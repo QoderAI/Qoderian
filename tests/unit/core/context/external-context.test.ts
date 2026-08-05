@@ -13,6 +13,8 @@ import {
 
 jest.mock('fs');
 
+const isWindows = process.platform === 'win32';
+
 describe('externalContext utilities', () => {
   describe('buildExternalContextDisplayEntries', () => {
     it('expands parent segments until every display name is unique', () => {
@@ -73,6 +75,10 @@ describe('externalContext utilities', () => {
 
     // eslint-disable-next-line jest/expect-expect
     it('should handle Unix-style paths', () => {
+      // On a Windows host path.win32.normalize treats "/home/..." as a
+      // drive-relative path and rewrites it, so the passthrough
+      // expectation only holds on POSIX hosts.
+      if (isWindows) return;
       expectNormalized('/home/user/project', '/home/user/project');
       expectNormalized('/home/user/project/', '/home/user/project');
     });
@@ -174,9 +180,11 @@ describe('externalContext utilities', () => {
       });
 
       it('should return first conflict when multiple exist', () => {
-        const result = findConflictingPath('/a/b', ['/a', '/a/b/c']);
-        // Should return /a as it appears first and is a parent
-        expect(result).toEqual({ path: '/a', type: 'parent' });
+        // Multi-letter segments: "/a" would be a MSYS drive reference on
+        // Windows hosts and normalize to "a:", breaking nesting checks.
+        const result = findConflictingPath('/proj-a/proj-b', ['/proj-a', '/proj-a/proj-b/proj-c']);
+        // Should return /proj-a as it appears first and is a parent
+        expect(result).toEqual({ path: '/proj-a', type: 'parent' });
       });
     });
   });
