@@ -219,12 +219,9 @@ export class QoderianView extends ItemView {
    * The wrapper is moved to the active tab's nav row on tab switches.
    */
   private buildNavRowContent(): HTMLElement {
-    const activeDocument = this.containerEl.ownerDocument;
+    const wrapper = createDiv({ cls: 'qoderian-input-nav-content' });
 
-    const fragment = activeDocument.createDocumentFragment();
-
-    this.tabBarContainerEl = activeDocument.createElement('div');
-    this.tabBarContainerEl.className = 'qoderian-tab-bar-container';
+    this.tabBarContainerEl = wrapper.createDiv({ cls: 'qoderian-tab-bar-container' });
     this.tabBar = new TabBar(this.tabBarContainerEl, {
       onTabClick: (tabId) => this.handleTabClick(tabId),
       onTabClose: (tabId) => {
@@ -234,10 +231,8 @@ export class QoderianView extends ItemView {
         void this.createNewTab().catch(() => new Notice('Failed to create tab'));
       },
     });
-    fragment.appendChild(this.tabBarContainerEl);
 
-    const navActionsEl = activeDocument.createElement('div');
-    navActionsEl.className = 'qoderian-input-nav-actions';
+    const navActionsEl = wrapper.createDiv({ cls: 'qoderian-input-nav-actions' });
 
     this.newTabButtonEl = navActionsEl.createDiv({ cls: 'qoderian-input-nav-btn qoderian-new-tab-btn' });
     setIcon(this.newTabButtonEl, 'square-plus');
@@ -269,11 +264,6 @@ export class QoderianView extends ItemView {
       this.toggleHistoryDropdown();
     });
 
-    fragment.appendChild(navActionsEl);
-
-    const wrapper = activeDocument.createElement('div');
-    wrapper.className = 'qoderian-input-nav-content';
-    wrapper.appendChild(fragment);
     return wrapper;
   }
 

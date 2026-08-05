@@ -86,27 +86,19 @@ export class ImageContextManager {
 
     this.dropOverlay = inputWrapper.createDiv({ cls: 'qoderian-drop-overlay' });
     const dropContent = this.dropOverlay.createDiv({ cls: 'qoderian-drop-content' });
-    const ownerDocument = inputWrapper.ownerDocument ?? window.document;
-    const svg = ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('width', '32');
-    svg.setAttribute('height', '32');
-    svg.setAttribute('fill', 'none');
-    svg.setAttribute('stroke', 'currentColor');
-    svg.setAttribute('stroke-width', '2');
-    const pathEl = ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'path');
-    pathEl.setAttribute('d', 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4');
-    const polyline = ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-    polyline.setAttribute('points', '17 8 12 3 7 8');
-    const line = ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', '12');
-    line.setAttribute('y1', '3');
-    line.setAttribute('x2', '12');
-    line.setAttribute('y2', '15');
-    svg.appendChild(pathEl);
-    svg.appendChild(polyline);
-    svg.appendChild(line);
-    dropContent.appendChild(svg);
+    const svg = dropContent.createSvg('svg', {
+      attr: {
+        viewBox: '0 0 24 24',
+        width: '32',
+        height: '32',
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': '2',
+      },
+    });
+    svg.createSvg('path', { attr: { d: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4' } });
+    svg.createSvg('polyline', { attr: { points: '17 8 12 3 7 8' } });
+    svg.createSvg('line', { attr: { x1: '12', y1: '3', x2: '12', y2: '15' } });
     dropContent.createSpan({ text: 'Drop image here' });
 
     const dropZone = inputWrapper;

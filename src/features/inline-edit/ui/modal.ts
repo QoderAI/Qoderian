@@ -463,28 +463,18 @@ class InlineEditController {
 
   createInputDOM(): HTMLElement {
     const ownerDocument = this.getOwnerDocument();
-    const container = ownerDocument.createElement('div');
-    container.className = 'qoderian-inline-input-container';
+    const container = createDiv({ cls: 'qoderian-inline-input-container' });
     this.containerEl = container;
 
-    this.agentReplyEl = ownerDocument.createElement('div');
-    this.agentReplyEl.className = 'qoderian-inline-agent-reply qoderian-hidden';
-    container.appendChild(this.agentReplyEl);
+    this.agentReplyEl = container.createDiv({ cls: 'qoderian-inline-agent-reply qoderian-hidden' });
 
-    const inputWrap = ownerDocument.createElement('div');
-    inputWrap.className = 'qoderian-inline-input-wrap';
-    container.appendChild(inputWrap);
+    const inputWrap = container.createDiv({ cls: 'qoderian-inline-input-wrap' });
 
-    this.inputEl = ownerDocument.createElement('input');
-    this.inputEl.type = 'text';
-    this.inputEl.className = 'qoderian-inline-input';
+    this.inputEl = inputWrap.createEl('input', { cls: 'qoderian-inline-input', type: 'text' });
     this.inputEl.placeholder = this.mode === 'cursor' ? 'Insert instructions...' : 'Edit instructions...';
     this.inputEl.spellcheck = false;
-    inputWrap.appendChild(this.inputEl);
 
-    this.spinnerEl = ownerDocument.createElement('div');
-    this.spinnerEl.className = 'qoderian-inline-spinner qoderian-hidden';
-    inputWrap.appendChild(this.spinnerEl);
+    this.spinnerEl = inputWrap.createDiv({ cls: 'qoderian-inline-spinner qoderian-hidden' });
 
     const inlineCatalog = this.plugin.qoderServices.commandCatalog;
     this.slashCommandDropdown = new SlashCommandDropdown(
@@ -527,19 +517,13 @@ class InlineEditController {
   }
 
   createDiffPreviewDOM(diffOps: DiffOp[]): HTMLElement {
-    const ownerDocument = this.getOwnerDocument();
-    const previewEl = ownerDocument.createElement('div');
-    previewEl.className = 'qoderian-inline-diff-preview';
+    const previewEl = createDiv({ cls: 'qoderian-inline-diff-preview' });
 
-    const bodyEl = ownerDocument.createElement('div');
-    bodyEl.className = 'qoderian-inline-diff-preview-body markdown-rendered';
-    previewEl.appendChild(bodyEl);
+    const bodyEl = previewEl.createDiv({ cls: 'qoderian-inline-diff-preview-body markdown-rendered' });
 
-    const actionsEl = ownerDocument.createElement('div');
-    actionsEl.className = 'qoderian-inline-preview-actions';
+    const actionsEl = previewEl.createDiv({ cls: 'qoderian-inline-preview-actions' });
     actionsEl.appendChild(this.createPreviewActionButton('Reject', 'reject', () => this.reject()));
     actionsEl.appendChild(this.createPreviewActionButton('Accept', 'accept', () => this.accept()));
-    previewEl.appendChild(actionsEl);
 
     void this.renderMarkdownDiffPreview(bodyEl, diffOps);
     return previewEl;
@@ -550,10 +534,7 @@ class InlineEditController {
     variant: 'accept' | 'reject',
     onClick: () => void
   ): HTMLButtonElement {
-    const ownerDocument = this.getOwnerDocument();
-    const button = ownerDocument.createElement('button');
-    button.type = 'button';
-    button.className = `qoderian-inline-preview-action ${variant}`;
+    const button = createEl('button', { cls: `qoderian-inline-preview-action ${variant}`, type: 'button' });
     button.textContent = label;
     button.title = variant === 'accept' ? 'Accept (enter)' : 'Reject (esc)';
     button.addEventListener('click', (event) => {
@@ -580,9 +561,7 @@ class InlineEditController {
     for (const document of buildMarkdownDiffDocuments(diffOps)) {
       if (!document.markdown) continue;
 
-      const opEl = this.getOwnerDocument().createElement('div');
-      opEl.className = `qoderian-diff-block ${getDiffBlockClass(document.type)}`;
-      container.appendChild(opEl);
+      const opEl = container.createDiv({ cls: `qoderian-diff-block ${getDiffBlockClass(document.type)}` });
       await this.renderMarkdownPreview(opEl, document.markdown);
     }
   }
@@ -670,7 +649,7 @@ class InlineEditController {
     if (!this.agentReplyEl || !this.containerEl) return;
     const replyEl = this.agentReplyEl;
     const renderVersion = ++this.agentReplyRenderVersion;
-    const renderedEl = this.getOwnerDocument().createElement('div');
+    const renderedEl = createDiv();
 
     replyEl.removeClass('qoderian-hidden');
     replyEl.empty();

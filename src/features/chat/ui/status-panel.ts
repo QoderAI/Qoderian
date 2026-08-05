@@ -85,18 +85,13 @@ export class StatusPanel {
       return;
     }
 
-    const ownerDocument = this.containerEl.ownerDocument ?? window.document;
-
     // Create panel element (no border/background - seamless)
-    this.panelEl = ownerDocument.createElement('div');
-    this.panelEl.className = 'qoderian-status-panel';
+    this.panelEl = this.containerEl.createDiv({ cls: 'qoderian-status-panel' });
 
     // Bash output container - hidden by default
-    this.bashOutputContainerEl = ownerDocument.createElement('div');
-    this.bashOutputContainerEl.className = 'qoderian-status-panel-bash qoderian-hidden';
+    this.bashOutputContainerEl = this.panelEl.createDiv({ cls: 'qoderian-status-panel-bash qoderian-hidden' });
 
-    this.bashHeaderEl = ownerDocument.createElement('div');
-    this.bashHeaderEl.className = 'qoderian-tool-header qoderian-status-panel-bash-header';
+    this.bashHeaderEl = this.bashOutputContainerEl.createDiv({ cls: 'qoderian-tool-header qoderian-status-panel-bash-header' });
     this.bashHeaderEl.setAttribute('tabindex', '0');
     this.bashHeaderEl.setAttribute('role', 'button');
 
@@ -110,14 +105,7 @@ export class StatusPanel {
     this.bashHeaderEl.addEventListener('click', this.bashClickHandler);
     this.bashHeaderEl.addEventListener('keydown', this.bashKeydownHandler);
 
-    this.bashContentEl = ownerDocument.createElement('div');
-    this.bashContentEl.className = 'qoderian-status-panel-bash-content';
-
-    this.bashOutputContainerEl.appendChild(this.bashHeaderEl);
-    this.bashOutputContainerEl.appendChild(this.bashContentEl);
-    this.panelEl.appendChild(this.bashOutputContainerEl);
-
-    this.containerEl.appendChild(this.panelEl);
+    this.bashContentEl = this.bashOutputContainerEl.createDiv({ cls: 'qoderian-status-panel-bash-content' });
   }
 
   /**
@@ -174,32 +162,24 @@ export class StatusPanel {
     this.bashOutputContainerEl.removeClass('qoderian-hidden');
     this.bashHeaderEl.empty();
     this.bashContentEl.empty();
-    const ownerDocument = this.bashHeaderEl.ownerDocument ?? window.document;
 
-    const headerIconEl = ownerDocument.createElement('span');
-    headerIconEl.className = 'qoderian-tool-icon';
+    const headerIconEl = this.bashHeaderEl.createSpan({ cls: 'qoderian-tool-icon' });
     headerIconEl.setAttribute('aria-hidden', 'true');
     setIcon(headerIconEl, 'terminal');
-    this.bashHeaderEl.appendChild(headerIconEl);
 
     const latest = Array.from(this.currentBashOutputs.values()).at(-1);
 
-    const headerLabelEl = ownerDocument.createElement('span');
-    headerLabelEl.className = 'qoderian-tool-label';
+    const headerLabelEl = this.bashHeaderEl.createSpan({ cls: 'qoderian-tool-label' });
     if (this.isBashExpanded) {
       headerLabelEl.textContent = t('chat.bangBash.commandPanel');
     } else {
       headerLabelEl.textContent = latest ? this.truncateDescription(latest.command, 60) : t('chat.bangBash.commandPanel');
     }
-    this.bashHeaderEl.appendChild(headerLabelEl);
 
-    const previewEl = ownerDocument.createElement('span');
-    previewEl.className = 'qoderian-tool-current';
+    const previewEl = this.bashHeaderEl.createSpan({ cls: 'qoderian-tool-current' });
     previewEl.classList.toggle('qoderian-hidden', !this.isBashExpanded);
-    this.bashHeaderEl.appendChild(previewEl);
 
-    const summaryStatusEl = ownerDocument.createElement('span');
-    summaryStatusEl.className = 'qoderian-tool-status';
+    const summaryStatusEl = this.bashHeaderEl.createSpan({ cls: 'qoderian-tool-status' });
     if (!this.isBashExpanded && latest) {
       summaryStatusEl.classList.add(`status-${latest.status}`);
       summaryStatusEl.setAttribute('aria-label', t('chat.bangBash.statusLabel', { status: latest.status }));
@@ -208,19 +188,16 @@ export class StatusPanel {
     } else {
       summaryStatusEl.classList.add('qoderian-hidden');
     }
-    this.bashHeaderEl.appendChild(summaryStatusEl);
 
     this.bashHeaderEl.setAttribute('aria-expanded', String(this.isBashExpanded));
 
-    const actionsEl = ownerDocument.createElement('span');
-    actionsEl.className = 'qoderian-status-panel-bash-actions';
+    const actionsEl = this.bashHeaderEl.createSpan({ cls: 'qoderian-status-panel-bash-actions' });
     this.appendActionButton(actionsEl, 'copy', t('chat.bangBash.copyAriaLabel'), 'copy', () => {
       void this.copyLatestBashOutput();
     });
     this.appendActionButton(actionsEl, 'clear', t('chat.bangBash.clearAriaLabel'), 'trash', () => {
       this.clearBashOutputs();
     });
-    this.bashHeaderEl.appendChild(actionsEl);
 
     this.bashContentEl.toggleClass('qoderian-hidden', !this.isBashExpanded);
 
@@ -229,7 +206,7 @@ export class StatusPanel {
     }
 
     for (const info of this.currentBashOutputs.values()) {
-      this.bashContentEl.appendChild(this.renderBashEntry(info, ownerDocument));
+      this.renderBashEntry(info, this.bashContentEl);
     }
 
     if (scroll) {
@@ -238,38 +215,27 @@ export class StatusPanel {
     }
   }
 
-  private renderBashEntry(info: PanelBashOutput, ownerDocument: Document): HTMLElement {
-    const entryEl = ownerDocument.createElement('div');
-    entryEl.className = 'qoderian-tool-call qoderian-status-panel-bash-entry';
+  private renderBashEntry(info: PanelBashOutput, parent: HTMLElement): void {
+    const entryEl = parent.createDiv({ cls: 'qoderian-tool-call qoderian-status-panel-bash-entry' });
 
-    const entryHeaderEl = ownerDocument.createElement('div');
-    entryHeaderEl.className = 'qoderian-tool-header';
+    const entryHeaderEl = entryEl.createDiv({ cls: 'qoderian-tool-header' });
     entryHeaderEl.setAttribute('tabindex', '0');
     entryHeaderEl.setAttribute('role', 'button');
 
-    const entryIconEl = ownerDocument.createElement('span');
-    entryIconEl.className = 'qoderian-tool-icon';
+    const entryIconEl = entryHeaderEl.createSpan({ cls: 'qoderian-tool-icon' });
     entryIconEl.setAttribute('aria-hidden', 'true');
     setIcon(entryIconEl, 'dollar-sign');
-    entryHeaderEl.appendChild(entryIconEl);
 
-    const entryLabelEl = ownerDocument.createElement('span');
-    entryLabelEl.className = 'qoderian-tool-label';
+    const entryLabelEl = entryHeaderEl.createSpan({ cls: 'qoderian-tool-label' });
     entryLabelEl.textContent = t('chat.bangBash.commandLabel', { command: this.truncateDescription(info.command, 60) });
-    entryHeaderEl.appendChild(entryLabelEl);
 
-    const entryStatusEl = ownerDocument.createElement('span');
-    entryStatusEl.className = 'qoderian-tool-status';
+    const entryStatusEl = entryHeaderEl.createSpan({ cls: 'qoderian-tool-status' });
     entryStatusEl.classList.add(`status-${info.status}`);
     entryStatusEl.setAttribute('aria-label', t('chat.bangBash.statusLabel', { status: info.status }));
     if (info.status === 'completed') setIcon(entryStatusEl, 'check');
     if (info.status === 'error') setIcon(entryStatusEl, 'x');
-    entryHeaderEl.appendChild(entryStatusEl);
 
-    entryEl.appendChild(entryHeaderEl);
-
-    const contentEl = ownerDocument.createElement('div');
-    contentEl.className = 'qoderian-tool-content';
+    const contentEl = entryEl.createDiv({ cls: 'qoderian-tool-content' });
     const isEntryExpanded = this.bashEntryExpanded.get(info.id) ?? true;
     contentEl.classList.toggle('qoderian-hidden', !isEntryExpanded);
     entryHeaderEl.setAttribute('aria-expanded', String(isEntryExpanded));
@@ -286,22 +252,14 @@ export class StatusPanel {
       }
     });
 
-    const rowEl = ownerDocument.createElement('div');
-    rowEl.className = 'qoderian-tool-result-row';
+    const rowEl = contentEl.createDiv({ cls: 'qoderian-tool-result-row' });
 
-    const textEl = ownerDocument.createElement('span');
-    textEl.className = 'qoderian-tool-result-text';
+    const textEl = rowEl.createSpan({ cls: 'qoderian-tool-result-text' });
     if (info.status === 'running' && !info.output) {
       textEl.textContent = t('chat.bangBash.running');
     } else if (info.output) {
       textEl.textContent = info.output;
     }
-
-    rowEl.appendChild(textEl);
-    contentEl.appendChild(rowEl);
-
-    entryEl.appendChild(contentEl);
-    return entryEl;
   }
 
   private async copyLatestBashOutput(): Promise<void> {
@@ -324,8 +282,7 @@ export class StatusPanel {
     icon: string,
     action: () => void
   ): void {
-    const el = (parent.ownerDocument ?? window.document).createElement('span');
-    el.className = `qoderian-status-panel-bash-action qoderian-status-panel-bash-action-${name}`;
+    const el = parent.createSpan({ cls: `qoderian-status-panel-bash-action qoderian-status-panel-bash-action-${name}` });
     el.setAttribute('role', 'button');
     el.setAttribute('tabindex', '0');
     el.setAttribute('aria-label', ariaLabel);
@@ -341,7 +298,6 @@ export class StatusPanel {
         action();
       }
     });
-    parent.appendChild(el);
   }
 
   private toggleBashSection(): void {

@@ -110,15 +110,14 @@ function extractLinkPathFromTarget(linkTarget: string): string {
  * Click handling is done via event delegation in registerFileLinkHandler.
  */
 function createWikilink(
-  ownerDocument: Document,
   linkTarget: string,
   displayText: string
 ): HTMLElement {
-  const link = ownerDocument.createElement('a');
-  link.className = 'qoderian-file-link internal-link';
-  link.textContent = displayText;
-  link.setAttribute('data-href', linkTarget);
-  link.setAttribute('href', linkTarget);
+  const link = createEl('a', {
+    cls: 'qoderian-file-link internal-link',
+    text: displayText,
+    attr: { 'data-href': linkTarget, href: linkTarget },
+  });
   return link;
 }
 
@@ -164,7 +163,7 @@ export function registerFileLinkHandler(
 }
 
 function buildFragmentWithLinks(ownerDocument: Document, text: string, matches: WikilinkMatch[]): DocumentFragment {
-  const fragment = ownerDocument.createDocumentFragment();
+  const fragment = createFragment();
   let currentIndex = text.length;
 
   for (const { index, fullMatch, linkTarget, displayText } of matches) {
@@ -177,7 +176,7 @@ function buildFragmentWithLinks(ownerDocument: Document, text: string, matches: 
       );
     }
 
-    fragment.insertBefore(createWikilink(ownerDocument, linkTarget, displayText), fragment.firstChild);
+    fragment.insertBefore(createWikilink(linkTarget, displayText), fragment.firstChild);
     currentIndex = index;
   }
 

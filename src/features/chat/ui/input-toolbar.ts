@@ -649,31 +649,36 @@ export class ContextUsageMeter {
     const y2 = cy + radius * Math.sin(endRad);
 
     const gaugeEl = this.container.createDiv({ cls: 'qoderian-context-meter-gauge' });
-    const svg = gaugeEl.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', String(size));
-    svg.setAttribute('height', String(size));
-    svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+    const svg = gaugeEl.createSvg('svg', {
+      attr: {
+        width: String(size),
+        height: String(size),
+        viewBox: `0 0 ${size} ${size}`,
+      },
+    });
 
     const pathData = `M ${x1} ${y1} A ${radius} ${radius} 0 1 1 ${x2} ${y2}`;
-    const backgroundPath = gaugeEl.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'path');
-    backgroundPath.classList.add('qoderian-meter-bg');
-    backgroundPath.setAttribute('d', pathData);
-    backgroundPath.setAttribute('fill', 'none');
-    backgroundPath.setAttribute('stroke-width', String(strokeWidth));
-    backgroundPath.setAttribute('stroke-linecap', 'round');
+    svg.createSvg('path', {
+      cls: 'qoderian-meter-bg',
+      attr: {
+        d: pathData,
+        fill: 'none',
+        'stroke-width': String(strokeWidth),
+        'stroke-linecap': 'round',
+      },
+    });
 
-    const fillPath = gaugeEl.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'path');
-    fillPath.classList.add('qoderian-meter-fill');
-    fillPath.setAttribute('d', pathData);
-    fillPath.setAttribute('fill', 'none');
-    fillPath.setAttribute('stroke-width', String(strokeWidth));
-    fillPath.setAttribute('stroke-linecap', 'round');
-    fillPath.setAttribute('stroke-dasharray', String(this.circumference));
-    fillPath.setAttribute('stroke-dashoffset', String(this.circumference));
-
-    svg.appendChild(backgroundPath);
-    svg.appendChild(fillPath);
-    gaugeEl.appendChild(svg);
+    const fillPath = svg.createSvg('path', {
+      cls: 'qoderian-meter-fill',
+      attr: {
+        d: pathData,
+        fill: 'none',
+        'stroke-width': String(strokeWidth),
+        'stroke-linecap': 'round',
+        'stroke-dasharray': String(this.circumference),
+        'stroke-dashoffset': String(this.circumference),
+      },
+    });
     this.fillPath = fillPath;
 
     this.percentEl = this.container.createSpan({ cls: 'qoderian-context-meter-percent' });

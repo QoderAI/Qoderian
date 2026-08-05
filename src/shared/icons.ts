@@ -120,12 +120,15 @@ export function createIconSvg(
     svg.classList.add(...options.className.split(/\s+/).filter(Boolean));
   }
   if (icon.kind === 'raw') {
-    const template = ownerDocument.createElement('template');
-    template.innerHTML = icon.svg.trim();
-    const sourceSvg = template.content.querySelector('svg');
+    // Parsed as an inert SVG document instead of assigning innerHTML, so no
+    // markup is ever written to the live DOM (Obsidian review requirement).
+    const parsed = new DOMParser().parseFromString(icon.svg.trim(), 'image/svg+xml');
+    const sourceSvg = parsed.documentElement.tagName.toLowerCase() === 'svg'
+      ? parsed.documentElement
+      : null;
     if (sourceSvg) {
       for (const child of Array.from(sourceSvg.children)) {
-        const clone = child.cloneNode(true) as SVGElement;
+        const clone = ownerDocument.importNode(child, true) as SVGElement;
         // The source artwork is an app-icon variant with a dark rounded-square
         // backdrop. In a compact model selector that backdrop turns into the
         // grey block seen on every option, so keep only the Qoder mark.
