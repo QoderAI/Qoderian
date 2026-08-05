@@ -1,6 +1,7 @@
 import { existsSync } from 'fs';
 import * as fsPromises from 'fs/promises';
 import * as os from 'os';
+import * as path from 'path';
 
 import {
   collectAsyncSubagentResults,
@@ -100,7 +101,9 @@ describe('sdkSession', () => {
   describe('getSDKProjectsPath', () => {
     it('returns path under home directory', () => {
       const projectsPath = getSDKProjectsPath();
-      expect(projectsPath).toBe('/Users/test/.qoder/projects');
+      // Build the expectation with path.join so separators match the
+      // source on both POSIX and Windows hosts.
+      expect(projectsPath).toBe(path.join('/Users/test', '.qoder', 'projects'));
     });
   });
 
@@ -135,7 +138,9 @@ describe('sdkSession', () => {
   describe('getSDKSessionPath', () => {
     it('constructs correct session file path', () => {
       const sessionPath = getSDKSessionPath('/Users/test/vault', 'session-123');
-      expect(sessionPath).toContain('.qoder/projects');
+      // Avoid asserting the separator so the check holds on Windows too.
+      expect(sessionPath).toContain('.qoder');
+      expect(sessionPath).toContain('projects');
       expect(sessionPath).toContain('session-123.jsonl');
     });
 

@@ -57,10 +57,16 @@ describe('findQoderCLIPath', () => {
   });
 
   it('falls back to the official npm cli.js path when the binary is not found', () => {
-    const cliPath = path.join(
-      os.homedir(), '.npm-global', 'lib', 'node_modules',
-      '@qoder-ai', 'qodercli', 'cli.js'
-    );
+    // On Windows the source looks under AppData\Roaming\npm instead of ~/.npm-global.
+    const cliPath = isWindows
+      ? path.join(
+          os.homedir(), 'AppData', 'Roaming', 'npm', 'node_modules',
+          '@qoder-ai', 'qodercli', 'cli.js'
+        )
+      : path.join(
+          os.homedir(), '.npm-global', 'lib', 'node_modules',
+          '@qoder-ai', 'qodercli', 'cli.js'
+        );
 
     jest.spyOn(fs, 'existsSync').mockImplementation(
       p => String(p) === cliPath
@@ -74,9 +80,16 @@ describe('findQoderCLIPath', () => {
   });
 
   it('falls back to PATH environment when common and npm paths fail', () => {
-    const envQoderPath = '/env/specific/bin/qodercli';
+    // Use the platform's PATH delimiter; the expected path keeps the mocked
+    // Unix-style directory with host separators, mirroring how the source
+    // joins PATH entries with the binary name.
+    const sep = isWindows ? ';' : ':';
+    const envBin = '/env/specific/bin';
+    const envQoderPath = isWindows
+      ? `${envBin}/qodercli`.replace(/\//g, '\\')
+      : `${envBin}/qodercli`;
     const originalPath = process.env.PATH;
-    process.env.PATH = `/env/specific/bin:${originalPath}`;
+    process.env.PATH = `${envBin}${sep}${originalPath}`;
 
     jest.spyOn(fs, 'existsSync').mockImplementation(
       p => String(p) === envQoderPath
@@ -219,9 +232,12 @@ describe('findQoderCLIPath (platform resolution)', () => {
 
     it('should return first matching Qoder CLI path', () => {
       jest.spyOn(os, 'homedir').mockReturnValue('/home/test');
-      mockExistingFile('/home/test/.local/bin/qodercli');
+      // Build the mock path with path.join so it matches the source's
+      // separator even when this suite runs on a Windows host.
+      const qoderPath = path.join('/home/test', '.local', 'bin', 'qodercli');
+      mockExistingFile(qoderPath);
 
-      expect(findQoderCLIPath()).toBe('/home/test/.local/bin/qodercli');
+      expect(findQoderCLIPath()).toBe(qoderPath);
     });
 
     it('should return null when Qoder CLI is not found', () => {
@@ -233,24 +249,27 @@ describe('findQoderCLIPath (platform resolution)', () => {
 
     it('should check the official npm package entrypoint as fallback on Unix', () => {
       jest.spyOn(os, 'homedir').mockReturnValue('/home/test');
-      mockExistingFile('/usr/local/lib/node_modules/@qoder-ai/qodercli/cli.js');
+      const cliPath = path.join('/usr', 'local', 'lib', 'node_modules', '@qoder-ai', 'qodercli', 'cli.js');
+      mockExistingFile(cliPath);
 
-      expect(findQoderCLIPath()).toBe('/usr/local/lib/node_modules/@qoder-ai/qodercli/cli.js');
+      expect(findQoderCLIPath()).toBe(cliPath);
     });
 
     it('should resolve Qoder CLI from custom PATH', () => {
-      mockExistingFile('/custom/bin/qodercli');
+      const qoderPath = path.join('/custom', 'bin', 'qodercli');
+      mockExistingFile(qoderPath);
 
       const customPath = '/custom/bin:/usr/bin';
-      expect(findQoderCLIPath(customPath)).toBe('/custom/bin/qodercli');
+      expect(findQoderCLIPath(customPath)).toBe(qoderPath);
     });
 
     it('should expand home directory in custom PATH', () => {
       jest.spyOn(os, 'homedir').mockReturnValue('/home/test');
-      mockExistingFile('/home/test/bin/qodercli');
+      const qoderPath = path.join('/home/test', 'bin', 'qodercli');
+      mockExistingFile(qoderPath);
 
       const customPath = '~/bin:/usr/bin';
-      expect(findQoderCLIPath(customPath)).toBe('/home/test/bin/qodercli');
+      expect(findQoderCLIPath(customPath)).toBe(qoderPath);
     });
 
     it('should not return a directory path even if it exists', () => {
