@@ -23,10 +23,8 @@ function emptyElement(container: HTMLElement): void {
 }
 
 function appendFallback(container: HTMLElement, markdown: string): void {
-  const fallback = container.ownerDocument.createElement('div');
-  fallback.className = 'qoderian-inline-markdown-fallback';
+  const fallback = container.createDiv({ cls: 'qoderian-inline-markdown-fallback' });
   fallback.textContent = markdown;
-  container.appendChild(fallback);
 }
 
 export async function renderInlineEditMarkdownPreview({

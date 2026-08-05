@@ -659,7 +659,7 @@ export class ConversationController {
 
       // Show regenerate button if title generation failed, or loading indicator if pending
       if (conv.titleGenerationStatus === 'pending') {
-        const loadingEl = actions.createEl('span', { cls: 'qoderian-action-btn qoderian-action-loading' });
+        const loadingEl = actions.createSpan({ cls: 'qoderian-action-btn qoderian-action-loading' });
         setIcon(loadingEl, 'loader-2');
         loadingEl.setAttribute('aria-label', 'Generating title...');
       } else if (conv.titleGenerationStatus === 'failed') {
@@ -874,9 +874,7 @@ export class ConversationController {
     const titleEl = item.querySelector('.qoderian-history-item-title') as HTMLElement;
     if (!titleEl) return;
 
-    const input = (item.ownerDocument ?? window.document).createElement('input');
-    input.type = 'text';
-    input.className = 'qoderian-rename-input';
+    const input = item.createEl('input', { cls: 'qoderian-rename-input', type: 'text' });
     input.value = currentTitle;
 
     titleEl.replaceWith(input);

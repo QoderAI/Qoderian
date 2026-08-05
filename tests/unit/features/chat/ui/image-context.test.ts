@@ -8,20 +8,6 @@ jest.mock('obsidian', () => ({
   Notice: jest.fn(),
 }));
 
-// Mock document.createElementNS for SVG elements created in setupDragAndDrop
-const mockSvgElement = () => {
-  const el = createMockEl('svg');
-  el.appendChild = jest.fn();
-  return el;
-};
-
-beforeAll(() => {
-  if (typeof globalThis.document === 'undefined') {
-    (globalThis as any).document = {};
-  }
-  (globalThis.document as any).createElementNS = jest.fn(() => mockSvgElement());
-});
-
 function createMockCallbacks() {
   return {
     onImagesChanged: jest.fn(),
@@ -717,7 +703,6 @@ describe('ImageContextManager - Private Helpers', () => {
         body: mockBody,
         addEventListener: addEventSpy,
         removeEventListener: removeEventSpy,
-        createElementNS: jest.fn(() => mockSvgElement()),
       };
     });
 

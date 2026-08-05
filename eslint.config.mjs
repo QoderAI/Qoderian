@@ -34,6 +34,7 @@ const stagedObsidianRules = {
   'obsidianmd/platform': obsidianRuleSeverity,
   'obsidianmd/prefer-abstract-input-suggest': obsidianRuleSeverity,
   'obsidianmd/prefer-active-doc': obsidianRuleSeverity,
+  'obsidianmd/prefer-create-el': obsidianRuleSeverity,
   'obsidianmd/prefer-file-manager-trash-file': obsidianRuleSeverity,
   'obsidianmd/prefer-get-language': obsidianRuleSeverity,
   'obsidianmd/prefer-instanceof': obsidianRuleSeverity,

@@ -660,7 +660,7 @@ export class MessageRenderer {
         if (pre.parentElement?.classList.contains('qoderian-code-wrapper')) return;
 
         // Create wrapper
-        const wrapper = createEl('div', { cls: 'qoderian-code-wrapper' });
+        const wrapper = createDiv({ cls: 'qoderian-code-wrapper' });
         pre.parentElement?.insertBefore(wrapper, pre);
         wrapper.appendChild(pre);
 
@@ -670,7 +670,7 @@ export class MessageRenderer {
           const match = code.className.match(/language-(\w+)/);
           if (match) {
             wrapper.classList.add('has-language');
-            const label = createEl('span', {
+            const label = createSpan({
               cls: 'qoderian-code-lang-label',
               text: match[1],
             });
