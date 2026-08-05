@@ -28,19 +28,19 @@ jobs:
       - name: Analyze
         uses: github/codeql-action/analyze@a2983b8bed1923f44751c5c43237f479442827b3 # v3
 
-  # actions/dependency-review-action requires the repository's Dependency
-  # graph to be enabled (Settings > Code security and analysis). Until an
-  # org admin enables it, newly introduced vulnerabilities are still gated
-  # by the "npm run audit:prod" step in ci.yml. To restore this job:
-  #
-  # dependency-review:
-  #   name: Dependency review
-  #   if: github.event_name == 'pull_request'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-  #     - name: Review dependency changes
-  #       uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # Downgraded to advisory: this action needs the repository Dependency
+      # graph enabled (Settings > Code security and analysis), which requires
+      # org admin access. Once enabled, drop continue-on-error to re-gate.
+      # Introduced vulnerabilities are still blocked by audit:prod in ci.yml.
+      - name: Review dependency changes
+        continue-on-error: true
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
 
   secrets:
     name: Secret scan
