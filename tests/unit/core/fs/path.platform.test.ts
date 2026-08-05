@@ -110,9 +110,11 @@ describe('normalizePathForFilesystem', () => {
   });
 
   it('handles non-existent environment variables', () => {
-    // Non-existent env vars should be left as-is
-    expect(normalizePathForFilesystem('$NONEXISTENT/path')).toBe('$NONEXISTENT/path');
-    expect(normalizePathForFilesystem('%NONEXISTENT%/path')).toBe('%NONEXISTENT%/path');
+    // Non-existent env vars should be left as-is; only the separator
+    // differs because win32.normalize rewrites slashes on Windows hosts.
+    const sep = isWindows ? '\\' : '/';
+    expect(normalizePathForFilesystem('$NONEXISTENT/path')).toBe(`$NONEXISTENT${sep}path`);
+    expect(normalizePathForFilesystem('%NONEXISTENT%/path')).toBe(`%NONEXISTENT%${sep}path`);
   });
 
   it('handles mixed path separators', () => {

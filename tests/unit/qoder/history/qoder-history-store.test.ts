@@ -34,6 +34,23 @@ const mockExistsSync = existsSync as jest.MockedFunction<typeof existsSync>;
 const mockFsPromises = fsPromises as jest.Mocked<typeof fsPromises>;
 const mockOs = os as jest.Mocked<typeof os>;
 
+const isWindows = process.platform === 'win32';
+// On Windows, path.resolve prepends the current drive letter to
+// drive-relative Unix-style inputs and path.join uses backslashes, so
+// derive the expected fragments from the source helpers instead of literals.
+const encodeRegExp = (value: string) => new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+const expectEncodedAs = (encoded: string, posixEncoded: string) => {
+  // On Windows the resolved drive prefix ("D:") encodes to "D-" ahead of
+  // the POSIX-shaped expectation.
+  const prefix = isWindows ? '[a-zA-Z]-' : '';
+  expect(encoded).toMatch(new RegExp(`^${prefix}${encodeRegExp(posixEncoded).source}$`));
+};
+const encodedTestVault = encodeVaultPathForSDK('/Users/test/vault');
+const expectedProjectsPath = path.join('/Users/test', '.qoder', 'projects');
+const expectedSessionPath = path.join(expectedProjectsPath, encodedTestVault, 'session-abc.jsonl');
+const expectedArtifactsDir = path.join(expectedProjectsPath, encodedTestVault, 'session-abc');
+const expectedSidecarPath = path.join(expectedArtifactsDir, 'subagents', 'agent-a123.jsonl');
+
 describe('sdkSession', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,29 +58,31 @@ describe('sdkSession', () => {
   });
 
   describe('encodeVaultPathForSDK', () => {
+    // eslint-disable-next-line jest/expect-expect
     it('encodes vault path by replacing all non-alphanumeric chars with dash', () => {
       const encoded = encodeVaultPathForSDK('/Users/test/vault');
       // SDK replaces ALL non-alphanumeric characters with `-`
-      expect(encoded).toBe('-Users-test-vault');
+      expectEncodedAs(encoded, '-Users-test-vault');
     });
 
+    // eslint-disable-next-line jest/expect-expect
     it('handles paths with spaces and special characters', () => {
       const encoded = encodeVaultPathForSDK("/Users/test/My Vault's~Data");
-      expect(encoded).toBe('-Users-test-My-Vault-s-Data');
+      expectEncodedAs(encoded, '-Users-test-My-Vault-s-Data');
     });
 
     it('handles Unicode characters (Chinese, Japanese, etc.)', () => {
       // Unicode characters should be replaced with `-` to match SDK behavior
       const encoded = encodeVaultPathForSDK('/Volumes/[Work]弘毅之鹰/学习/东京大学/2025年 秋');
       // All non-alphanumeric (including Chinese, brackets) become `-`
-      expect(encoded).toBe('-Volumes--Work--------------2025---');
+      expectEncodedAs(encoded, '-Volumes--Work--------------2025---');
       // Verify only ASCII alphanumeric and dash remain
       expect(encoded).toMatch(/^[a-zA-Z0-9-]+$/);
     });
 
     it('handles brackets and other special characters', () => {
       const encoded = encodeVaultPathForSDK('/Users/test/[my-vault](notes)');
-      expect(encoded).toBe('-Users-test--my-vault--notes-');
+      expectEncodedAs(encoded, '-Users-test--my-vault--notes-');
       expect(encoded).not.toContain('[');
       expect(encoded).not.toContain(']');
       expect(encoded).not.toContain('(');
@@ -190,9 +209,7 @@ describe('sdkSession', () => {
 
       await deleteSDKSession('/Users/test/vault', 'session-abc');
 
-      expect(mockFsPromises.unlink).toHaveBeenCalledWith(
-        '/Users/test/.qoder/projects/-Users-test-vault/session-abc.jsonl'
-      );
+      expect(mockFsPromises.unlink).toHaveBeenCalledWith(expectedSessionPath);
     });
 
     it('does nothing when session file does not exist', async () => {
@@ -226,11 +243,9 @@ describe('sdkSession', () => {
 
       await deleteSDKSessionArtifacts('/Users/test/vault', 'session-abc');
 
-      expect(mockFsPromises.unlink).toHaveBeenCalledWith(
-        '/Users/test/.qoder/projects/-Users-test-vault/session-abc.jsonl'
-      );
+      expect(mockFsPromises.unlink).toHaveBeenCalledWith(expectedSessionPath);
       expect(mockFsPromises.rm).toHaveBeenCalledWith(
-        '/Users/test/.qoder/projects/-Users-test-vault/session-abc',
+        expectedArtifactsDir,
         { recursive: true, force: true },
       );
     });
@@ -323,7 +338,7 @@ describe('sdkSession', () => {
       );
 
       expect(mockFsPromises.readFile).toHaveBeenCalledWith(
-        '/Users/test/.qoder/projects/-Users-test-vault/session-abc/subagents/agent-a123.jsonl',
+        expectedSidecarPath,
         'utf-8'
       );
       expect(toolCalls).toHaveLength(1);
@@ -381,7 +396,7 @@ describe('sdkSession', () => {
 
       expect(result).toBe('Final answer');
       expect(mockFsPromises.readFile).toHaveBeenCalledWith(
-        '/Users/test/.qoder/projects/-Users-test-vault/session-abc/subagents/agent-a123.jsonl',
+        expectedSidecarPath,
         'utf-8'
       );
     });

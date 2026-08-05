@@ -149,11 +149,13 @@ describe('parsePathEntries', () => {
   });
 
   it('splits on platform separator', () => {
+    // Multi-letter segments: a single "/a" entry is a valid MSYS drive
+    // reference and gets translated to "A:" on Windows hosts.
     const sep = isWindows ? ';' : ':';
-    const result = parsePathEntries(`/a${sep}/b${sep}/c`);
-    expect(result).toContain('/a');
-    expect(result).toContain('/b');
-    expect(result).toContain('/c');
+    const result = parsePathEntries(`/dir-a${sep}/dir-b${sep}/dir-c`);
+    expect(result).toContain('/dir-a');
+    expect(result).toContain('/dir-b');
+    expect(result).toContain('/dir-c');
   });
 
   it('filters out empty segments', () => {

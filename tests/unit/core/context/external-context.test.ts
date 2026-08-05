@@ -180,9 +180,11 @@ describe('externalContext utilities', () => {
       });
 
       it('should return first conflict when multiple exist', () => {
-        const result = findConflictingPath('/a/b', ['/a', '/a/b/c']);
-        // Should return /a as it appears first and is a parent
-        expect(result).toEqual({ path: '/a', type: 'parent' });
+        // Multi-letter segments: "/a" would be a MSYS drive reference on
+        // Windows hosts and normalize to "a:", breaking nesting checks.
+        const result = findConflictingPath('/proj-a/proj-b', ['/proj-a', '/proj-a/proj-b/proj-c']);
+        // Should return /proj-a as it appears first and is a parent
+        expect(result).toEqual({ path: '/proj-a', type: 'parent' });
       });
     });
   });
