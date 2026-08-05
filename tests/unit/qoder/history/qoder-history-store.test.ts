@@ -2424,7 +2424,8 @@ describe('sdkSession', () => {
     it('loads subagent tool calls from sidecar JSONL', async () => {
       mockExistsSync.mockReturnValue(true);
       mockFsPromises.readFile.mockImplementation(async (filePath: any) => {
-        const p = String(filePath);
+        // Normalize separators so the branch checks work on Windows hosts.
+        const p = String(filePath).replace(/\\/g, '/');
         if (p.includes('subagents/agent-ae5eb9a.jsonl')) {
           return [
             '{"type":"assistant","timestamp":"2024-01-15T10:02:00Z","message":{"content":[{"type":"tool_use","id":"sub-tool-1","name":"Grep","input":{"pattern":"TODO"}}]}}',
