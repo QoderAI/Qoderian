@@ -1,0 +1,161 @@
+/* Instruction Mode */
+
+/* Instruction Confirm Modal */
+.qoderian-instruction-modal {
+  max-width: 500px;
+}
+
+.qoderian-instruction-section {
+  margin-bottom: 16px;
+}
+
+.qoderian-instruction-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.qoderian-instruction-original {
+  padding: 10px 12px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+  white-space: pre-wrap;
+}
+
+.qoderian-instruction-refined {
+  padding: 12px;
+  background: var(--background-primary-alt);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-normal);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.qoderian-instruction-clarification {
+  padding: 12px;
+  background: var(--background-primary-alt);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-normal);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.qoderian-instruction-edit-container {
+  margin-top: 6px;
+}
+
+.qoderian-instruction-edit-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  resize: vertical;
+  min-height: 80px;
+}
+
+.qoderian-instruction-edit-textarea:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.qoderian-instruction-response-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  resize: vertical;
+  min-height: 60px;
+}
+
+.qoderian-instruction-response-textarea:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.qoderian-instruction-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.qoderian-instruction-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.qoderian-instruction-reject-btn {
+  background: var(--background-modifier-border);
+  color: var(--text-normal);
+}
+
+.qoderian-instruction-reject-btn:hover {
+  background: var(--background-modifier-border-hover);
+}
+
+.qoderian-instruction-edit-btn {
+  background: var(--background-modifier-border);
+  color: var(--text-normal);
+}
+
+.qoderian-instruction-edit-btn:hover {
+  background: var(--background-modifier-border-hover);
+}
+
+.qoderian-instruction-accept-btn {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.qoderian-instruction-accept-btn:hover {
+  opacity: 0.9;
+}
+
+/* Instruction loading state */
+.qoderian-instruction-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  color: var(--text-muted);
+}
+
+.qoderian-instruction-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--background-modifier-border);
+  border-top-color: var(--interactive-accent);
+  border-radius: 50%;
+  animation: qoderian-spin 0.8s linear infinite;
+}
+
+/* Instruction modal content sections */
+.qoderian-instruction-content-section {
+  margin: 8px 0;
+}
+
+.qoderian-instruction-clarification-section,
+.qoderian-instruction-confirmation-section {
+  margin-top: 8px;
+}

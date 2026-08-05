@@ -1,0 +1,368 @@
+
+// eslint-disable-next-line jest/no-mocks-import
+import {
+  getLastOptions,
+  resetMockMessages,
+  setMockMessages,
+} from '@test/__mocks__/qoder-agent-sdk';
+
+// Import after mocks are set up
+import { QoderInstructionRefineService } from '@/qoder/services/qoder-instruction-refine-service';
+
+function createMockPlugin(settings = {}) {
+  return {
+    settings: {
+      model: 'sonnet',
+      systemPrompt: '',
+      ...settings,
+    },
+    app: {
+      vault: {
+        adapter: {
+          basePath: '/test/vault/path',
+        },
+      },
+    },
+    getResolvedQoderCliPath: jest.fn().mockReturnValue('/fake/qoder'),
+  } as any;
+}
+
+describe('QoderInstructionRefineService', () => {
+  let service: QoderInstructionRefineService;
+  let mockPlugin: any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resetMockMessages();
+    mockPlugin = createMockPlugin();
+    service = new QoderInstructionRefineService(mockPlugin);
+  });
+
+  describe('refineInstruction', () => {
+    it('should use no tools (text-only refinement)', async () => {
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: '<instruction>- Be concise.</instruction>' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      const result = await service.refineInstruction('be concise', '');
+      expect(result.success).toBe(true);
+
+      const options = getLastOptions();
+      expect(options?.tools).toEqual([]);
+      expect(options?.permissionMode).toBe('bypassPermissions');
+      expect(options?.allowDangerouslySkipPermissions).toBe(true);
+    });
+
+    it('should set settingSources to project only when loadUserSettings is false', async () => {
+      mockPlugin.settings.qoder = { loadUserSettings: false };
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: '<instruction>- Be concise.</instruction>' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      await service.refineInstruction('be concise', '');
+
+      const options = getLastOptions();
+      expect(options?.settingSources).toEqual(['project', 'local']);
+    });
+
+    it('should set settingSources to include user when loadUserSettings is true', async () => {
+      mockPlugin.settings.qoder = { loadUserSettings: true };
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: '<instruction>- Be concise.</instruction>' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      await service.refineInstruction('be concise', '');
+
+      const options = getLastOptions();
+      expect(options?.settingSources).toEqual(['user', 'project', 'local']);
+    });
+
+    it('should include existing instructions and allow markdown blocks', async () => {
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: {
+            content: [
+              {
+                type: 'text',
+                text: '<instruction>\n## Coding Style\n\n- Use TypeScript.\n- Prefer small diffs.\n</instruction>',
+              },
+            ],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      const existing = '## Existing\n\n- Keep it short.';
+      const result = await service.refineInstruction('coding style', existing);
+
+      expect(result.success).toBe(true);
+      expect(result.refinedInstruction).toBe('## Coding Style\n\n- Use TypeScript.\n- Prefer small diffs.');
+
+      const options = getLastOptions();
+      expect(options?.systemPrompt).toContain('EXISTING INSTRUCTIONS');
+      expect(options?.systemPrompt).toContain(existing);
+      expect(options?.systemPrompt).toContain('Consider how it fits with existing instructions');
+      expect(options?.systemPrompt).toContain('Match the format of existing instructions');
+    });
+
+    it('should return clarification when no instruction tag in response', async () => {
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: 'Could you clarify what you mean by concise?' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      const result = await service.refineInstruction('be concise', '');
+      expect(result.success).toBe(true);
+      expect(result.clarification).toBe('Could you clarify what you mean by concise?');
+      expect(result.refinedInstruction).toBeUndefined();
+    });
+
+    it('should return error for empty response', async () => {
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: '' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      const result = await service.refineInstruction('be concise', '');
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Empty response');
+    });
+
+    it('should call onProgress during streaming', async () => {
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: '<instruction>- Be brief.</instruction>' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      const onProgress = jest.fn();
+      await service.refineInstruction('be concise', '', onProgress);
+      expect(onProgress).toHaveBeenCalled();
+    });
+
+    it('should pass Qoder reasoning effort without legacy thinking options', async () => {
+      mockPlugin.settings.model = 'sonnet';
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: '<instruction>ok</instruction>' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      await service.refineInstruction('test', '');
+      const options = getLastOptions();
+      expect(options?.thinking).toBeUndefined();
+      expect(options?.extraArgs?.['reasoning-effort']).toBe('high');
+      expect(options?.maxThinkingTokens).toBeUndefined();
+    });
+
+    it('should pass configured Qoder reasoning effort for custom models', async () => {
+      mockPlugin.settings.model = 'custom-model';
+      mockPlugin.settings.effortLevel = 'medium';
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: '<instruction>ok</instruction>' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      await service.refineInstruction('test', '');
+      const options = getLastOptions();
+      expect(options?.thinking).toBeUndefined();
+      expect(options?.extraArgs?.['reasoning-effort']).toBe('medium');
+      expect(options?.maxThinkingTokens).toBeUndefined();
+    });
+
+    it('should ignore non-text content blocks', async () => {
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: {
+            content: [
+              { type: 'tool_use', name: 'test' },
+              { type: 'text', text: '<instruction>result</instruction>' },
+            ],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      const result = await service.refineInstruction('test', '');
+      expect(result.success).toBe(true);
+      expect(result.refinedInstruction).toBe('result');
+    });
+
+    it('should skip messages without content', async () => {
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        { type: 'assistant' },
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: '<instruction>ok</instruction>' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      const result = await service.refineInstruction('test', '');
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('continueConversation', () => {
+    it('should return error when no active session', async () => {
+      const result = await service.continueConversation('follow up');
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('No active conversation to continue');
+    });
+
+    it('should continue with session id after initial refinement', async () => {
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'session-abc' },
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: 'What do you mean?' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      // First call establishes a session
+      await service.refineInstruction('test', '');
+
+      // Set up messages for the continuation
+      resetMockMessages();
+      setMockMessages([
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: '<instruction>- Be concise and clear.</instruction>' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      const result = await service.continueConversation('I mean short answers');
+      expect(result.success).toBe(true);
+      expect(result.refinedInstruction).toBe('- Be concise and clear.');
+
+      const options = getLastOptions();
+      expect(options?.resume).toBe('session-abc');
+    });
+  });
+
+  describe('resetConversation', () => {
+    it('should clear session so continueConversation fails', async () => {
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'session-abc' },
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: 'clarification' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      await service.refineInstruction('test', '');
+      service.resetConversation();
+
+      const result = await service.continueConversation('follow up');
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('No active conversation to continue');
+    });
+  });
+
+  describe('cancel', () => {
+    it('should abort the current request', async () => {
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: {
+            content: [{ type: 'text', text: '<instruction>ok</instruction>' }],
+          },
+        },
+        { type: 'result' },
+      ]);
+
+      const promise = service.refineInstruction('test', '');
+      service.cancel();
+      const result = await promise;
+      expect(result).toBeDefined();
+    });
+
+    it('should be safe to cancel when nothing is running', () => {
+      service.cancel();
+      // Verify service is still usable after cancelling with no active request
+      expect(service).toBeDefined();
+    });
+  });
+
+  describe('error handling', () => {
+    it('should return error when vault path cannot be determined', async () => {
+      mockPlugin.app.vault.adapter.basePath = undefined;
+      const result = await service.refineInstruction('test', '');
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Could not determine vault path');
+    });
+
+    it('should return error when Qoder CLI is not found', async () => {
+      mockPlugin.getResolvedQoderCliPath.mockReturnValue(null);
+      const result = await service.refineInstruction('test', '');
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Qoder CLI not found');
+    });
+  });
+});

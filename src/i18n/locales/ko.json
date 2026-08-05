@@ -1,0 +1,272 @@
+{
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "add": "추가",
+    "remove": "제거",
+    "clear": "지우기",
+    "clearAll": "모두 지우기",
+    "loading": "로딩 중",
+    "error": "오류",
+    "success": "성공",
+    "warning": "경고",
+    "confirm": "확인",
+    "settings": "설정",
+    "advanced": "고급",
+    "enabled": "활성화",
+    "disabled": "비활성화",
+    "platform": "플랫폼",
+    "refresh": "새로고침",
+    "rewind": "되감기"
+  },
+  "commands": {
+    "openView": "채팅 뷰 열기",
+    "inlineEdit": "인라인 편집",
+    "inlineEditUnavailable": "인라인 편집을 사용할 수 없습니다: 활성 Markdown 뷰에 접근할 수 없습니다.",
+    "inserted": "삽입됨",
+    "editApplied": "편집 적용됨",
+    "newTab": "새 탭",
+    "newSession": "새 세션 (현재 탭)",
+    "closeCurrentTab": "현재 탭 닫기"
+  },
+  "chat": {
+    "rewind": {
+      "confirmMessage": "이 시점으로 되감으시겠습니까? 이 메시지 이후의 파일 변경 사항이 되돌려집니다. 수동으로 또는 bash를 통해 편집된 파일에는 영향을 미치지 않습니다.",
+      "confirmMessageConversationOnly": "대화를 이 시점으로 되감으시겠습니까? 파일 변경 사항은 유지됩니다.",
+      "confirmButton": "되감기",
+      "ariaLabel": "여기로 되감기",
+      "menuConversationOnly": "대화만 되감기",
+      "menuCodeAndConversation": "코드 + 대화 되감기",
+      "notice": "되감기 완료: {count}개 파일 복원됨",
+      "noticeConversationOnly": "대화를 되감았습니다. 파일 변경 사항은 유지되었습니다",
+      "noticeSaveFailed": "되감기 완료: {count}개 파일 복원됨, 하지만 상태를 저장하지 못했습니다: {error}",
+      "noticeConversationOnlySaveFailed": "대화를 되감았지만 상태를 저장하지 못했습니다: {error}",
+      "failed": "되감기 실패: {error}",
+      "cannot": "되감기 불가: {error}",
+      "unavailableStreaming": "스트리밍 중에는 되감기할 수 없습니다",
+      "unavailableNoUuid": "되감기 불가: 메시지 식별자 누락"
+    },
+    "fork": {
+      "ariaLabel": "대화 분기",
+      "chooseTarget": "대화 분기",
+      "targetNewTab": "새 탭",
+      "targetCurrentTab": "현재 탭",
+      "maxTabsReached": "분기 불가: 최대 {count}개 탭에 도달했습니다",
+      "notice": "새 탭으로 분기됨",
+      "noticeCurrentTab": "현재 탭에서 분기됨",
+      "failed": "분기 실패: {error}",
+      "unavailableStreaming": "스트리밍 중에는 분기할 수 없습니다",
+      "unavailableNoUuid": "분기 불가: 메시지 식별자 누락",
+      "unavailableNoResponse": "분기 불가: 분기할 응답이 없습니다",
+      "errorMessageNotFound": "메시지를 찾을 수 없습니다",
+      "errorNoSession": "사용 가능한 세션 ID가 없습니다",
+      "errorNoActiveTab": "활성 탭이 없습니다",
+      "commandNoMessages": "포크할 수 없습니다: 대화에 메시지가 없습니다",
+      "commandNoAssistantUuid": "포크할 수 없습니다: 식별자가 있는 어시스턴트 응답이 없습니다"
+    },
+    "bangBash": {
+      "placeholder": "> bash 명령 실행...",
+      "commandPanel": "명령 패널",
+      "copyAriaLabel": "최신 명령 출력을 복사",
+      "clearAriaLabel": "bash 출력 지우기",
+      "commandLabel": "{command}",
+      "statusLabel": "상태: {status}",
+      "collapseOutput": "명령 출력 접기",
+      "expandOutput": "명령 출력 펼치기",
+      "running": "실행 중...",
+      "copyFailed": "클립보드에 복사하지 못했습니다"
+    },
+    "view": {
+      "openQoderian": "Qoderian 열기",
+      "moveBlockedStreaming": "현재 응답이 완료될 때까지 기다린 후 Qoderian 뷰를 이동하세요.",
+      "moveFailed": "선택한 위치에 Qoderian 뷰를 만들 수 없습니다."
+    },
+    "conversation": {
+      "emptyPreview": "새 대화",
+      "deleteFailed": "대화 삭제 실패: {error}"
+    }
+  },
+  "settings": {
+    "title": "Qoderian 설정",
+    "display": "표시",
+    "conversations": "대화",
+    "content": "콘텐츠",
+    "input": "입력",
+    "setup": "설정",
+    "experimental": "실험적 기능",
+    "userName": {
+      "name": "Qoderian이 당신을 어떻게 불러야 합니까?",
+      "desc": "개인화된 인사에 사용할 이름 (비워두면 일반 인사)"
+    },
+    "excludedTags": {
+      "name": "제외 태그",
+      "desc": "이 태그가 포함된 노트는 자동으로 컨텍스트로 로드되지 않습니다 (한 줄에 하나, # 제외)"
+    },
+    "mediaFolder": {
+      "name": "미디어 폴더",
+      "desc": "첨부 파일/이미지를 저장할 폴더. 노트가 ![[image.jpg]]를 사용할 때 Qoder가 여기서 찾습니다. 비워두면 저장소 루트 사용."
+    },
+    "systemPrompt": {
+      "name": "커스텀 시스템 프롬프트",
+      "desc": "기본 시스템 프롬프트에 추가되는 추가 지침"
+    },
+    "autoTitle": {
+      "name": "대화 제목 자동 생성",
+      "desc": "첫 번째 사용자 메시지 전송 후 자동으로 대화 제목을 생성합니다."
+    },
+    "titleModel": {
+      "name": "제목 생성 모델",
+      "desc": "대화 제목을 자동 생성하는 데 사용되는 모델."
+    },
+    "navMappings": {
+      "name": "Vim 스타일 네비게이션 매핑",
+      "desc": "한 줄에 하나의 매핑. 형식: \"map <키> <동작>\" (동작: scrollUp, scrollDown, focusInput)."
+    },
+    "requireCommandOrControlEnterToSend": {
+      "name": "Command/Ctrl+Enter로 보내기 필수",
+      "desc": "활성화하면 Enter는 줄바꿈을 삽입합니다. macOS에서는 Command+Enter, Windows와 Linux에서는 Ctrl+Enter로 보냅니다."
+    },
+    "slashCommands": {
+      "name": "명령어와 스킬",
+      "command": "명령어",
+      "commands": "명령어",
+      "commandsDesc": ".qoder/commands/*.md에 저장되고 /이름으로 호출하는 재사용 가능한 프롬프트입니다.",
+      "skill": "스킬",
+      "skills": "스킬",
+      "skillsDesc": ".qoder/skills/<이름>/SKILL.md에 저장하는 에이전트 기능입니다. 폴더에 스크립트, 참고 자료, 템플릿도 포함할 수 있습니다.",
+      "learnMore": "자세히 알아보기",
+      "noCommands": "프로젝트 명령어가 없습니다. +를 클릭하여 만드세요.",
+      "noSkills": "프로젝트 스킬이 없습니다. +를 클릭하여 만드세요.",
+      "unavailable": "Qoder CLI 명령어 카탈로그를 사용할 수 없습니다.",
+      "deleteConfirm": "{type} \"{name}\"을(를) 삭제할까요?",
+      "saveFailed": "저장 실패: {message}",
+      "deleteFailed": "삭제 실패: {message}",
+      "created": "{type} \"{name}\" 생성됨",
+      "updated": "{type} \"{name}\" 업데이트됨",
+      "deleted": "{type} \"{name}\" 삭제됨",
+      "duplicateName": "\"{name}\" 이름의 명령어 또는 스킬이 이미 있습니다",
+      "descriptionRequired": "설명이 필요합니다",
+      "instructionsRequired": "지침이 필요합니다",
+      "modal": {
+        "titleAdd": "{type} 추가",
+        "titleEdit": "{type} 편집",
+        "name": "이름",
+        "nameDesc": "소문자, 숫자, 하이픈만 사용",
+        "description": "설명",
+        "descriptionDesc": "Qoder가 언제 사용해야 하는지 간단히 설명합니다",
+        "instructions": "지침",
+        "commandInstructionsDesc": "명령어 호출 시 전송할 프롬프트입니다. 사용자 입력은 $ARGUMENTS를 사용합니다.",
+        "skillInstructionsDesc": "이 스킬이 활성화될 때 Qoder가 따를 지침입니다.",
+        "commandInstructionsPlaceholder": "다음 코드를 검토하세요:\n\n$ARGUMENTS",
+        "skillInstructionsPlaceholder": "이 스킬의 워크플로, 제약 조건, 예상 출력을 설명하세요."
+      }
+    },
+    "mcpServers": {
+      "name": "MCP 서버",
+      "desc": ".qoder/mcp.json에 저장된 Vault 수준의 MCP 서버 구성을 관리합니다. 컨텍스트 저장 모드 서버는 @mention으로 활성화해야 합니다."
+    },
+    "plugins": {
+      "name": "Qoder CLI 플러그인",
+      "desc": "~/.qoder/plugins에서 발견된 Qoder CLI 플러그인을 관리합니다. 활성화된 플러그인은 .qoder/settings.json에 Vault별로 저장됩니다."
+    },
+    "subagents": {
+      "name": "서브에이전트",
+      "desc": ".qoder/agents/에 저장된 Vault 수준의 서브에이전트를 관리합니다. 각 Markdown 파일이 하나의 커스텀 에이전트를 정의합니다.",
+      "noAgents": "구성된 서브에이전트가 없습니다. +를 클릭해 새로 만드세요.",
+      "deleteConfirm": "서브에이전트 \"{name}\"을 삭제하시겠습니까?",
+      "saveFailed": "서브에이전트를 저장하지 못했습니다: {message}",
+      "refreshFailed": "서브에이전트를 새로고침하지 못했습니다: {message}",
+      "deleteFailed": "서브에이전트를 삭제하지 못했습니다: {message}",
+      "renameCleanupFailed": "경고: \"{name}\"의 이전 파일을 제거하지 못했습니다",
+      "created": "서브에이전트 \"{name}\"를 생성했습니다",
+      "updated": "서브에이전트 \"{name}\"를 업데이트했습니다",
+      "deleted": "서브에이전트 \"{name}\"를 삭제했습니다",
+      "duplicateName": "\"{name}\"이라는 이름의 에이전트가 이미 있습니다",
+      "descriptionRequired": "설명은 필수입니다",
+      "promptRequired": "시스템 프롬프트는 필수입니다",
+      "modal": {
+        "titleEdit": "서브에이전트 편집",
+        "titleAdd": "서브에이전트 추가",
+        "name": "이름",
+        "nameDesc": "소문자, 숫자, 하이픈만 사용할 수 있습니다",
+        "namePlaceholder": "code-reviewer",
+        "description": "설명",
+        "descriptionDesc": "이 에이전트에 대한 간단한 설명",
+        "descriptionPlaceholder": "코드의 버그와 스타일을 검토합니다",
+        "advancedOptions": "고급 옵션",
+        "model": "모델",
+        "modelDesc": "이 에이전트에 사용할 모델 재정의",
+        "tools": "도구",
+        "toolsDesc": "허용할 도구를 쉼표로 구분해 입력하세요 (비워두면 모두 허용)",
+        "disallowedTools": "금지 도구",
+        "disallowedToolsDesc": "금지할 도구를 쉼표로 구분해 입력하세요",
+        "skills": "스킬",
+        "skillsDesc": "스킬 목록을 쉼표로 구분해 입력하세요",
+        "prompt": "시스템 프롬프트",
+        "promptDesc": "에이전트용 지침",
+        "promptPlaceholder": "당신은 코드 리뷰어입니다. 주어진 코드를 분석하여..."
+      }
+    },
+    "safety": "보안",
+    "loadUserSettings": {
+      "name": "사용자 Qoder 설정 로드",
+      "desc": "~/.qoder/settings.json을 로드합니다. 활성화하면 사용자의 Qoder CLI 허용 규칙이 보안 모드를 우회할 수 있습니다."
+    },
+    "qoderSafeMode": {
+      "name": "안전 모드 권한",
+      "desc": "안전 모드가 켜져 있을 때 사용할 권한 동작입니다.",
+      "modes": {
+        "acceptEdits": "안전한 편집 자동 승인",
+        "auto": "자동 판단(확인 없음)",
+        "default": "민감한 작업 확인"
+      }
+    },
+    "enableBangBash": {
+      "name": "bash 모드 (!) 활성화",
+      "desc": "입력창이 비어 있을 때 !를 입력하면 bash 모드로 들어갑니다. Node.js child_process를 통해 명령을 직접 실행합니다. 보기를 다시 열어야 합니다.",
+      "validation": {
+        "noNode": "PATH에서 Node.js를 찾을 수 없습니다. Node.js를 설치하거나 PATH 설정을 확인하세요."
+      }
+    },
+    "maxTabs": {
+      "name": "최대 채팅 탭 수",
+      "desc": "동시에 열 수 있는 최대 채팅 탭 수(3-10). 각 탭은 별도의 Qoder 세션을 사용합니다.",
+      "warning": "5개 탭을 초과하면 성능 및 메모리 사용량에 영향을 줄 수 있습니다."
+    },
+    "enableAutoScroll": {
+      "name": "스트리밍 중 자동 스크롤",
+      "desc": "Qoder가 응답을 스트리밍하는 동안 자동으로 아래로 스크롤합니다. 비활성화하면 상단에 머물러 처음부터 읽을 수 있습니다."
+    },
+    "deferMathRenderingDuringStreaming": {
+      "name": "스트리밍 중 수식 렌더링 지연",
+      "desc": "응답이 스트리밍되는 동안 원본 LaTeX를 표시하고 각 텍스트 블록이 완료되면 수식을 한 번 렌더링합니다."
+    },
+    "expandFileEditsByDefault": {
+      "name": "파일 편집을 기본적으로 펼치기",
+      "desc": "Write 및 Edit diff가 처음 표시될 때 펼친 상태로 보여줍니다."
+    },
+    "chatViewPlacement": {
+      "name": "Qoderian 열 위치",
+      "desc": "채팅 패널이 생성될 때 열릴 위치를 선택합니다",
+      "rightSidebar": "오른쪽 사이드바",
+      "leftSidebar": "왼쪽 사이드바",
+      "mainTab": "메인 편집기 탭"
+    },
+    "cliPath": {
+      "name": "Qoder CLI 경로",
+      "desc": "Qoder CLI의 사용자 정의 경로. 비워두면 자동 감지 사용.",
+      "descWindows": "네이티브 설치 프로그램은 qodercli.exe를 사용하세요. npm/pnpm/yarn은 @qoder-ai/qodercli의 cli.js 경로를 사용하세요(qodercli.cmd 아님).",
+      "descUnix": "\"which qoder\"의 출력을 붙여넣으세요 - 네이티브 및 npm/pnpm/yarn 설치 모두에서 작동합니다.",
+      "validation": {
+        "notExist": "경로가 존재하지 않습니다",
+        "isDirectory": "경로가 디렉토리입니다 파일이 아닙니다"
+      }
+    },
+    "language": {
+      "name": "언어",
+      "desc": "플러그인 인터페이스의 표시 언어 변경"
+    }
+  }
+}

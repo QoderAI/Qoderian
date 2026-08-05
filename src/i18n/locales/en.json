@@ -1,0 +1,272 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "remove": "Remove",
+    "clear": "Clear",
+    "clearAll": "Clear all",
+    "loading": "Loading",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "confirm": "Confirm",
+    "settings": "Settings",
+    "advanced": "Advanced",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "platform": "Platform",
+    "refresh": "Refresh",
+    "rewind": "Rewind"
+  },
+  "commands": {
+    "openView": "Open chat view",
+    "inlineEdit": "Inline edit",
+    "inlineEditUnavailable": "Inline edit unavailable: could not access the active Markdown view.",
+    "inserted": "Inserted",
+    "editApplied": "Edit applied",
+    "newTab": "New tab",
+    "newSession": "New session (in current tab)",
+    "closeCurrentTab": "Close current tab"
+  },
+  "chat": {
+    "rewind": {
+      "confirmMessage": "Rewind to this point? File changes after this message will be reverted. Rewinding does not affect files edited manually or via bash.",
+      "confirmMessageConversationOnly": "Rewind conversation to this point? File changes will be kept.",
+      "confirmButton": "Rewind",
+      "ariaLabel": "Rewind to here",
+      "menuConversationOnly": "Rewind conversation only",
+      "menuCodeAndConversation": "Rewind code + conversation",
+      "notice": "Rewound: {count} file(s) reverted",
+      "noticeConversationOnly": "Rewound conversation; file changes kept",
+      "noticeSaveFailed": "Rewound: {count} file(s) reverted, but failed to save state: {error}",
+      "noticeConversationOnlySaveFailed": "Rewound conversation, but failed to save state: {error}",
+      "failed": "Rewind failed: {error}",
+      "cannot": "Cannot rewind: {error}",
+      "unavailableStreaming": "Cannot rewind while streaming",
+      "unavailableNoUuid": "Cannot rewind: missing message identifiers"
+    },
+    "fork": {
+      "ariaLabel": "Fork conversation",
+      "chooseTarget": "Fork conversation",
+      "targetNewTab": "New tab",
+      "targetCurrentTab": "Current tab",
+      "maxTabsReached": "Cannot fork: maximum {count} tabs reached",
+      "notice": "Forked to new tab",
+      "noticeCurrentTab": "Forked in current tab",
+      "failed": "Fork failed: {error}",
+      "unavailableStreaming": "Cannot fork while streaming",
+      "unavailableNoUuid": "Cannot fork: missing message identifiers",
+      "unavailableNoResponse": "Cannot fork: no response to fork from",
+      "errorMessageNotFound": "Message not found",
+      "errorNoSession": "No session ID available",
+      "errorNoActiveTab": "No active tab",
+      "commandNoMessages": "Cannot fork: no messages in conversation",
+      "commandNoAssistantUuid": "Cannot fork: no assistant response with identifiers"
+    },
+    "bangBash": {
+      "placeholder": "> Run a bash command...",
+      "commandPanel": "Command panel",
+      "copyAriaLabel": "Copy latest command output",
+      "clearAriaLabel": "Clear bash output",
+      "commandLabel": "{command}",
+      "statusLabel": "Status: {status}",
+      "collapseOutput": "Collapse command output",
+      "expandOutput": "Expand command output",
+      "running": "Running...",
+      "copyFailed": "Failed to copy to clipboard"
+    },
+    "view": {
+      "openQoderian": "Open Qoderian",
+      "moveBlockedStreaming": "Wait for the current response to finish before moving the Qoderian view.",
+      "moveFailed": "Could not create the Qoderian view in the selected location."
+    },
+    "conversation": {
+      "emptyPreview": "New conversation",
+      "deleteFailed": "Failed to delete conversation: {error}"
+    }
+  },
+  "settings": {
+    "title": "Qoderian Settings",
+    "display": "Display",
+    "conversations": "Conversations",
+    "content": "Content",
+    "input": "Input",
+    "setup": "Setup",
+    "experimental": "Experimental",
+    "userName": {
+      "name": "What should Qoderian call you?",
+      "desc": "Your name for personalized greetings (leave empty for generic greetings)"
+    },
+    "excludedTags": {
+      "name": "Excluded tags",
+      "desc": "Notes with these tags will not auto-load as context (one per line, without #)"
+    },
+    "mediaFolder": {
+      "name": "Media folder",
+      "desc": "Folder containing attachments/images. When notes use ![[image.jpg]], Qoder will look here. Leave empty for vault root."
+    },
+    "systemPrompt": {
+      "name": "Custom system prompt",
+      "desc": "Additional instructions appended to the default system prompt"
+    },
+    "autoTitle": {
+      "name": "Auto-generate conversation titles",
+      "desc": "Automatically generate conversation titles after the first user message is sent."
+    },
+    "titleModel": {
+      "name": "Title generation model",
+      "desc": "Model used for auto-generating conversation titles."
+    },
+    "navMappings": {
+      "name": "Vim-style navigation mappings",
+      "desc": "One mapping per line. Format: \"map <key> <action>\" (actions: scrollUp, scrollDown, focusInput)."
+    },
+    "requireCommandOrControlEnterToSend": {
+      "name": "Require Command/Ctrl+Enter to send",
+      "desc": "When enabled, Enter inserts a newline. Command+Enter sends on macOS; Ctrl+Enter sends on Windows and Linux."
+    },
+    "slashCommands": {
+      "name": "Commands and Skills",
+      "command": "Command",
+      "commands": "Commands",
+      "commandsDesc": "Reusable prompts stored as .qoder/commands/*.md and invoked with /name.",
+      "skill": "Skill",
+      "skills": "Skills",
+      "skillsDesc": "Agent capabilities stored as .qoder/skills/<name>/SKILL.md. A skill folder may also contain scripts, references, and templates.",
+      "learnMore": "Learn more",
+      "noCommands": "No project commands configured. Click + to create one.",
+      "noSkills": "No project skills configured. Click + to create one.",
+      "unavailable": "Qoder CLI command catalog is unavailable.",
+      "deleteConfirm": "Delete {type} \"{name}\"?",
+      "saveFailed": "Failed to save: {message}",
+      "deleteFailed": "Failed to delete: {message}",
+      "created": "{type} \"{name}\" created",
+      "updated": "{type} \"{name}\" updated",
+      "deleted": "{type} \"{name}\" deleted",
+      "duplicateName": "A command or skill named \"{name}\" already exists",
+      "descriptionRequired": "Description is required",
+      "instructionsRequired": "Instructions are required",
+      "modal": {
+        "titleAdd": "Add {type}",
+        "titleEdit": "Edit {type}",
+        "name": "Name",
+        "nameDesc": "Lowercase letters, numbers, and hyphens only",
+        "description": "Description",
+        "descriptionDesc": "Briefly explain when Qoder should use it",
+        "instructions": "Instructions",
+        "commandInstructionsDesc": "Prompt sent when the command is invoked. Use $ARGUMENTS for user input.",
+        "skillInstructionsDesc": "Instructions Qoder follows when this skill is activated.",
+        "commandInstructionsPlaceholder": "Review the following code:\n\n$ARGUMENTS",
+        "skillInstructionsPlaceholder": "Explain the workflow, constraints, and expected output for this skill."
+      }
+    },
+    "mcpServers": {
+      "name": "MCP Servers",
+      "desc": "Manage vault-level MCP server configurations stored in .qoder/mcp.json. Servers with context-saving mode require @mention to activate."
+    },
+    "plugins": {
+      "name": "Qoder Plugins",
+      "desc": "Manage Qoder plugins discovered from ~/.qoder/plugins. Enabled plugins are stored per vault in .qoder/settings.json."
+    },
+    "subagents": {
+      "name": "Subagents",
+      "desc": "Manage vault-level subagents stored in .qoder/agents/. Each Markdown file defines one custom agent.",
+      "noAgents": "No subagents configured. Click + to create one.",
+      "deleteConfirm": "Delete subagent \"{name}\"?",
+      "saveFailed": "Failed to save subagent: {message}",
+      "refreshFailed": "Failed to refresh subagents: {message}",
+      "deleteFailed": "Failed to delete subagent: {message}",
+      "renameCleanupFailed": "Warning: could not remove old file for \"{name}\"",
+      "created": "Subagent \"{name}\" created",
+      "updated": "Subagent \"{name}\" updated",
+      "deleted": "Subagent \"{name}\" deleted",
+      "duplicateName": "An agent named \"{name}\" already exists",
+      "descriptionRequired": "Description is required",
+      "promptRequired": "System prompt is required",
+      "modal": {
+        "titleEdit": "Edit Subagent",
+        "titleAdd": "Add Subagent",
+        "name": "Name",
+        "nameDesc": "Lowercase letters, numbers, and hyphens only",
+        "namePlaceholder": "code-reviewer",
+        "description": "Description",
+        "descriptionDesc": "Brief description of this agent",
+        "descriptionPlaceholder": "Reviews code for bugs and style",
+        "advancedOptions": "Advanced options",
+        "model": "Model",
+        "modelDesc": "Model override for this agent",
+        "tools": "Tools",
+        "toolsDesc": "Comma-separated list of allowed tools (empty = all)",
+        "disallowedTools": "Disallowed tools",
+        "disallowedToolsDesc": "Comma-separated list of tools to disallow",
+        "skills": "Skills",
+        "skillsDesc": "Comma-separated list of skills",
+        "prompt": "System prompt",
+        "promptDesc": "Instructions for the agent",
+        "promptPlaceholder": "You are a code reviewer. Analyze the given code for..."
+      }
+    },
+    "safety": "Safety",
+    "loadUserSettings": {
+      "name": "Load user Qoder settings",
+      "desc": "Load ~/.qoder/settings.json. When enabled, user's Qoder CLI permission rules may bypass Safe mode."
+    },
+    "qoderSafeMode": {
+      "name": "Safe mode permissions",
+      "desc": "Permission behavior used while the Safe toggle is on.",
+      "modes": {
+        "acceptEdits": "Approve safe edits",
+        "auto": "Automatic decisions (no prompts)",
+        "default": "Ask for sensitive actions"
+      }
+    },
+    "enableBangBash": {
+      "name": "Enable bash mode (!)",
+      "desc": "Type ! on empty input to enter bash mode. Runs commands directly via Node.js child_process. Requires view reopen.",
+      "validation": {
+        "noNode": "Node.js not found on PATH. Install Node.js or check your PATH configuration."
+      }
+    },
+    "maxTabs": {
+      "name": "Maximum chat tabs",
+      "desc": "Maximum number of concurrent chat tabs (3-10). Each tab uses a separate Qoder session.",
+      "warning": "More than 5 tabs may impact performance and memory usage."
+    },
+    "enableAutoScroll": {
+      "name": "Auto-scroll during streaming",
+      "desc": "Automatically scroll to the bottom as Qoder streams responses. Disable to stay at the top and read from the beginning."
+    },
+    "deferMathRenderingDuringStreaming": {
+      "name": "Defer math rendering during streaming",
+      "desc": "Show raw LaTeX while responses stream, then render math once when each text block completes."
+    },
+    "expandFileEditsByDefault": {
+      "name": "Expand file edits by default",
+      "desc": "Show Write and Edit diffs expanded when they first appear."
+    },
+    "chatViewPlacement": {
+      "name": "Open Qoderian in",
+      "desc": "Choose where the chat panel opens when it is created",
+      "rightSidebar": "Right sidebar",
+      "leftSidebar": "Left sidebar",
+      "mainTab": "Main editor tab"
+    },
+    "cliPath": {
+      "name": "Qoder CLI path",
+      "desc": "Custom path to Qoder CLI. Leave empty for auto-detection.",
+      "descWindows": "For the native installer, use qodercli.exe. For npm/pnpm/yarn installs, use the @qoder-ai/qodercli cli.js path (not qodercli.cmd).",
+      "descUnix": "Paste the output of \"which qoder\" — works for both native and npm/pnpm/yarn installs.",
+      "validation": {
+        "notExist": "Path does not exist",
+        "isDirectory": "Path is a directory, not a file"
+      }
+    },
+    "language": {
+      "name": "Language",
+      "desc": "Change the display language of the plugin interface"
+    }
+  }
+}

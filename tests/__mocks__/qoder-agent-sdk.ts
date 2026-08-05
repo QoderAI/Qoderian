@@ -1,0 +1,375 @@
+// Mock for @qoder-ai/qoder-agent-sdk
+
+export interface HookCallbackMatcher {
+  matcher?: string;
+  hooks: Array<(hookInput: any, toolUseID: string, options: any) => Promise<{ continue: boolean; hookSpecificOutput?: any }>>;
+}
+
+export interface SpawnOptions {
+  command: string;
+  args: string[];
+  cwd?: string;
+  env: {
+    [envVar: string]: string | undefined;
+  };
+  signal: AbortSignal;
+}
+
+export interface SpawnedProcess {
+  stdin: NodeJS.WritableStream;
+  stdout: NodeJS.ReadableStream;
+  stderr?: NodeJS.ReadableStream | null;
+  killed: boolean;
+  exitCode: number | null;
+  kill: (signal?: NodeJS.Signals) => void;
+  on: (event: 'exit' | 'error', listener: (...args: any[]) => void) => void;
+  once: (event: 'exit' | 'error', listener: (...args: any[]) => void) => void;
+  off: (event: 'exit' | 'error', listener: (...args: any[]) => void) => void;
+}
+
+export interface Options {
+  cwd?: string;
+  permissionMode?: string;
+  allowDangerouslySkipPermissions?: boolean;
+  model?: string;
+  tools?: string[];
+  allowedTools?: string[];
+  disallowedTools?: string[];
+  abortController?: AbortController;
+  pathToQoderCLIExecutable?: string;
+  resume?: string;
+  maxThinkingTokens?: number;
+  thinking?: { type: string; budgetTokens?: number };
+  effort?: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
+  extraArgs?: Record<string, string | null>;
+  canUseTool?: CanUseTool;
+  systemPrompt?: string | { content: string; cacheControl?: { type: string } };
+  mcpServers?: Record<string, unknown>;
+  settingSources?: ('user' | 'project' | 'local')[];
+  spawnQoderCLIProcess?: (options: SpawnOptions) => SpawnedProcess;
+  hooks?: {
+    PreToolUse?: HookCallbackMatcher[];
+    PostToolUse?: HookCallbackMatcher[];
+    Stop?: HookCallbackMatcher[];
+  };
+  agents?: Record<string, AgentDefinition>;
+  persistSession?: boolean;
+}
+
+export function qodercliAuth() {
+  return { type: 'qodercli' } as const;
+}
+
+export interface Settings {
+  effortLevel?: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
+}
+
+// Type exports that match the real SDK
+export type AgentDefinition = {
+  description: string;
+  tools?: string[];
+  disallowedTools?: string[];
+  prompt: string;
+  model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
+  mcpServers?: unknown[];
+  skills?: string[];
+  maxTurns?: number;
+  hooks?: Record<string, unknown>;
+};
+
+export type AgentMcpServerSpec = string | Record<string, unknown>;
+
+export type McpServerConfig = Record<string, unknown>;
+
+export type PermissionBehavior = 'allow' | 'deny' | 'ask';
+
+export type PermissionRuleValue = {
+  toolName: string;
+  ruleContent?: string;
+};
+
+export type PermissionUpdateDestination = 'userSettings' | 'projectSettings' | 'localSettings' | 'session' | 'cliArg';
+
+export type PermissionMode = 'acceptEdits' | 'auto' | 'bypassPermissions' | 'default' | 'delegate' | 'dontAsk' | 'plan';
+
+export type PermissionUpdate =
+  | { type: 'addRules'; rules: PermissionRuleValue[]; behavior: PermissionBehavior; destination: PermissionUpdateDestination }
+  | { type: 'replaceRules'; rules: PermissionRuleValue[]; behavior: PermissionBehavior; destination: PermissionUpdateDestination }
+  | { type: 'removeRules'; rules: PermissionRuleValue[]; behavior: PermissionBehavior; destination: PermissionUpdateDestination }
+  | { type: 'setMode'; mode: PermissionMode; destination: PermissionUpdateDestination }
+  | { type: 'addDirectories'; directories: string[]; destination: PermissionUpdateDestination }
+  | { type: 'removeDirectories'; directories: string[]; destination: PermissionUpdateDestination };
+
+export type CanUseTool = (toolName: string, input: Record<string, unknown>, options: {
+  signal: AbortSignal;
+  suggestions?: PermissionUpdate[];
+  blockedPath?: string;
+  decisionReason?: string;
+  toolUseID: string;
+  agentID?: string;
+}) => Promise<PermissionResult>;
+
+export type PermissionResult =
+  | { behavior: 'allow'; updatedInput?: Record<string, unknown>; updatedPermissions?: PermissionUpdate[]; toolUseID?: string }
+  | { behavior: 'deny'; message: string; interrupt?: boolean; toolUseID?: string };
+
+// Default mock messages for testing
+const mockMessages = [
+  { type: 'system', subtype: 'init', session_id: 'test-session-123' },
+  { type: 'assistant', message: { content: [{ type: 'text', text: 'Hello, I am Qoder!' }] } },
+  { type: 'result', subtype: 'success', result: 'completed' },
+];
+
+let customMockMessages: any[] | null = null;
+let appendResultMessage = true;
+let lastOptions: Options | undefined;
+let mockSupportedCommands: Array<{ name: string; description: string; argumentHint?: string }> = [];
+let mockAvailableModels: any[] = [];
+let mockInitializationModels: any[] | undefined;
+let lastResponse: (AsyncGenerator<any> & {
+  interrupt: jest.Mock;
+  setModel: jest.Mock;
+  setMaxThinkingTokens: jest.Mock;
+  setPermissionMode: jest.Mock;
+  applyFlagSettings: jest.Mock;
+  setMcpServers: jest.Mock;
+  supportedCommands: jest.Mock;
+  getAvailableModels: jest.Mock;
+  initializationResult: jest.Mock;
+  close: jest.Mock;
+}) | null = null;
+
+// Crash simulation control
+let shouldThrowOnIteration = false;
+let throwAfterChunks = 0;
+let queryCallCount = 0;
+
+// Allow tests to set custom mock messages
+export function setMockMessages(messages: any[], options?: { appendResult?: boolean }) {
+  customMockMessages = messages;
+  appendResultMessage = options?.appendResult ?? true;
+}
+
+export function resetMockMessages() {
+  customMockMessages = null;
+  appendResultMessage = true;
+  lastOptions = undefined;
+  mockSupportedCommands = [];
+  mockAvailableModels = [];
+  mockInitializationModels = undefined;
+  lastResponse = null;
+  shouldThrowOnIteration = false;
+  throwAfterChunks = 0;
+  queryCallCount = 0;
+}
+
+export function setMockSupportedCommands(
+  commands: Array<{ name: string; description: string; argumentHint?: string }>
+) {
+  mockSupportedCommands = commands;
+}
+
+export function setMockAvailableModels(models: any[]) {
+  mockAvailableModels = models;
+}
+
+export function setMockInitializationModels(models: any[]) {
+  mockInitializationModels = models;
+}
+
+/**
+ * Configure the mock to throw an error during iteration.
+ * @param afterChunks - Number of chunks to emit before throwing (0 = throw immediately)
+ */
+export function simulateCrash(afterChunks = 0) {
+  shouldThrowOnIteration = true;
+  throwAfterChunks = afterChunks;
+}
+
+/**
+ * Get the number of times query() was called (useful for verifying restart behavior).
+ */
+export function getQueryCallCount(): number {
+  return queryCallCount;
+}
+
+export function getLastOptions(): Options | undefined {
+  return lastOptions;
+}
+
+export function getLastResponse(): typeof lastResponse {
+  return lastResponse;
+}
+
+// Helper to run PreToolUse hooks
+async function runPreToolUseHooks(
+  hooks: HookCallbackMatcher[] | undefined,
+  toolName: string,
+  toolInput: Record<string, unknown>,
+  toolId: string
+): Promise<{ blocked: boolean; reason?: string }> {
+  if (!hooks) return { blocked: false };
+
+  for (const hookMatcher of hooks) {
+    // Check if matcher matches the tool (no matcher = match all)
+    if (hookMatcher.matcher && hookMatcher.matcher !== toolName) {
+      continue;
+    }
+
+    for (const hookFn of hookMatcher.hooks) {
+      const hookInput = { tool_name: toolName, tool_input: toolInput };
+      const result = await hookFn(hookInput, toolId, {});
+
+      if (!result.continue) {
+        const reason = result.hookSpecificOutput?.permissionDecisionReason || 'Blocked by hook';
+        return { blocked: true, reason };
+      }
+    }
+  }
+
+  return { blocked: false };
+}
+
+// Mock query function that returns an async generator
+function isAsyncIterable(value: any): value is AsyncIterable<any> {
+  return !!value && typeof value[Symbol.asyncIterator] === 'function';
+}
+
+function getMessagesForPrompt(): any[] {
+  const baseMessages = customMockMessages || mockMessages;
+  // Older fixtures used the pre-1.0 shorthand `{ type: 'result' }`.
+  // Normalize them at the SDK boundary so production code can enforce the
+  // real 1.0 contract and require an explicit successful result subtype.
+  const messages = baseMessages.map((message) => (
+    message.type === 'result' && message.subtype === undefined
+      ? { ...message, subtype: 'success' }
+      : message
+  ));
+  if (appendResultMessage && !messages.some((msg) => msg.type === 'result')) {
+    messages.push({ type: 'result', subtype: 'success' });
+  }
+  return messages;
+}
+
+async function* emitMessages(messages: any[], options: Options) {
+  let chunksEmitted = 0;
+
+  for (const msg of messages) {
+    // Check if we should throw (crash simulation)
+    if (shouldThrowOnIteration && chunksEmitted >= throwAfterChunks) {
+      // Reset for next query (allows recovery to work)
+      shouldThrowOnIteration = false;
+      throw new Error('Simulated consumer crash');
+    }
+
+    // Check for tool_use in assistant messages and run hooks
+    if (msg.type === 'assistant' && msg.message?.content) {
+      let wasBlocked = false;
+      for (const block of msg.message.content) {
+        if (block.type === 'tool_use') {
+          const hookResult = await runPreToolUseHooks(
+            options.hooks?.PreToolUse,
+            block.name,
+            block.input,
+            block.id || `tool-${Date.now()}`
+          );
+
+          if (hookResult.blocked) {
+            // Yield the assistant message first (with tool_use)
+            yield msg;
+            chunksEmitted++;
+            // Then yield a blocked indicator as a user message with error
+            yield {
+              type: 'user',
+              parent_tool_use_id: block.id,
+              tool_use_result: `BLOCKED: ${hookResult.reason}`,
+              message: { content: [] },
+              _blocked: true,
+              _blockReason: hookResult.reason,
+            };
+            chunksEmitted++;
+            wasBlocked = true;
+            break; // Exit inner loop since we already handled this message
+          }
+        }
+      }
+      // If the message was blocked, don't yield it again
+      if (wasBlocked) {
+        continue;
+      }
+    }
+    yield msg;
+    chunksEmitted++;
+  }
+}
+
+export function query({ prompt, options }: { prompt: any; options: Options }): AsyncGenerator<any> & { interrupt: () => Promise<void> } {
+  lastOptions = options;
+  queryCallCount++;
+
+  const generator = async function* () {
+    if (isAsyncIterable(prompt)) {
+      for await (const _ of prompt) {
+        void _; // Consume async iterable input
+        const messages = getMessagesForPrompt();
+        yield* emitMessages(messages, options);
+      }
+      return;
+    }
+
+    const messages = getMessagesForPrompt();
+    yield* emitMessages(messages, options);
+  };
+
+  const gen = generator() as AsyncGenerator<any> & {
+    interrupt: jest.Mock;
+    setModel: jest.Mock;
+    setMaxThinkingTokens: jest.Mock;
+    setPermissionMode: jest.Mock;
+    applyFlagSettings: jest.Mock;
+    setMcpServers: jest.Mock;
+    supportedCommands: jest.Mock;
+    getAvailableModels: jest.Mock;
+    initializationResult: jest.Mock;
+    close: jest.Mock;
+  };
+  gen.interrupt = jest.fn().mockResolvedValue(undefined);
+  // Dynamic update methods for persistent queries
+  gen.setModel = jest.fn().mockResolvedValue(undefined);
+  gen.setMaxThinkingTokens = jest.fn().mockResolvedValue(undefined);
+  gen.setPermissionMode = jest.fn().mockResolvedValue(undefined);
+  gen.applyFlagSettings = jest.fn().mockResolvedValue(undefined);
+  gen.setMcpServers = jest.fn().mockResolvedValue({ added: [], removed: [], errors: {} });
+  gen.supportedCommands = jest.fn().mockResolvedValue(mockSupportedCommands);
+  gen.getAvailableModels = jest.fn().mockImplementation(async () => mockAvailableModels);
+  gen.initializationResult = jest.fn().mockImplementation(async () => {
+    const init = getMessagesForPrompt().find(
+      (message) => message.type === 'system' && message.subtype === 'init',
+    );
+    if (init) {
+      return {
+        ...init,
+        models: mockInitializationModels ?? mockAvailableModels,
+      };
+    }
+
+    await new Promise<void>((_resolve, reject) => {
+      const signal = options.abortController?.signal;
+      if (!signal || signal.aborted) {
+        reject(new Error('Query initialization aborted'));
+        return;
+      }
+      signal.addEventListener(
+        'abort',
+        () => reject(new Error('Query initialization aborted')),
+        { once: true },
+      );
+    });
+  });
+  gen.close = jest.fn().mockImplementation(async () => {
+    await gen.return(undefined);
+  });
+  lastResponse = gen;
+
+  return gen;
+}

@@ -1,0 +1,272 @@
+{
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "add": "Hinzufügen",
+    "remove": "Entfernen",
+    "clear": "Löschen",
+    "clearAll": "Alle löschen",
+    "loading": "Lädt",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "warning": "Warnung",
+    "confirm": "Bestätigen",
+    "settings": "Einstellungen",
+    "advanced": "Erweitert",
+    "enabled": "Aktiviert",
+    "disabled": "Deaktiviert",
+    "platform": "Plattform",
+    "refresh": "Aktualisieren",
+    "rewind": "Zurückspulen"
+  },
+  "commands": {
+    "openView": "Chat-Ansicht öffnen",
+    "inlineEdit": "Inline-Bearbeitung",
+    "inlineEditUnavailable": "Inline-Bearbeitung nicht möglich: Kein Zugriff auf die aktive Markdown-Ansicht.",
+    "inserted": "Eingefügt",
+    "editApplied": "Bearbeitung angewendet",
+    "newTab": "Neuer Tab",
+    "newSession": "Neue Sitzung (im aktuellen Tab)",
+    "closeCurrentTab": "Aktuellen Tab schließen"
+  },
+  "chat": {
+    "rewind": {
+      "confirmMessage": "Zu diesem Punkt zurückspulen? Dateiänderungen nach dieser Nachricht werden rückgängig gemacht. Das Zurückspulen betrifft keine manuell oder über Bash bearbeiteten Dateien.",
+      "confirmMessageConversationOnly": "Konversation zu diesem Punkt zurückspulen? Dateiänderungen bleiben erhalten.",
+      "confirmButton": "Zurückspulen",
+      "ariaLabel": "Hierher zurückspulen",
+      "menuConversationOnly": "Nur Konversation zurückspulen",
+      "menuCodeAndConversation": "Code + Konversation zurückspulen",
+      "notice": "Zurückgespult: {count} Datei(en) wiederhergestellt",
+      "noticeConversationOnly": "Konversation zurückgespult; Dateiänderungen bleiben erhalten",
+      "noticeSaveFailed": "Zurückgespult: {count} Datei(en) wiederhergestellt, aber Status konnte nicht gespeichert werden: {error}",
+      "noticeConversationOnlySaveFailed": "Konversation zurückgespult, aber Status konnte nicht gespeichert werden: {error}",
+      "failed": "Zurückspulen fehlgeschlagen: {error}",
+      "cannot": "Zurückspulen nicht möglich: {error}",
+      "unavailableStreaming": "Zurückspulen während des Streamings nicht möglich",
+      "unavailableNoUuid": "Zurückspulen nicht möglich: Nachrichtenkennungen fehlen"
+    },
+    "fork": {
+      "ariaLabel": "Konversation verzweigen",
+      "chooseTarget": "Konversation verzweigen",
+      "targetNewTab": "Neuer Tab",
+      "targetCurrentTab": "Aktueller Tab",
+      "maxTabsReached": "Verzweigung nicht möglich: maximal {count} Tabs erreicht",
+      "notice": "In neuem Tab verzweigt",
+      "noticeCurrentTab": "Im aktuellen Tab verzweigt",
+      "failed": "Verzweigung fehlgeschlagen: {error}",
+      "unavailableStreaming": "Verzweigung während des Streamings nicht möglich",
+      "unavailableNoUuid": "Verzweigung nicht möglich: Nachrichtenkennungen fehlen",
+      "unavailableNoResponse": "Verzweigung nicht möglich: keine Antwort zum Verzweigen vorhanden",
+      "errorMessageNotFound": "Nachricht nicht gefunden",
+      "errorNoSession": "Keine Sitzungs-ID verfügbar",
+      "errorNoActiveTab": "Kein aktiver Tab",
+      "commandNoMessages": "Verzweigung nicht möglich: keine Nachrichten in der Konversation",
+      "commandNoAssistantUuid": "Verzweigung nicht möglich: keine Assistentenantwort mit Kennungen"
+    },
+    "bangBash": {
+      "placeholder": "> Einen Bash-Befehl ausführen...",
+      "commandPanel": "Befehlspanel",
+      "copyAriaLabel": "Neueste Befehlsausgabe kopieren",
+      "clearAriaLabel": "Bash-Ausgabe löschen",
+      "commandLabel": "{command}",
+      "statusLabel": "Status des Befehls: {status}",
+      "collapseOutput": "Befehlsausgabe einklappen",
+      "expandOutput": "Befehlsausgabe ausklappen",
+      "running": "Wird ausgeführt...",
+      "copyFailed": "Kopieren in die Zwischenablage fehlgeschlagen"
+    },
+    "view": {
+      "openQoderian": "Qoderian öffnen",
+      "moveBlockedStreaming": "Warte, bis die aktuelle Antwort abgeschlossen ist, bevor du die Qoderian-Ansicht verschiebst.",
+      "moveFailed": "Die Qoderian-Ansicht konnte am gewählten Ort nicht erstellt werden."
+    },
+    "conversation": {
+      "emptyPreview": "Neue Unterhaltung",
+      "deleteFailed": "Unterhaltung konnte nicht gelöscht werden: {error}"
+    }
+  },
+  "settings": {
+    "title": "Qoderian Einstellungen",
+    "display": "Anzeige",
+    "conversations": "Unterhaltungen",
+    "content": "Inhalte",
+    "input": "Eingabe",
+    "setup": "Einrichtung",
+    "experimental": "Experimentell",
+    "userName": {
+      "name": "Wie soll Qoderian dich nennen?",
+      "desc": "Dein Name für personalisierte Begrüßungen (leer lassen für allgemeine Begrüßungen)"
+    },
+    "excludedTags": {
+      "name": "Ausgeschlossene Tags",
+      "desc": "Notizen mit diesen Tags werden nicht automatisch als Kontext geladen (einer pro Zeile, ohne #)"
+    },
+    "mediaFolder": {
+      "name": "Medienordner",
+      "desc": "Ordner mit Anhängen/Bildern. Wenn Notizen ![[image.jpg]] verwenden, sucht Qoder hier. Leer lassen für Vault-Stammverzeichnis."
+    },
+    "systemPrompt": {
+      "name": "Benutzerdefinierter System-Prompt",
+      "desc": "Zusätzliche Anweisungen, die an den Standard-System-Prompt angehängt werden"
+    },
+    "autoTitle": {
+      "name": "Konversationstitel automatisch generieren",
+      "desc": "Generiert automatisch Konversationstitel nach der ersten Nutzernachricht."
+    },
+    "titleModel": {
+      "name": "Titel-Generierungsmodell",
+      "desc": "Modell zur automatischen Generierung von Konversationstiteln."
+    },
+    "navMappings": {
+      "name": "Vim-Style Navigationszuordnungen",
+      "desc": "Eine Zuordnung pro Zeile. Format: \"map <Taste> <Aktion>\" (Aktionen: scrollUp, scrollDown, focusInput)."
+    },
+    "requireCommandOrControlEnterToSend": {
+      "name": "Command/Ctrl+Enter zum Senden erfordern",
+      "desc": "Wenn aktiviert, fügt Enter einen Zeilenumbruch ein. Command+Enter sendet unter macOS; Ctrl+Enter sendet unter Windows und Linux."
+    },
+    "slashCommands": {
+      "name": "Befehle und Fähigkeiten",
+      "command": "Befehl",
+      "commands": "Befehle",
+      "commandsDesc": "Wiederverwendbare Prompts in .qoder/commands/*.md, aufgerufen mit /Name.",
+      "skill": "Fähigkeit",
+      "skills": "Fähigkeiten",
+      "skillsDesc": "Agent-Fähigkeiten in .qoder/skills/<Name>/SKILL.md. Ein Ordner kann auch Skripte, Referenzen und Vorlagen enthalten.",
+      "learnMore": "Mehr erfahren",
+      "noCommands": "Keine Projektbefehle konfiguriert. Klicke auf +, um einen zu erstellen.",
+      "noSkills": "Keine Projektfähigkeiten konfiguriert. Klicke auf +, um eine zu erstellen.",
+      "unavailable": "Der Qoder CLI-Befehlskatalog ist nicht verfügbar.",
+      "deleteConfirm": "{type} „{name}“ löschen?",
+      "saveFailed": "Speichern fehlgeschlagen: {message}",
+      "deleteFailed": "Löschen fehlgeschlagen: {message}",
+      "created": "{type} „{name}“ erstellt",
+      "updated": "{type} „{name}“ aktualisiert",
+      "deleted": "{type} „{name}“ gelöscht",
+      "duplicateName": "Ein Befehl oder eine Fähigkeit namens „{name}“ existiert bereits",
+      "descriptionRequired": "Eine Beschreibung ist erforderlich",
+      "instructionsRequired": "Anweisungen sind erforderlich",
+      "modal": {
+        "titleAdd": "{type} hinzufügen",
+        "titleEdit": "{type} bearbeiten",
+        "name": "Name",
+        "nameDesc": "Nur Kleinbuchstaben, Zahlen und Bindestriche",
+        "description": "Beschreibung",
+        "descriptionDesc": "Kurz beschreiben, wann Qoder dies verwenden soll",
+        "instructions": "Anweisungen",
+        "commandInstructionsDesc": "Prompt beim Aufruf des Befehls. $ARGUMENTS steht für die Benutzereingabe.",
+        "skillInstructionsDesc": "Anweisungen, denen Qoder bei Aktivierung dieser Fähigkeit folgt.",
+        "commandInstructionsPlaceholder": "Prüfe den folgenden Code:\n\n$ARGUMENTS",
+        "skillInstructionsPlaceholder": "Beschreibe Ablauf, Einschränkungen und erwartete Ausgabe dieser Fähigkeit."
+      }
+    },
+    "mcpServers": {
+      "name": "MCP-Server",
+      "desc": "Verwalte Vault-MCP-Serverkonfigurationen in .qoder/mcp.json. Server mit Kontext-Speichermodus benötigen @mention zur Aktivierung."
+    },
+    "plugins": {
+      "name": "Qoder CLI-Plugins",
+      "desc": "Verwalte Qoder CLI Plugins aus ~/.qoder/plugins. Aktivierte Plugins werden pro Vault in .qoder/settings.json gespeichert."
+    },
+    "subagents": {
+      "name": "Sub-Agenten",
+      "desc": "Verwalte Vault-Sub-Agenten in .qoder/agents/. Jede Markdown-Datei definiert einen benutzerdefinierten Agenten.",
+      "noAgents": "Keine Sub-Agenten konfiguriert. Klicke auf +, um einen zu erstellen.",
+      "deleteConfirm": "Sub-Agent \"{name}\" löschen?",
+      "saveFailed": "Sub-Agent konnte nicht gespeichert werden: {message}",
+      "refreshFailed": "Sub-Agenten konnten nicht aktualisiert werden: {message}",
+      "deleteFailed": "Sub-Agent konnte nicht gelöscht werden: {message}",
+      "renameCleanupFailed": "Warnung: Alte Datei für \"{name}\" konnte nicht entfernt werden",
+      "created": "Sub-Agent \"{name}\" erstellt",
+      "updated": "Sub-Agent \"{name}\" aktualisiert",
+      "deleted": "Sub-Agent \"{name}\" gelöscht",
+      "duplicateName": "Ein Agent mit dem Namen \"{name}\" existiert bereits",
+      "descriptionRequired": "Beschreibung ist erforderlich",
+      "promptRequired": "System-Prompt ist erforderlich",
+      "modal": {
+        "titleEdit": "Sub-Agent bearbeiten",
+        "titleAdd": "Sub-Agent hinzufügen",
+        "name": "Name",
+        "nameDesc": "Nur Kleinbuchstaben, Zahlen und Bindestriche",
+        "namePlaceholder": "code-reviewer",
+        "description": "Beschreibung",
+        "descriptionDesc": "Kurzbeschreibung dieses Agenten",
+        "descriptionPlaceholder": "Prüft Code auf Fehler und Stil",
+        "advancedOptions": "Erweiterte Optionen",
+        "model": "Modell",
+        "modelDesc": "Modellüberschreibung für diesen Agenten",
+        "tools": "Tools",
+        "toolsDesc": "Kommagetrennte Liste zulässiger Tools (leer = alle)",
+        "disallowedTools": "Nicht erlaubte Tools",
+        "disallowedToolsDesc": "Kommagetrennte Liste der zu verbietenden Tools",
+        "skills": "Fähigkeiten",
+        "skillsDesc": "Kommagetrennte Liste von Fähigkeiten",
+        "prompt": "System-Prompt",
+        "promptDesc": "Anweisungen für den Agenten",
+        "promptPlaceholder": "Du bist ein Code-Reviewer. Analysiere den angegebenen Code auf..."
+      }
+    },
+    "safety": "Sicherheit",
+    "loadUserSettings": {
+      "name": "Benutzer-Qoder-Einstellungen laden",
+      "desc": "Lädt ~/.qoder/settings.json. Wenn aktiviert, können Benutzer-Qoder-CLI-Berechtigungsregeln den Sicherheitsmodus umgehen."
+    },
+    "qoderSafeMode": {
+      "name": "Berechtigungen im sicheren Modus",
+      "desc": "Berechtigungsverhalten bei aktiviertem sicheren Modus.",
+      "modes": {
+        "acceptEdits": "Sichere Änderungen automatisch zulassen",
+        "auto": "Automatisch entscheiden (ohne Rückfragen)",
+        "default": "Bei sensiblen Aktionen nachfragen"
+      }
+    },
+    "enableBangBash": {
+      "name": "Bash-Modus (!) aktivieren",
+      "desc": "Gib ! in ein leeres Eingabefeld ein, um den Bash-Modus zu starten. Führt Befehle direkt über Node.js child_process aus. Die Ansicht muss neu geöffnet werden.",
+      "validation": {
+        "noNode": "Node.js wurde auf PATH nicht gefunden. Installiere Node.js oder prüfe deine PATH-Konfiguration."
+      }
+    },
+    "maxTabs": {
+      "name": "Maximale Chat-Tabs",
+      "desc": "Maximale Anzahl gleichzeitiger Chat-Tabs (3-10). Jeder Tab verwendet eine separate Qoder-Sitzung.",
+      "warning": "Mehr als 5 Tabs können Leistung und Speichernutzung beeinträchtigen."
+    },
+    "enableAutoScroll": {
+      "name": "Automatisches Scrollen während Streaming",
+      "desc": "Automatisch nach unten scrollen, während Qoder Antworten streamt. Deaktivieren, um oben zu bleiben und von Anfang an zu lesen."
+    },
+    "deferMathRenderingDuringStreaming": {
+      "name": "Mathe-Rendering während Streaming aufschieben",
+      "desc": "LaTeX während des Streamings roh anzeigen und Mathematik einmal rendern, wenn der Textblock abgeschlossen ist."
+    },
+    "expandFileEditsByDefault": {
+      "name": "Dateibearbeitungen standardmäßig ausklappen",
+      "desc": "Write- und Edit-Diffs beim ersten Erscheinen ausgeklappt anzeigen."
+    },
+    "chatViewPlacement": {
+      "name": "Qoderian öffnen in",
+      "desc": "Wählen Sie, wo das Chat-Panel beim Erstellen geöffnet wird",
+      "rightSidebar": "Rechte Seitenleiste",
+      "leftSidebar": "Linke Seitenleiste",
+      "mainTab": "Haupteditor-Tab"
+    },
+    "cliPath": {
+      "name": "Qoder CLI-Pfad",
+      "desc": "Benutzerdefinierter Pfad zum Qoder CLI. Leer lassen für automatische Erkennung.",
+      "descWindows": "Verwenden Sie beim nativen Installer qodercli.exe. Bei npm/pnpm/yarn verwenden Sie den cli.js-Pfad von @qoder-ai/qodercli (nicht qodercli.cmd).",
+      "descUnix": "Fügen Sie die Ausgabe von \"which qoder\" ein — funktioniert sowohl für native als auch npm/pnpm/yarn-Installationen.",
+      "validation": {
+        "notExist": "Pfad existiert nicht",
+        "isDirectory": "Pfad ist ein Verzeichnis, keine Datei"
+      }
+    },
+    "language": {
+      "name": "Sprache",
+      "desc": "Anzeigesprache der Plugin-Oberfläche ändern"
+    }
+  }
+}

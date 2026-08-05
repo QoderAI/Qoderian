@@ -1,0 +1,278 @@
+/* Inline Edit (CM6 decorations) */
+
+/* Selection highlight (shared by inline edit and chat) */
+.cm-line .qoderian-selection-highlight,
+.qoderian-selection-highlight.qoderian-selection-highlight {
+  background: var(--text-selection);
+  border-radius: 2px;
+  padding: 3px 0;
+  margin: -3px 0;
+}
+
+/* Preview mode selection highlight via CSS Custom Highlight API */
+::highlight(qoderian-selection) {
+  background: var(--text-selection);
+}
+
+/* CM6 widget container - ensure transparent background */
+.markdown-source-view.mod-cm6 .cm-widgetBuffer,
+.markdown-source-view.mod-cm6 .cm-line.qoderian-inline-input-line {
+  background: transparent;
+}
+
+/* Input container - fully transparent */
+.qoderian-inline-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 2px 0;
+  background: transparent;
+}
+
+/* Input wrapper - contains input and spinner */
+.qoderian-inline-input-wrap {
+  flex: 1;
+  position: relative;
+  background: transparent;
+  overflow: visible;
+}
+
+/* Input - fully transparent */
+.qoderian-inline-input-wrap input.qoderian-inline-input {
+  width: 100%;
+  padding: 4px 8px;
+  padding-inline-end: 30px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--background-modifier-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-normal);
+  font-family: var(--font-interface, -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: var(--font-ui-small, 13px);
+}
+
+.qoderian-inline-input-wrap input.qoderian-inline-input:focus,
+.qoderian-inline-input-wrap input.qoderian-inline-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.qoderian-inline-input-wrap input.qoderian-inline-input::placeholder {
+  color: var(--text-faint);
+}
+
+.qoderian-inline-input-wrap input.qoderian-inline-input:disabled {
+  opacity: 0.6;
+}
+
+/* Spinner - inside input box on end side */
+.qoderian-inline-spinner {
+  position: absolute;
+  inset-inline-end: 8px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border: 2px solid var(--background-modifier-border);
+  border-top-color: var(--qoderian-brand);
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: qoderian-spin 0.8s linear infinite;
+}
+
+/* Agent reply - shown when agent asks clarifying question */
+.qoderian-inline-agent-reply {
+  padding: 8px;
+  margin-bottom: 4px;
+  background: transparent;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--background-modifier-border);
+  border-radius: 8px;
+  font-family: var(--font-interface, -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: var(--font-ui-small, 13px);
+  line-height: 1.4;
+  color: var(--text-muted);
+  overflow-x: auto;
+  word-wrap: break-word;
+}
+
+.qoderian-inline-agent-reply > :first-child,
+.qoderian-inline-diff-preview-body > :first-child {
+  margin-top: 0;
+}
+
+.qoderian-inline-agent-reply > :last-child,
+.qoderian-inline-diff-preview-body > :last-child {
+  margin-bottom: 0;
+}
+
+.qoderian-inline-diff-preview {
+  margin: 4px 0 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  overflow: hidden;
+}
+
+.qoderian-inline-diff-preview-body {
+  font-family: var(--font-text);
+  font-size: var(--font-text-size);
+  line-height: var(--line-height-normal);
+  overflow-x: auto;
+  --p-spacing: 0.4rem;
+  --heading-spacing: 0.5rem;
+}
+
+.qoderian-inline-diff-preview img {
+  max-width: 100%;
+  height: auto;
+}
+
+.qoderian-inline-diff-preview .markdown-rendered p {
+  margin: 0 0 6px;
+}
+
+.qoderian-inline-diff-preview .markdown-rendered p:last-child {
+  margin-bottom: 0;
+}
+
+.qoderian-inline-diff-preview .markdown-rendered h1,
+.qoderian-inline-diff-preview .markdown-rendered h2,
+.qoderian-inline-diff-preview .markdown-rendered h3,
+.qoderian-inline-diff-preview .markdown-rendered h4,
+.qoderian-inline-diff-preview .markdown-rendered h5,
+.qoderian-inline-diff-preview .markdown-rendered h6 {
+  margin: 0 0 6px;
+  line-height: 1.25;
+}
+
+.qoderian-inline-diff-preview .markdown-rendered h1:first-child,
+.qoderian-inline-diff-preview .markdown-rendered h2:first-child,
+.qoderian-inline-diff-preview .markdown-rendered h3:first-child,
+.qoderian-inline-diff-preview .markdown-rendered h4:first-child,
+.qoderian-inline-diff-preview .markdown-rendered h5:first-child,
+.qoderian-inline-diff-preview .markdown-rendered h6:first-child {
+  margin-top: 0;
+}
+
+.qoderian-inline-diff-preview .markdown-rendered ul,
+.qoderian-inline-diff-preview .markdown-rendered ol {
+  margin: 2px 0 8px;
+  padding-inline-start: 1.5em;
+}
+
+.qoderian-inline-diff-preview .markdown-rendered li {
+  margin: 2px 0;
+}
+
+.qoderian-inline-diff-preview .markdown-rendered li > p {
+  margin: 0;
+}
+
+.qoderian-inline-diff-preview .markdown-rendered pre,
+.qoderian-inline-diff-preview .markdown-rendered table,
+.qoderian-inline-diff-preview .markdown-rendered blockquote {
+  margin: 2px 0 8px;
+}
+
+.qoderian-inline-diff-preview .markdown-rendered .el-h1,
+.qoderian-inline-diff-preview .markdown-rendered .el-h2,
+.qoderian-inline-diff-preview .markdown-rendered .el-h3,
+.qoderian-inline-diff-preview .markdown-rendered .el-h4,
+.qoderian-inline-diff-preview .markdown-rendered .el-h5,
+.qoderian-inline-diff-preview .markdown-rendered .el-h6,
+.qoderian-inline-diff-preview .markdown-rendered .el-p,
+.qoderian-inline-diff-preview .markdown-rendered .el-ul,
+.qoderian-inline-diff-preview .markdown-rendered .el-ol,
+.qoderian-inline-diff-preview .markdown-rendered .el-pre,
+.qoderian-inline-diff-preview .markdown-rendered .el-table,
+.qoderian-inline-diff-preview .markdown-rendered .el-blockquote {
+  margin-block-start: 0;
+  margin-block-end: 6px;
+}
+
+.qoderian-inline-markdown-fallback {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.qoderian-diff-block {
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+.qoderian-diff-block + .qoderian-diff-block {
+  margin-top: 2px;
+}
+
+.qoderian-diff-block > :first-child {
+  margin-top: 0;
+}
+
+.qoderian-diff-block > :last-child {
+  margin-bottom: 0;
+}
+
+.qoderian-diff-del:not(.qoderian-diff-block) {
+  background: rgba(255, 80, 80, 0.2);
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.qoderian-diff-ins:not(.qoderian-diff-block) {
+  background: rgba(80, 200, 80, 0.2);
+}
+
+.qoderian-diff-block.qoderian-diff-del {
+  background: rgba(255, 80, 80, 0.14);
+  color: var(--text-muted);
+}
+
+.qoderian-diff-block.qoderian-diff-ins {
+  background: rgba(80, 200, 80, 0.14);
+}
+
+.qoderian-inline-preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.qoderian-inline-preview-actions button.qoderian-inline-preview-action {
+  min-height: 28px;
+  padding: 4px 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-secondary);
+  box-shadow: none;
+  color: var(--text-normal);
+  font-family: var(--font-interface, -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: var(--font-ui-small, 13px);
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.qoderian-inline-preview-actions button.qoderian-inline-preview-action:hover {
+  background: var(--background-modifier-hover);
+}
+
+.qoderian-inline-preview-actions button.qoderian-inline-preview-action.reject {
+  color: var(--color-red);
+}
+
+.qoderian-inline-preview-actions button.qoderian-inline-preview-action.accept {
+  border-color: var(--interactive-accent);
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.qoderian-inline-preview-actions button.qoderian-inline-preview-action.accept:hover {
+  background: var(--interactive-accent-hover);
+}

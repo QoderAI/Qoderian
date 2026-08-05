@@ -1,0 +1,9 @@
+{
+  "id": "qoderian-dev-reloader",
+  "name": "Qoderian dev reloader",
+  "version": "1.0.0",
+  "minAppVersion": "1.7.2",
+  "description": "Development-only helper that reloads Qoderian whenever a fresh build is copied into the vault.",
+  "author": "Qoder",
+  "isDesktopOnly": true
+}

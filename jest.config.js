@@ -1,0 +1,50 @@
+/** @type {import('ts-jest').JestConfigWithTsJest} */
+const baseConfig = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.jest.json' }],
+  },
+  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup-window.ts'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@test/(.*)$': '<rootDir>/tests/$1',
+    '^@qoder-ai/qoder-agent-sdk$': '<rootDir>/tests/__mocks__/qoder-agent-sdk.ts',
+    '^obsidian$': '<rootDir>/tests/__mocks__/obsidian.ts',
+    '\\.svg$': '<rootDir>/tests/__mocks__/svg.ts',
+    '^@modelcontextprotocol/sdk/(.*)$': '<rootDir>/node_modules/@modelcontextprotocol/sdk/dist/cjs/$1',
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@qoder-ai/qoder-agent-sdk)/)',
+  ],
+};
+
+module.exports = {
+  projects: [
+    {
+      ...baseConfig,
+      displayName: 'unit',
+      testMatch: ['<rootDir>/tests/unit/**/*.test.ts'],
+    },
+    {
+      ...baseConfig,
+      displayName: 'integration',
+      testMatch: ['<rootDir>/tests/integration/**/*.test.ts'],
+    },
+  ],
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.d.ts',
+  ],
+  coverageDirectory: 'coverage',
+  coverageThreshold: {
+    global: {
+      branches: 45,
+      functions: 55,
+      lines: 55,
+      statements: 55,
+    },
+  },
+};

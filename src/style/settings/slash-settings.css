@@ -1,0 +1,41 @@
+/* Command and skill settings — shared row/modal rules live in base.css. */
+
+.qoderian-slash-commands-container {
+  display: grid;
+  gap: 20px;
+}
+
+.qoderian-command-section {
+  padding: 16px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-primary-alt);
+}
+
+.qoderian-command-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.qoderian-command-section-copy {
+  min-width: 0;
+}
+
+.qoderian-command-section-copy h4 {
+  margin: 0 0 4px;
+  font-size: var(--font-ui-medium);
+}
+
+.qoderian-command-section-copy p {
+  margin: 0;
+}
+
+.qoderian-command-section .qoderian-sp-empty-state {
+  margin-top: 16px;
+}
+
+.qoderian-command-section .qoderian-sp-list {
+  margin-top: 16px;
+}

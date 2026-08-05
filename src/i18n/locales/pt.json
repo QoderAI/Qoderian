@@ -1,0 +1,272 @@
+{
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "add": "Adicionar",
+    "remove": "Remover",
+    "clear": "Limpar",
+    "clearAll": "Limpar tudo",
+    "loading": "Carregando",
+    "error": "Erro",
+    "success": "Sucesso",
+    "warning": "Aviso",
+    "confirm": "Confirmar",
+    "settings": "Configurações",
+    "advanced": "Avançado",
+    "enabled": "Ativado",
+    "disabled": "Desativado",
+    "platform": "Plataforma",
+    "refresh": "Atualizar",
+    "rewind": "Retroceder"
+  },
+  "commands": {
+    "openView": "Abrir visualização de chat",
+    "inlineEdit": "Edição inline",
+    "inlineEditUnavailable": "Edição inline indisponível: não foi possível acessar a visualização Markdown ativa.",
+    "inserted": "Inserido",
+    "editApplied": "Edição aplicada",
+    "newTab": "Nova aba",
+    "newSession": "Nova sessão (na aba atual)",
+    "closeCurrentTab": "Fechar aba atual"
+  },
+  "chat": {
+    "rewind": {
+      "confirmMessage": "Retroceder até este ponto? As alterações de arquivos após esta mensagem serão revertidas. O retrocesso não afeta arquivos editados manualmente ou via bash.",
+      "confirmMessageConversationOnly": "Retroceder a conversa até este ponto? As alterações de arquivos serão mantidas.",
+      "confirmButton": "Retroceder",
+      "ariaLabel": "Retroceder até aqui",
+      "menuConversationOnly": "Retroceder somente conversa",
+      "menuCodeAndConversation": "Retroceder código + conversa",
+      "notice": "Retrocedido: {count} arquivo(s) revertido(s)",
+      "noticeConversationOnly": "Conversa retrocedida; alterações de arquivos mantidas",
+      "noticeSaveFailed": "Retrocedido: {count} arquivo(s) revertido(s), mas não foi possível salvar o estado: {error}",
+      "noticeConversationOnlySaveFailed": "Conversa retrocedida, mas não foi possível salvar o estado: {error}",
+      "failed": "Falha ao retroceder: {error}",
+      "cannot": "Não é possível retroceder: {error}",
+      "unavailableStreaming": "Não é possível retroceder durante a transmissão",
+      "unavailableNoUuid": "Não é possível retroceder: identificadores de mensagem ausentes"
+    },
+    "fork": {
+      "ariaLabel": "Bifurcar conversa",
+      "chooseTarget": "Bifurcar conversa",
+      "targetNewTab": "Nova aba",
+      "targetCurrentTab": "Aba atual",
+      "maxTabsReached": "Não é possível bifurcar: máximo de {count} abas atingido",
+      "notice": "Bifurcado para nova aba",
+      "noticeCurrentTab": "Bifurcado na aba atual",
+      "failed": "Falha ao bifurcar: {error}",
+      "unavailableStreaming": "Não é possível bifurcar durante a transmissão",
+      "unavailableNoUuid": "Não é possível bifurcar: identificadores de mensagem ausentes",
+      "unavailableNoResponse": "Não é possível bifurcar: nenhuma resposta para bifurcar",
+      "errorMessageNotFound": "Mensagem não encontrada",
+      "errorNoSession": "Nenhum ID de sessão disponível",
+      "errorNoActiveTab": "Nenhuma aba ativa",
+      "commandNoMessages": "Não é possível bifurcar: não há mensagens na conversa",
+      "commandNoAssistantUuid": "Não é possível bifurcar: não há resposta do assistente com identificadores"
+    },
+    "bangBash": {
+      "placeholder": "> Executar um comando bash...",
+      "commandPanel": "Painel de comandos",
+      "copyAriaLabel": "Copiar a saída do comando mais recente",
+      "clearAriaLabel": "Limpar a saída do bash",
+      "commandLabel": "{command}",
+      "statusLabel": "Estado: {status}",
+      "collapseOutput": "Recolher a saída do comando",
+      "expandOutput": "Expandir a saída do comando",
+      "running": "Executando...",
+      "copyFailed": "Falha ao copiar para a área de transferência"
+    },
+    "view": {
+      "openQoderian": "Abrir Qoderian",
+      "moveBlockedStreaming": "Aguarde a resposta atual terminar antes de mover a visualização do Qoderian.",
+      "moveFailed": "Não foi possível criar a visualização do Qoderian no local selecionado."
+    },
+    "conversation": {
+      "emptyPreview": "Nova conversa",
+      "deleteFailed": "Falha ao excluir a conversa: {error}"
+    }
+  },
+  "settings": {
+    "title": "Configurações do Qoderian",
+    "display": "Exibição",
+    "conversations": "Conversas",
+    "content": "Conteúdo",
+    "input": "Entrada",
+    "setup": "Configuração",
+    "experimental": "Experimental",
+    "userName": {
+      "name": "Como o Qoderian deve chamá-lo?",
+      "desc": "Seu nome para saudações personalizadas (deixe vazio para saudações genéricas)"
+    },
+    "excludedTags": {
+      "name": "Tags excluídas",
+      "desc": "Notas com estas tags não serão carregadas automaticamente como contexto (uma por linha, sem #)"
+    },
+    "mediaFolder": {
+      "name": "Pasta de mídia",
+      "desc": "Pasta contendo anexos/imagens. Quando notas usam ![[image.jpg]], Qoder procurará aqui. Deixe vazio para a raiz do repositório."
+    },
+    "systemPrompt": {
+      "name": "Prompt de sistema personalizado",
+      "desc": "Instruções adicionais anexadas ao prompt de sistema padrão"
+    },
+    "autoTitle": {
+      "name": "Gerar automaticamente títulos de conversa",
+      "desc": "Gera automaticamente títulos de conversa após a primeira mensagem do usuário."
+    },
+    "titleModel": {
+      "name": "Modelo de geração de título",
+      "desc": "Modelo usado para gerar automaticamente títulos de conversa."
+    },
+    "navMappings": {
+      "name": "Mapeamentos de navegação estilo Vim",
+      "desc": "Um mapeamento por linha. Formato: \"map <tecla> <ação>\" (ações: scrollUp, scrollDown, focusInput)."
+    },
+    "requireCommandOrControlEnterToSend": {
+      "name": "Exigir Command/Ctrl+Enter para enviar",
+      "desc": "Quando ativado, Enter insere uma quebra de linha. Command+Enter envia no macOS; Ctrl+Enter envia no Windows e Linux."
+    },
+    "slashCommands": {
+      "name": "Comandos e habilidades",
+      "command": "Comando",
+      "commands": "Comandos",
+      "commandsDesc": "Prompts reutilizáveis armazenados em .qoder/commands/*.md e chamados com /nome.",
+      "skill": "Habilidade",
+      "skills": "Habilidades",
+      "skillsDesc": "Capacidades do agente em .qoder/skills/<nome>/SKILL.md. A pasta também pode conter scripts, referências e modelos.",
+      "learnMore": "Saiba mais",
+      "noCommands": "Nenhum comando de projeto configurado. Clique em + para criar.",
+      "noSkills": "Nenhuma habilidade de projeto configurada. Clique em + para criar.",
+      "unavailable": "O catálogo de comandos do Qoder CLI está indisponível.",
+      "deleteConfirm": "Excluir {type} \"{name}\"?",
+      "saveFailed": "Falha ao salvar: {message}",
+      "deleteFailed": "Falha ao excluir: {message}",
+      "created": "{type} \"{name}\" criado",
+      "updated": "{type} \"{name}\" atualizado",
+      "deleted": "{type} \"{name}\" excluído",
+      "duplicateName": "Já existe um comando ou habilidade chamado \"{name}\"",
+      "descriptionRequired": "A descrição é obrigatória",
+      "instructionsRequired": "As instruções são obrigatórias",
+      "modal": {
+        "titleAdd": "Adicionar {type}",
+        "titleEdit": "Editar {type}",
+        "name": "Nome",
+        "nameDesc": "Apenas letras minúsculas, números e hífens",
+        "description": "Descrição",
+        "descriptionDesc": "Explique brevemente quando o Qoder deve usar isto",
+        "instructions": "Instruções",
+        "commandInstructionsDesc": "Prompt enviado ao chamar o comando. Use $ARGUMENTS para a entrada do usuário.",
+        "skillInstructionsDesc": "Instruções seguidas pelo Qoder quando esta habilidade é ativada.",
+        "commandInstructionsPlaceholder": "Revise o código a seguir:\n\n$ARGUMENTS",
+        "skillInstructionsPlaceholder": "Explique o fluxo, as restrições e a saída esperada desta habilidade."
+      }
+    },
+    "mcpServers": {
+      "name": "Servidores MCP",
+      "desc": "Gerencie configurações de servidores MCP a nível de vault armazenadas em .qoder/mcp.json. Servidores com modo de salvamento de contexto exigem @mention para ativar."
+    },
+    "plugins": {
+      "name": "Plugins do Qoder CLI",
+      "desc": "Gerencie plugins do Qoder CLI descobertos em ~/.qoder/plugins. Plugins ativados são armazenados por vault em .qoder/settings.json."
+    },
+    "subagents": {
+      "name": "Subagentes",
+      "desc": "Gerencie subagentes a nível de vault armazenados em .qoder/agents/. Cada arquivo Markdown define um agente personalizado.",
+      "noAgents": "Nenhum subagente configurado. Clique em + para criar um.",
+      "deleteConfirm": "Excluir o subagente \"{name}\"?",
+      "saveFailed": "Falha ao salvar o subagente: {message}",
+      "refreshFailed": "Falha ao atualizar subagentes: {message}",
+      "deleteFailed": "Falha ao excluir o subagente: {message}",
+      "renameCleanupFailed": "Aviso: não foi possível remover o arquivo antigo de \"{name}\"",
+      "created": "Subagente \"{name}\" criado",
+      "updated": "Subagente \"{name}\" atualizado",
+      "deleted": "Subagente \"{name}\" excluído",
+      "duplicateName": "Já existe um agente chamado \"{name}\"",
+      "descriptionRequired": "A descrição é obrigatória",
+      "promptRequired": "O prompt do sistema é obrigatório",
+      "modal": {
+        "titleEdit": "Editar subagente",
+        "titleAdd": "Adicionar subagente",
+        "name": "Nome",
+        "nameDesc": "Use apenas letras minúsculas, números e hífens",
+        "namePlaceholder": "code-reviewer",
+        "description": "Descrição",
+        "descriptionDesc": "Breve descrição deste agente",
+        "descriptionPlaceholder": "Revisa código em busca de bugs e estilo",
+        "advancedOptions": "Opções avançadas",
+        "model": "Modelo",
+        "modelDesc": "Substituir o modelo deste agente",
+        "tools": "Ferramentas",
+        "toolsDesc": "Lista de ferramentas permitidas separadas por vírgula (vazio = todas)",
+        "disallowedTools": "Ferramentas não permitidas",
+        "disallowedToolsDesc": "Lista de ferramentas a desativar separadas por vírgula",
+        "skills": "Habilidades",
+        "skillsDesc": "Lista de habilidades separadas por vírgula",
+        "prompt": "Prompt do sistema",
+        "promptDesc": "Instruções para o agente",
+        "promptPlaceholder": "Você é um revisor de código. Analise o código fornecido para..."
+      }
+    },
+    "safety": "Segurança",
+    "loadUserSettings": {
+      "name": "Carregar configurações do usuário Qoder",
+      "desc": "Carrega ~/.qoder/settings.json. Quando habilitado, as regras de permissão do usuário podem ignorar o modo seguro."
+    },
+    "qoderSafeMode": {
+      "name": "Permissões do modo seguro",
+      "desc": "Comportamento das permissões quando o modo seguro está ativo.",
+      "modes": {
+        "acceptEdits": "Aprovar edições seguras",
+        "auto": "Decisão automática (sem avisos)",
+        "default": "Perguntar em ações sensíveis"
+      }
+    },
+    "enableBangBash": {
+      "name": "Ativar modo bash (!)",
+      "desc": "Digite ! com a entrada vazia para entrar no modo bash. Executa comandos diretamente via Node.js child_process. Requer reabrir a visualização.",
+      "validation": {
+        "noNode": "Node.js não encontrado no PATH. Instale o Node.js ou verifique a configuração do PATH."
+      }
+    },
+    "maxTabs": {
+      "name": "Máximo de abas de chat",
+      "desc": "Número máximo de abas de chat simultâneas (3-10). Cada aba usa uma sessão Qoder separada.",
+      "warning": "Mais de 5 abas pode afetar o desempenho e o uso de memória."
+    },
+    "enableAutoScroll": {
+      "name": "Rolagem automática durante streaming",
+      "desc": "Rolar automaticamente para baixo enquanto o Qoder transmite respostas. Desativar para ficar no topo e ler desde o início."
+    },
+    "deferMathRenderingDuringStreaming": {
+      "name": "Adiar renderização matemática durante streaming",
+      "desc": "Mostrar LaTeX bruto enquanto a resposta é transmitida e renderizar a matemática uma vez quando cada bloco de texto terminar."
+    },
+    "expandFileEditsByDefault": {
+      "name": "Expandir edições de arquivo por padrão",
+      "desc": "Mostrar os diffs de Write e Edit expandidos quando aparecerem pela primeira vez."
+    },
+    "chatViewPlacement": {
+      "name": "Abrir Qoderian em",
+      "desc": "Escolha onde o painel de chat abre quando é criado",
+      "rightSidebar": "Barra lateral direita",
+      "leftSidebar": "Barra lateral esquerda",
+      "mainTab": "Aba do editor principal"
+    },
+    "cliPath": {
+      "name": "Caminho CLI Qoder",
+      "desc": "Caminho personalizado para Qoder CLI. Deixe vazio para detecção automática.",
+      "descWindows": "Para o instalador nativo, use qodercli.exe. Para npm/pnpm/yarn, use o caminho cli.js de @qoder-ai/qodercli (não qodercli.cmd).",
+      "descUnix": "Cole a saída de \"which qoder\" — funciona tanto para instalações nativas quanto npm/pnpm/yarn.",
+      "validation": {
+        "notExist": "Caminho não existe",
+        "isDirectory": "Caminho é um diretório, não um arquivo"
+      }
+    },
+    "language": {
+      "name": "Idioma",
+      "desc": "Alterar o idioma de exibição da interface do plugin"
+    }
+  }
+}

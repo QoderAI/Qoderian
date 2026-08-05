@@ -1,0 +1,124 @@
+/* Navigation Sidebar */
+.qoderian-nav-sidebar {
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.qoderian-nav-sidebar.visible {
+    opacity: 0.15;
+    pointer-events: auto;
+}
+
+.qoderian-nav-sidebar.visible:hover {
+    opacity: 1;
+}
+
+.qoderian-nav-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.qoderian-nav-btn:hover {
+    background: var(--background-secondary);
+    color: var(--text-normal);
+    transform: scale(1.05);
+}
+
+.qoderian-nav-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.qoderian-nav-toc-popover {
+    position: absolute;
+    right: 42px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: min(260px, calc(100% - 56px));
+    max-height: min(420px, calc(100% - 32px));
+    z-index: 101;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #ffffff;
+    background-image: linear-gradient(var(--background-primary), var(--background-primary));
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+body.theme-dark .qoderian-nav-toc-popover {
+    background-color: #1e1e1e;
+}
+
+.qoderian-nav-toc-title {
+    padding: 4px 6px 8px;
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
+    font-weight: 600;
+}
+
+.qoderian-nav-toc-list {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 0;
+}
+
+.qoderian-nav-toc-item {
+    box-sizing: border-box;
+    min-height: calc(1.35em + 12px);
+    max-width: 100%;
+    padding: 6px 8px;
+    border-radius: 6px;
+    color: var(--text-normal);
+    font-size: var(--font-ui-small);
+    line-height: 1.35;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.qoderian-nav-toc-item:hover,
+.qoderian-nav-toc-item:focus {
+    background: var(--background-secondary);
+    outline: none;
+}
+
+.qoderian-nav-toc-empty {
+    padding: 8px;
+    color: var(--text-muted);
+    font-size: var(--font-ui-small);
+    line-height: 1.35;
+}
+
+/* Specific button spacing/grouping if needed */
+.qoderian-nav-btn-top {
+    margin-bottom: 4px;
+}
+
+.qoderian-nav-btn-bottom {
+    margin-top: 4px;
+}

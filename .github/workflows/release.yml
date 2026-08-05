@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags:
+      # Bare semver only (no v prefix) — release:check requires the tag to
+      # exactly match the manifest version.
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Audit production dependencies
+        run: npm run audit:prod
+
+      - name: Build
+        run: npm run build
+
+      - name: Validate release artifacts
+        run: npm run release:check
+
+      # Release notes come from the curated CHANGELOG.md section, not from
+      # commit messages. A missing section means [Unreleased] was not renamed
+      # before tagging, so fail instead of shipping empty notes.
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          VERSION="${{ github.ref_name }}"
+          NOTES=$(awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { found=1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md)
+          if [ -z "$(echo "$NOTES" | tr -d '[:space:]')" ]; then
+            echo "No CHANGELOG.md section found for $VERSION." >&2
+            echo "Rename [Unreleased] to [$VERSION] with its date before tagging." >&2
+            exit 1
+          fi
+          echo "notes<<CHANGELOG_EOF" >> "$GITHUB_OUTPUT"
+          echo "$NOTES" >> "$GITHUB_OUTPUT"
+          echo "CHANGELOG_EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          name: Qoderian ${{ github.ref_name }}
+          draft: false
+          body: |
+            ## Installation
+
+            Download `main.js`, `manifest.json`, and `styles.css` below, then place
+            them in your vault's plugin directory:
+            ```
+            <your-vault>/.obsidian/plugins/qoderian/
+            ├── main.js
+            ├── manifest.json
+            └── styles.css
+            ```
+            Then enable the Qoderian plugin in Obsidian settings.
+
+            `LICENSE` and `NOTICE` are attached for reference; the same notice is
+            embedded at the top of `main.js`.
+
+            ## What's Changed
+            ${{ steps.changelog.outputs.notes }}
+
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for the full history.
+          files: |
+            main.js
+            manifest.json
+            styles.css
+            LICENSE
+            NOTICE

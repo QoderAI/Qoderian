@@ -1,0 +1,172 @@
+/* Model selector */
+.qoderian-model-selector {
+  position: relative;
+}
+
+.qoderian-model-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--qoderian-brand);
+  font-size: 12px;
+}
+
+.qoderian-model-btn--warning {
+  color: var(--text-warning);
+}
+
+.qoderian-model-label {
+  font-weight: 500;
+}
+
+.qoderian-model-chevron {
+  display: flex;
+  align-items: center;
+}
+
+.qoderian-model-chevron svg {
+  width: 12px;
+  height: 12px;
+}
+
+.qoderian-model-dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  width: max-content;
+  max-width: min(340px, calc(100vw - 24px));
+  padding: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.qoderian-model-runtime-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 280px;
+  padding: 8px;
+  color: var(--text-muted);
+  white-space: normal;
+}
+
+.qoderian-model-runtime-title {
+  color: var(--text-normal);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.qoderian-model-runtime-message {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.qoderian-model-runtime-command {
+  padding: 3px 6px;
+  border-radius: 3px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-family: var(--font-monospace);
+  font-size: 11px;
+}
+
+.qoderian-model-runtime-retry {
+  align-self: flex-end;
+  padding: 3px 9px;
+  font-size: 11px;
+}
+
+.qoderian-model-selector--open .qoderian-model-dropdown {
+  opacity: 1;
+  visibility: visible;
+}
+
+.qoderian-model-group {
+  padding: 3px 8px;
+  font-size: 8px;
+  font-weight: 600;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+}
+
+.qoderian-model-group:not(:first-child) {
+  margin-top: 4px;
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 6px;
+}
+
+.qoderian-model-icon {
+  flex-shrink: 0;
+}
+
+.qoderian-model-option .qoderian-model-icon {
+  opacity: 0.7;
+}
+
+/* Qoder's dual-green mark stays branded on the active option, while inactive
+   options inherit the muted selector text just like PR #973. */
+.qoderian-model-option:not(.selected) .qoderian-model-icon * {
+  fill: currentColor;
+}
+
+.qoderian-model-option {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-radius: 3px;
+  transition: background 0.1s ease, color 0.1s ease;
+  white-space: nowrap;
+}
+
+.qoderian-model-option:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qoderian-model-option.selected {
+  background: rgba(var(--qoderian-brand-rgb), 0.15);
+  color: var(--qoderian-brand);
+  font-weight: 500;
+}
+
+/* Credit multiplier and promotion badge trail the row like the Qoder IDE. */
+.qoderian-model-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  padding-left: 12px;
+}
+
+.qoderian-model-price {
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.qoderian-model-promo {
+  padding: 0 4px;
+  border-radius: 3px;
+  background: rgba(var(--qoderian-brand-rgb), 0.15);
+  color: var(--qoderian-brand);
+  font-size: 10px;
+}

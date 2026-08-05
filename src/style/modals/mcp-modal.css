@@ -1,0 +1,241 @@
+/* MCP Server Modal */
+.qoderian-mcp-modal .modal-content {
+  width: 480px;
+  max-width: 90vw;
+}
+
+.qoderian-mcp-type-fields {
+  margin: 12px 0;
+  padding: 12px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+}
+
+.qoderian-mcp-type-fields .setting-item {
+  padding: 8px 0;
+  border-top: none;
+}
+
+.qoderian-mcp-type-fields .setting-item:first-child {
+  padding-top: 0;
+}
+
+.qoderian-mcp-cmd-setting,
+.qoderian-mcp-env-setting {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.qoderian-mcp-cmd-setting .setting-item-control,
+.qoderian-mcp-env-setting .setting-item-control {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.qoderian-mcp-cmd-textarea,
+.qoderian-mcp-env-textarea {
+  width: 100%;
+  min-height: 50px;
+  resize: vertical;
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+}
+
+.qoderian-mcp-cmd-textarea:focus,
+.qoderian-mcp-env-textarea:focus {
+  border-color: var(--interactive-accent);
+  outline: none;
+}
+
+.qoderian-mcp-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* MCP Test Modal */
+.qoderian-mcp-test-modal {
+  width: 500px;
+  max-width: 90vw;
+}
+
+.qoderian-mcp-test-modal .modal-content {
+  padding: 0 20px 20px 20px;
+}
+
+.qoderian-mcp-test-modal .modal-title {
+  padding: 20px 20px 12px 20px;
+  margin: 0 -20px;
+}
+
+.qoderian-mcp-test-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px;
+  color: var(--text-muted);
+}
+
+.qoderian-mcp-test-spinner {
+  width: 20px;
+  height: 20px;
+  animation: qoderian-spin 1s linear infinite;
+}
+
+.qoderian-mcp-test-spinner svg {
+  width: 100%;
+  height: 100%;
+}
+
+.qoderian-mcp-test-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.qoderian-mcp-test-icon {
+  display: flex;
+  align-items: center;
+}
+
+.qoderian-mcp-test-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.qoderian-mcp-test-icon.success {
+  color: var(--color-green);
+}
+
+.qoderian-mcp-test-icon.error {
+  color: var(--text-error);
+}
+
+.qoderian-mcp-test-text {
+  font-weight: 500;
+}
+
+.qoderian-mcp-test-error {
+  padding: 10px 12px;
+  background: rgba(var(--color-red-rgb), 0.1);
+  border: 1px solid var(--text-error);
+  border-radius: 6px;
+  color: var(--text-error);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.qoderian-mcp-test-tools {
+  margin-bottom: 16px;
+}
+
+.qoderian-mcp-test-tools-header {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+}
+
+.qoderian-mcp-test-tools-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.qoderian-mcp-test-tool {
+  padding: 10px 12px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+}
+
+.qoderian-mcp-test-tool-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qoderian-mcp-test-tool-icon {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.qoderian-mcp-test-tool-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.qoderian-mcp-test-tool-name {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.qoderian-mcp-test-tool-toggle {
+  margin-left: auto;
+}
+
+.qoderian-mcp-test-tool-toggle .checkbox-container {
+  display: flex;
+  align-items: center;
+}
+
+.qoderian-mcp-test-tool-disabled {
+  opacity: 0.75;
+}
+
+.qoderian-mcp-test-tool-disabled .qoderian-mcp-test-tool-name {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.qoderian-mcp-toggle-all-btn {
+  margin-right: 8px;
+}
+
+.qoderian-mcp-toggle-all-btn.is-destructive {
+  background: rgba(var(--color-red-rgb), 0.1);
+  border-color: rgba(var(--color-red-rgb), 0.3);
+  color: var(--text-error);
+}
+
+.qoderian-mcp-toggle-all-btn.is-destructive:hover {
+  background: rgba(var(--color-red-rgb), 0.2);
+}
+
+.qoderian-mcp-test-tool-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.qoderian-mcp-test-no-tools {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.qoderian-mcp-test-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}

@@ -1,0 +1,221 @@
+.qoderian-history-container {
+  position: static;
+}
+
+/* History dropup menu (opens upward since it's at bottom of view) */
+.qoderian-history-menu {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 4px;
+  background: var(--background-secondary);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  max-height: 400px;
+  overflow: hidden;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+}
+
+.qoderian-history-menu.visible {
+  display: block;
+}
+
+.qoderian-history-header {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.qoderian-history-list {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.qoderian-history-empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.qoderian-history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  transition: background 0.15s ease;
+}
+
+.qoderian-history-item-icon {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.qoderian-history-item-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.qoderian-history-item:last-child {
+  border-bottom: none;
+}
+
+.qoderian-history-item:hover {
+  background: var(--background-modifier-hover);
+}
+
+.qoderian-history-item.active {
+  background: var(--background-modifier-hover);
+  border-inline-start: 2px solid var(--interactive-accent);
+  padding-inline-start: 10px;
+}
+
+.qoderian-history-item.active:hover {
+  background: var(--background-modifier-active-hover, var(--background-modifier-hover));
+}
+
+.qoderian-history-item.active .qoderian-history-item-icon {
+  color: var(--interactive-accent);
+}
+
+.qoderian-history-item.active .qoderian-history-item-content {
+  cursor: default;
+}
+
+.qoderian-history-item.active .qoderian-history-item-date {
+  color: var(--text-faint);
+}
+
+.qoderian-history-item.open {
+  background: var(--background-modifier-hover);
+  border-inline-start: 2px solid var(--interactive-accent);
+  padding-inline-start: 10px;
+}
+
+.qoderian-history-item.open:hover {
+  background: var(--background-modifier-active-hover, var(--background-modifier-hover));
+}
+
+.qoderian-history-item.open .qoderian-history-item-icon {
+  color: var(--interactive-accent);
+}
+
+.qoderian-history-item.open .qoderian-history-item-date {
+  color: var(--text-muted);
+}
+
+.qoderian-history-item.running .qoderian-history-item-icon {
+  color: var(--interactive-accent);
+}
+
+.qoderian-history-item.running .qoderian-history-item-icon svg {
+  animation: spin 1s linear infinite;
+}
+
+.qoderian-history-item.running .qoderian-history-item-date {
+  color: var(--interactive-accent);
+  font-weight: 500;
+}
+
+.qoderian-history-item-content {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.qoderian-history-item-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-normal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qoderian-history-item-date {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: 2px;
+}
+
+.qoderian-history-item-actions {
+  display: flex;
+  gap: 4px;
+  margin-inline-start: 8px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.qoderian-history-item:hover .qoderian-history-item-actions {
+  opacity: 1;
+}
+
+.qoderian-history-item:focus-within .qoderian-history-item-actions {
+  opacity: 1;
+}
+
+.qoderian-action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.qoderian-action-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qoderian-action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.qoderian-delete-btn:hover {
+  color: var(--color-red);
+}
+
+.qoderian-open-new-tab-btn:hover {
+  color: var(--interactive-accent);
+}
+
+.qoderian-rename-input {
+  width: 100%;
+  padding: 2px 4px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--interactive-accent);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.qoderian-rename-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+}
+
+/* Loading indicator for title generation */
+.qoderian-action-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: spin 1s linear infinite;
+  opacity: 0.6;
+  cursor: default;
+}

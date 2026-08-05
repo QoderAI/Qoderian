@@ -1,0 +1,103 @@
+/* Plan Mode - inline cards for EnterPlanMode / ExitPlanMode */
+
+.qoderian-plan-approval-inline {
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  outline: none;
+}
+
+.qoderian-plan-inline-title {
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 6px 10px 0;
+}
+
+/* ── Plan content preview ────────────────────────── */
+
+.qoderian-plan-content-preview {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 6px 10px 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-normal);
+}
+
+.qoderian-plan-content-preview::-webkit-scrollbar {
+  width: 4px;
+}
+
+.qoderian-plan-content-preview::-webkit-scrollbar-thumb {
+  background: var(--background-modifier-border);
+  border-radius: 2px;
+}
+
+.qoderian-plan-content-preview p {
+  margin: 0 0 6px;
+}
+
+.qoderian-plan-content-preview p:last-child {
+  margin-bottom: 0;
+}
+
+.qoderian-plan-content-preview h1,
+.qoderian-plan-content-preview h2,
+.qoderian-plan-content-preview h3,
+.qoderian-plan-content-preview h4 {
+  margin: 8px 0 4px;
+  font-size: 13px;
+}
+
+.qoderian-plan-content-preview ul,
+.qoderian-plan-content-preview ol {
+  margin: 2px 0 6px;
+  padding-left: 18px;
+}
+
+.qoderian-plan-content-preview li {
+  margin: 0;
+}
+
+.qoderian-plan-content-preview code {
+  font-size: 11px;
+}
+
+.qoderian-plan-content-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-monospace);
+}
+
+/* ── Permissions list ──────────────────────────── */
+
+.qoderian-plan-permissions {
+  padding: 4px 10px 8px;
+}
+
+.qoderian-plan-permissions-label {
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.qoderian-plan-permissions-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-normal);
+  line-height: 1.5;
+}
+
+.qoderian-plan-permissions-list li {
+  margin: 0;
+}
+
+/* ── Plan mode input border ──────────────────────── */
+
+.qoderian-input-wrapper.qoderian-input-plan-mode {
+  --qoderian-input-wrapper-border-color: rgb(92, 148, 140);
+  --qoderian-input-wrapper-box-shadow: 0 0 0 1px rgb(92, 148, 140);
+}

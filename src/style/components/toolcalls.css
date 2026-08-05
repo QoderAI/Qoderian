@@ -1,0 +1,278 @@
+.qoderian-tool-call {
+  margin: 8px 0;
+}
+
+.qoderian-tool-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.qoderian-tool-header:hover {
+  opacity: 0.85;
+}
+
+.qoderian-tool-icon {
+  display: flex;
+  align-items: center;
+  color: var(--text-accent);
+  flex-shrink: 0;
+}
+
+.qoderian-tool-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.qoderian-tool-name {
+  font-family: var(--font-monospace);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-normal);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.qoderian-tool-summary {
+  font-family: var(--font-monospace);
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.qoderian-tool-summary:empty {
+  display: none;
+}
+
+.qoderian-tool-call-bash.expanded .qoderian-tool-summary {
+  display: none;
+}
+
+.qoderian-tool-bash-command {
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-normal);
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 2px 0 4px;
+}
+
+/* Legacy: StatusPanel bash entries still use qoderian-tool-label */
+.qoderian-tool-label {
+  font-family: var(--font-monospace);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-normal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qoderian-tool-current {
+  font-family: var(--font-monospace);
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.qoderian-tool-current:empty {
+  display: none;
+}
+
+.qoderian-tool-status {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.qoderian-tool-status svg {
+  width: 14px;
+  height: 14px;
+}
+
+.qoderian-tool-status.status-running {
+  color: var(--text-accent);
+}
+
+.qoderian-tool-status.status-completed {
+  color: var(--color-green);
+}
+
+.qoderian-tool-status.status-error {
+  color: var(--color-red);
+}
+
+.qoderian-tool-status.status-blocked {
+  color: var(--color-orange);
+}
+
+/* Tool call content - border style (like thinking block) */
+.qoderian-tool-content {
+  padding: 4px 0;
+  padding-inline-start: 16px;
+  margin-inline-start: 7px;
+  border-inline-start: 2px solid var(--background-modifier-border);
+}
+
+/* Tool content variants that render inline widgets instead of bordered results */
+.qoderian-tool-content-todo,
+.qoderian-tool-content-ask {
+  border-inline-start: none;
+  margin-inline-start: 0;
+  padding-inline-start: 0;
+}
+
+/* Expanded content: per-line rendering */
+.qoderian-tool-lines {
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-x: auto;
+}
+
+.qoderian-tool-line {
+  padding: 1px 0;
+  color: var(--text-muted);
+  white-space: pre;
+}
+
+.qoderian-tool-line-wrap {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Hover highlight for file search results */
+.qoderian-tool-line.hoverable:hover {
+  background: var(--background-modifier-hover);
+}
+
+/* Truncation indicator: "... N more lines" */
+.qoderian-tool-truncated {
+  color: var(--text-faint);
+  font-style: italic;
+  padding: 4px 0;
+  font-family: var(--font-monospace);
+  font-size: 12px;
+}
+
+/* ToolSearch expanded: icon + tool name rows */
+.qoderian-tool-search-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.qoderian-tool-search-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--text-faint);
+}
+
+.qoderian-tool-search-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Web search links */
+.qoderian-tool-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 3px 0;
+  color: var(--text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.qoderian-tool-link:hover {
+  color: var(--text-accent);
+}
+
+.qoderian-tool-link-icon {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  margin-top: 2px;
+  color: var(--text-faint);
+}
+
+.qoderian-tool-link-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.qoderian-tool-link-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Web search summary section */
+.qoderian-tool-web-summary {
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  color: var(--text-muted);
+  padding-top: 4px;
+  border-top: 1px solid var(--background-modifier-border);
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Empty state for file search */
+.qoderian-tool-empty {
+  color: var(--text-faint);
+  font-style: italic;
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.qoderian-tool-result-row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.qoderian-tool-result-text {
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow: hidden;
+  flex: 1;
+}
+
+.qoderian-tool-result-item {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.qoderian-tool-patch-section + .qoderian-tool-patch-section {
+  margin-top: 10px;
+}
+
+.qoderian-tool-result-item:last-child {
+  margin-bottom: 0;
+}

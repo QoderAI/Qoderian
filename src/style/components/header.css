@@ -1,0 +1,27 @@
+/* Header - logo and title */
+.qoderian-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 12px 12px 12px;
+}
+
+.qoderian-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.qoderian-title-text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.qoderian-logo {
+  display: flex;
+  align-items: center;
+  color: var(--qoderian-brand);
+}

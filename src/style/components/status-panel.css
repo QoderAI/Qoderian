@@ -1,0 +1,70 @@
+/* Status Panel - persistent bottom panel for command output */
+
+.qoderian-status-panel-container {
+  flex-shrink: 0;
+  padding: 0 14px;
+}
+
+.qoderian-status-panel {
+  padding-top: 12px;
+}
+
+/* Bash Output Section */
+
+.qoderian-status-panel-bash {
+  margin-bottom: 4px;
+}
+
+.qoderian-status-panel-bash-header {
+  padding: 4px 0;
+}
+
+.qoderian-status-panel-bash-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qoderian-status-panel-bash-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  color: var(--text-muted);
+}
+
+.qoderian-status-panel-bash-action:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qoderian-status-panel-bash-content {
+  padding-top: 2px;
+  max-height: min(40vh, 320px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.qoderian-status-panel-bash-entry {
+  margin: 4px 0;
+}
+
+.qoderian-status-panel-bash-entry .qoderian-tool-icon svg {
+  width: 14px;
+  height: 14px;
+  position: relative;
+  top: -1px;
+}
+
+.qoderian-status-panel-bash-entry .qoderian-tool-call {
+  margin: 0;
+}
+
+/* Keep bash output blocks from growing without bound */
+.qoderian-status-panel-bash-entry .qoderian-tool-result-text {
+  max-height: 200px;
+  overflow-y: auto;
+  word-break: break-word;
+}

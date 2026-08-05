@@ -1,0 +1,17 @@
+Qoderian
+Copyright (c) 2026 Qoder
+
+This project contains code derived from Claudian:
+https://github.com/YishenTu/claudian
+
+Claudian is distributed under the MIT License. Its original copyright notice
+and MIT permission notice are retained in this repository's LICENSE file.
+Qoder thanks the Claudian authors and contributors for their work.
+
+Qoderian also includes or bundles third-party dependencies. Those components
+remain subject to their respective licenses and notices.
+
+The bundled @qoder-ai/qoder-agent-sdk package is not relicensed under the
+Qoderian MIT License. Use of the Qoder Agent SDK and Qoder services is governed
+by the Qoder Product Service Terms:
+https://qoder.com/product-service

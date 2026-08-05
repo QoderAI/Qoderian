@@ -1,0 +1,40 @@
+/* Accessibility - Focus Visible Styles */
+
+/* outline + offset + border-radius */
+.qoderian-tool-header:focus-visible,
+.qoderian-thinking-header:focus-visible,
+.qoderian-subagent-header:focus-visible,
+.qoderian-input-nav-btn:focus-visible,
+.qoderian-model-btn:focus-visible,
+.qoderian-permission-button:focus-visible,
+.qoderian-thinking-current:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* outline + offset only */
+.qoderian-action-btn:focus-visible,
+.qoderian-file-chip:focus-visible,
+.qoderian-image-chip:focus-visible,
+.qoderian-file-chip-remove:focus-visible,
+.qoderian-image-remove:focus-visible,
+.qoderian-image-modal-close:focus-visible,
+.qoderian-approved-remove-btn:focus-visible,
+.qoderian-save-env-btn:focus-visible,
+.qoderian-restore-snippet-btn:focus-visible,
+.qoderian-edit-snippet-btn:focus-visible,
+.qoderian-delete-snippet-btn:focus-visible,
+.qoderian-cancel-btn:focus-visible,
+.qoderian-save-btn:focus-visible,
+.qoderian-code-lang-label:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+/* outline + negative offset + border-radius */
+.qoderian-history-item-content:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: -2px;
+  border-radius: 4px;
+}

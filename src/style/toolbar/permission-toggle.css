@@ -1,0 +1,122 @@
+/* Permission mode selector */
+.qoderian-permission-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  padding-left: 12px;
+  padding-right: 8px;
+}
+
+.qoderian-permission-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 26px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.qoderian-permission-button:hover,
+.qoderian-permission-toggle--open .qoderian-permission-button {
+  background: var(--background-modifier-hover);
+}
+
+.qoderian-permission-label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.qoderian-permission-chevron {
+  color: var(--text-faint);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.qoderian-permission-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.qoderian-permission-button--default { color: var(--text-success); }
+.qoderian-permission-button--acceptEdits { color: var(--text-warning); }
+.qoderian-permission-button--auto { color: rgb(222, 139, 66); }
+.qoderian-permission-button--plan { color: rgb(92, 148, 140); }
+.qoderian-permission-button--yolo { color: var(--text-error); }
+
+.qoderian-permission-button--default .qoderian-permission-dot,
+.qoderian-permission-option--default .qoderian-permission-dot { background: var(--text-success); }
+.qoderian-permission-button--acceptEdits .qoderian-permission-dot,
+.qoderian-permission-option--acceptEdits .qoderian-permission-dot { background: var(--text-warning); }
+.qoderian-permission-button--auto .qoderian-permission-dot,
+.qoderian-permission-option--auto .qoderian-permission-dot { background: rgb(222, 139, 66); }
+.qoderian-permission-button--plan .qoderian-permission-dot,
+.qoderian-permission-option--plan .qoderian-permission-dot { background: rgb(92, 148, 140); }
+.qoderian-permission-button--yolo .qoderian-permission-dot,
+.qoderian-permission-option--yolo .qoderian-permission-dot { background: var(--text-error); }
+
+.qoderian-permission-dropdown {
+  position: absolute;
+  right: 8px;
+  bottom: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  margin-bottom: 4px;
+  padding: 4px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-secondary);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  z-index: 1000;
+}
+
+.qoderian-permission-toggle--open .qoderian-permission-dropdown {
+  opacity: 1;
+  visibility: visible;
+}
+
+.qoderian-permission-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 7px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.qoderian-permission-option:hover,
+.qoderian-permission-option.selected {
+  background: var(--background-modifier-hover);
+}
+
+.qoderian-permission-option .qoderian-permission-dot {
+  margin-top: 5px;
+}
+
+.qoderian-permission-option-copy {
+  min-width: 0;
+}
+
+.qoderian-permission-option-label {
+  color: var(--text-normal);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.qoderian-permission-option-description {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.35;
+}

@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a reproducible Qoderian problem
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Do not include credentials, private vault content, or unredacted logs. Report security issues privately according to SECURITY.md.
+  - type: input
+    id: qoderian-version
+    attributes:
+      label: Qoderian version
+    validations:
+      required: true
+  - type: input
+    id: qodercli-version
+    attributes:
+      label: qodercli version
+      description: Output of `qodercli --version`
+    validations:
+      required: true
+  - type: input
+    id: obsidian-version
+    attributes:
+      label: Obsidian and operating system
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Use a minimal test vault when possible.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs or screenshots
+      description: Remove tokens, authorization headers, user paths, and private note content.

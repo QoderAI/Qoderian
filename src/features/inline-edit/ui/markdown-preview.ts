@@ -1,0 +1,57 @@
+import type { App, Component } from 'obsidian';
+import { MarkdownRenderer } from 'obsidian';
+
+import { processFileLinks } from '../../../shared/markdown/file-link';
+import { replaceImageEmbedsWithHtml } from '../../../shared/markdown/image-embed';
+import { normalizeMathDelimitersForObsidian } from '../../../shared/markdown/markdown-math';
+
+interface RenderInlineEditMarkdownPreviewOptions {
+  app: App;
+  component: Component;
+  container: HTMLElement;
+  markdown: string;
+  sourcePath: string;
+  mediaFolder?: string;
+}
+
+function emptyElement(container: HTMLElement): void {
+  if (typeof container.empty === 'function') {
+    container.empty();
+    return;
+  }
+  container.replaceChildren();
+}
+
+function appendFallback(container: HTMLElement, markdown: string): void {
+  const fallback = container.ownerDocument.createElement('div');
+  fallback.className = 'qoderian-inline-markdown-fallback';
+  fallback.textContent = markdown;
+  container.appendChild(fallback);
+}
+
+export async function renderInlineEditMarkdownPreview({
+  app,
+  component,
+  container,
+  markdown,
+  sourcePath,
+  mediaFolder = '',
+}: RenderInlineEditMarkdownPreviewOptions): Promise<void> {
+  emptyElement(container);
+
+  try {
+    const normalizedMarkdown = normalizeMathDelimitersForObsidian(markdown);
+    const processedMarkdown = replaceImageEmbedsWithHtml(normalizedMarkdown, app, {
+      mediaFolder,
+      sourcePath,
+    });
+    await MarkdownRenderer.render(app, processedMarkdown, container, sourcePath, component);
+
+    if (processedMarkdown.includes('[[') && app.metadataCache) {
+      processFileLinks(app, container);
+    }
+  } catch {
+    emptyElement(container);
+    appendFallback(container, markdown);
+  }
+}

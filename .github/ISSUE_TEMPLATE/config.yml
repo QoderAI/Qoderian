@@ -1,0 +1,10 @@
+# Force issue authors through the structured templates.
+blank_issues_enabled: false
+
+# TODO(before publishing): once the public repository URL is final, add a
+# contact link that routes vulnerability reports to private advisories, e.g.:
+#
+# contact_links:
+#   - name: Report a security vulnerability
+#     url: https://github.com/<owner>/<repo>/security/advisories/new
+#     about: Please report vulnerabilities privately. See SECURITY.md.

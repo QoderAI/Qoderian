@@ -1,0 +1,217 @@
+/* Settings page - remove separator lines from setting items */
+.qoderian-settings .setting-item {
+  border-top: none;
+}
+
+/* Settings section headings (via setHeading()) */
+.qoderian-settings .setting-item-heading {
+  padding-top: 18px;
+  margin-top: 12px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.qoderian-settings .setting-item-heading:first-child {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: none;
+}
+
+.qoderian-settings .setting-item-heading .setting-item-name {
+  font-size: var(--font-ui-medium);
+  font-weight: var(--font-semibold);
+  color: var(--text-normal);
+}
+
+/* Custom section descriptions - align with items */
+.qoderian-sp-settings-desc,
+.qoderian-mcp-settings-desc,
+.qoderian-plugin-settings-desc,
+.qoderian-approved-desc {
+  padding: 0 12px;
+}
+
+/* Unified icon action buttons for settings */
+.qoderian-settings-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.qoderian-settings-action-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qoderian-settings-action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.qoderian-settings-delete-btn:hover {
+  color: var(--text-error);
+}
+
+.qoderian-setting-validation {
+  font-size: var(--font-ui-smaller);
+  margin-top: -0.5em;
+  margin-bottom: 0.5em;
+}
+
+.qoderian-setting-validation-error {
+  color: var(--text-error);
+}
+
+.qoderian-setting-validation-warning {
+  color: var(--text-warning);
+}
+
+.qoderian-settings-cli-path-input {
+  width: 100%;
+}
+
+.qoderian-settings-cli-path-input.qoderian-input-error {
+  border-color: var(--text-error);
+}
+
+/* Media folder input width */
+.qoderian-settings-media-input {
+  width: 200px;
+}
+
+/* ── Shared settings panel layout (used by slash-settings + agent-settings) ── */
+
+.qoderian-sp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 12px;
+}
+
+.qoderian-sp-label {
+  font-size: var(--font-ui-small);
+  color: var(--text-muted);
+  font-weight: var(--font-medium);
+}
+
+.qoderian-sp-header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.qoderian-sp-empty-state {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--background-secondary);
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.qoderian-sp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.qoderian-sp-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+}
+
+.qoderian-sp-item:hover {
+  background: var(--background-modifier-hover);
+}
+
+.qoderian-sp-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.qoderian-sp-item-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.qoderian-sp-item-name {
+  font-weight: 600;
+  font-family: var(--font-monospace);
+  color: var(--text-normal);
+}
+
+.qoderian-sp-item-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.qoderian-sp-item-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: 16px;
+  flex-shrink: 0;
+}
+
+.qoderian-sp-advanced-section {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 0 12px;
+  margin: 8px 0;
+}
+
+.qoderian-sp-advanced-summary {
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: var(--font-ui-small);
+  color: var(--text-muted);
+  font-weight: var(--font-medium);
+}
+
+.qoderian-sp-advanced-section[open] .qoderian-sp-advanced-summary {
+  margin-bottom: 4px;
+}
+
+.qoderian-sp-modal .modal-content {
+  max-width: 600px;
+  width: auto;
+}
+
+.qoderian-sp-content-area {
+  width: 100%;
+  font-family: var(--font-monospace);
+  font-size: 13px;
+  padding: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  resize: vertical;
+  margin-top: 8px;
+}
+
+.qoderian-sp-content-area:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.qoderian-sp-modal-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: flex-end;
+}

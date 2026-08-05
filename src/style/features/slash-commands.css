@@ -1,0 +1,91 @@
+/* Slash Command Dropdown */
+.qoderian-slash-dropdown {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: 4px;
+  background: var(--background-secondary);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.qoderian-slash-dropdown.visible {
+  display: block;
+}
+
+/* Fixed positioning for inline editor */
+.qoderian-slash-dropdown-fixed {
+  position: fixed;
+  bottom: var(--qoderian-fixed-dropdown-bottom);
+  left: var(--qoderian-fixed-dropdown-left);
+  right: auto;
+  width: var(--qoderian-fixed-dropdown-width);
+  z-index: 10001;
+}
+
+.qoderian-slash-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.qoderian-slash-item:last-child {
+  border-bottom: none;
+}
+
+.qoderian-slash-item:hover,
+.qoderian-slash-item.selected {
+  background: var(--background-modifier-hover);
+}
+
+.qoderian-slash-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-normal);
+  font-family: var(--font-monospace);
+}
+
+.qoderian-slash-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+.qoderian-slash-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qoderian-slash-empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* Scrollbar */
+.qoderian-slash-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.qoderian-slash-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.qoderian-slash-dropdown::-webkit-scrollbar-thumb {
+  background: var(--background-modifier-border);
+  border-radius: 3px;
+}

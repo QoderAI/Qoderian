@@ -1,0 +1,291 @@
+import type {
+  SDKAssistantMessage,
+  SDKCompactBoundaryMessage,
+  SDKMessage,
+  SDKPartialAssistantMessage,
+  SDKResultError,
+  SDKResultSuccess,
+  SDKStatusMessage,
+  SDKSystemMessage,
+  SDKUserMessage,
+} from '@qoder-ai/qoder-agent-sdk';
+
+const TEST_UUID = '00000000-0000-4000-8000-000000000001';
+const TEST_SESSION_ID = 'test-session';
+
+const DEFAULT_RESULT_USAGE = ({
+  input_tokens: 0,
+  output_tokens: 0,
+  cache_creation_input_tokens: 0,
+  cache_read_input_tokens: 0,
+} as unknown) as SDKResultSuccess['usage'];
+
+const DEFAULT_MODEL_USAGE: SDKResultSuccess['modelUsage'] = {
+  'qoder-sonnet-test': {
+    inputTokens: 0,
+    outputTokens: 0,
+    cacheReadInputTokens: 0,
+    cacheCreationInputTokens: 0,
+    webSearchRequests: 0,
+    costUSD: 0,
+    contextWindow: 200000,
+    maxOutputTokens: 8192,
+  },
+};
+
+export type SystemInitMessageInput = {
+  type: 'system';
+  subtype: 'init';
+} & Record<string, unknown>;
+
+export type SystemStatusMessageInput = {
+  type: 'system';
+  subtype: 'status';
+} & Partial<Omit<SDKStatusMessage, 'type' | 'subtype'>>;
+
+export type CompactBoundaryMessageInput = {
+  type: 'system';
+  subtype: 'compact_boundary';
+} & Partial<Omit<SDKCompactBoundaryMessage, 'type' | 'subtype'>>;
+
+export type AssistantMessageInput = {
+  type: 'assistant';
+} & Record<string, unknown>;
+
+export type UserMessageInput = {
+  type: 'user';
+  _blocked?: boolean;
+  _blockReason?: string;
+} & Record<string, unknown>;
+
+export type StreamEventMessageInput = {
+  type: 'stream_event';
+} & Record<string, unknown>;
+
+export type ResultSuccessMessageInput = {
+  type: 'result';
+  subtype?: 'success';
+} & Record<string, unknown>;
+
+export type ResultErrorMessageInput = {
+  type: 'result';
+  subtype: SDKResultError['subtype'];
+} & Record<string, unknown>;
+
+export type ToolProgressMessageInput = {
+  type: 'tool_progress';
+} & Record<string, unknown>;
+
+export type AuthStatusMessageInput = {
+  type: 'auth_status';
+} & Record<string, unknown>;
+
+export type SDKTestMessageInput =
+  | SystemInitMessageInput
+  | SystemStatusMessageInput
+  | CompactBoundaryMessageInput
+  | AssistantMessageInput
+  | UserMessageInput
+  | StreamEventMessageInput
+  | ResultSuccessMessageInput
+  | ResultErrorMessageInput
+  | ToolProgressMessageInput
+  | AuthStatusMessageInput;
+
+export function buildSystemInitMessage(overrides: Partial<Omit<SDKSystemMessage, 'type' | 'subtype'>> = {}): SDKSystemMessage {
+  return {
+    type: 'system',
+    subtype: 'init',
+    apiKeySource: 'user',
+    qoder_code_version: 'test-version',
+    cwd: '/test/cwd',
+    tools: [],
+    mcp_servers: [],
+    model: 'qoder-sonnet-4-5',
+    permissionMode: 'default',
+    slash_commands: [],
+    output_style: 'default',
+    skills: [],
+    plugins: [],
+    uuid: TEST_UUID,
+    session_id: TEST_SESSION_ID,
+    ...overrides,
+  } as unknown as SDKSystemMessage;
+}
+
+export function buildSystemStatusMessage(overrides: Partial<Omit<SDKStatusMessage, 'type' | 'subtype'>> = {}): SDKStatusMessage {
+  return {
+    type: 'system',
+    subtype: 'status',
+    status: null,
+    uuid: TEST_UUID,
+    session_id: TEST_SESSION_ID,
+    ...overrides,
+  } as SDKStatusMessage;
+}
+
+export function buildCompactBoundaryMessage(
+  overrides: Partial<Omit<SDKCompactBoundaryMessage, 'type' | 'subtype'>> = {}
+): SDKCompactBoundaryMessage {
+  return {
+    type: 'system',
+    subtype: 'compact_boundary',
+    compact_metadata: {
+      trigger: 'manual',
+      pre_tokens: 0,
+    },
+    uuid: TEST_UUID,
+    session_id: TEST_SESSION_ID,
+    ...overrides,
+  } as SDKCompactBoundaryMessage;
+}
+
+export function buildAssistantMessage(overrides: AssistantMessageInput): SDKAssistantMessage {
+  return {
+    type: 'assistant',
+    message: ({ content: [] } as unknown) as SDKAssistantMessage['message'],
+    parent_tool_use_id: null,
+    uuid: TEST_UUID,
+    session_id: TEST_SESSION_ID,
+    ...(overrides as Partial<Omit<SDKAssistantMessage, 'type'>>),
+  };
+}
+
+export function buildUserMessage(overrides: UserMessageInput): SDKUserMessage {
+  return {
+    type: 'user',
+    message: ({ content: [] } as unknown) as SDKUserMessage['message'],
+    parent_tool_use_id: null,
+    session_id: TEST_SESSION_ID,
+    ...(overrides as Partial<Omit<SDKUserMessage, 'type'>>),
+  };
+}
+
+export function buildStreamEventMessage(
+  overrides: StreamEventMessageInput
+): SDKPartialAssistantMessage {
+  return {
+    type: 'stream_event',
+    event: ({
+      type: 'content_block_delta',
+      delta: { type: 'text_delta', text: '' },
+    } as unknown) as SDKPartialAssistantMessage['event'],
+    parent_tool_use_id: null,
+    uuid: TEST_UUID,
+    session_id: TEST_SESSION_ID,
+    ...(overrides as Partial<Omit<SDKPartialAssistantMessage, 'type'>>),
+  };
+}
+
+export function buildResultSuccessMessage(
+  overrides: Omit<ResultSuccessMessageInput, 'type' | 'subtype'> = {}
+): SDKResultSuccess {
+  return {
+    type: 'result',
+    subtype: 'success',
+    duration_ms: 0,
+    duration_api_ms: 0,
+    is_error: false,
+    num_turns: 1,
+    result: 'completed',
+    stop_reason: null,
+    total_cost_usd: 0,
+    usage: DEFAULT_RESULT_USAGE,
+    modelUsage: DEFAULT_MODEL_USAGE,
+    permission_denials: [],
+    uuid: TEST_UUID,
+    session_id: TEST_SESSION_ID,
+    ...(overrides as Partial<Omit<SDKResultSuccess, 'type' | 'subtype'>>),
+  };
+}
+
+export function buildResultErrorMessage(
+  overrides: Omit<ResultErrorMessageInput, 'type'> & Pick<ResultErrorMessageInput, 'subtype'>
+): SDKResultError {
+  const { subtype, ...rest } = overrides;
+
+  return {
+    type: 'result',
+    subtype,
+    duration_ms: 0,
+    duration_api_ms: 0,
+    is_error: true,
+    num_turns: 1,
+    stop_reason: null,
+    total_cost_usd: 0,
+    usage: DEFAULT_RESULT_USAGE,
+    modelUsage: DEFAULT_MODEL_USAGE,
+    permission_denials: [],
+    errors: ['SDK reported an execution error'],
+    uuid: TEST_UUID,
+    session_id: TEST_SESSION_ID,
+    ...(rest as Partial<Omit<SDKResultError, 'type' | 'subtype'>>),
+  };
+}
+
+export function buildToolProgressMessage(
+  overrides: ToolProgressMessageInput
+): SDKMessage {
+  const { type: _type, ...rest } = overrides;
+  return {
+    type: 'tool_progress',
+    tool_use_id: 'tool-1',
+    tool_name: 'Bash',
+    parent_tool_use_id: null,
+    elapsed_time_seconds: 0,
+    uuid: TEST_UUID,
+    session_id: TEST_SESSION_ID,
+    ...rest,
+  } as unknown as SDKMessage;
+}
+
+export function buildAuthStatusMessage(
+  overrides: AuthStatusMessageInput
+): SDKMessage {
+  const { type: _type, ...rest } = overrides;
+  return {
+    type: 'auth_status',
+    isAuthenticating: false,
+    output: [],
+    uuid: TEST_UUID,
+    session_id: TEST_SESSION_ID,
+    ...rest,
+  } as unknown as SDKMessage;
+}
+
+function isResultErrorInput(input: ResultSuccessMessageInput | ResultErrorMessageInput): input is ResultErrorMessageInput {
+  return input.subtype !== undefined && input.subtype !== 'success';
+}
+
+export function buildSDKMessage(input: SDKTestMessageInput): SDKMessage {
+  switch (input.type) {
+    case 'system':
+      if (input.subtype === 'init') return buildSystemInitMessage(input as Partial<Omit<SDKSystemMessage, 'type' | 'subtype'>>);
+      if (input.subtype === 'status') return buildSystemStatusMessage(input);
+      return buildCompactBoundaryMessage(input);
+    case 'assistant':
+      return buildAssistantMessage(input);
+    case 'user': {
+      const message = buildUserMessage(input);
+      if (input._blocked === true) {
+        return {
+          ...message,
+          _blocked: true,
+          _blockReason: input._blockReason ?? 'Blocked by hook',
+        } as SDKMessage;
+      }
+      return message;
+    }
+    case 'stream_event':
+      return buildStreamEventMessage(input);
+    case 'result':
+      if (isResultErrorInput(input)) {
+        return buildResultErrorMessage(input);
+      }
+      return buildResultSuccessMessage(input);
+    case 'tool_progress':
+      return buildToolProgressMessage(input);
+    case 'auth_status':
+      return buildAuthStatusMessage(input);
+  }
+}
