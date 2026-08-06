@@ -41,7 +41,7 @@ export function getTabSettingsSnapshot(
   _tab: TabQoderContext,
   plugin: QoderianPlugin,
 ): TabQoderSettings {
-  return plugin.settings as TabQoderSettings;
+  return plugin.settings;
 }
 
 export function getTabPermissionMode(

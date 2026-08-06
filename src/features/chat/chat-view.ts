@@ -61,7 +61,7 @@ export class QoderianView extends ItemView {
     // overwritten by prototype patching. Hover Editor patches QoderianView.prototype.load
     // after our class is defined, but instance methods take precedence over prototype methods.
     const prototype = Object.getPrototypeOf(this) as LoadableView;
-    const originalLoad = prototype.load.bind(this) as () => Promise<void> | void;
+    const originalLoad = prototype.load.bind(this);
     Object.defineProperty(this, 'load', {
       value: async () => {
         // Ensure containerEl exists before any patched load code tries to use it

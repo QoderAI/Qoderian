@@ -202,7 +202,7 @@ export default class QoderianPlugin extends Plugin {
     for (const leaf of leaves) {
       if (leaf === keepLeaf) continue;
       try {
-        await leaf.detach();
+        leaf.detach();
       } catch {
         // Best-effort cleanup; the leaf may already be detached.
       }
