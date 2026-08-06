@@ -11,6 +11,20 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-08-06
+
+### Added
+
+- Plugin settings are now searchable from Obsidian's settings search
+  (Obsidian 1.13+).
+
+### Changed
+
+- GitHub releases now include build provenance attestations, so the
+  plugin files can be verified against this repository.
+- Replaced deprecated Obsidian APIs (`setWarning`, `setDynamicTooltip`)
+  with their 1.13 replacements, keeping fallbacks for older versions.
+
 ## [1.0.1] - 2026-08-06
 
 ### Fixed
