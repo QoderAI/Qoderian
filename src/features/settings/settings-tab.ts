@@ -202,7 +202,6 @@ export class QoderianSettingTab extends PluginSettingTab {
       slider
         .setLimits(3, 10, 1)
         .setValue(this.plugin.settings.maxTabs ?? 3)
-        .setDynamicTooltip()
         .onChange(async (value) => {
           this.plugin.settings.maxTabs = value;
           await this.plugin.saveSettings();

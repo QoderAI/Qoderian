@@ -263,6 +263,10 @@ export const MarkdownRenderer = {
 
 export const setIcon = jest.fn();
 
+// Tests run against the newest API surface, so version gates take the
+// modern branch by default.
+export const requireApiVersion = jest.fn(() => true);
+
 export const addIcon = jest.fn();
 
 // Notice mock that tracks constructor calls

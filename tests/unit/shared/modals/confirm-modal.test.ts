@@ -46,6 +46,7 @@ jest.mock('obsidian', () => {
         _onClick: null as null | (() => void),
         setButtonText: jest.fn().mockReturnThis(),
         setWarning: jest.fn().mockReturnThis(),
+        setDestructive: jest.fn().mockReturnThis(),
         onClick: jest.fn((handler: () => void) => {
           btn._onClick = handler;
           return btn;
