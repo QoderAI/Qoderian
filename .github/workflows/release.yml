@@ -83,8 +83,9 @@ jobs:
             ```
             Then enable the Qoderian plugin in Obsidian settings.
 
-            `LICENSE` and `NOTICE` are attached for reference; the same notice is
-            embedded at the top of `main.js`.
+            The MIT license and attribution notice are embedded at the top of
+            `main.js`; see [LICENSE](https://github.com/${{ github.repository }}/blob/main/LICENSE)
+            and [NOTICE](https://github.com/${{ github.repository }}/blob/main/NOTICE) in the repository.
 
             ## What's Changed
             ${{ steps.changelog.outputs.notes }}
@@ -94,5 +95,3 @@ jobs:
             main.js
             manifest.json
             styles.css
-            LICENSE
-            NOTICE
