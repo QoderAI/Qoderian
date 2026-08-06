@@ -11,6 +11,23 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-08-06
+
+### Fixed
+
+- Resolved all blocking findings from the community plugin review: the icon
+  renderer no longer assigns `innerHTML`, and every UI element is created
+  through Obsidian's `createEl` helpers instead of native DOM APIs.
+- Restored the standard MIT license text so GitHub recognizes the repository
+  license; Claudian attribution details now live in `NOTICE`.
+- Removed type assertions, a stray `await`, and unhandled-promise patterns
+  flagged by the review's static analysis.
+
+### Changed
+
+- GitHub releases now attach only `main.js`, `manifest.json`, and
+  `styles.css`; the license and attribution stay embedded in `main.js`.
+
 ## [1.0.0] - 2026-08-03
 
 ### Added
