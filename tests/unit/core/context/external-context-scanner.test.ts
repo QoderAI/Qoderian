@@ -4,6 +4,13 @@ import * as path from 'path';
 
 import { type ExternalContextFile,externalContextScanner } from '@/core/context/external-context-scanner';
 
+// node:os properties are non-configurable, so jest.spyOn cannot patch homedir
+// directly; wrap it once here and keep the actual behavior by default.
+jest.mock('os', () => {
+  const actual = jest.requireActual('os') as typeof os;
+  return { ...actual, homedir: jest.fn(actual.homedir) };
+});
+
 describe('externalContextScanner', () => {
   let tempDir: string;
 
@@ -186,12 +193,21 @@ describe('externalContextScanner', () => {
 
   describe('home path expansion', () => {
     it('should expand home paths', async () => {
-      // This test uses a real path that should exist
-      const files = await externalContextScanner.scanPaths(['~']);
+      // Scanning the real home directory is too slow on Windows CI runners,
+      // so point os.homedir at a small fixture to keep the expansion check fast.
+      const homedirMock = os.homedir as jest.Mock;
+      homedirMock.mockReturnValue(tempDir);
+      try {
+        const files = await externalContextScanner.scanPaths(['~']);
 
-      // Should not throw and should return some files (or empty if home is empty)
-      expect(Array.isArray(files)).toBe(true);
-      expect(files.every(file => file.contextRoot === '~')).toBe(true);
+        expect(Array.isArray(files)).toBe(true);
+        expect(files.length).toBe(3);
+        expect(files.every(file => file.contextRoot === '~')).toBe(true);
+        expect(files.every(file => file.path.startsWith(tempDir))).toBe(true);
+      } finally {
+        homedirMock.mockReset();
+        homedirMock.mockImplementation((jest.requireActual('os') as typeof os).homedir);
+      }
     });
   });
 });
