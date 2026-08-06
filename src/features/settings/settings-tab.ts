@@ -1,4 +1,4 @@
-import type { App } from 'obsidian';
+import type { App, SettingDefinitionItem } from 'obsidian';
 import { Notice, PluginSettingTab, Setting } from 'obsidian';
 
 import type { ChatViewPlacement } from '../../core/types/settings';
@@ -18,6 +18,111 @@ export class QoderianSettingTab extends PluginSettingTab {
   constructor(app: App, plugin: QoderianPlugin) {
     super(app, plugin);
     this.plugin = plugin;
+  }
+
+  /**
+   * Declarative mirror of display() for Obsidian's settings search (1.13+).
+   * Rendering stays imperative in display(); these definitions only feed the
+   * search index, so every entry is a plain name/desc row grouped under the
+   * same headings the page shows.
+   */
+  getSettingDefinitions(): SettingDefinitionItem[] {
+    setLocale(this.plugin.settings.locale as Locale);
+
+    return [
+      {
+        type: 'group',
+        heading: t('settings.setup'),
+        items: [
+          { name: t('settings.cliPath.name'), desc: t('settings.cliPath.desc') },
+        ],
+      },
+      { name: t('settings.language.name'), desc: t('settings.language.desc') },
+      {
+        type: 'group',
+        heading: t('settings.display'),
+        items: [
+          { name: t('settings.maxTabs.name'), desc: t('settings.maxTabs.desc') },
+          { name: t('settings.chatViewPlacement.name'), desc: t('settings.chatViewPlacement.desc') },
+          { name: t('settings.enableAutoScroll.name'), desc: t('settings.enableAutoScroll.desc') },
+          { name: t('settings.deferMathRenderingDuringStreaming.name'), desc: t('settings.deferMathRenderingDuringStreaming.desc') },
+          { name: t('settings.expandFileEditsByDefault.name'), desc: t('settings.expandFileEditsByDefault.desc') },
+        ],
+      },
+      {
+        type: 'group',
+        heading: t('settings.conversations'),
+        items: [
+          { name: t('settings.autoTitle.name'), desc: t('settings.autoTitle.desc') },
+          {
+            name: t('settings.titleModel.name'),
+            desc: t('settings.titleModel.desc'),
+            visible: () => this.plugin.settings.enableAutoTitleGeneration,
+          },
+        ],
+      },
+      {
+        type: 'group',
+        heading: t('settings.content'),
+        items: [
+          { name: t('settings.userName.name'), desc: t('settings.userName.desc') },
+          { name: t('settings.systemPrompt.name'), desc: t('settings.systemPrompt.desc') },
+          { name: t('settings.excludedTags.name'), desc: t('settings.excludedTags.desc') },
+          { name: t('settings.mediaFolder.name'), desc: t('settings.mediaFolder.desc') },
+        ],
+      },
+      {
+        type: 'group',
+        heading: t('settings.input'),
+        items: [
+          { name: t('settings.requireCommandOrControlEnterToSend.name'), desc: t('settings.requireCommandOrControlEnterToSend.desc') },
+          { name: t('settings.navMappings.name'), desc: t('settings.navMappings.desc') },
+        ],
+      },
+      {
+        type: 'group',
+        heading: t('settings.safety'),
+        items: [
+          { name: t('settings.loadUserSettings.name'), desc: t('settings.loadUserSettings.desc') },
+        ],
+      },
+      {
+        type: 'group',
+        heading: t('settings.slashCommands.name'),
+        items: [
+          { name: t('settings.slashCommands.commands'), desc: t('settings.slashCommands.commandsDesc') },
+          { name: t('settings.slashCommands.skills'), desc: t('settings.slashCommands.skillsDesc') },
+        ],
+      },
+      {
+        type: 'group',
+        heading: t('settings.subagents.name'),
+        items: [
+          { name: t('settings.subagents.name'), desc: t('settings.subagents.desc') },
+        ],
+      },
+      {
+        type: 'group',
+        heading: t('settings.mcpServers.name'),
+        items: [
+          { name: t('settings.mcpServers.name'), desc: t('settings.mcpServers.desc') },
+        ],
+      },
+      {
+        type: 'group',
+        heading: t('settings.plugins.name'),
+        items: [
+          { name: t('settings.plugins.name'), desc: t('settings.plugins.desc') },
+        ],
+      },
+      {
+        type: 'group',
+        heading: t('settings.experimental'),
+        items: [
+          { name: t('settings.enableBangBash.name'), desc: t('settings.enableBangBash.desc') },
+        ],
+      },
+    ];
   }
 
   display(): void {
