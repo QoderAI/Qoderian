@@ -47,12 +47,13 @@ class ConfirmModal extends Modal {
             this.resolve(true);
             this.close();
           });
-        // setDestructive replaced setWarning in 1.13; keep the deprecated
-        // call on older installs covered by minAppVersion.
+        // setDestructive replaced setWarning in 1.13. On older installs
+        // covered by minAppVersion, apply the class the deprecated
+        // setWarning() used to add instead of calling the API.
         if (requireApiVersion('1.13.0')) {
           btn.setDestructive();
         } else {
-          btn.setWarning();
+          btn.buttonEl.addClass('mod-warning');
         }
       });
   }
