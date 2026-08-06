@@ -1,4 +1,4 @@
-import { type App,Modal, Setting } from 'obsidian';
+import { type App,Modal, requireApiVersion, Setting } from 'obsidian';
 
 import { t } from '../../i18n/i18n';
 
@@ -39,16 +39,23 @@ class ConfirmModal extends Modal {
           .setButtonText(t('common.cancel'))
           .onClick(() => this.close())
       )
-      .addButton(btn =>
+      .addButton(btn => {
         btn
           .setButtonText(this.confirmText)
-          .setWarning()
           .onClick(() => {
             this.resolved = true;
             this.resolve(true);
             this.close();
-          })
-      );
+          });
+        // setDestructive replaced setWarning in 1.13. On older installs
+        // covered by minAppVersion, apply the class the deprecated
+        // setWarning() used to add instead of calling the API.
+        if (requireApiVersion('1.13.0')) {
+          btn.setDestructive();
+        } else {
+          btn.buttonEl.addClass('mod-warning');
+        }
+      });
   }
 
   onClose() {
