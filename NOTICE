@@ -5,7 +5,8 @@ This project contains code derived from Claudian:
 https://github.com/YishenTu/claudian
 
 Claudian is distributed under the MIT License. Its original copyright notice
-and MIT permission notice are retained in this repository's LICENSE file.
+("Copyright (c) 2025") is retained verbatim in this repository's LICENSE file
+alongside Qoder's own notice, and the MIT permission notice applies to both.
 Qoder thanks the Claudian authors and contributors for their work.
 
 Qoderian also includes or bundles third-party dependencies. Those components

@@ -307,7 +307,7 @@ function sanitizeQoderState(
     return undefined;
   }
 
-  return Object.fromEntries(sanitizedEntries) as QoderState;
+  return Object.fromEntries(sanitizedEntries);
 }
 
 export function buildPersistedQoderState(

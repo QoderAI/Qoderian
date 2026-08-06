@@ -74,7 +74,7 @@ export class QoderTitleGenerationService {
     const titleModel = this.plugin.settings.titleGenerationModel || 'auto';
     if (qoderModelConfig.isKnownModel(
       titleModel,
-      this.plugin.settings as unknown as Record<string, unknown>,
+      this.plugin.settings,
     )) {
       return toQoderRuntimeModelId(titleModel);
     }

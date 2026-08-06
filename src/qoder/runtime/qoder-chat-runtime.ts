@@ -1178,7 +1178,7 @@ export class QoderChatRuntime implements ChatRuntime {
    */
   resetSession() {
     // Close persistent query (new session will use cold-start resume)
-    this.closePersistentQuery('session reset');
+    void this.closePersistentQuery('session reset');
 
     // Reset crash recovery for fresh start
     this.crashRecoveryAttempted = false;
@@ -1258,7 +1258,7 @@ export class QoderChatRuntime implements ChatRuntime {
 
     // Close synchronously when session changes
     if (sessionChanged) {
-      this.closePersistentQuery('session switch');
+      void this.closePersistentQuery('session switch');
       this.crashRecoveryAttempted = false;
     }
 

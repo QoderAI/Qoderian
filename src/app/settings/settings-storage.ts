@@ -104,7 +104,7 @@ function normalizeKeyboardNavigation(value: unknown): KeyboardNavigationSettings
   const candidate = value as Partial<Record<keyof KeyboardNavigationSettings, unknown>>;
   const pick = (key: keyof KeyboardNavigationSettings): string =>
     typeof candidate[key] === 'string' && candidate[key]
-      ? candidate[key] as string
+      ? candidate[key]
       : defaults[key];
 
   return {

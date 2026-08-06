@@ -79,9 +79,7 @@ export async function applyQoderDynamicUpdates(
   const currentEffort = deps.getCurrentConfig()?.effortLevel ?? null;
   if (effortLevel !== currentEffort) {
     try {
-      // SDK runtime accepts `max`, but the current type definition for
-      // Settings.effortLevel has not caught up yet.
-      await persistentQuery.applyFlagSettings({ effortLevel } as unknown as Parameters<Query['applyFlagSettings']>[0]);
+      await persistentQuery.applyFlagSettings({ effortLevel });
       deps.mutateCurrentConfig(config => {
         config.effortLevel = effortLevel;
       });
