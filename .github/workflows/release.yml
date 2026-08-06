@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # Required by attest-build-provenance to sign and store attestations.
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout code
@@ -43,6 +46,16 @@ jobs:
 
       - name: Validate release artifacts
         run: npm run release:check
+
+      # Provenance lets users cryptographically verify the assets were built
+      # from this repository by this workflow (gh attestation verify).
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        with:
+          subject-path: |
+            main.js
+            manifest.json
+            styles.css
 
       # Release notes come from the curated CHANGELOG.md section, not from
       # commit messages. A missing section means [Unreleased] was not renamed
