@@ -5,15 +5,27 @@ import type { ChatViewPlacement } from '../../core/types/settings';
 import { getAvailableLocales, getLocaleDisplayName, setLocale, t } from '../../i18n/i18n';
 import type { Locale } from '../../i18n/types';
 import type QoderianPlugin from '../../main';
+import { getQoderSettings, updateQoderSettings } from '../../qoder/config/settings';
 import { buildNavMappingText, parseNavMappings } from './keyboard-navigation';
 import { McpSettingsManager } from './ui/mcp-settings-manager';
 import {
+  getCliPathDescription,
+  renderBangBashControl,
+  renderMcpSection,
+  renderPluginsSection,
+  renderQoderCliPathControl,
   renderQoderCliPathSetting,
   renderQoderSettingsTab,
+  renderSlashCommandsSection,
+  renderSubagentsSection,
 } from './ui/qoder-settings-tab';
+
+/** Keys whose edits affect the prompt and require a debounced service restart. */
+const PROMPT_SETTING_KEYS = new Set(['userName', 'systemPrompt', 'mediaFolder']);
 
 export class QoderianSettingTab extends PluginSettingTab {
   plugin: QoderianPlugin;
+  private promptRestartTimer: number | null = null;
 
   constructor(app: App, plugin: QoderianPlugin) {
     super(app, plugin);
@@ -21,43 +33,140 @@ export class QoderianSettingTab extends PluginSettingTab {
   }
 
   /**
-   * Declarative mirror of display() for Obsidian's settings search (1.13+).
-   * Rendering stays imperative in display(); these definitions only feed the
-   * search index, so every entry is a plain name/desc row grouped under the
-   * same headings the page shows.
+   * Declarative settings for Obsidian 1.13.0+. When this returns a
+   * non-empty array, Obsidian renders the tab from these definitions and
+   * never calls display(); simple values bind through getControlValue /
+   * setControlValue, while rows with custom validation or rich components
+   * use `render` callbacks that share the imperative builders with the
+   * pre-1.13 display() fallback below.
+   *
+   * The new-API usages below only execute on Obsidian >= 1.13 (Obsidian
+   * never invokes this method on older versions), so the version warnings
+   * against minAppVersion are expected.
    */
+  /* eslint-disable obsidianmd/no-unsupported-api */
   getSettingDefinitions(): SettingDefinitionItem[] {
     setLocale(this.plugin.settings.locale as Locale);
+
+    const settingsBag = this.plugin.settings as unknown as Record<string, unknown>;
+    const qoderSettings = getQoderSettings(settingsBag);
+
+    const localeOptions: Record<string, string> = {};
+    for (const locale of getAvailableLocales()) {
+      localeOptions[locale] = getLocaleDisplayName(locale);
+    }
+
+    const modelOptions: Record<string, string> = {};
+    for (const model of this.plugin.qoderServices.modelConfig.getModelOptions(settingsBag)) {
+      modelOptions[model.value] = model.label;
+    }
 
     return [
       {
         type: 'group',
         heading: t('settings.setup'),
         items: [
-          { name: t('settings.cliPath.name'), desc: t('settings.cliPath.desc') },
+          {
+            name: t('settings.cliPath.name'),
+            desc: getCliPathDescription(),
+            render: (setting, group) => {
+              let injected: HTMLElement | null = null;
+              this.deferIntoList(group.listEl, (host) => {
+                injected = renderQoderCliPathControl(setting, host, { plugin: this.plugin });
+              });
+              return () => { injected?.remove(); };
+            },
+          },
         ],
       },
-      { name: t('settings.language.name'), desc: t('settings.language.desc') },
+      {
+        name: t('settings.language.name'),
+        desc: t('settings.language.desc'),
+        control: {
+          type: 'dropdown',
+          key: 'locale',
+          options: localeOptions,
+          defaultValue: this.plugin.settings.locale,
+          validate: (value: string) => {
+            const locales: string[] = getAvailableLocales();
+            if (!locales.includes(value)) {
+              return t('common.error');
+            }
+          },
+        },
+      },
       {
         type: 'group',
         heading: t('settings.display'),
         items: [
-          { name: t('settings.maxTabs.name'), desc: t('settings.maxTabs.desc') },
-          { name: t('settings.chatViewPlacement.name'), desc: t('settings.chatViewPlacement.desc') },
-          { name: t('settings.enableAutoScroll.name'), desc: t('settings.enableAutoScroll.desc') },
-          { name: t('settings.deferMathRenderingDuringStreaming.name'), desc: t('settings.deferMathRenderingDuringStreaming.desc') },
-          { name: t('settings.expandFileEditsByDefault.name'), desc: t('settings.expandFileEditsByDefault.desc') },
+          {
+            name: t('settings.maxTabs.name'),
+            desc: t('settings.maxTabs.desc'),
+            render: (setting, group) => {
+              let injected: HTMLElement | null = null;
+              this.deferIntoList(group.listEl, (host) => {
+                injected = this.renderMaxTabsControl(setting, host);
+              });
+              return () => { injected?.remove(); };
+            },
+          },
+          {
+            name: t('settings.chatViewPlacement.name'),
+            desc: t('settings.chatViewPlacement.desc'),
+            render: (setting) => this.renderChatViewPlacementControl(setting),
+          },
+          {
+            name: t('settings.enableAutoScroll.name'),
+            desc: t('settings.enableAutoScroll.desc'),
+            control: {
+              type: 'toggle',
+              key: 'enableAutoScroll',
+              defaultValue: true,
+            },
+          },
+          {
+            name: t('settings.deferMathRenderingDuringStreaming.name'),
+            desc: t('settings.deferMathRenderingDuringStreaming.desc'),
+            control: {
+              type: 'toggle',
+              key: 'deferMathRenderingDuringStreaming',
+              defaultValue: true,
+            },
+          },
+          {
+            name: t('settings.expandFileEditsByDefault.name'),
+            desc: t('settings.expandFileEditsByDefault.desc'),
+            control: {
+              type: 'toggle',
+              key: 'expandFileEditsByDefault',
+              defaultValue: false,
+            },
+          },
         ],
       },
       {
         type: 'group',
         heading: t('settings.conversations'),
         items: [
-          { name: t('settings.autoTitle.name'), desc: t('settings.autoTitle.desc') },
+          {
+            name: t('settings.autoTitle.name'),
+            desc: t('settings.autoTitle.desc'),
+            control: {
+              type: 'toggle',
+              key: 'enableAutoTitleGeneration',
+              defaultValue: false,
+            },
+          },
           {
             name: t('settings.titleModel.name'),
             desc: t('settings.titleModel.desc'),
             visible: () => this.plugin.settings.enableAutoTitleGeneration,
+            control: {
+              type: 'dropdown',
+              key: 'titleGenerationModel',
+              options: modelOptions,
+              defaultValue: 'auto',
+            },
           },
         ],
       },
@@ -65,66 +174,277 @@ export class QoderianSettingTab extends PluginSettingTab {
         type: 'group',
         heading: t('settings.content'),
         items: [
-          { name: t('settings.userName.name'), desc: t('settings.userName.desc') },
-          { name: t('settings.systemPrompt.name'), desc: t('settings.systemPrompt.desc') },
-          { name: t('settings.excludedTags.name'), desc: t('settings.excludedTags.desc') },
-          { name: t('settings.mediaFolder.name'), desc: t('settings.mediaFolder.desc') },
+          {
+            name: t('settings.userName.name'),
+            desc: t('settings.userName.desc'),
+            control: {
+              type: 'text',
+              key: 'userName',
+              placeholder: t('settings.userName.name'),
+              defaultValue: '',
+            },
+          },
+          {
+            name: t('settings.systemPrompt.name'),
+            desc: t('settings.systemPrompt.desc'),
+            control: {
+              type: 'textarea',
+              key: 'systemPrompt',
+              placeholder: t('settings.systemPrompt.name'),
+              defaultValue: '',
+              rows: 6,
+            },
+          },
+          {
+            name: t('settings.excludedTags.name'),
+            desc: t('settings.excludedTags.desc'),
+            control: {
+              type: 'textarea',
+              key: 'excludedTags',
+              placeholder: 'System\nprivate\ndraft',
+              defaultValue: '',
+              rows: 4,
+            },
+          },
+          {
+            name: t('settings.mediaFolder.name'),
+            desc: t('settings.mediaFolder.desc'),
+            control: {
+              type: 'text',
+              key: 'mediaFolder',
+              placeholder: 'Attachments',
+              defaultValue: '',
+            },
+          },
         ],
       },
       {
         type: 'group',
         heading: t('settings.input'),
         items: [
-          { name: t('settings.requireCommandOrControlEnterToSend.name'), desc: t('settings.requireCommandOrControlEnterToSend.desc') },
-          { name: t('settings.navMappings.name'), desc: t('settings.navMappings.desc') },
+          {
+            name: t('settings.requireCommandOrControlEnterToSend.name'),
+            desc: t('settings.requireCommandOrControlEnterToSend.desc'),
+            control: {
+              type: 'toggle',
+              key: 'requireCommandOrControlEnterToSend',
+              defaultValue: false,
+            },
+          },
+          {
+            name: t('settings.navMappings.name'),
+            desc: t('settings.navMappings.desc'),
+            render: (setting) => this.renderNavMappingsControl(setting),
+          },
         ],
       },
       {
         type: 'group',
         heading: t('settings.safety'),
         items: [
-          { name: t('settings.loadUserSettings.name'), desc: t('settings.loadUserSettings.desc') },
+          {
+            name: t('settings.loadUserSettings.name'),
+            desc: t('settings.loadUserSettings.desc'),
+            control: {
+              type: 'toggle',
+              key: 'loadUserSettings',
+              defaultValue: qoderSettings.loadUserSettings,
+            },
+          },
         ],
       },
       {
         type: 'group',
         heading: t('settings.slashCommands.name'),
+        cls: 'qoderian-slash-commands-group',
         items: [
-          { name: t('settings.slashCommands.commands'), desc: t('settings.slashCommands.commandsDesc') },
-          { name: t('settings.slashCommands.skills'), desc: t('settings.slashCommands.skillsDesc') },
+          {
+            name: t('settings.slashCommands.name'),
+            aliases: [
+              t('settings.slashCommands.commands'),
+              t('settings.slashCommands.skills'),
+            ],
+            render: (setting, group) => {
+              let wrapper: HTMLElement | null = null;
+              this.deferIntoList(group.listEl, (host) => {
+                wrapper = host.createDiv({
+                  cls: 'qoderian-slash-commands-container',
+                });
+                renderSlashCommandsSection(wrapper, { plugin: this.plugin });
+              });
+              return () => { wrapper?.remove(); };
+            },
+          },
         ],
       },
       {
         type: 'group',
         heading: t('settings.subagents.name'),
+        cls: 'qoderian-agents-group',
         items: [
-          { name: t('settings.subagents.name'), desc: t('settings.subagents.desc') },
+          {
+            name: t('settings.subagents.name'),
+            desc: t('settings.subagents.desc'),
+            render: (setting, group) => {
+              let wrapper: HTMLElement | null = null;
+              this.deferIntoList(group.listEl, (host) => {
+                wrapper = host.createDiv({
+                  cls: 'qoderian-agents-container',
+                });
+                renderSubagentsSection(wrapper, { plugin: this.plugin });
+              });
+              return () => { wrapper?.remove(); };
+            },
+          },
         ],
       },
       {
         type: 'group',
         heading: t('settings.mcpServers.name'),
+        cls: 'qoderian-mcp-group',
         items: [
-          { name: t('settings.mcpServers.name'), desc: t('settings.mcpServers.desc') },
+          {
+            name: t('settings.mcpServers.name'),
+            desc: t('settings.mcpServers.desc'),
+            render: (setting, group) => {
+              let wrapper: HTMLElement | null = null;
+              this.deferIntoList(group.listEl, (host) => {
+                wrapper = host.createDiv({
+                  cls: 'qoderian-mcp-container',
+                });
+                renderMcpSection(wrapper, {
+                  plugin: this.plugin,
+                  renderMcpSettings: (target, storage) => {
+                    new McpSettingsManager(target, {
+                      app: this.plugin.app,
+                      mcpStorage: storage,
+                      broadcastMcpReload: async () => {
+                        for (const view of this.plugin.getAllViews()) {
+                          await view.getTabManager()?.broadcastToAllTabs(
+                            (service) => service.reloadMcpServers(),
+                          );
+                        }
+                      },
+                    });
+                  },
+                });
+              });
+              return () => { wrapper?.remove(); };
+            },
+          },
         ],
       },
       {
         type: 'group',
         heading: t('settings.plugins.name'),
+        cls: 'qoderian-plugins-group',
         items: [
-          { name: t('settings.plugins.name'), desc: t('settings.plugins.desc') },
+          {
+            name: t('settings.plugins.name'),
+            desc: t('settings.plugins.desc'),
+            render: (setting, group) => {
+              let wrapper: HTMLElement | null = null;
+              this.deferIntoList(group.listEl, (host) => {
+                wrapper = host.createDiv({
+                  cls: 'qoderian-plugins-container',
+                });
+                renderPluginsSection(wrapper, { plugin: this.plugin });
+              });
+              return () => { wrapper?.remove(); };
+            },
+          },
         ],
       },
       {
         type: 'group',
         heading: t('settings.experimental'),
         items: [
-          { name: t('settings.enableBangBash.name'), desc: t('settings.enableBangBash.desc') },
+          {
+            name: t('settings.enableBangBash.name'),
+            desc: t('settings.enableBangBash.desc'),
+            render: (setting, group) => {
+              let injected: HTMLElement | null = null;
+              this.deferIntoList(group.listEl, (host) => {
+                injected = renderBangBashControl(setting, host, { plugin: this.plugin });
+              });
+              return () => { injected?.remove(); };
+            },
+          },
         ],
       },
     ];
   }
 
+  getControlValue(key: string): unknown {
+    if (key === 'excludedTags') {
+      return this.plugin.settings.excludedTags.join('\n');
+    }
+    if (key === 'loadUserSettings') {
+      const settingsBag = this.plugin.settings as unknown as Record<string, unknown>;
+      return getQoderSettings(settingsBag).loadUserSettings;
+    }
+    if (key === 'titleGenerationModel') {
+      return this.plugin.settings.titleGenerationModel || 'auto';
+    }
+    return super.getControlValue(key);
+  }
+
+  setControlValue(key: string, value: unknown): void | Promise<void> {
+    if (key === 'excludedTags') {
+      this.plugin.settings.excludedTags = String(value)
+        .split(/\r?\n/)
+        .map((entry) => entry.trim().replace(/^#/, ''))
+        .filter((entry) => entry.length > 0);
+      return this.plugin.saveSettings();
+    }
+
+    if (key === 'loadUserSettings') {
+      const settingsBag = this.plugin.settings as unknown as Record<string, unknown>;
+      updateQoderSettings(settingsBag, { loadUserSettings: Boolean(value) });
+      return this.plugin.saveSettings();
+    }
+
+    if (key === 'mediaFolder') {
+      return super.setControlValue(key, String(value).trim());
+    }
+
+    const result = super.setControlValue(key, value);
+
+    if (key === 'locale') {
+      setLocale(this.plugin.settings.locale as Locale);
+      this.update();
+    } else if (key === 'maxTabs') {
+      for (const view of this.plugin.getAllViews()) {
+        view.refreshTabControls();
+      }
+    } else if (key === 'enableAutoTitleGeneration') {
+      this.refreshDomState();
+    } else if (PROMPT_SETTING_KEYS.has(key)) {
+      this.schedulePromptRestart();
+    }
+
+    return result;
+  }
+  /* eslint-enable obsidianmd/no-unsupported-api */
+
+  /**
+   * The declarative renderer reconciles `group.listEl` synchronously after
+   * every `render` callback returns, removing children it does not own.
+   * Deferring to a microtask lets injected content (validation messages,
+   * rich section managers) survive that reconciliation.
+   */
+  private deferIntoList(
+    listEl: HTMLElement,
+    mount: (host: HTMLElement) => void,
+  ): void {
+    queueMicrotask(() => mount(listEl));
+  }
+
+  /**
+   * Imperative renderer for Obsidian versions older than 1.13.0, which
+   * never consult getSettingDefinitions(). Kept as the documented fallback
+   * and sharing the same builders as the declarative render rows.
+   */
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
@@ -188,53 +508,12 @@ export class QoderianSettingTab extends PluginSettingTab {
     const maxTabsSetting = new Setting(container)
       .setName(t('settings.maxTabs.name'))
       .setDesc(t('settings.maxTabs.desc'));
+    this.renderMaxTabsControl(maxTabsSetting, container);
 
-    const maxTabsWarningEl = container.createDiv({
-      cls: 'qoderian-max-tabs-warning qoderian-setting-validation qoderian-setting-validation-warning qoderian-hidden',
-    });
-    maxTabsWarningEl.setText(t('settings.maxTabs.warning'));
-
-    const updateMaxTabsWarning = (value: number): void => {
-      maxTabsWarningEl.toggleClass('qoderian-hidden', value <= 5);
-    };
-
-    maxTabsSetting.addSlider((slider) => {
-      slider
-        .setLimits(3, 10, 1)
-        .setValue(this.plugin.settings.maxTabs ?? 3)
-        .onChange(async (value) => {
-          this.plugin.settings.maxTabs = value;
-          await this.plugin.saveSettings();
-          updateMaxTabsWarning(value);
-          for (const view of this.plugin.getAllViews()) {
-            view.refreshTabControls();
-          }
-        });
-      updateMaxTabsWarning(this.plugin.settings.maxTabs ?? 3);
-    });
-
-    new Setting(container)
+    const placementSetting = new Setting(container)
       .setName(t('settings.chatViewPlacement.name'))
-      .setDesc(t('settings.chatViewPlacement.desc'))
-      .addDropdown((dropdown) => {
-        dropdown
-          .addOption('right-sidebar', t('settings.chatViewPlacement.rightSidebar'))
-          .addOption('left-sidebar', t('settings.chatViewPlacement.leftSidebar'))
-          .addOption('main-tab', t('settings.chatViewPlacement.mainTab'))
-          .setValue(this.plugin.settings.chatViewPlacement)
-          .onChange(async (value) => {
-            const previousPlacement = this.plugin.settings.chatViewPlacement;
-            try {
-              await this.plugin.updateChatViewPlacement(value as ChatViewPlacement);
-            } catch (error) {
-              dropdown.setValue(previousPlacement);
-              const message = error instanceof Error
-                ? error.message
-                : 'Could not move the Qoderian view.';
-              new Notice(message);
-            }
-          });
-      });
+      .setDesc(t('settings.chatViewPlacement.desc'));
+    this.renderChatViewPlacementControl(placementSetting);
 
     new Setting(container)
       .setName(t('settings.enableAutoScroll.name'))
@@ -381,60 +660,116 @@ export class QoderianSettingTab extends PluginSettingTab {
           });
       });
 
-    new Setting(container)
+    const navMappingsSetting = new Setting(container)
       .setName(t('settings.navMappings.name'))
-      .setDesc(t('settings.navMappings.desc'))
-      .addTextArea((text) => {
-        let pendingValue = buildNavMappingText(this.plugin.settings.keyboardNavigation);
-        let saveTimeout: number | null = null;
+      .setDesc(t('settings.navMappings.desc'));
+    this.renderNavMappingsControl(navMappingsSetting);
+  }
 
-        const commitValue = async (showError: boolean): Promise<void> => {
-          if (saveTimeout !== null) {
-            window.clearTimeout(saveTimeout);
-            saveTimeout = null;
-          }
+  /** Builds the max tabs slider with its over-limit warning. */
+  private renderMaxTabsControl(setting: Setting, warningHost: HTMLElement): HTMLElement {
+    const maxTabsWarningEl = warningHost.createDiv({
+      cls: 'qoderian-max-tabs-warning qoderian-setting-validation qoderian-setting-validation-warning qoderian-hidden',
+    });
+    maxTabsWarningEl.setText(t('settings.maxTabs.warning'));
 
-          const result = parseNavMappings(pendingValue);
-          if (!result.settings) {
-            if (showError) {
-              new Notice(`${t('common.error')}: ${result.error}`);
-              pendingValue = buildNavMappingText(this.plugin.settings.keyboardNavigation);
-              text.setValue(pendingValue);
-            }
-            return;
-          }
+    const updateMaxTabsWarning = (value: number): void => {
+      maxTabsWarningEl.toggleClass('qoderian-hidden', value <= 5);
+    };
 
-          this.plugin.settings.keyboardNavigation.scrollUpKey = result.settings.scrollUp;
-          this.plugin.settings.keyboardNavigation.scrollDownKey = result.settings.scrollDown;
-          this.plugin.settings.keyboardNavigation.focusInputKey = result.settings.focusInput;
+    setting.addSlider((slider) => {
+      slider
+        .setLimits(3, 10, 1)
+        .setValue(this.plugin.settings.maxTabs ?? 3)
+        .onChange(async (value) => {
+          this.plugin.settings.maxTabs = value;
           await this.plugin.saveSettings();
-          pendingValue = buildNavMappingText(this.plugin.settings.keyboardNavigation);
-          text.setValue(pendingValue);
-        };
-
-        const scheduleSave = (): void => {
-          if (saveTimeout !== null) {
-            window.clearTimeout(saveTimeout);
+          updateMaxTabsWarning(value);
+          for (const view of this.plugin.getAllViews()) {
+            view.refreshTabControls();
           }
-          saveTimeout = window.setTimeout(() => {
-            void commitValue(false);
-          }, 500);
-        };
-
-        text
-          .setPlaceholder('Map w scrollup\nmap s scrolldown\nmap i focusinput')
-          .setValue(pendingValue)
-          .onChange((value) => {
-            pendingValue = value;
-            scheduleSave();
-          });
-
-        text.inputEl.rows = 3;
-        text.inputEl.addEventListener('blur', () => {
-          void commitValue(true);
         });
-      });
+      updateMaxTabsWarning(this.plugin.settings.maxTabs ?? 3);
+    });
 
+    return maxTabsWarningEl;
+  }
+
+  /** Builds the chat view placement dropdown with error rollback. */
+  private renderChatViewPlacementControl(setting: Setting): void {
+    setting.addDropdown((dropdown) => {
+      dropdown
+        .addOption('right-sidebar', t('settings.chatViewPlacement.rightSidebar'))
+        .addOption('left-sidebar', t('settings.chatViewPlacement.leftSidebar'))
+        .addOption('main-tab', t('settings.chatViewPlacement.mainTab'))
+        .setValue(this.plugin.settings.chatViewPlacement)
+        .onChange(async (value) => {
+          const previousPlacement = this.plugin.settings.chatViewPlacement;
+          try {
+            await this.plugin.updateChatViewPlacement(value as ChatViewPlacement);
+          } catch (error) {
+            dropdown.setValue(previousPlacement);
+            const message = error instanceof Error
+              ? error.message
+              : 'Could not move the Qoderian view.';
+            new Notice(message);
+          }
+        });
+    });
+  }
+
+  /** Builds the keyboard navigation mappings editor with debounced validation. */
+  private renderNavMappingsControl(setting: Setting): void {
+    setting.addTextArea((text) => {
+      let pendingValue = buildNavMappingText(this.plugin.settings.keyboardNavigation);
+      let saveTimeout: number | null = null;
+
+      const commitValue = async (showError: boolean): Promise<void> => {
+        if (saveTimeout !== null) {
+          window.clearTimeout(saveTimeout);
+          saveTimeout = null;
+        }
+
+        const result = parseNavMappings(pendingValue);
+        if (!result.settings) {
+          if (showError) {
+            new Notice(`${t('common.error')}: ${result.error}`);
+            pendingValue = buildNavMappingText(this.plugin.settings.keyboardNavigation);
+            text.setValue(pendingValue);
+          }
+          return;
+        }
+
+        this.plugin.settings.keyboardNavigation.scrollUpKey = result.settings.scrollUp;
+        this.plugin.settings.keyboardNavigation.scrollDownKey = result.settings.scrollDown;
+        this.plugin.settings.keyboardNavigation.focusInputKey = result.settings.focusInput;
+        await this.plugin.saveSettings();
+        pendingValue = buildNavMappingText(this.plugin.settings.keyboardNavigation);
+        text.setValue(pendingValue);
+      };
+
+      const scheduleSave = (): void => {
+        if (saveTimeout !== null) {
+          window.clearTimeout(saveTimeout);
+        }
+        saveTimeout = window.setTimeout(() => {
+          void commitValue(false);
+        }, 500);
+      };
+
+      text
+        .setPlaceholder('Map w scrollup\nmap s scrolldown\nmap i focusinput')
+        .setValue(pendingValue)
+        .onChange((value) => {
+          pendingValue = value;
+          scheduleSave();
+        });
+
+      text.inputEl.rows = 3;
+      text.inputEl.addEventListener('blur', () => {
+        void commitValue(true);
+      });
+    });
   }
 
   private renderTitleModelSetting(container: HTMLElement): void {
@@ -460,6 +795,17 @@ export class QoderianSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           });
       });
+  }
+
+  /** Debounced service restart so prompt edits apply after typing settles. */
+  private schedulePromptRestart(): void {
+    if (this.promptRestartTimer !== null) {
+      window.clearTimeout(this.promptRestartTimer);
+    }
+    this.promptRestartTimer = window.setTimeout(() => {
+      this.promptRestartTimer = null;
+      void this.restartServiceForPromptChange();
+    }, 1000);
   }
 
   private async restartServiceForPromptChange(): Promise<void> {

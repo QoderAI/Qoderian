@@ -23,27 +23,53 @@ export interface QoderCliPathSettingContext {
   plugin: QoderianPlugin;
 }
 
-/** Renders the host-specific CLI path at the top of the complete settings page. */
-export function renderQoderCliPathSetting(
-  container: HTMLElement,
+export interface SlashCommandsSectionContext {
+  plugin: QoderianPlugin;
+}
+
+export interface SubagentsSectionContext {
+  plugin: QoderianPlugin;
+}
+
+export interface McpSectionContext {
+  plugin: QoderianPlugin;
+  renderMcpSettings(container: HTMLElement, storage: AppMcpStorage): void;
+}
+
+export interface PluginsSectionContext {
+  plugin: QoderianPlugin;
+}
+
+export interface BangBashSectionContext {
+  plugin: QoderianPlugin;
+}
+
+/** Builds the CLI path description for the current platform. */
+export function getCliPathDescription(): string {
+  const platformDesc = process.platform === 'win32'
+    ? t('settings.cliPath.descWindows')
+    : t('settings.cliPath.descUnix');
+  return `${t('settings.cliPath.desc')} ${platformDesc}`;
+}
+
+/**
+ * Attaches the host-specific CLI path input to `setting` and its validation
+ * message to `validationHost`. Shared by the imperative display() fallback
+ * and the 1.13+ declarative render row. Returns the injected validation
+ * element so declarative callers can remove it on teardown.
+ */
+export function renderQoderCliPathControl(
+  setting: Setting,
+  validationHost: HTMLElement,
   context: QoderCliPathSettingContext,
-): void {
+): HTMLElement {
     const qoderWorkspace = context.plugin.qoderServices;
     const settingsBag = context.plugin.settings as unknown as Record<string, unknown>;
     const qoderSettings = getQoderSettings(settingsBag);
-    new Setting(container).setName(t('settings.setup')).setHeading();
 
     const hostnameKey = getHostnameKey();
-    const platformDesc = process.platform === 'win32'
-      ? t('settings.cliPath.descWindows')
-      : t('settings.cliPath.descUnix');
-    const cliPathDescription = `${t('settings.cliPath.desc')} ${platformDesc}`;
 
-    const cliPathSetting = new Setting(container)
-      .setName(t('settings.cliPath.name'))
-      .setDesc(cliPathDescription);
-
-    const validationEl = container.createDiv({
+    const validationEl = validationHost.createDiv({
       cls: 'qoderian-cli-path-validation qoderian-setting-validation qoderian-setting-validation-error qoderian-hidden',
     });
 
@@ -109,7 +135,7 @@ export function renderQoderCliPathSetting(
       return true;
     };
 
-    cliPathSetting.addText((text) => {
+    setting.addText((text) => {
       const placeholder = process.platform === 'win32'
         ? 'C:\\Users\\<user>\\.local\\bin\\qodercli.exe'
         : '~/.local/bin/qodercli';
@@ -125,10 +151,122 @@ export function renderQoderCliPathSetting(
 
       updateCliPathValidation(currentValue, text.inputEl);
     });
+
+    return validationEl;
+}
+
+/** Renders the "Setup" heading plus the CLI path row (imperative fallback). */
+export function renderQoderCliPathSetting(
+  container: HTMLElement,
+  context: QoderCliPathSettingContext,
+): void {
+  new Setting(container).setName(t('settings.setup')).setHeading();
+  const cliPathSetting = new Setting(container)
+    .setName(t('settings.cliPath.name'))
+    .setDesc(getCliPathDescription());
+  renderQoderCliPathControl(cliPathSetting, container, context);
+}
+
+/** Renders the slash commands/skills manager into `container`. */
+export function renderSlashCommandsSection(
+  container: HTMLElement,
+  context: SlashCommandsSectionContext,
+): void {
+  new CommandSkillSettings(
+    container,
+    context.plugin.app,
+    context.plugin.qoderServices.commandCatalog,
+  );
+}
+
+/** Renders the subagents manager into `container`. */
+export function renderSubagentsSection(
+  container: HTMLElement,
+  context: SubagentsSectionContext,
+): void {
+  const qoderWorkspace = context.plugin.qoderServices;
+  const settingsBag = context.plugin.settings as unknown as Record<string, unknown>;
+  new AgentSettings(container, {
+    app: context.plugin.app,
+    agentCatalog: qoderWorkspace.agentCatalog,
+    agentStorage: qoderWorkspace.agentStorage,
+    modelOptions: qoderWorkspace.modelConfig.getModelOptions(settingsBag),
+  });
+}
+
+/** Renders the MCP servers manager into `container`. */
+export function renderMcpSection(
+  container: HTMLElement,
+  context: McpSectionContext,
+): void {
+  context.renderMcpSettings(container, context.plugin.qoderServices.mcpStorage);
+}
+
+/** Renders the plugins manager into `container`. */
+export function renderPluginsSection(
+  container: HTMLElement,
+  context: PluginsSectionContext,
+): void {
+  const qoderWorkspace = context.plugin.qoderServices;
+  new PluginSettingsManager(container, {
+    pluginManager: qoderWorkspace.pluginManager,
+    agentCatalog: qoderWorkspace.agentCatalog,
+    restartTabs: async () => {
+      const view = context.plugin.getView();
+      const tabManager = view?.getTabManager();
+      if (!tabManager) {
+        return;
+      }
+
+      await tabManager.broadcastToAllTabs(
+        async (service) => { await service.ensureReady({ force: true }); },
+      );
+    },
+  });
+}
+
+/**
+ * Attaches the `!bash` toggle to `setting` and its validation message to
+ * `validationHost`. Shared by the imperative display() fallback and the
+ * 1.13+ declarative render row. Returns the injected validation element so
+ * declarative callers can remove it on teardown.
+ */
+export function renderBangBashControl(
+  setting: Setting,
+  validationHost: HTMLElement,
+  context: BangBashSectionContext,
+): HTMLElement {
+  const settingsBag = context.plugin.settings as unknown as Record<string, unknown>;
+  const qoderSettings = getQoderSettings(settingsBag);
+
+  const validationEl = validationHost.createDiv({
+    cls: 'qoderian-bang-bash-validation qoderian-setting-validation qoderian-setting-validation-error qoderian-hidden',
+  });
+
+  setting.addToggle((toggle) =>
+      toggle
+        .setValue(qoderSettings.enableBangBash)
+        .onChange(async (value) => {
+          validationEl.toggleClass('qoderian-hidden', true);
+          if (value) {
+            const { findNodeExecutable, getEnhancedPath } = await import('../../../core/env/environment');
+            const nodePath = findNodeExecutable(getEnhancedPath());
+            if (!nodePath) {
+              validationEl.setText(t('settings.enableBangBash.validation.noNode'));
+              validationEl.toggleClass('qoderian-hidden', false);
+              toggle.setValue(false);
+              return;
+            }
+          }
+          updateQoderSettings(settingsBag, { enableBangBash: value });
+          await context.plugin.saveSettings();
+        })
+  );
+
+  return validationEl;
 }
 
 export function renderQoderSettingsTab(container: HTMLElement, context: QoderSettingsTabContext): void {
-    const qoderWorkspace = context.plugin.qoderServices;
     const settingsBag = context.plugin.settings as unknown as Record<string, unknown>;
     const qoderSettings = getQoderSettings(settingsBag);
 
@@ -153,11 +291,7 @@ export function renderQoderSettingsTab(container: HTMLElement, context: QoderSet
     new Setting(container).setName(t('settings.slashCommands.name')).setHeading();
 
     const slashCommandsContainer = container.createDiv({ cls: 'qoderian-slash-commands-container' });
-    new CommandSkillSettings(
-      slashCommandsContainer,
-      context.plugin.app,
-      qoderWorkspace.commandCatalog,
-    );
+    renderSlashCommandsSection(slashCommandsContainer, context);
 
     // --- Subagents ---
 
@@ -170,12 +304,7 @@ export function renderQoderSettingsTab(container: HTMLElement, context: QoderSet
     });
 
     const agentsContainer = container.createDiv({ cls: 'qoderian-agents-container' });
-    new AgentSettings(agentsContainer, {
-      app: context.plugin.app,
-      agentCatalog: qoderWorkspace.agentCatalog,
-      agentStorage: qoderWorkspace.agentStorage,
-      modelOptions: qoderWorkspace.modelConfig.getModelOptions(settingsBag),
-    });
+    renderSubagentsSection(agentsContainer, context);
 
     // --- MCP Servers ---
 
@@ -188,7 +317,7 @@ export function renderQoderSettingsTab(container: HTMLElement, context: QoderSet
     });
 
     const mcpContainer = container.createDiv({ cls: 'qoderian-mcp-container' });
-    context.renderMcpSettings(mcpContainer, qoderWorkspace.mcpStorage);
+    renderMcpSection(mcpContainer, context);
 
     // --- Plugins ---
 
@@ -201,50 +330,14 @@ export function renderQoderSettingsTab(container: HTMLElement, context: QoderSet
     });
 
     const pluginsContainer = container.createDiv({ cls: 'qoderian-plugins-container' });
-    new PluginSettingsManager(pluginsContainer, {
-      pluginManager: qoderWorkspace.pluginManager,
-      agentCatalog: qoderWorkspace.agentCatalog,
-      restartTabs: async () => {
-        const view = context.plugin.getView();
-        const tabManager = view?.getTabManager();
-        if (!tabManager) {
-          return;
-        }
-
-        await tabManager.broadcastToAllTabs(
-          async (service) => { await service.ensureReady({ force: true }); },
-        );
-      },
-    });
+    renderPluginsSection(pluginsContainer, context);
 
     // --- Experimental ---
 
     new Setting(container).setName(t('settings.experimental')).setHeading();
 
-    new Setting(container)
+    const bangBashSetting = new Setting(container)
       .setName(t('settings.enableBangBash.name'))
-      .setDesc(t('settings.enableBangBash.desc'))
-      .addToggle((toggle) =>
-        toggle
-          .setValue(qoderSettings.enableBangBash)
-          .onChange(async (value) => {
-            bangBashValidationEl.toggleClass('qoderian-hidden', true);
-            if (value) {
-              const { findNodeExecutable, getEnhancedPath } = await import('../../../core/env/environment');
-              const nodePath = findNodeExecutable(getEnhancedPath());
-              if (!nodePath) {
-                bangBashValidationEl.setText(t('settings.enableBangBash.validation.noNode'));
-                bangBashValidationEl.toggleClass('qoderian-hidden', false);
-                toggle.setValue(false);
-                return;
-              }
-            }
-            updateQoderSettings(settingsBag, { enableBangBash: value });
-            await context.plugin.saveSettings();
-          })
-      );
-
-    const bangBashValidationEl = container.createDiv({
-      cls: 'qoderian-bang-bash-validation qoderian-setting-validation qoderian-setting-validation-error qoderian-hidden',
-    });
+      .setDesc(t('settings.enableBangBash.desc'));
+    renderBangBashControl(bangBashSetting, container, context);
 }
