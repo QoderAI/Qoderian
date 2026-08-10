@@ -11,6 +11,17 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-08-10
+
+### Fixed
+
+- Restored editable settings on Obsidian 1.13+. The settings tab now
+  implements the declarative settings API with native controls and full
+  settings search support; rows with custom UI (Qoder CLI path, max tabs,
+  chat view placement, navigation keys, `!` bash, slash commands,
+  subagents, MCP servers, plugins) keep their rich behavior. `display()`
+  remains as the fallback for Obsidian versions older than 1.13.
+
 ## [1.0.2] - 2026-08-06
 
 ### Added
