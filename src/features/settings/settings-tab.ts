@@ -1,5 +1,5 @@
-import type { App, SettingDefinitionItem } from 'obsidian';
-import { Notice, PluginSettingTab, Setting } from 'obsidian';
+import type { App, SettingDefinitionItem, SettingGroup } from 'obsidian';
+import { Notice, PluginSettingTab, requireApiVersion, Setting } from 'obsidian';
 
 import type { ChatViewPlacement } from '../../core/types/settings';
 import { getAvailableLocales, getLocaleDisplayName, setLocale, t } from '../../i18n/i18n';
@@ -41,10 +41,10 @@ export class QoderianSettingTab extends PluginSettingTab {
    * pre-1.13 display() fallback below.
    *
    * The new-API usages below only execute on Obsidian >= 1.13 (Obsidian
-   * never invokes this method on older versions), so the version warnings
-   * against minAppVersion are expected.
+   * never invokes this method on older versions) and are guarded with
+   * requireApiVersion() so they stay compatible with the lower
+   * minAppVersion.
    */
-  /* eslint-disable obsidianmd/no-unsupported-api */
   getSettingDefinitions(): SettingDefinitionItem[] {
     setLocale(this.plugin.settings.locale as Locale);
 
@@ -71,7 +71,7 @@ export class QoderianSettingTab extends PluginSettingTab {
             desc: getCliPathDescription(),
             render: (setting, group) => {
               let injected: HTMLElement | null = null;
-              this.deferIntoList(group.listEl, (host) => {
+              this.deferIntoList(group, (host) => {
                 injected = renderQoderCliPathControl(setting, host, { plugin: this.plugin });
               });
               return () => { injected?.remove(); };
@@ -104,7 +104,7 @@ export class QoderianSettingTab extends PluginSettingTab {
             desc: t('settings.maxTabs.desc'),
             render: (setting, group) => {
               let injected: HTMLElement | null = null;
-              this.deferIntoList(group.listEl, (host) => {
+              this.deferIntoList(group, (host) => {
                 injected = this.renderMaxTabsControl(setting, host);
               });
               return () => { injected?.remove(); };
@@ -266,7 +266,7 @@ export class QoderianSettingTab extends PluginSettingTab {
             ],
             render: (setting, group) => {
               let wrapper: HTMLElement | null = null;
-              this.deferIntoList(group.listEl, (host) => {
+              this.deferIntoList(group, (host) => {
                 wrapper = host.createDiv({
                   cls: 'qoderian-slash-commands-container',
                 });
@@ -287,7 +287,7 @@ export class QoderianSettingTab extends PluginSettingTab {
             desc: t('settings.subagents.desc'),
             render: (setting, group) => {
               let wrapper: HTMLElement | null = null;
-              this.deferIntoList(group.listEl, (host) => {
+              this.deferIntoList(group, (host) => {
                 wrapper = host.createDiv({
                   cls: 'qoderian-agents-container',
                 });
@@ -308,7 +308,7 @@ export class QoderianSettingTab extends PluginSettingTab {
             desc: t('settings.mcpServers.desc'),
             render: (setting, group) => {
               let wrapper: HTMLElement | null = null;
-              this.deferIntoList(group.listEl, (host) => {
+              this.deferIntoList(group, (host) => {
                 wrapper = host.createDiv({
                   cls: 'qoderian-mcp-container',
                 });
@@ -344,7 +344,7 @@ export class QoderianSettingTab extends PluginSettingTab {
             desc: t('settings.plugins.desc'),
             render: (setting, group) => {
               let wrapper: HTMLElement | null = null;
-              this.deferIntoList(group.listEl, (host) => {
+              this.deferIntoList(group, (host) => {
                 wrapper = host.createDiv({
                   cls: 'qoderian-plugins-container',
                 });
@@ -364,7 +364,7 @@ export class QoderianSettingTab extends PluginSettingTab {
             desc: t('settings.enableBangBash.desc'),
             render: (setting, group) => {
               let injected: HTMLElement | null = null;
-              this.deferIntoList(group.listEl, (host) => {
+              this.deferIntoList(group, (host) => {
                 injected = renderBangBashControl(setting, host, { plugin: this.plugin });
               });
               return () => { injected?.remove(); };
@@ -376,68 +376,80 @@ export class QoderianSettingTab extends PluginSettingTab {
   }
 
   getControlValue(key: string): unknown {
-    if (key === 'excludedTags') {
-      return this.plugin.settings.excludedTags.join('\n');
+    if (requireApiVersion('1.13.0')) {
+      if (key === 'excludedTags') {
+        return this.plugin.settings.excludedTags.join('\n');
+      }
+      if (key === 'loadUserSettings') {
+        const settingsBag = this.plugin.settings as unknown as Record<string, unknown>;
+        return getQoderSettings(settingsBag).loadUserSettings;
+      }
+      if (key === 'titleGenerationModel') {
+        return this.plugin.settings.titleGenerationModel || 'auto';
+      }
+      return super.getControlValue(key);
     }
-    if (key === 'loadUserSettings') {
-      const settingsBag = this.plugin.settings as unknown as Record<string, unknown>;
-      return getQoderSettings(settingsBag).loadUserSettings;
-    }
-    if (key === 'titleGenerationModel') {
-      return this.plugin.settings.titleGenerationModel || 'auto';
-    }
-    return super.getControlValue(key);
+    // Unreachable: Obsidian < 1.13 never calls getControlValue.
+    return undefined;
   }
 
   setControlValue(key: string, value: unknown): void | Promise<void> {
-    if (key === 'excludedTags') {
-      this.plugin.settings.excludedTags = String(value)
-        .split(/\r?\n/)
-        .map((entry) => entry.trim().replace(/^#/, ''))
-        .filter((entry) => entry.length > 0);
-      return this.plugin.saveSettings();
-    }
-
-    if (key === 'loadUserSettings') {
-      const settingsBag = this.plugin.settings as unknown as Record<string, unknown>;
-      updateQoderSettings(settingsBag, { loadUserSettings: Boolean(value) });
-      return this.plugin.saveSettings();
-    }
-
-    if (key === 'mediaFolder') {
-      return super.setControlValue(key, String(value).trim());
-    }
-
-    const result = super.setControlValue(key, value);
-
-    if (key === 'locale') {
-      setLocale(this.plugin.settings.locale as Locale);
-      this.update();
-    } else if (key === 'maxTabs') {
-      for (const view of this.plugin.getAllViews()) {
-        view.refreshTabControls();
+    if (requireApiVersion('1.13.0')) {
+      if (key === 'excludedTags') {
+        this.plugin.settings.excludedTags = String(value)
+          .split(/\r?\n/)
+          .map((entry) => entry.trim().replace(/^#/, ''))
+          .filter((entry) => entry.length > 0);
+        return this.plugin.saveSettings();
       }
-    } else if (key === 'enableAutoTitleGeneration') {
-      this.refreshDomState();
-    } else if (PROMPT_SETTING_KEYS.has(key)) {
-      this.schedulePromptRestart();
-    }
 
-    return result;
+      if (key === 'loadUserSettings') {
+        const settingsBag = this.plugin.settings as unknown as Record<string, unknown>;
+        updateQoderSettings(settingsBag, { loadUserSettings: Boolean(value) });
+        return this.plugin.saveSettings();
+      }
+
+      if (key === 'mediaFolder') {
+        return super.setControlValue(key, String(value).trim());
+      }
+
+      const result = super.setControlValue(key, value);
+
+      if (key === 'locale') {
+        setLocale(this.plugin.settings.locale as Locale);
+        this.update();
+      } else if (key === 'maxTabs') {
+        for (const view of this.plugin.getAllViews()) {
+          view.refreshTabControls();
+        }
+      } else if (key === 'enableAutoTitleGeneration') {
+        this.refreshDomState();
+      } else if (PROMPT_SETTING_KEYS.has(key)) {
+        this.schedulePromptRestart();
+      }
+
+      return result;
+    }
+    // Unreachable: Obsidian < 1.13 never calls setControlValue.
   }
-  /* eslint-enable obsidianmd/no-unsupported-api */
 
   /**
    * The declarative renderer reconciles `group.listEl` synchronously after
    * every `render` callback returns, removing children it does not own.
    * Deferring to a microtask lets injected content (validation messages,
-   * rich section managers) survive that reconciliation.
+   * rich section managers) survive that reconciliation. The guard covers
+   * `listEl`, which only exists on newer Obsidian versions.
    */
   private deferIntoList(
-    listEl: HTMLElement,
+    group: SettingGroup,
     mount: (host: HTMLElement) => void,
   ): void {
-    queueMicrotask(() => mount(listEl));
+    if (requireApiVersion('1.13.0')) {
+      const listEl = group.listEl;
+      if (listEl) {
+        queueMicrotask(() => mount(listEl));
+      }
+    }
   }
 
   /**
