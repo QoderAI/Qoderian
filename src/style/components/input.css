@@ -29,7 +29,7 @@
   box-shadow: var(--qoderian-input-wrapper-box-shadow);
 }
 
-/* Context row (file chip start, selection indicator end) - inside input wrapper at top */
+/* Context row (context chips: files, images, selections) - inside input wrapper at top */
 /* Collapsed by default; expanded via .has-content class; textarea fills remaining space */
 .qoderian-context-row {
   display: none;
@@ -97,27 +97,29 @@
   height: 16.8px;
 }
 
-/* Selection indicator (shown when text is selected in editor) */
-/* Match file chip height (24px): chip has 16px remove button + 6px padding + 2px border */
-/* Indicator: 12px text + 10px padding (5+5) + 2px border = 24px */
+/* Selection chips (editor / browser / canvas selection context) */
+/* Pill-styled like file chips: icon + label + remove button, left aligned in context row */
 .qoderian-selection-indicator,
 .qoderian-browser-selection-indicator,
 .qoderian-canvas-indicator {
-  color: #7abaff;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px 3px 8px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 12px;
   font-size: 12px;
   line-height: 1;
-  opacity: 0.9;
-  pointer-events: none;
-  white-space: nowrap;
-  padding: 5px 6px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  margin-inline-start: auto;
+  max-width: min(200px, 100%);
+  color: var(--text-normal);
   flex-shrink: 0;
-  order: 4;
-  max-width: min(100%, clamp(220px, 64vw, 560px));
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.qoderian-selection-indicator:hover,
+.qoderian-browser-selection-indicator:hover,
+.qoderian-canvas-indicator:hover {
+  background: var(--background-modifier-hover);
 }
 
 .qoderian-input-wrapper textarea.qoderian-input {

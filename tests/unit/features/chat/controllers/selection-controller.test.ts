@@ -1,5 +1,6 @@
 import { createMockEl } from '@test/helpers/mock-element';
 
+import { createSelectionChip } from '@/features/chat/controllers/selection-chip';
 import { SelectionController } from '@/features/chat/controllers/selection-controller';
 import { hideSelectionHighlight, showSelectionHighlight } from '@/shared/components/selection-highlight';
 
@@ -167,6 +168,24 @@ describe('SelectionController', () => {
 
     controller.showHighlight();
     expect(showSelectionHighlight).toHaveBeenCalledWith(editorView, 0, 4);
+  });
+
+  it('clears the selection when the chip remove button is clicked', () => {
+    const chipEl = createSelectionChip(contextRowEl, 'qoderian-selection-indicator', 'text-select');
+    const chipController = new SelectionController(app, chipEl as any, inputEl, contextRowEl, undefined, focusScopeEl);
+    chipController.start();
+    jest.advanceTimersByTime(250);
+
+    expect(chipController.hasSelection()).toBe(true);
+    const labelEl = chipEl.querySelector('.qoderian-file-chip-name')!;
+    expect(labelEl.textContent).toBe('1 line selected');
+
+    (chipEl.querySelector('.qoderian-file-chip-remove') as any).click();
+
+    expect(chipController.hasSelection()).toBe(false);
+    expect(chipEl.hasClass('qoderian-hidden')).toBe(true);
+    expect(labelEl.textContent).toBe('');
+    chipController.stop();
   });
 
   it('clears selection immediately when deselected without input handoff intent', () => {
