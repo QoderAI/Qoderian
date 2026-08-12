@@ -11,6 +11,15 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-08-12
+
+### Fixed
+
+- Selection context indicators (editor, browser, and canvas selections)
+  now render as left-aligned removable chips — icon, label, and a ×
+  button that clears the captured selection — instead of right-aligned
+  text that pushed the input placeholder down inside the composer box.
+
 ## [1.0.3] - 2026-08-10
 
 ### Fixed
