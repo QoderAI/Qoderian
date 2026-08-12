@@ -2,6 +2,7 @@ import type { App, ItemView } from 'obsidian';
 
 import type { BrowserSelectionContext } from '../../../core/context/types';
 import { updateContextRowHasContent } from './context-row-visibility';
+import { bindSelectionChipRemove, setSelectionChipLabel } from './selection-chip';
 
 const BROWSER_SELECTION_POLL_INTERVAL = 250;
 
@@ -31,6 +32,7 @@ export class BrowserSelectionController {
     this.inputEl = inputEl;
     this.contextRowEl = contextRowEl;
     this.onVisibilityChange = onVisibilityChange ?? null;
+    bindSelectionChipRemove(this.indicatorEl, () => this.clear());
   }
 
   start(): void {
@@ -248,12 +250,12 @@ export class BrowserSelectionController {
     if (this.storedSelection) {
       const lineCount = this.storedSelection.selectedText.split(/\r?\n/).length;
       const lineLabel = lineCount === 1 ? 'line' : 'lines';
-      this.indicatorEl.textContent = `${lineCount} ${lineLabel} selected`;
+      setSelectionChipLabel(this.indicatorEl, `${lineCount} ${lineLabel} selected`);
       this.indicatorEl.setAttribute('title', this.buildIndicatorTitle());
       this.indicatorEl.removeClass('qoderian-hidden');
     } else {
       this.indicatorEl.addClass('qoderian-hidden');
-      this.indicatorEl.textContent = '';
+      setSelectionChipLabel(this.indicatorEl, '');
       this.indicatorEl.removeAttribute('title');
     }
     this.updateContextRowVisibility();

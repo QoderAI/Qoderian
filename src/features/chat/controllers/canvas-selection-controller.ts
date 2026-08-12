@@ -2,6 +2,7 @@ import type { App, ItemView } from 'obsidian';
 
 import type { CanvasSelectionContext } from '../../../core/context/types';
 import { updateContextRowHasContent } from './context-row-visibility';
+import { bindSelectionChipRemove, setSelectionChipLabel } from './selection-chip';
 
 const CANVAS_POLL_INTERVAL = 250;
 
@@ -37,6 +38,7 @@ export class CanvasSelectionController {
     this.inputEl = inputEl;
     this.contextRowEl = contextRowEl;
     this.onVisibilityChange = onVisibilityChange ?? null;
+    bindSelectionChipRemove(this.indicatorEl, () => this.clear());
   }
 
   start(): void {
@@ -107,12 +109,13 @@ export class CanvasSelectionController {
 
     if (this.storedSelection) {
       const { nodeIds } = this.storedSelection;
-      this.indicatorEl.textContent = nodeIds.length === 1
+      setSelectionChipLabel(this.indicatorEl, nodeIds.length === 1
         ? `node "${nodeIds[0]}" selected`
-        : `${nodeIds.length} nodes selected`;
+        : `${nodeIds.length} nodes selected`);
       this.indicatorEl.removeClass('qoderian-hidden');
     } else {
       this.indicatorEl.addClass('qoderian-hidden');
+      setSelectionChipLabel(this.indicatorEl, '');
     }
     this.updateContextRowVisibility();
   }

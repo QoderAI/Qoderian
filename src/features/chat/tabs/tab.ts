@@ -18,6 +18,7 @@ import { CanvasSelectionController } from '../controllers/canvas-selection-contr
 import { ConversationController } from '../controllers/conversation-controller';
 import { InputController } from '../controllers/input-controller';
 import { NavigationController } from '../controllers/navigation-controller';
+import { createSelectionChip } from '../controllers/selection-chip';
 import { SelectionController } from '../controllers/selection-controller';
 import { StreamController } from '../controllers/stream-controller';
 import { MessageRenderer } from '../rendering/message-renderer';
@@ -494,12 +495,24 @@ export function initializeTabUI(
   // Initialize context managers (file/image)
   initializeContextManagers(tab, plugin);
 
-  // Selection indicator - add to contextRowEl
-  dom.selectionIndicatorEl = dom.contextRowEl.createDiv({ cls: 'qoderian-selection-indicator qoderian-hidden' });
+  // Selection chips - add to contextRowEl (pill style: icon + label + remove)
+  dom.selectionIndicatorEl = createSelectionChip(
+    dom.contextRowEl,
+    'qoderian-selection-indicator',
+    'text-select'
+  );
 
-  dom.browserIndicatorEl = dom.contextRowEl.createDiv({ cls: 'qoderian-browser-selection-indicator qoderian-hidden' });
+  dom.browserIndicatorEl = createSelectionChip(
+    dom.contextRowEl,
+    'qoderian-browser-selection-indicator',
+    'globe'
+  );
 
-  dom.canvasIndicatorEl = dom.contextRowEl.createDiv({ cls: 'qoderian-canvas-indicator qoderian-hidden' });
+  dom.canvasIndicatorEl = createSelectionChip(
+    dom.contextRowEl,
+    'qoderian-canvas-indicator',
+    'network'
+  );
 
   const catalogInfo = options.getQoderCatalogConfig?.() ?? null;
   initializeSlashCommands(

@@ -5,6 +5,7 @@ import { type EditorSelectionContext, getEditorView } from '../../../core/editor
 import { hideSelectionHighlight, showSelectionHighlight } from '../../../shared/components/selection-highlight';
 import type { StoredSelection } from '../state/types';
 import { updateContextRowHasContent } from './context-row-visibility';
+import { bindSelectionChipRemove, setSelectionChipLabel } from './selection-chip';
 
 const SELECTION_POLL_INTERVAL = 250;
 const INPUT_HANDOFF_GRACE_MS = 1500;
@@ -51,6 +52,7 @@ export class SelectionController {
     this.focusScopeEls = this.normalizeFocusScopes(focusScopeEl);
     this.contextRowEl = contextRowEl;
     this.onVisibilityChange = onVisibilityChange ?? null;
+    bindSelectionChipRemove(this.indicatorEl, () => this.clear());
   }
 
   start(): void {
@@ -384,10 +386,11 @@ export class SelectionController {
 
     if (this.storedSelection) {
       const lineText = this.storedSelection.lineCount === 1 ? 'line' : 'lines';
-      this.indicatorEl.textContent = `${this.storedSelection.lineCount} ${lineText} selected`;
+      setSelectionChipLabel(this.indicatorEl, `${this.storedSelection.lineCount} ${lineText} selected`);
       this.indicatorEl.removeClass('qoderian-hidden');
     } else {
       this.indicatorEl.addClass('qoderian-hidden');
+      setSelectionChipLabel(this.indicatorEl, '');
     }
     this.updateContextRowVisibility();
   }
