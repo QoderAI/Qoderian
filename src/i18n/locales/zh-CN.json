@@ -254,6 +254,12 @@
       "leftSidebar": "左侧边栏",
       "mainTab": "主编辑器标签页"
     },
+    "cliEdition": {
+      "name": "Qoder CLI 版本",
+      "desc": "选择国际版（qodercli，配置目录 ~/.qoder）或国内版（qoderclicn，配置目录 ~/.qoder-cn）。切换后已打开的标签页将立即重启，进行中的对话会中断。两个版本的历史会话分别保存在 ~/.qoder 和 ~/.qoder-cn，互相不可见。",
+      "global": "国际版（qodercli）",
+      "cn": "国内版（qoderclicn）"
+    },
     "cliPath": {
       "name": "Qoder CLI 路径",
       "desc": "Qoder CLI 的自定义路径。留空使用自动检测。",

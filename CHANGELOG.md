@@ -11,6 +11,14 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Added
+
+- Qoder CLI edition switch in settings (Setup section): choose the
+  international build (`qodercli`, config under `~/.qoder`) or the
+  China build (`qoderclicn`, config under `~/.qoder-cn`). Auto-
+  detection, session history, global plugins, and login hints all
+  follow the selected edition.
+
 ### Fixed
 
 - The composer now adapts to narrow sidebars: context chips that do

@@ -221,6 +221,10 @@ export type TranslationKey =
   | 'settings.cliPath.descUnix'
   | 'settings.cliPath.validation.notExist'
   | 'settings.cliPath.validation.isDirectory'
+  | 'settings.cliEdition.name'
+  | 'settings.cliEdition.desc'
+  | 'settings.cliEdition.global'
+  | 'settings.cliEdition.cn'
 
   // Settings - Language
   | 'settings.language.name'

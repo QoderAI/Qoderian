@@ -63,10 +63,22 @@ export type PermissionMode = 'default' | 'acceptEdits' | 'auto' | 'plan' | 'yolo
 /** Opaque device-keyed CLI paths for per-device configuration. */
 export type HostnameCliPaths = Record<string, string>;
 
+/** Supported Qoder CLI distribution builds. */
+export const QODER_CLI_EDITIONS = ['global', 'cn'] as const;
+
+/**
+ * Qoder CLI distribution edition: the international build (`qodercli`,
+ * config under `~/.qoder`) or the China build (`qoderclicn`, config under
+ * `~/.qoder-cn`).
+ */
+export type QoderCliEdition = typeof QODER_CLI_EDITIONS[number];
+
 /** Qoder CLI settings stored alongside Qoderian's general preferences. */
 export interface QoderSettings {
   cliPath: string;
   cliPathsByHost: HostnameCliPaths;
+  /** Selected Qoder CLI distribution build. */
+  edition: QoderCliEdition;
   loadUserSettings: boolean;
   enableBangBash: boolean;
   discoveredModels: Array<{

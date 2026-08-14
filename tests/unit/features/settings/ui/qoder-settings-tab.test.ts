@@ -373,10 +373,17 @@ describe('QoderSettingsTab', () => {
     const cliPathSetting = findSetting('settings.cliPath.name');
     const cliPathInput = cliPathSetting.textComponents[0];
 
-    expect(createdSettings.slice(0, 2).map(setting => setting.name)).toEqual([
+    expect(createdSettings.slice(0, 3).map(setting => setting.name)).toEqual([
       'settings.setup',
+      'settings.cliEdition.name',
       'settings.cliPath.name',
     ]);
+
+    const editionSetting = findSetting('settings.cliEdition.name');
+    const editionDropdown = editionSetting.dropdownComponents[0];
+    expect(editionDropdown.options.map(option => option.value)).toEqual(['global', 'cn']);
+    expect(editionDropdown.value).toBe('global');
+
     expect(cliPathInput.placeholder).toContain('qodercli');
   });
 
