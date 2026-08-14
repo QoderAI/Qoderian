@@ -2,6 +2,7 @@ import { Notice } from 'obsidian';
 
 import type { QoderRuntimeStatus } from '../../../../core/types/services';
 import type { PermissionMode } from '../../../../core/types/settings';
+import { getActiveQoderCliEdition, getQoderCliLoginCommand } from '../../../../qoder/config/cli-edition';
 import type { QoderModelConfig } from '../../../../qoder/models/qoder-model-config';
 import { createIconSvg, QODER_ICON } from '../../../../shared/icons';
 import { ClickPopover } from './click-popover';
@@ -34,7 +35,6 @@ const DEFAULT_RUNTIME_STATUS: QoderRuntimeStatus = {
   kind: 'ready',
   message: 'Qoder CLI is ready.',
 };
-const QODER_LOGIN_COMMAND = 'qodercli login';
 
 function getRuntimeStatusLabel(status: QoderRuntimeStatus): string {
   switch (status.kind) {
@@ -137,7 +137,7 @@ export class ModelSelector {
       if (status.kind === 'authRequired') {
         statusEl.createEl('code', {
           cls: 'qoderian-model-runtime-command',
-          text: QODER_LOGIN_COMMAND,
+          text: getQoderCliLoginCommand(getActiveQoderCliEdition()),
         });
       }
       if (status.details) {

@@ -254,6 +254,12 @@
       "leftSidebar": "Barre latérale gauche",
       "mainTab": "Onglet principal de l'éditeur"
     },
+    "cliEdition": {
+      "name": "Édition de Qoder CLI",
+      "desc": "Choisissez la version internationale (qodercli, ~/.qoder) ou la version Chine (qoderclicn, ~/.qoder-cn). Les onglets ouverts redémarrent immédiatement après le changement, interrompant les conversations en cours. L'historique des conversations est stocké séparément par édition (~/.qoder et ~/.qoder-cn) et n'est pas partagé entre les éditions.",
+      "global": "Internationale (qodercli)",
+      "cn": "Chine (qoderclicn)"
+    },
     "cliPath": {
       "name": "Chemin CLI Qoder",
       "desc": "Chemin personnalisé vers Qoder CLI. Laisser vide pour la détection automatique.",

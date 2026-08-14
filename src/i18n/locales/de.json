@@ -254,6 +254,12 @@
       "leftSidebar": "Linke Seitenleiste",
       "mainTab": "Haupteditor-Tab"
     },
+    "cliEdition": {
+      "name": "Qoder CLI-Ausgabe",
+      "desc": "Wählen Sie die internationale Version (qodercli, ~/.qoder) oder die China-Version (qoderclicn, ~/.qoder-cn). Geöffnete Tabs werden nach dem Wechsel sofort neu gestartet, laufende Unterhaltungen werden unterbrochen. Der Gesprächsverlauf wird pro Ausgabe getrennt gespeichert (~/.qoder und ~/.qoder-cn) und nicht gemeinsam genutzt.",
+      "global": "International (qodercli)",
+      "cn": "China (qoderclicn)"
+    },
     "cliPath": {
       "name": "Qoder CLI-Pfad",
       "desc": "Benutzerdefinierter Pfad zum Qoder CLI. Leer lassen für automatische Erkennung.",

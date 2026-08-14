@@ -254,6 +254,12 @@
       "leftSidebar": "左側邊欄",
       "mainTab": "主編輯器分頁"
     },
+    "cliEdition": {
+      "name": "Qoder CLI 版本",
+      "desc": "選擇國際版（qodercli，設定目錄 ~/.qoder）或中國大陸版（qoderclicn，設定目錄 ~/.qoder-cn）。切換後已開啟的標籤頁將立即重新啟動，進行中的對話會中斷。各版本的歷史對話分別儲存在 ~/.qoder 和 ~/.qoder-cn，互不可見。",
+      "global": "國際版（qodercli）",
+      "cn": "中國大陸版（qoderclicn）"
+    },
     "cliPath": {
       "name": "Qoder CLI 路徑",
       "desc": "Qoder CLI 的自訂路徑。留空使用自動偵測。",

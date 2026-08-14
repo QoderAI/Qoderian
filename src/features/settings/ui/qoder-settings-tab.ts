@@ -6,6 +6,7 @@ import { expandHomePath } from '../../../core/fs/path';
 import type { AppMcpStorage } from '../../../core/types/services';
 import { t } from '../../../i18n/i18n';
 import type QoderianPlugin from '../../../main';
+import { normalizeQoderCliEdition } from '../../../qoder/config/cli-edition';
 import {
   getQoderSettings,
   updateQoderSettings,
@@ -20,6 +21,10 @@ export interface QoderSettingsTabContext {
 }
 
 export interface QoderCliPathSettingContext {
+  plugin: QoderianPlugin;
+}
+
+export interface QoderCliEditionSettingContext {
   plugin: QoderianPlugin;
 }
 
@@ -155,12 +160,50 @@ export function renderQoderCliPathControl(
     return validationEl;
 }
 
+/**
+ * Attaches the CLI edition dropdown to `setting`. Switching editions changes
+ * the executable name and the CLI's user config root, so the resolver cache
+ * is dropped and every tab restarts, mirroring a CLI path change.
+ */
+export function renderQoderCliEditionControl(
+  setting: Setting,
+  context: QoderCliEditionSettingContext,
+): void {
+  const qoderWorkspace = context.plugin.qoderServices;
+  const settingsBag = context.plugin.settings as unknown as Record<string, unknown>;
+
+  setting.addDropdown((dropdown) => {
+    dropdown
+      .addOption('global', t('settings.cliEdition.global'))
+      .addOption('cn', t('settings.cliEdition.cn'))
+      .setValue(getQoderSettings(settingsBag).edition)
+      .onChange(async (value) => {
+        const edition = normalizeQoderCliEdition(value);
+        updateQoderSettings(settingsBag, { edition });
+        await context.plugin.saveSettings();
+        qoderWorkspace.cliResolver.reset();
+        await qoderWorkspace.pluginManager.loadPlugins();
+        const view = context.plugin.getView();
+        await view?.getTabManager()?.broadcastToAllTabs(
+          (service) => Promise.resolve(service.cleanup())
+        );
+        void qoderWorkspace.agentCatalog.refresh();
+      });
+  });
+}
+
 /** Renders the "Setup" heading plus the CLI path row (imperative fallback). */
 export function renderQoderCliPathSetting(
   container: HTMLElement,
   context: QoderCliPathSettingContext,
 ): void {
   new Setting(container).setName(t('settings.setup')).setHeading();
+
+  const editionSetting = new Setting(container)
+    .setName(t('settings.cliEdition.name'))
+    .setDesc(t('settings.cliEdition.desc'));
+  renderQoderCliEditionControl(editionSetting, context);
+
   const cliPathSetting = new Setting(container)
     .setName(t('settings.cliPath.name'))
     .setDesc(getCliPathDescription());

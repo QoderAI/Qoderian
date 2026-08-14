@@ -254,6 +254,12 @@
       "leftSidebar": "Barra lateral esquerda",
       "mainTab": "Aba do editor principal"
     },
+    "cliEdition": {
+      "name": "Edição do Qoder CLI",
+      "desc": "Escolha a versão internacional (qodercli, ~/.qoder) ou a versão China (qoderclicn, ~/.qoder-cn). As abas abertas são reiniciadas imediatamente após a troca, interrompendo conversas em andamento. O histórico de conversas é armazenado separadamente por edição (~/.qoder e ~/.qoder-cn) e não é compartilhado entre edições.",
+      "global": "Internacional (qodercli)",
+      "cn": "China (qoderclicn)"
+    },
     "cliPath": {
       "name": "Caminho CLI Qoder",
       "desc": "Caminho personalizado para Qoder CLI. Deixe vazio para detecção automática.",

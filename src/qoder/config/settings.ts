@@ -1,4 +1,5 @@
 import type { HostnameCliPaths, QoderSettings } from '../../core/types/settings';
+import { normalizeQoderCliEdition } from './cli-edition';
 
 export type QoderSettingSource = 'user' | 'project' | 'local';
 
@@ -28,6 +29,7 @@ export interface QoderDiscoveredAgent {
 export const DEFAULT_QODER_SETTINGS: Readonly<QoderSettings> = Object.freeze({
   cliPath: '',
   cliPathsByHost: {},
+  edition: 'global',
   loadUserSettings: true,
   enableBangBash: false,
   discoveredModels: [],
@@ -152,6 +154,7 @@ export function getQoderSettings(
   return {
     cliPath: (config.cliPath as string | undefined) ?? DEFAULT_QODER_SETTINGS.cliPath,
     cliPathsByHost: normalizeHostnameCliPaths(config.cliPathsByHost),
+    edition: normalizeQoderCliEdition(config.edition),
     loadUserSettings: (config.loadUserSettings as boolean | undefined)
       ?? DEFAULT_QODER_SETTINGS.loadUserSettings,
     enableBangBash: (config.enableBangBash as boolean | undefined)

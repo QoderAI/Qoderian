@@ -7,16 +7,27 @@
  */
 
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 
 import { resolvePathForComparison } from '../../core/fs/path';
 import type { PluginInfo, PluginScope } from '../../core/types';
+import { getActiveQoderCliEdition, getQoderCliHomeDir } from '../config/cli-edition';
 import type { QoderCliSettingsStorage } from '../storage/qoder-cli-settings-storage';
 import type { InstalledPluginEntry, InstalledPluginsFile } from '../types/plugins';
 
-const INSTALLED_PLUGINS_PATH = path.join(os.homedir(), '.qoder', 'plugins', 'installed_plugins.json');
-const GLOBAL_SETTINGS_PATH = path.join(os.homedir(), '.qoder', 'settings.json');
+// Global plugin state lives under the active edition's config root
+// (e.g. `~/.qoder-cn/plugins`), so resolve lazily on each read.
+function getInstalledPluginsPath(): string {
+  return path.join(
+    getQoderCliHomeDir(getActiveQoderCliEdition()),
+    'plugins',
+    'installed_plugins.json',
+  );
+}
+
+function getGlobalSettingsPath(): string {
+  return path.join(getQoderCliHomeDir(getActiveQoderCliEdition()), 'settings.json');
+}
 
 interface SettingsFile {
   enabledPlugins?: Record<string, boolean>;
@@ -82,8 +93,8 @@ export class PluginManager {
   }
 
   async loadPlugins(): Promise<void> {
-    const installedPlugins = readJsonFile<InstalledPluginsFile>(INSTALLED_PLUGINS_PATH);
-    const globalSettings = readJsonFile<SettingsFile>(GLOBAL_SETTINGS_PATH);
+    const installedPlugins = readJsonFile<InstalledPluginsFile>(getInstalledPluginsPath());
+    const globalSettings = readJsonFile<SettingsFile>(getGlobalSettingsPath());
     const projectSettings = await this.loadProjectSettings();
 
     const globalEnabled = globalSettings?.enabledPlugins ?? {};

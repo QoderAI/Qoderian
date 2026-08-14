@@ -13,6 +13,7 @@ import {
   renderBangBashControl,
   renderMcpSection,
   renderPluginsSection,
+  renderQoderCliEditionControl,
   renderQoderCliPathControl,
   renderQoderCliPathSetting,
   renderQoderSettingsTab,
@@ -66,6 +67,13 @@ export class QoderianSettingTab extends PluginSettingTab {
         type: 'group',
         heading: t('settings.setup'),
         items: [
+          {
+            name: t('settings.cliEdition.name'),
+            desc: t('settings.cliEdition.desc'),
+            render: (setting) => {
+              renderQoderCliEditionControl(setting, { plugin: this.plugin });
+            },
+          },
           {
             name: t('settings.cliPath.name'),
             desc: getCliPathDescription(),

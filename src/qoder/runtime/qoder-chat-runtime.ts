@@ -55,6 +55,7 @@ import type {
   AppPluginManager,
 } from '../../core/types/services';
 import type { PermissionMode, QoderianSettings } from '../../core/types/settings';
+import { getActiveQoderCliEdition, getQoderCliBinaryBaseName } from '../config/cli-edition';
 import { loadSubagentFinalResult, loadSubagentToolCalls } from '../history/qoder-history-store';
 import type { McpServerManager } from '../mcp/mcp-server-manager';
 import { toQoderRuntimeModelId } from '../models/model-selection';
@@ -757,7 +758,7 @@ export class QoderChatRuntime implements ChatRuntime {
     if (!resolvedQoderPath) {
       yield {
         type: 'error',
-        content: 'Qoder CLI not found. Install qodercli or configure its path in Qoderian settings, then retry.',
+        content: `Qoder CLI not found. Install ${getQoderCliBinaryBaseName(getActiveQoderCliEdition())} or configure its path in Qoderian settings, then retry.`,
       };
       return;
     }

@@ -254,6 +254,12 @@
       "leftSidebar": "左サイドバー",
       "mainTab": "メインエディタタブ"
     },
+    "cliEdition": {
+      "name": "Qoder CLI エディション",
+      "desc": "国際版（qodercli、~/.qoder）または中国版（qoderclicn、~/.qoder-cn）を選択します。切り替え後、開いているタブは直ちに再起動し、進行中の会話は中断されます。各エディションの会話履歴は ~/.qoder と ~/.qoder-cn にそれぞれ保存され、相互に表示されません。",
+      "global": "国際版（qodercli）",
+      "cn": "中国版（qoderclicn）"
+    },
     "cliPath": {
       "name": "Qoder CLI パス",
       "desc": "Qoder CLI のカスタムパス。空欄で自動検出を使用。",

@@ -254,6 +254,12 @@
       "leftSidebar": "Left sidebar",
       "mainTab": "Main editor tab"
     },
+    "cliEdition": {
+      "name": "Qoder CLI edition",
+      "desc": "Choose the international build (qodercli, ~/.qoder) or the China build (qoderclicn, ~/.qoder-cn). Open tabs restart immediately after switching, interrupting in-progress conversations. Session history is stored separately per edition (~/.qoder and ~/.qoder-cn) and is not shared between editions.",
+      "global": "International (qodercli)",
+      "cn": "China (qoderclicn)"
+    },
     "cliPath": {
       "name": "Qoder CLI path",
       "desc": "Custom path to Qoder CLI. Leave empty for auto-detection.",

@@ -254,6 +254,12 @@
       "leftSidebar": "Barra lateral izquierda",
       "mainTab": "Pestaña del editor principal"
     },
+    "cliEdition": {
+      "name": "Edición de Qoder CLI",
+      "desc": "Elija la versión internacional (qodercli, ~/.qoder) o la versión de China (qoderclicn, ~/.qoder-cn). Las pestañas abiertas se reinician inmediatamente tras el cambio, interrumpiendo las conversaciones en curso. El historial de conversaciones se almacena por separado en cada edición (~/.qoder y ~/.qoder-cn) y no se comparte entre ediciones.",
+      "global": "Internacional (qodercli)",
+      "cn": "China (qoderclicn)"
+    },
     "cliPath": {
       "name": "Ruta CLI Qoder",
       "desc": "Ruta personalizada a Qoder CLI. Dejar vacío para detección automática.",

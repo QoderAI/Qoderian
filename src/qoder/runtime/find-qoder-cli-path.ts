@@ -3,6 +3,8 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { parsePathEntries, resolveNvmDefaultBin } from '../../core/fs/path';
+import type { QoderCliEdition } from '../../core/types/settings';
+import { QODER_CLI_BINARY_NAMES, QODER_CLI_HOME_DIRS } from '../config/cli-edition';
 
 const QODERCLI_PACKAGE_SEGMENTS = ['node_modules', '@qoder-ai', 'qodercli'];
 const QODERCLI_NODE_ENTRYPOINT = 'cli.js';
@@ -84,20 +86,53 @@ function resolveQoderCliEntrypointFromPathEntries(entries: string[], isWindows: 
   return null;
 }
 
+function getBinaryCandidates(binaryBase: string, isWindows: boolean): string[] {
+  return isWindows ? [`${binaryBase}.exe`, binaryBase] : [binaryBase];
+}
+
+/**
+ * The native installer keeps versioned binaries in a subdirectory, e.g.
+ * `~/.qoder-cn/bin/qoderclicn/qoderclicn-1.1.21`, with a plain symlink in
+ * `~/.local/bin`. Pick the newest file whose name starts with the binary
+ * base name when such a directory exists.
+ */
+function findVersionedBinaryInDir(dir: string, binaryBase: string, isWindows: boolean): string | null {
+  let names: string[];
+  try {
+    names = fs.readdirSync(dir);
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(names)) {
+    return null;
+  }
+
+  const candidates = names
+    .filter((name) => name === binaryBase
+      || (isWindows && name === `${binaryBase}.exe`)
+      || name.startsWith(`${binaryBase}-`))
+    .map((name) => path.join(dir, name))
+    .filter((candidate) => isExistingFile(candidate))
+    .sort((a, b) => path.basename(b).localeCompare(path.basename(a), undefined, { numeric: true }));
+
+  return candidates[0] ?? null;
+}
+
 function resolveQoderFromPathEntries(
   entries: string[],
-  isWindows: boolean
+  isWindows: boolean,
+  binaryBase: string,
 ): string | null {
   if (entries.length === 0) {
     return null;
   }
 
   if (!isWindows) {
-    const unixCandidate = findFirstExistingPath(entries, ['qodercli']);
+    const unixCandidate = findFirstExistingPath(entries, [binaryBase]);
     return unixCandidate;
   }
 
-  const exeCandidate = findFirstExistingPath(entries, ['qodercli.exe', 'qodercli']);
+  const exeCandidate = findFirstExistingPath(entries, getBinaryCandidates(binaryBase, true));
   if (exeCandidate) {
     return exeCandidate;
   }
@@ -163,14 +198,19 @@ function getNpmQoderCliEntrypointPaths(): string[] {
   return entrypointPaths;
 }
 
-export function findQoderCLIPath(pathValue?: string): string | null {
+export function findQoderCLIPath(
+  pathValue?: string,
+  edition: QoderCliEdition = 'global',
+): string | null {
   const homeDir = os.homedir();
   const isWindows = process.platform === 'win32';
+  const binaryBase = QODER_CLI_BINARY_NAMES[edition];
+  const homeDirName = QODER_CLI_HOME_DIRS[edition];
 
   const customEntries = dedupePaths(parsePathEntries(pathValue));
 
   if (customEntries.length > 0) {
-    const customResolution = resolveQoderFromPathEntries(customEntries, isWindows);
+    const customResolution = resolveQoderFromPathEntries(customEntries, isWindows, binaryBase);
     if (customResolution) {
       return customResolution;
     }
@@ -180,12 +220,17 @@ export function findQoderCLIPath(pathValue?: string): string | null {
   // because it requires shell: true and breaks SDK stdio streaming.
   if (isWindows) {
     const exePaths: string[] = [
-      path.join(homeDir, '.qoder', 'bin', 'qodercli.exe'),
-      path.join(homeDir, 'AppData', 'Local', 'Qoder', 'qodercli.exe'),
-      path.join(process.env.ProgramFiles || 'C:\\Program Files', 'Qoder', 'qodercli.exe'),
-      path.join(process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)', 'Qoder', 'qodercli.exe'),
-      path.join(homeDir, '.local', 'bin', 'qodercli.exe'),
+      path.join(homeDir, homeDirName, 'bin', `${binaryBase}.exe`),
+      path.join(homeDir, '.local', 'bin', `${binaryBase}.exe`),
     ];
+
+    if (edition === 'global') {
+      exePaths.push(
+        path.join(homeDir, 'AppData', 'Local', 'Qoder', 'qodercli.exe'),
+        path.join(process.env.ProgramFiles || 'C:\\Program Files', 'Qoder', 'qodercli.exe'),
+        path.join(process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)', 'Qoder', 'qodercli.exe'),
+      );
+    }
 
     for (const p of exePaths) {
       if (isExistingFile(p)) {
@@ -193,10 +238,21 @@ export function findQoderCLIPath(pathValue?: string): string | null {
       }
     }
 
-    const packageEntrypointPaths = getNpmQoderCliEntrypointPaths();
-    for (const p of packageEntrypointPaths) {
-      if (isExistingFile(p)) {
-        return p;
+    const versionedExe = findVersionedBinaryInDir(
+      path.join(homeDir, homeDirName, 'bin', binaryBase),
+      binaryBase,
+      true,
+    );
+    if (versionedExe) {
+      return versionedExe;
+    }
+
+    if (edition === 'global') {
+      const packageEntrypointPaths = getNpmQoderCliEntrypointPaths();
+      for (const p of packageEntrypointPaths) {
+        if (isExistingFile(p)) {
+          return p;
+        }
       }
     }
 
@@ -204,26 +260,26 @@ export function findQoderCLIPath(pathValue?: string): string | null {
 
   const commonPaths: string[] = [
     // Qoder CLI paths
-    path.join(homeDir, '.local', 'bin', 'qodercli'),
-    path.join(homeDir, '.qoder', 'bin', 'qodercli'),
-    path.join(homeDir, '.volta', 'bin', 'qodercli'),
-    path.join(homeDir, '.asdf', 'shims', 'qodercli'),
-    path.join(homeDir, '.asdf', 'bin', 'qodercli'),
-    path.join(homeDir, 'bin', 'qodercli'),
-    path.join(homeDir, '.npm-global', 'bin', 'qodercli'),
-    '/usr/local/bin/qodercli',
-    '/opt/homebrew/bin/qodercli',
+    path.join(homeDir, '.local', 'bin', binaryBase),
+    path.join(homeDir, homeDirName, 'bin', binaryBase),
+    path.join(homeDir, '.volta', 'bin', binaryBase),
+    path.join(homeDir, '.asdf', 'shims', binaryBase),
+    path.join(homeDir, '.asdf', 'bin', binaryBase),
+    path.join(homeDir, 'bin', binaryBase),
+    path.join(homeDir, '.npm-global', 'bin', binaryBase),
+    `/usr/local/bin/${binaryBase}`,
+    `/opt/homebrew/bin/${binaryBase}`,
   ];
 
   const npmPrefix = getNpmGlobalPrefix();
   if (npmPrefix) {
-    commonPaths.push(path.join(npmPrefix, 'bin', 'qodercli'));
+    commonPaths.push(path.join(npmPrefix, 'bin', binaryBase));
   }
 
   // NVM: resolve default version bin when NVM_BIN env var is not available (GUI apps)
   const nvmBin = resolveNvmDefaultBin(homeDir);
   if (nvmBin) {
-    commonPaths.push(path.join(nvmBin, 'qodercli'));
+    commonPaths.push(path.join(nvmBin, binaryBase));
   }
 
   for (const p of commonPaths) {
@@ -232,7 +288,17 @@ export function findQoderCLIPath(pathValue?: string): string | null {
     }
   }
 
-  if (!isWindows) {
+  // Native installers keep versioned builds under `<config root>/bin/<name>/`.
+  const versionedBinary = findVersionedBinaryInDir(
+    path.join(homeDir, homeDirName, 'bin', binaryBase),
+    binaryBase,
+    false,
+  );
+  if (versionedBinary) {
+    return versionedBinary;
+  }
+
+  if (!isWindows && edition === 'global') {
     const packageEntrypointPaths = getNpmQoderCliEntrypointPaths();
     for (const p of packageEntrypointPaths) {
       if (isExistingFile(p)) {
@@ -243,7 +309,7 @@ export function findQoderCLIPath(pathValue?: string): string | null {
 
   const envEntries = dedupePaths(parsePathEntries(getEnvValue('PATH')));
   if (envEntries.length > 0) {
-    const envResolution = resolveQoderFromPathEntries(envEntries, isWindows);
+    const envResolution = resolveQoderFromPathEntries(envEntries, isWindows, binaryBase);
     if (envResolution) {
       return envResolution;
     }

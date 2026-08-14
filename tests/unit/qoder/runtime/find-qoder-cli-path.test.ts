@@ -373,3 +373,73 @@ describe('findQoderCLIPath (platform resolution)', () => {
     });
   });
 });
+
+describe('findQoderCLIPath (cn edition)', () => {
+  const originalPlatform = process.platform;
+  let originalEnv: NodeJS.ProcessEnv;
+
+  beforeEach(() => {
+    originalEnv = { ...process.env };
+    process.env.PATH = '';
+    Object.defineProperty(process, 'platform', { value: 'darwin' });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    Object.defineProperty(process, 'platform', { value: originalPlatform });
+    process.env = originalEnv;
+  });
+
+  function mockExistingFile(...paths: string[]) {
+    const pathSet = new Set(paths);
+    jest.spyOn(fs, 'existsSync').mockImplementation((p: any) => pathSet.has(p));
+    jest.spyOn(fs, 'statSync').mockImplementation((p: any) => ({
+      isFile: () => pathSet.has(String(p)),
+    }) as fsType.Stats);
+    // No versioned bin directories exist by default.
+    jest.spyOn(fs, 'readdirSync').mockImplementation((() => {
+      throw new Error('ENOENT');
+    }) as typeof fs.readdirSync);
+  }
+
+  it('finds qoderclicn from common paths', () => {
+    jest.spyOn(os, 'homedir').mockReturnValue('/home/test');
+    const cnPath = path.join('/home/test', '.local', 'bin', 'qoderclicn');
+    mockExistingFile(cnPath);
+
+    expect(findQoderCLIPath(undefined, 'cn')).toBe(cnPath);
+  });
+
+  it('does not fall back to the global qodercli binary', () => {
+    jest.spyOn(os, 'homedir').mockReturnValue('/home/test');
+    const globalPath = path.join('/home/test', '.local', 'bin', 'qodercli');
+    mockExistingFile(globalPath);
+
+    expect(findQoderCLIPath(undefined, 'cn')).toBeNull();
+  });
+
+  it('resolves the versioned installer layout under ~/.qoder-cn/bin', () => {
+    jest.spyOn(os, 'homedir').mockReturnValue('/home/test');
+    const versionedDir = path.join('/home/test', '.qoder-cn', 'bin', 'qoderclicn');
+    const versionedBinary = path.join(versionedDir, 'qoderclicn-1.1.21');
+
+    jest.spyOn(fs, 'existsSync').mockImplementation((p: any) => p === versionedBinary);
+    jest.spyOn(fs, 'statSync').mockImplementation((p: any) => ({
+      isFile: () => String(p) === versionedBinary,
+    }) as fsType.Stats);
+    jest.spyOn(fs, 'readdirSync').mockImplementation(((p: string) => {
+      if (String(p) === versionedDir) return ['qoderclicn-1.1.20', 'qoderclicn-1.1.21'];
+      throw new Error('ENOENT');
+    }) as typeof fs.readdirSync);
+
+    // Newest versioned build wins.
+    expect(findQoderCLIPath(undefined, 'cn')).toBe(versionedBinary);
+  });
+
+  it('resolves qoderclicn from custom PATH entries', () => {
+    const cnPath = path.join('/custom', 'bin', 'qoderclicn');
+    mockExistingFile(cnPath);
+
+    expect(findQoderCLIPath('/custom/bin', 'cn')).toBe(cnPath);
+  });
+});

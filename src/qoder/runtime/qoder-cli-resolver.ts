@@ -2,7 +2,7 @@ import * as fs from 'fs';
 
 import { getHostnameKey } from '../../core/env/environment';
 import { expandHomePath } from '../../core/fs/path';
-import type { HostnameCliPaths } from '../../core/types/settings';
+import type { HostnameCliPaths, QoderCliEdition } from '../../core/types/settings';
 import { getQoderSettings } from '../config/settings';
 import { findQoderCLIPath } from './find-qoder-cli-path';
 
@@ -10,6 +10,7 @@ export class QoderCliResolver {
   private resolvedPath: string | null = null;
   private lastHostnamePath = '';
   private lastLegacyPath = '';
+  private lastEdition: QoderCliEdition = 'global';
   private readonly cachedHostname = getHostnameKey();
 
   /**
@@ -23,34 +24,38 @@ export class QoderCliResolver {
     const hostnamePath = (qoderSettings.cliPathsByHost[hostnameKey] ?? '').trim();
     const normalizedLegacy = qoderSettings.cliPath.trim();
 
-    return this.resolveConfiguredPaths(hostnamePath, normalizedLegacy);
+    return this.resolveConfiguredPaths(hostnamePath, normalizedLegacy, qoderSettings.edition);
   }
 
   resolve(
     hostnamePaths: HostnameCliPaths | undefined,
     legacyPath: string | undefined,
+    edition: QoderCliEdition = 'global',
   ): string | null {
     const hostnamePath = (hostnamePaths?.[this.cachedHostname] ?? '').trim();
     const normalizedLegacy = (legacyPath ?? '').trim();
-    return this.resolveConfiguredPaths(hostnamePath, normalizedLegacy);
+    return this.resolveConfiguredPaths(hostnamePath, normalizedLegacy, edition);
   }
 
   private resolveConfiguredPaths(
     hostnamePath: string,
     normalizedLegacy: string,
+    edition: QoderCliEdition,
   ): string | null {
     if (
       this.resolvedPath &&
       hostnamePath === this.lastHostnamePath &&
-      normalizedLegacy === this.lastLegacyPath
+      normalizedLegacy === this.lastLegacyPath &&
+      edition === this.lastEdition
     ) {
       return this.resolvedPath;
     }
 
     this.lastHostnamePath = hostnamePath;
     this.lastLegacyPath = normalizedLegacy;
+    this.lastEdition = edition;
 
-    this.resolvedPath = resolveQoderCliPath(hostnamePath, normalizedLegacy);
+    this.resolvedPath = resolveQoderCliPath(hostnamePath, normalizedLegacy, edition);
     return this.resolvedPath;
   }
 
@@ -58,6 +63,7 @@ export class QoderCliResolver {
     this.resolvedPath = null;
     this.lastHostnamePath = '';
     this.lastLegacyPath = '';
+    this.lastEdition = 'global';
   }
 }
 
@@ -78,10 +84,11 @@ function resolveConfiguredPath(rawPath: string | undefined): string | null {
 export function resolveQoderCliPath(
   hostnamePath: string | undefined,
   legacyPath: string | undefined,
+  edition: QoderCliEdition = 'global',
 ): string | null {
   return (
     resolveConfiguredPath(hostnamePath) ??
     resolveConfiguredPath(legacyPath) ??
-    findQoderCLIPath()
+    findQoderCLIPath(undefined, edition)
   );
 }

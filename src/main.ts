@@ -24,7 +24,9 @@ import { type InlineEditContext, InlineEditModal } from './features/inline-edit/
 import { QoderianSettingTab } from './features/settings/settings-tab';
 import { setLocale, t } from './i18n/i18n';
 import type { Locale } from './i18n/types';
+import { setActiveQoderCliEdition } from './qoder/config/cli-edition';
 import { normalizeQoderSettings } from './qoder/config/qoder-settings-reconciler';
+import { getQoderSettings } from './qoder/config/settings';
 import { extractUserDisplayContent } from './qoder/prompt/context/prompt-context';
 import {
   createQoderServices,
@@ -401,6 +403,7 @@ export default class QoderianPlugin extends Plugin {
     this.lastKnownTabManagerState = await this.storage.getTabManagerState();
 
     this.settings = qoderian;
+    this.syncActiveQoderCliEdition();
 
     // Plan mode is ephemeral — return to the SDK's prompting mode on restart.
     if (this.settings.permissionMode === 'plan') {
@@ -443,7 +446,13 @@ export default class QoderianPlugin extends Plugin {
   }
 
   async saveSettings() {
+    this.syncActiveQoderCliEdition();
     await this.storage.saveQoderianSettings(this.settings);
+  }
+
+  /** Keeps the edition-aware path helpers aligned with the persisted settings. */
+  private syncActiveQoderCliEdition() {
+    setActiveQoderCliEdition(getQoderSettings(this.settings).edition);
   }
 
   getResolvedQoderCliPath(): string | null {

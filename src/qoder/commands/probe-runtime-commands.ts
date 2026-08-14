@@ -6,6 +6,11 @@ import { getVaultPath } from '../../core/fs/path';
 import type { SlashCommand } from '../../core/types';
 import type { QoderRuntimeStatus } from '../../core/types/services';
 import {
+  getActiveQoderCliEdition,
+  getQoderCliBinaryBaseName,
+  getQoderCliLoginCommand,
+} from '../config/cli-edition';
+import {
   getQoderSettings,
   type QoderDiscoveredAgent,
   type QoderDiscoveredModel,
@@ -179,14 +184,14 @@ export function classifyQoderProbeError(error: unknown, timedOut = false): Qoder
   if (/not logged in|login required|please (?:log|sign) in|please run \/?login|sign[- ]?in required|unauthori[sz]ed|authentication required|invalid (?:api key|credential|token)|expired.*(?:credential|token)|credentials? (?:not found|missing)|\b401\b/i.test(details)) {
     return {
       kind: 'authRequired',
-      message: 'Qoder CLI is not signed in. Run `qodercli login` in a terminal, then retry.',
+      message: `Qoder CLI is not signed in. Run \`${getQoderCliLoginCommand(getActiveQoderCliEdition())}\` in a terminal, then retry.`,
       details,
     };
   }
   if (/protocol version|incompatible|unsupported (?:cli|sdk|version)|version mismatch/i.test(details)) {
     return {
       kind: 'incompatible',
-      message: 'This Qoder CLI version is incompatible. Update qodercli, then retry.',
+      message: `This Qoder CLI version is incompatible. Update ${getQoderCliBinaryBaseName(getActiveQoderCliEdition())}, then retry.`,
       details,
     };
   }
@@ -224,7 +229,7 @@ export async function probeRuntimeCatalog(
     return {
       error: {
         kind: 'cliMissing',
-        message: 'Qoder CLI was not found. Install qodercli or configure its path in Qoderian settings.',
+        message: `Qoder CLI was not found. Install ${getQoderCliBinaryBaseName(getActiveQoderCliEdition())} or configure its path in Qoderian settings.`,
       },
     };
   }
@@ -243,7 +248,7 @@ export async function probeRuntimeCatalog(
     return {
       error: {
         kind: 'nodeMissing',
-        message: `${missingNodeError} Install Node.js or use the native qodercli executable, then retry.`,
+        message: `${missingNodeError} Install Node.js or use the native ${getQoderCliBinaryBaseName(getActiveQoderCliEdition())} executable, then retry.`,
         details: missingNodeError,
       },
     };

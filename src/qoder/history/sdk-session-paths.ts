@@ -1,8 +1,8 @@
 import { existsSync } from 'fs';
 import * as fs from 'fs/promises';
-import * as os from 'os';
 import * as path from 'path';
 
+import { getActiveQoderCliEdition, getQoderCliHomeDir } from '../config/cli-edition';
 import type { SDKNativeMessage, SDKSessionReadResult } from './sdk-history-types';
 
 /**
@@ -16,7 +16,8 @@ export function encodeVaultPathForSDK(vaultPath: string): string {
 }
 
 export function getSDKProjectsPath(): string {
-  return path.join(os.homedir(), '.qoder', 'projects');
+  // Sessions live under the active edition's config root, e.g. `~/.qoder-cn/projects`.
+  return path.join(getQoderCliHomeDir(getActiveQoderCliEdition()), 'projects');
 }
 
 /** Validates an identifier for safe use in filesystem paths (no traversal, bounded length). */
