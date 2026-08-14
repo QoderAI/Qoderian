@@ -33,6 +33,7 @@
 /* Collapsed by default; expanded via .has-content class; textarea fills remaining space */
 .qoderian-context-row {
   display: none;
+  position: relative;
   align-items: flex-start;
   justify-content: flex-start;
   flex-shrink: 0;
@@ -43,6 +44,50 @@
 /* Show context row when it has visible content */
 .qoderian-context-row.has-content {
   display: flex;
+}
+
+/* Overflow collapse: chips that do not fit a narrow row are parked behind a
+   "+N more" pill. Hidden items stay measurable (absolute + invisible). */
+.qoderian-context-row > .qoderian-context-overflow-hidden {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Expanded state (pill clicked): wrap so every chip stays reachable. */
+.qoderian-context-row.qoderian-context-row--expanded {
+  flex-wrap: wrap;
+}
+
+.qoderian-context-overflow-pill {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 3px 8px;
+  background: var(--background-modifier-hover);
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.qoderian-context-overflow-pill:hover {
+  color: var(--text-normal);
+}
+
+/* Off-screen surface used to measure natural chip widths. */
+.qoderian-context-overflow-measure {
+  position: absolute;
+  visibility: hidden;
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  pointer-events: none;
+}
+
+.qoderian-context-overflow-measure > * {
+  flex: none;
 }
 
 /* Nav row (tab badges start, action icons end) - above input wrapper */
@@ -156,9 +201,12 @@
 
 /* Input toolbar */
 .qoderian-input-toolbar {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  flex-wrap: wrap;
+  row-gap: 2px;
   flex-shrink: 0;
   padding: 4px 6px 6px 6px;
 }

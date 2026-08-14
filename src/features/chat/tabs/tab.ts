@@ -15,6 +15,7 @@ import {
 } from '../../../shared/components/slash-command-dropdown';
 import { BrowserSelectionController } from '../controllers/browser-selection-controller';
 import { CanvasSelectionController } from '../controllers/canvas-selection-controller';
+import { ContextRowOverflowController } from '../controllers/context-row-overflow';
 import { ConversationController } from '../controllers/conversation-controller';
 import { InputController } from '../controllers/input-controller';
 import { NavigationController } from '../controllers/navigation-controller';
@@ -135,6 +136,7 @@ export function createTab(options: TabCreateOptions): TabData {
       streamController: null,
       inputController: null,
       navigationController: null,
+      contextRowOverflow: null,
     },
     services: {
       subagentManager,
@@ -513,6 +515,9 @@ export function initializeTabUI(
     'qoderian-canvas-indicator',
     'network'
   );
+
+  // Collapse chips into "+N more" when the sidebar is too narrow.
+  tab.controllers.contextRowOverflow = new ContextRowOverflowController(dom.contextRowEl);
 
   const catalogInfo = options.getQoderCatalogConfig?.() ?? null;
   initializeSlashCommands(

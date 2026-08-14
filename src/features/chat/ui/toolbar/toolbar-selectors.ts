@@ -183,7 +183,7 @@ export class ModelSelector {
         ownerDocument: option.ownerDocument,
         width: 12,
       }));
-      option.createSpan({ text: model.label });
+      option.createSpan({ cls: 'qoderian-model-option-label', text: model.label });
       if (model.promotionLabel || model.priceLabel) {
         const meta = option.createSpan({ cls: 'qoderian-model-meta' });
         if (model.promotionLabel) {
