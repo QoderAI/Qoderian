@@ -5,6 +5,7 @@ import type { AppTabManagerState, InstructionRefineService, TitleGenerationServi
 import type { SlashCommandDropdown } from '../../../shared/components/slash-command-dropdown';
 import type { BrowserSelectionController } from '../controllers/browser-selection-controller';
 import type { CanvasSelectionController } from '../controllers/canvas-selection-controller';
+import type { ContextRowOverflowController } from '../controllers/context-row-overflow';
 import type { ConversationController } from '../controllers/conversation-controller';
 import type { InputController } from '../controllers/input-controller';
 import type { NavigationController } from '../controllers/navigation-controller';
@@ -97,6 +98,7 @@ export interface TabControllers {
   streamController: StreamController | null;
   inputController: InputController | null;
   navigationController: NavigationController | null;
+  contextRowOverflow: ContextRowOverflowController | null;
 }
 
 /**

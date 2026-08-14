@@ -28,6 +28,8 @@ export async function destroyTab(tab: TabData): Promise<void> {
   tab.controllers.canvasSelectionController?.stop();
   tab.controllers.canvasSelectionController?.clear();
   tab.controllers.navigationController?.dispose();
+  tab.controllers.contextRowOverflow?.destroy();
+  tab.controllers.contextRowOverflow = null;
 
   cleanupThinkingBlock(tab.state.currentThinkingState);
   tab.state.currentThinkingState = null;
