@@ -274,5 +274,18 @@
       "name": "Language",
       "desc": "Change the display language of the plugin interface"
     }
+  },
+  "credits": {
+    "title": "Credits Usage",
+    "viewDetails": "View Details",
+    "planCredits": "Plan Credits",
+    "addOnCredits": "Personal Resource Pack",
+    "resourcePackage": "Add-on Credits",
+    "tierTrial": "Trial",
+    "renewsOn": "Renews on {date}",
+    "usedPercent": "{percent}% used",
+    "left": "{count} left",
+    "trigger": "Usage - {percent}%",
+    "unavailable": "Usage unavailable"
   }
 }

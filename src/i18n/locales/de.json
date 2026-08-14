@@ -274,5 +274,18 @@
       "name": "Sprache",
       "desc": "Anzeigesprache der Plugin-Oberfläche ändern"
     }
+  },
+  "credits": {
+    "title": "Credit-Nutzung",
+    "viewDetails": "Details ansehen",
+    "planCredits": "Plan-Credits",
+    "addOnCredits": "Persönliches Ressourcenpaket",
+    "resourcePackage": "Add-on-Credits",
+    "tierTrial": "Testversion",
+    "renewsOn": "Verlängert am {date}",
+    "usedPercent": "{percent}% verwendet",
+    "left": "{count} übrig",
+    "trigger": "Nutzung - {percent}%",
+    "unavailable": "Nutzung nicht verfügbar"
   }
 }

@@ -3,6 +3,7 @@ import { ItemView, Notice, Scope, setIcon } from 'obsidian';
 
 import { VIEW_TYPE_QODERIAN } from '../../core/types';
 import type QoderianPlugin from '../../main';
+import { fetchCreditsUsage } from '../../qoder/services/credits-usage';
 import {
   cancelScheduledAnimationFrame,
   scheduleAnimationFrame,
@@ -16,6 +17,7 @@ import {
 import { TabBar } from './tabs/tab-bar';
 import { TabManager } from './tabs/tab-manager';
 import type { TabData, TabId } from './tabs/types';
+import { CreditsUsageButton } from './ui/credits-usage-button';
 
 type LoadableView = {
   containerEl?: HTMLElement;
@@ -43,6 +45,7 @@ export class QoderianView extends ItemView {
 
   // Header elements
   private historyDropdown: HTMLElement | null = null;
+  private creditsUsageButton: CreditsUsageButton | null = null;
 
   // Event refs for cleanup
   private eventRefs: EventRef[] = [];
@@ -198,6 +201,9 @@ export class QoderianView extends ItemView {
 
     this.tabBar?.destroy();
     this.tabBar = null;
+
+    this.creditsUsageButton?.destroy();
+    this.creditsUsageButton = null;
     this.scope = null;
   }
 
@@ -262,6 +268,14 @@ export class QoderianView extends ItemView {
     historyBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       this.toggleHistoryDropdown();
+    });
+
+    // Credits usage popover (account-level, shared across tabs)
+    const agentCatalog = this.plugin.qoderServices.agentCatalog;
+    this.creditsUsageButton = new CreditsUsageButton(navActionsEl, {
+      getCachedUsage: () => agentCatalog.getUsageInfo(),
+      fetchUsage: () => fetchCreditsUsage(this.plugin),
+      subscribeRuntimeStatus: (listener) => agentCatalog.subscribeRuntimeStatus(listener),
     });
 
     return wrapper;

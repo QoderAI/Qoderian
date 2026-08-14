@@ -34,6 +34,18 @@ export function getQoderCliBinaryBaseName(edition: QoderCliEdition): string {
   return QODER_CLI_BINARY_NAMES[edition];
 }
 
+/** Web account usage page, per edition. */
+export const QODER_ACCOUNT_USAGE_URLS: Record<QoderCliEdition, string> = {
+  global: 'https://qoder.com/account/usage',
+  cn: 'https://qoder.com.cn/account/usage',
+};
+
+export function getQoderAccountUsageUrl(
+  edition: QoderCliEdition = getActiveQoderCliEdition(),
+): string {
+  return QODER_ACCOUNT_USAGE_URLS[edition];
+}
+
 /** Terminal login hint shown when the CLI reports missing credentials. */
 export function getQoderCliLoginCommand(edition: QoderCliEdition): string {
   return `${QODER_CLI_BINARY_NAMES[edition]} login`;

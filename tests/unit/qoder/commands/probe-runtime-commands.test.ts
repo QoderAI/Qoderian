@@ -12,6 +12,7 @@ const sdkMock = sdkModule as unknown as {
   setMockMessages: (messages: any[], options?: { appendResult?: boolean }) => void;
   setMockAvailableModels: (models: any[]) => void;
   setMockInitializationModels: (models: any[]) => void;
+  setMockUsageInfo: (usageInfo: unknown) => void;
   resetMockMessages: () => void;
   getLastOptions: () => sdkModule.Options | undefined;
   getLastResponse: () => {
@@ -81,6 +82,27 @@ describe('probeRuntimeCatalog', () => {
     });
     expect(sdkMock.getLastResponse()?.initializationResult).toHaveBeenCalled();
     expect(sdkMock.getLastResponse()?.close).toHaveBeenCalled();
+  });
+
+  it('includes the credits usage snapshot when the SDK reports it', async () => {
+    setInitMessage();
+    sdkMock.setMockUsageInfo({ totalUsagePercentage: 7 });
+
+    const result = await probeRuntimeCatalog(createMockPlugin());
+
+    expectSuccessfulProbe(result);
+    expect(result.usageInfo).toEqual({ totalUsagePercentage: 7 });
+  });
+
+  it('omits usage info when getUsageInfo fails', async () => {
+    setInitMessage();
+    sdkMock.setMockUsageInfo(new Error('usage unavailable'));
+
+    const result = await probeRuntimeCatalog(createMockPlugin());
+
+    expectSuccessfulProbe(result);
+    expect(result.usageInfo).toBeUndefined();
+    expect(result.commands).toEqual([]);
   });
 
   it('uses the same settingSources as the Qoder runtime when user settings are disabled', async () => {

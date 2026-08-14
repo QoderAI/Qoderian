@@ -65,6 +65,40 @@ describe('QoderRuntimeCatalog', () => {
     });
   });
 
+  it('exposes the usage snapshot from a successful probe', async () => {
+    probeMock.mockResolvedValue({
+      commands: [],
+      agents: [],
+      models: [],
+      usageInfo: { totalUsagePercentage: 42, userQuota: { total: 100, used: 42 } },
+    });
+    const catalog = new QoderRuntimeCatalog(createPlugin());
+
+    expect(catalog.getUsageInfo()).toBeNull();
+    await catalog.refresh();
+
+    expect(catalog.getUsageInfo()).toEqual({
+      totalUsagePercentage: 42,
+      userQuota: { total: 100, used: 42 },
+    });
+  });
+
+  it('keeps the last usage snapshot when a later probe has none', async () => {
+    probeMock.mockResolvedValueOnce({
+      commands: [],
+      agents: [],
+      models: [],
+      usageInfo: { totalUsagePercentage: 42 },
+    });
+    const catalog = new QoderRuntimeCatalog(createPlugin());
+    await catalog.refresh();
+
+    probeMock.mockResolvedValueOnce({ commands: [], agents: [], models: [] });
+    await catalog.refresh();
+
+    expect(catalog.getUsageInfo()).toEqual({ totalUsagePercentage: 42 });
+  });
+
   it('keeps the previous snapshot when the probe fails', async () => {
     probeMock.mockResolvedValueOnce({
       commands: [{ id: 'sdk:commit', name: 'commit', description: '', content: '', source: 'sdk' }],

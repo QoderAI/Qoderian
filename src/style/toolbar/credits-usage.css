@@ -1,0 +1,175 @@
+/* Credits usage button + popover panel (nav row, mirrors Qoder IDE usage view) */
+
+.qoderian-credits-container {
+  position: static;
+}
+
+.qoderian-credits-btn {
+  display: flex;
+  align-items: center;
+}
+
+/* Panel opens upward from the input footer, right-aligned. Width tracks the
+   footer so narrow sidebars clip neither edge (same approach as #18). */
+.qoderian-credits-panel {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 4px;
+  inset-inline-end: 0;
+  width: min(320px, calc(100% - 16px));
+  padding: 12px;
+  background: var(--background-secondary);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+}
+
+.qoderian-credits--open .qoderian-credits-panel {
+  display: block;
+}
+
+.qoderian-credits-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.qoderian-credits-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.qoderian-credits-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qoderian-credits-details-link {
+  font-size: 12px;
+  color: var(--text-accent);
+  cursor: pointer;
+}
+
+.qoderian-credits-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.qoderian-credits-refresh:hover {
+  color: var(--text-normal);
+  background: var(--background-modifier-hover);
+}
+
+.qoderian-credits-refresh svg {
+  width: 13px;
+  height: 13px;
+}
+
+.qoderian-credits-refresh--spinning svg {
+  animation: qoderian-spin 1s linear infinite;
+}
+
+.qoderian-credits-empty {
+  padding: 12px 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.qoderian-credits-section + .qoderian-credits-section {
+  margin-top: 14px;
+}
+
+.qoderian-credits-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.qoderian-credits-section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.qoderian-credits-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.qoderian-credits-badge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  background: rgba(34, 197, 94, 0.18);
+  color: #3fa96b;
+}
+
+.qoderian-credits-badge--plain {
+  background: none;
+  color: var(--text-muted);
+}
+
+.qoderian-credits-trailing {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.qoderian-credits-bar {
+  height: 6px;
+  margin: 8px 0 6px;
+  border-radius: 3px;
+  background: var(--background-modifier-border);
+  overflow: hidden;
+}
+
+.qoderian-credits-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: repeating-linear-gradient(90deg, var(--text-muted) 0 3px, transparent 3px 5px);
+}
+
+.qoderian-credits-numbers {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.qoderian-credits-usage-nums {
+  min-width: 0;
+}
+
+.qoderian-credits-used-num {
+  color: var(--text-normal);
+  font-weight: 600;
+}
+
+.qoderian-credits-total-num,
+.qoderian-credits-used-percent {
+  color: var(--text-muted);
+}
+
+.qoderian-credits-left {
+  color: var(--text-muted);
+  white-space: nowrap;
+}

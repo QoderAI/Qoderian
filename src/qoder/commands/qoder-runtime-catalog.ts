@@ -1,5 +1,5 @@
 import type { AgentDefinition, SlashCommand } from '../../core/types';
-import type { QoderRuntimeStatus } from '../../core/types/services';
+import type { CreditsUsageSnapshot, QoderRuntimeStatus } from '../../core/types/services';
 import {
   getQoderSettings,
   type QoderDiscoveredAgent,
@@ -42,6 +42,7 @@ function agentFromDiscovered(agent: QoderDiscoveredAgent): AgentDefinition {
 export class QoderRuntimeCatalog {
   private commands: SlashCommand[] = [];
   private agents: AgentDefinition[] = [];
+  private usageInfo: CreditsUsageSnapshot | null = null;
   private refreshPromise: Promise<boolean> | null = null;
   private runtimeStatus: QoderRuntimeStatus = {
     kind: 'checking',
@@ -132,6 +133,10 @@ export class QoderRuntimeCatalog {
     return { ...this.runtimeStatus };
   }
 
+  getUsageInfo(): CreditsUsageSnapshot | null {
+    return this.usageInfo;
+  }
+
   subscribeRuntimeStatus(listener: (status: QoderRuntimeStatus) => void): () => void {
     this.runtimeStatusListeners.add(listener);
     return () => this.runtimeStatusListeners.delete(listener);
@@ -154,6 +159,9 @@ export class QoderRuntimeCatalog {
     this.commands = result.commands;
     if (result.agents.length > 0) {
       this.agents = result.agents.map(agentFromDiscovered);
+    }
+    if (result.usageInfo) {
+      this.usageInfo = result.usageInfo;
     }
 
     if (this.onPersist && (result.agents.length > 0 || result.models.length > 0)) {

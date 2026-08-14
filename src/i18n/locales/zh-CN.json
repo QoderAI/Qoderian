@@ -274,5 +274,18 @@
       "name": "语言",
       "desc": "更改插件界面的显示语言"
     }
+  },
+  "credits": {
+    "title": "我的用量",
+    "viewDetails": "查看详情",
+    "planCredits": "套餐内 Credits",
+    "addOnCredits": "个人资源包",
+    "resourcePackage": "资源包",
+    "tierTrial": "体验版",
+    "renewsOn": "将于 {date} 刷新",
+    "usedPercent": "已使用 {percent}%",
+    "left": "剩余 {count}",
+    "trigger": "用量 - {percent}%",
+    "unavailable": "用量暂不可用"
   }
 }

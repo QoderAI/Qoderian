@@ -50,6 +50,29 @@ export interface AppPluginManager {
   disablePlugin(pluginId: string): Promise<void>;
 }
 
+/** One quota bucket of the account credits usage snapshot. */
+export interface CreditsUsageQuota {
+  total?: number;
+  used?: number;
+  remaining?: number;
+  percentage?: number;
+}
+
+/**
+ * Account credits usage snapshot as reported by the Qoder SDK.
+ * Mirrors the SDK `UsageInfo` shape without coupling core types to the SDK.
+ */
+export interface CreditsUsageSnapshot {
+  userType?: string;
+  totalUsagePercentage?: number;
+  expiresAt?: number;
+  upgradeUrl?: string;
+  isQuotaExceeded?: boolean;
+  userQuota?: CreditsUsageQuota;
+  addOnQuota?: CreditsUsageQuota;
+  orgResourcePackage?: CreditsUsageQuota & { cap?: number; available?: boolean };
+}
+
 /** Runtime catalog of agents discovered from the Qoder CLI. */
 export interface AppAgentCatalog extends AgentMentionIndex {
   /**
@@ -66,6 +89,8 @@ export interface AppAgentCatalog extends AgentMentionIndex {
   getRuntimeStatus(): QoderRuntimeStatus;
   /** Receives runtime availability changes, including background refreshes. */
   subscribeRuntimeStatus(listener: (status: QoderRuntimeStatus) => void): () => void;
+  /** Latest account credits usage from the last successful probe, if any. */
+  getUsageInfo(): CreditsUsageSnapshot | null;
 }
 
 export type QoderRuntimeStatusKind =

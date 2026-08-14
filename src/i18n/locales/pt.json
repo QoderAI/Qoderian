@@ -274,5 +274,18 @@
       "name": "Idioma",
       "desc": "Alterar o idioma de exibição da interface do plugin"
     }
+  },
+  "credits": {
+    "title": "Uso de créditos",
+    "viewDetails": "Ver detalhes",
+    "planCredits": "Créditos do plano",
+    "addOnCredits": "Pacote de recursos pessoal",
+    "resourcePackage": "Créditos adicionais",
+    "tierTrial": "Versão de teste",
+    "renewsOn": "Renova em {date}",
+    "usedPercent": "{percent}% usado",
+    "left": "{count} restantes",
+    "trigger": "Uso - {percent}%",
+    "unavailable": "Uso indisponível"
   }
 }
