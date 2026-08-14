@@ -41,7 +41,7 @@
 .qoderian-model-dropdown {
   position: absolute;
   bottom: 100%;
-  right: 8px;
+  inset-inline-start: 0;
   margin-bottom: 0;
   display: flex;
   flex-direction: column;
