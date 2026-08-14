@@ -11,6 +11,14 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Fixed
+
+- The composer now adapts to narrow sidebars: context chips that do
+  not fit collapse behind a "+N more" pill (click to expand or
+  collapse), the toolbar wraps instead of clipping, and the permission
+  mode and model dropdowns shrink to stay inside the sidebar, with
+  long model names ellipsized.
+
 ## [1.0.4] - 2026-08-12
 
 ### Fixed
