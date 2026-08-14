@@ -38,8 +38,8 @@ describe('cli-edition', () => {
     });
 
     it('maps config roots per edition', () => {
-      expect(getQoderCliHomeDir('global', '/home/test')).toBe('/home/test/.qoder');
-      expect(getQoderCliHomeDir('cn', '/home/test')).toBe('/home/test/.qoder-cn');
+      expect(getQoderCliHomeDir('global', '/home/test')).toBe(path.join('/home/test', '.qoder'));
+      expect(getQoderCliHomeDir('cn', '/home/test')).toBe(path.join('/home/test', '.qoder-cn'));
     });
 
     it('builds the login command from the binary name', () => {
