@@ -15,6 +15,7 @@ import type { McpServerManager } from '../mcp/mcp-server-manager';
 import {
   resolveEffortLevel,
 } from '../models/model-catalog';
+import { createQoderModelPolicyProvider } from '../models/model-policy';
 import { toQoderRuntimeModelId } from '../models/model-selection';
 import {
   buildSystemPrompt,
@@ -151,6 +152,13 @@ export class QueryOptionsBuilder {
     QueryOptionsBuilder.applyThinking(options, ctx.settings, runtimeModel);
     options.hooks = ctx.hooks;
 
+    // Pull mode: the provider re-reads live settings so model/override
+    // changes apply on the next LLM call without restarting the query.
+    options.resolveModel = createQoderModelPolicyProvider(
+      () => ctx.settings.model,
+      ctx.settings,
+    );
+
     options.enableFileCheckpointing = true;
 
     if (ctx.resume) {
@@ -198,6 +206,10 @@ export class QueryOptionsBuilder {
     );
     options.hooks = ctx.hooks;
     QueryOptionsBuilder.applyThinking(options, ctx.settings, selectedModel);
+    options.resolveModel = createQoderModelPolicyProvider(
+      () => selectedModel,
+      ctx.settings,
+    );
 
     if (ctx.allowedTools !== undefined && ctx.allowedTools.length > 0) {
       options.allowedTools = ctx.allowedTools;

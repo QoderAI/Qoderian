@@ -287,5 +287,13 @@
     "left": "{count} restants",
     "trigger": "Utilisation - {percent}%",
     "unavailable": "Utilisation indisponible"
+  },
+  "model": {
+    "edit": "Modifier",
+    "contextWindow": "Fenêtre de contexte",
+    "thinkingMode": "Mode de réflexion",
+    "thinkingEffort": "Thinking Effort",
+    "default": "Par défaut",
+    "backToList": "Retour à la liste des modèles"
   }
 }

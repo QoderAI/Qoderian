@@ -77,6 +77,14 @@ export type TranslationKey =
   | 'credits.trigger'
   | 'credits.unavailable'
 
+  // Model editor panel
+  | 'model.edit'
+  | 'model.contextWindow'
+  | 'model.thinkingMode'
+  | 'model.thinkingEffort'
+  | 'model.default'
+  | 'model.backToList'
+
   // Chat - Conversation
   | 'chat.conversation.emptyPreview'
   | 'chat.conversation.deleteFailed'

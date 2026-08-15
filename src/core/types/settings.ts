@@ -73,6 +73,33 @@ export const QODER_CLI_EDITIONS = ['global', 'cn'] as const;
  */
 export type QoderCliEdition = typeof QODER_CLI_EDITIONS[number];
 
+/** Server context-window tier, e.g. the 200K/400K/1M editor choices. */
+export interface ModelContextTier {
+  /** Display tier label from the server, e.g. '200K'. */
+  label: string;
+  tokenCount: number;
+  isDefault: boolean;
+}
+
+/** Server thinking effort level, e.g. the low/medium/xhigh editor choices. */
+export interface ModelThinkingEffort {
+  /** Effort value accepted by the CLI, e.g. 'xhigh'. */
+  value: string;
+  isDefault: boolean;
+  /** Server description of the level, shown as a tooltip in the IDE. */
+  description?: string;
+}
+
+/** Per-model editor overrides mirroring the Qoder IDE model edit panel. */
+export interface QoderModelOverride {
+  /** Selected context-window tier in tokens; absent means server default. */
+  contextWindow?: number;
+  /** False disables thinking for models that support it. */
+  thinkingEnabled?: boolean;
+  /** Per-model reasoning effort; absent means server default. */
+  thinkingEffort?: string;
+}
+
 /** Qoder CLI settings stored alongside Qoderian's general preferences. */
 export interface QoderSettings {
   cliPath: string;
@@ -91,6 +118,12 @@ export interface QoderSettings {
     priceFactor?: number;
     /** Pre-discount multiplier, when the server prices this model down. */
     originalPriceFactor?: number;
+    /** Configurable context-window tiers reported by the server. */
+    contextTiers?: ModelContextTier[];
+    /** Whether the server allows explicitly disabling thinking. */
+    thinkingDisableable?: boolean;
+    /** Configurable thinking effort levels reported by the server. */
+    thinkingEfforts?: ModelThinkingEffort[];
     promotion?: {
       active?: boolean;
       /** Server-localized badge text keyed by `en` / `zh`. */
@@ -107,6 +140,8 @@ export interface QoderSettings {
     model?: string;
   }>;
   lastModel: string;
+  /** Per-model editor overrides keyed by runtime model id. */
+  modelOverrides: Record<string, QoderModelOverride>;
 }
 
 /**

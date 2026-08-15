@@ -287,5 +287,13 @@
     "left": "{count} 남음",
     "trigger": "사용량 - {percent}%",
     "unavailable": "사용량을 확인할 수 없음"
+  },
+  "model": {
+    "edit": "편집",
+    "contextWindow": "컨텍스트 윈도우",
+    "thinkingMode": "사고 모드",
+    "thinkingEffort": "Thinking Effort",
+    "default": "기본",
+    "backToList": "모델 목록으로 돌아가기"
   }
 }

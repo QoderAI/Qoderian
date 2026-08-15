@@ -287,5 +287,13 @@
     "left": "剩餘 {count}",
     "trigger": "用量 - {percent}%",
     "unavailable": "用量暫不可用"
+  },
+  "model": {
+    "edit": "編輯",
+    "contextWindow": "上下文視窗",
+    "thinkingMode": "思考模式",
+    "thinkingEffort": "Thinking Effort",
+    "default": "預設",
+    "backToList": "返回模型列表"
   }
 }

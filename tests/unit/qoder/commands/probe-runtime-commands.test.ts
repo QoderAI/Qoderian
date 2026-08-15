@@ -246,6 +246,65 @@ describe('probeRuntimeCatalog', () => {
     });
   });
 
+  it('maps context_config and thinking_config for the per-model editor', async () => {
+    setInitMessage();
+    sdkMock.setMockAvailableModels([
+      {
+        value: 'qmodel_38max',
+        displayName: 'Qwen 3.8 Max',
+        description: '',
+        context_config: {
+          '1M': { token_count: 1000000, is_default: false },
+          '200K': { token_count: 200000, is_default: true },
+          ' 400K ': { token_count: 400000, is_default: false },
+          'bogus': { token_count: -1 },
+        },
+        thinking_config: {
+          disabled: { description: 'Respond directly' },
+          enabled: {
+            description: 'Think first',
+            efforts: { xhigh: { is_default: true }, low: { description: 'Minimal' } },
+            is_default: true,
+          },
+        },
+      },
+      {
+        value: 'no-thinking-disable',
+        displayName: 'Thinking only',
+        description: '',
+        thinking_config: {
+          enabled: { description: 'Think first', efforts: { high: {} }, is_default: true },
+        },
+      },
+    ]);
+
+    const result = await probeRuntimeCatalog(createMockPlugin());
+    expectSuccessfulProbe(result);
+
+    expect(result.models[0]).toEqual({
+      value: 'qmodel_38max',
+      displayName: 'Qwen 3.8 Max',
+      description: '',
+      group: 'Qoder',
+      contextTiers: [
+        { label: '200K', tokenCount: 200000, isDefault: true },
+        { label: '400K', tokenCount: 400000, isDefault: false },
+        { label: '1M', tokenCount: 1000000, isDefault: false },
+      ],
+      thinkingDisableable: true,
+      thinkingEfforts: [
+        { value: 'low', isDefault: false, description: 'Minimal' },
+        { value: 'xhigh', isDefault: true },
+      ],
+    });
+    // Without thinking_config.disabled the toggle must stay hidden.
+    expect(result.models[1]).not.toHaveProperty('thinkingDisableable');
+    expect(result.models[1]).not.toHaveProperty('contextTiers');
+    expect(result.models[1]).toHaveProperty('thinkingEfforts', [
+      { value: 'high', isDefault: false },
+    ]);
+  });
+
   it('uses initialization pricing when a live catalog refresh returns empty', async () => {
     setInitMessage();
     sdkMock.setMockAvailableModels([]);

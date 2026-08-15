@@ -287,5 +287,13 @@
     "left": "осталось {count}",
     "trigger": "Использование - {percent}%",
     "unavailable": "Использование недоступно"
+  },
+  "model": {
+    "edit": "Редактировать",
+    "contextWindow": "Контекстное окно",
+    "thinkingMode": "Режим размышлений",
+    "thinkingEffort": "Thinking Effort",
+    "default": "По умолчанию",
+    "backToList": "Назад к списку моделей"
   }
 }

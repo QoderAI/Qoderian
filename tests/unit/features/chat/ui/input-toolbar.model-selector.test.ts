@@ -170,6 +170,377 @@ describe('ModelSelector', () => {
     expect(parentEl.querySelector('.qoderian-model-label')?.textContent).toBe('Auto');
     expect(parentEl.querySelector('.qoderian-model-runtime-title')?.textContent).toBe('Loading models…');
   });
+
+  describe('per-model editor', () => {
+    const editableModel = {
+      value: 'qmodel',
+      label: 'Qwen 3.8 Max',
+      group: 'New models',
+      contextTiers: [
+        { label: '200K', tokenCount: 200000, isDefault: true },
+        { label: '400K', tokenCount: 400000, isDefault: false },
+        { label: '1M', tokenCount: 1000000, isDefault: false },
+      ],
+      thinkingDisableable: true,
+    };
+
+    function buildCallbacks(
+      extra: Record<string, unknown> = {},
+      overrides: Record<string, Record<string, unknown>> = {},
+      efforts: Array<Record<string, unknown>> = [],
+    ) {
+      const settings = {
+        model: 'qmodel',
+        effortLevel: 'high',
+        permissionMode: 'acceptEdits',
+        qoder: { modelOverrides: overrides },
+      };
+      return {
+        onModelChange: jest.fn().mockResolvedValue(undefined),
+        onEffortLevelChange: jest.fn().mockResolvedValue(undefined),
+        onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
+        getSettings: jest.fn().mockReturnValue(settings),
+        getEnvironmentVariables: jest.fn().mockReturnValue(''),
+        getModelConfig: jest.fn().mockReturnValue({
+          getModelOptions: jest.fn().mockReturnValue([
+            { value: 'auto', label: 'Auto', group: 'Qoder' },
+            editableModel,
+          ]),
+          getModelContextTiers: jest.fn().mockReturnValue(editableModel.contextTiers),
+          isThinkingDisableable: jest.fn().mockReturnValue(true),
+          getModelThinkingEfforts: jest.fn().mockReturnValue(efforts),
+          // Stateful: reflects whatever override the editor just persisted.
+          getEffectiveContextWindowSize: jest.fn(() =>
+            overrides.qmodel?.contextWindow ?? 200000),
+        }),
+        ...extra,
+      };
+    }
+
+    it('offers editing only for models with editable metadata', () => {
+      const parentEl = createMockEl();
+      new ModelSelector(parentEl, buildCallbacks({
+        onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
+      }));
+
+      const edits = parentEl.querySelectorAll('.qoderian-model-edit');
+      expect(edits).toHaveLength(1);
+    });
+
+    it('hides the edit affordance when the callback is missing', () => {
+      const parentEl = createMockEl();
+      new ModelSelector(parentEl, buildCallbacks());
+
+      expect(parentEl.querySelectorAll('.qoderian-model-edit')).toHaveLength(0);
+    });
+
+    it('opens the editor view with tiers, default tag, and thinking toggle', () => {
+      const parentEl = createMockEl();
+      new ModelSelector(parentEl, buildCallbacks({
+        onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
+      }));
+
+      parentEl.querySelector('.qoderian-model-edit')?.click();
+
+      expect(parentEl.querySelector('.qoderian-model-editor-title')?.textContent)
+        .toBe('Qwen 3.8 Max');
+      const tiers = parentEl.querySelectorAll('.qoderian-model-editor-tier');
+      expect(tiers).toHaveLength(3);
+      expect(tiers[0].hasClass('selected')).toBe(true);
+      expect(tiers[0].getAttribute('aria-selected')).toBe('true');
+      expect(tiers[1].hasClass('selected')).toBe(false);
+      expect(parentEl.querySelector('.qoderian-model-editor-tier-default')?.textContent)
+        .toBe('Default');
+      const toggle = parentEl.querySelector('.qoderian-model-editor-toggle');
+      expect(toggle?.hasClass('is-on')).toBe(true);
+      expect(toggle?.getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('persists a tier choice and clears the override for the default tier', async () => {
+      const parentEl = createMockEl();
+      const overrides: Record<string, Record<string, unknown>> = {
+        qmodel: { contextWindow: 400000 },
+      };
+      const onModelOverrideChange = jest.fn(async (_model: string, patch: Record<string, unknown>) => {
+        // Mirror tab.ts: undefined values delete the key, empty overrides vanish.
+        const current = overrides.qmodel ?? {};
+        for (const [key, value] of Object.entries(patch)) {
+          if (value === undefined) delete current[key];
+          else current[key] = value;
+        }
+        if (Object.keys(current).length > 0) overrides.qmodel = current;
+        else delete overrides.qmodel;
+      });
+      new ModelSelector(parentEl, buildCallbacks({ onModelOverrideChange }, overrides));
+
+      parentEl.querySelector('.qoderian-model-edit')?.click();
+      // Start from a 400K override: choose 1M, then back to the default tier.
+      parentEl.querySelectorAll('.qoderian-model-editor-tier')[2]?.click();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(onModelOverrideChange).toHaveBeenCalledWith('qmodel', { contextWindow: 1000000 });
+
+      parentEl.querySelectorAll('.qoderian-model-editor-tier')[0]?.click();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(onModelOverrideChange).toHaveBeenCalledWith('qmodel', { contextWindow: undefined });
+    });
+
+    it('toggles thinking mode off and back on', async () => {
+      const parentEl = createMockEl();
+      const overrides: Record<string, Record<string, unknown>> = {};
+      const onModelOverrideChange = jest.fn(async (_model: string, patch: Record<string, unknown>) => {
+        overrides.qmodel = { ...overrides.qmodel, ...patch };
+      });
+      new ModelSelector(parentEl, buildCallbacks({ onModelOverrideChange }, overrides));
+
+      parentEl.querySelector('.qoderian-model-edit')?.click();
+      parentEl.querySelector('.qoderian-model-editor-toggle')?.click();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(onModelOverrideChange).toHaveBeenCalledWith('qmodel', { thinkingEnabled: false });
+
+      const toggle = parentEl.querySelector('.qoderian-model-editor-toggle');
+      expect(toggle?.hasClass('is-on')).toBe(false);
+      toggle?.click();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(onModelOverrideChange).toHaveBeenCalledWith('qmodel', { thinkingEnabled: true });
+    });
+
+    it('shows thinking as disabled when the override turns it off', () => {
+      const parentEl = createMockEl();
+      const callbacks = buildCallbacks({
+        onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
+        getSettings: jest.fn().mockReturnValue({
+          model: 'qmodel',
+          effortLevel: 'high',
+          permissionMode: 'acceptEdits',
+          qoder: { modelOverrides: { qmodel: { thinkingEnabled: false } } },
+        }),
+      });
+      new ModelSelector(parentEl, callbacks);
+
+      parentEl.querySelector('.qoderian-model-edit')?.click();
+
+      const toggle = parentEl.querySelector('.qoderian-model-editor-toggle');
+      expect(toggle?.hasClass('is-on')).toBe(false);
+      expect(toggle?.getAttribute('aria-checked')).toBe('false');
+    });
+
+    it('returns to the model list via the back button', () => {
+      const parentEl = createMockEl();
+      new ModelSelector(parentEl, buildCallbacks({
+        onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
+      }));
+
+      parentEl.querySelector('.qoderian-model-edit')?.click();
+      expect(parentEl.querySelector('.qoderian-model-editor-head')).toBeTruthy();
+
+      parentEl.querySelector('.qoderian-model-editor-back')?.click();
+      expect(parentEl.querySelector('.qoderian-model-editor-head')).toBeNull();
+      expect(parentEl.querySelectorAll('.qoderian-model-option').length).toBeGreaterThan(0);
+    });
+
+    it('keeps the model list scroll position across editor open and close', () => {
+      const parentEl = createMockEl();
+      new ModelSelector(parentEl, buildCallbacks({
+        onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
+      }));
+
+      const listPane = parentEl.querySelector('.qoderian-model-list-pane');
+      if (listPane) listPane.scrollTop = 42;
+
+      parentEl.querySelector('.qoderian-model-edit')?.click();
+      expect(parentEl.querySelector('.qoderian-model-list-pane')?.scrollTop).toBe(42);
+
+      parentEl.querySelector('.qoderian-model-editor-back')?.click();
+      expect(parentEl.querySelector('.qoderian-model-list-pane')?.scrollTop).toBe(42);
+    });
+
+    it('returns to the model list when the dropdown reopens after editing', () => {
+      const parentEl = createMockEl();
+      new ModelSelector(parentEl, buildCallbacks({
+        onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
+      }));
+
+      const trigger = parentEl.querySelector('.qoderian-model-btn');
+      trigger?.click();
+      parentEl.querySelector('.qoderian-model-edit')?.click();
+      expect(parentEl.querySelector('.qoderian-model-editor-head')).toBeTruthy();
+
+      // Close, then reopen: the editor view must reset to the model list.
+      trigger?.click();
+      trigger?.click();
+
+      expect(parentEl.querySelector('.qoderian-model-editor-head')).toBeNull();
+      expect(parentEl.querySelector('.qoderian-model-dropdown')
+        ?.hasClass('qoderian-model-dropdown--editing')).toBe(false);
+    });
+
+    it('also resets the editor view when reopened via keyboard', () => {
+      const parentEl = createMockEl();
+      new ModelSelector(parentEl, buildCallbacks({
+        onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
+      }));
+
+      const trigger = parentEl.querySelector('.qoderian-model-btn');
+      const pressEnter = () => trigger?.dispatchEvent({
+        type: 'keydown',
+        key: 'Enter',
+        preventDefault: jest.fn(),
+        stopPropagation: jest.fn(),
+      });
+      pressEnter();
+      parentEl.querySelector('.qoderian-model-edit')?.click();
+      expect(parentEl.querySelector('.qoderian-model-editor-head')).toBeTruthy();
+
+      pressEnter(); // close
+      pressEnter(); // reopen -> back to the model list
+
+      expect(parentEl.querySelector('.qoderian-model-editor-head')).toBeNull();
+    });
+
+    it('drops a stale editor card when the runtime degrades mid-edit', () => {
+      const parentEl = createMockEl();
+      const notify: { current: (() => void) | null } = { current: null };
+      const getRuntimeStatus = jest.fn().mockReturnValue({ kind: 'ready', message: '' });
+      new ModelSelector(parentEl, buildCallbacks({
+        onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
+        getRuntimeStatus,
+        subscribeRuntimeStatus: jest.fn((listener: () => void) => {
+          notify.current = listener;
+          return () => {};
+        }),
+      }));
+
+      parentEl.querySelector('.qoderian-model-edit')?.click();
+      expect(parentEl.querySelector('.qoderian-model-editor-head')).toBeTruthy();
+
+      // Runtime drops while the editor is open: the card must not linger.
+      getRuntimeStatus.mockReturnValue({ kind: 'authRequired', message: 'Sign in required' });
+      notify.current?.();
+
+      expect(parentEl.querySelector('.qoderian-model-editor-head')).toBeNull();
+      expect(parentEl.querySelector('.qoderian-model-dropdown')
+        ?.hasClass('qoderian-model-dropdown--editing')).toBe(false);
+    });
+
+    describe('thinking effort levels', () => {
+      const thinkingEfforts = [
+        { value: 'low', isDefault: false, description: 'Minimal reasoning' },
+        { value: 'medium', isDefault: true },
+        { value: 'xhigh', isDefault: false },
+      ];
+
+      it('renders server effort rows under the thinking toggle', () => {
+        const parentEl = createMockEl();
+        new ModelSelector(parentEl, buildCallbacks({
+          onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
+        }, {}, thinkingEfforts));
+
+        parentEl.querySelector('.qoderian-model-edit')?.click();
+
+        // The intensity list gets its own labeled section like the IDE.
+        expect(parentEl.querySelector('.qoderian-model-editor-section--divided')?.textContent)
+          .toBe('Thinking Effort');
+        // 3 context tiers + 3 effort rows share the tier row style.
+        const rows = parentEl.querySelectorAll('.qoderian-model-editor-tier');
+        expect(rows).toHaveLength(6);
+        expect(rows.slice(3).map((row: ReturnType<typeof createMockEl>) =>
+          row.querySelector('.qoderian-model-editor-tier-label')?.textContent
+        )).toEqual(['low', 'medium', 'xhigh']);
+        expect(rows[3].getAttribute('title')).toBe('Minimal reasoning');
+        // Global effort 'high' is not in the list → server default is checked.
+        expect(rows[4].hasClass('selected')).toBe(true);
+        expect(rows[4].getAttribute('aria-selected')).toBe('true');
+        expect(rows[3].hasClass('selected')).toBe(false);
+        expect(rows[4].querySelector('.qoderian-model-editor-tier-default')?.textContent)
+          .toBe('Default');
+      });
+
+      it('hides effort rows when thinking is turned off', () => {
+        const parentEl = createMockEl();
+        new ModelSelector(parentEl, buildCallbacks({
+          onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
+        }, { qmodel: { thinkingEnabled: false } }, thinkingEfforts));
+
+        parentEl.querySelector('.qoderian-model-edit')?.click();
+
+        // Only the 3 context tiers remain.
+        expect(parentEl.querySelectorAll('.qoderian-model-editor-tier')).toHaveLength(3);
+      });
+
+      it('persists an effort choice and clears the override for the default', async () => {
+        const parentEl = createMockEl();
+        const overrides: Record<string, Record<string, unknown>> = {};
+        const onModelOverrideChange = jest.fn(async (_model: string, patch: Record<string, unknown>) => {
+          const current = overrides.qmodel ?? {};
+          for (const [key, value] of Object.entries(patch)) {
+            if (value === undefined) delete current[key];
+            else current[key] = value;
+          }
+          if (Object.keys(current).length > 0) overrides.qmodel = current;
+          else delete overrides.qmodel;
+        });
+        new ModelSelector(parentEl, buildCallbacks({ onModelOverrideChange }, overrides, thinkingEfforts));
+
+        parentEl.querySelector('.qoderian-model-edit')?.click();
+        // Choose xhigh (tier index 3 + effort index 2).
+        parentEl.querySelectorAll('.qoderian-model-editor-tier')[5]?.click();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(onModelOverrideChange).toHaveBeenCalledWith('qmodel', { thinkingEffort: 'xhigh' });
+        expect(parentEl.querySelectorAll('.qoderian-model-editor-tier')[5]?.hasClass('selected'))
+          .toBe(true);
+
+        // Choosing the server default clears the override entirely.
+        parentEl.querySelectorAll('.qoderian-model-editor-tier')[4]?.click();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(onModelOverrideChange).toHaveBeenCalledWith('qmodel', { thinkingEffort: undefined });
+        expect(overrides.qmodel?.thinkingEffort).toBeUndefined();
+      });
+      it('persists the server default explicitly when the global effort is offered', async () => {
+        // DeepSeek-V4-Pro shape (low/high/max), as delivered sorted by the
+        // getter: global 'high' is offered, max is the server default.
+        // Clicking max must stick instead of clearing to high.
+        const deepseekEfforts = [
+          { value: 'low', isDefault: false },
+          { value: 'high', isDefault: false },
+          { value: 'max', isDefault: true },
+        ];
+        const parentEl = createMockEl();
+        const overrides: Record<string, Record<string, unknown>> = {};
+        const onModelOverrideChange = jest.fn(async (_model: string, patch: Record<string, unknown>) => {
+          const current = overrides.qmodel ?? {};
+          for (const [key, value] of Object.entries(patch)) {
+            if (value === undefined) delete current[key];
+            else current[key] = value;
+          }
+          if (Object.keys(current).length > 0) overrides.qmodel = current;
+          else delete overrides.qmodel;
+        });
+        new ModelSelector(parentEl, buildCallbacks({ onModelOverrideChange }, overrides, deepseekEfforts));
+
+        parentEl.querySelector('.qoderian-model-edit')?.click();
+        // Effective starts at the global 'high'; choosing max persists it.
+        parentEl.querySelectorAll('.qoderian-model-editor-tier')[5]?.click();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(onModelOverrideChange).toHaveBeenCalledWith('qmodel', { thinkingEffort: 'max' });
+        expect(parentEl.querySelectorAll('.qoderian-model-editor-tier')[5]?.hasClass('selected'))
+          .toBe(true);
+
+        // Choosing the fallback value (global high) clears the override.
+        parentEl.querySelectorAll('.qoderian-model-editor-tier')[4]?.click();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(onModelOverrideChange).toHaveBeenCalledWith('qmodel', { thinkingEffort: undefined });
+        expect(overrides.qmodel).toBeUndefined();
+      });
+    });
+  });
 });
 
 describe('EffortSelector', () => {
