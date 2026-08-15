@@ -274,5 +274,18 @@
       "name": "語言",
       "desc": "變更外掛程式介面的顯示語言"
     }
+  },
+  "credits": {
+    "title": "我的用量",
+    "viewDetails": "查看詳情",
+    "planCredits": "套餐內 Credits",
+    "addOnCredits": "個人資源包",
+    "resourcePackage": "資源包",
+    "tierTrial": "體驗版",
+    "renewsOn": "將於 {date} 刷新",
+    "usedPercent": "已使用 {percent}%",
+    "left": "剩餘 {count}",
+    "trigger": "用量 - {percent}%",
+    "unavailable": "用量暫不可用"
   }
 }

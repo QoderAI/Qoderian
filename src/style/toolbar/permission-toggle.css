@@ -63,7 +63,7 @@
 
 .qoderian-permission-dropdown {
   position: absolute;
-  right: 8px;
+  inset-inline-end: 8px;
   bottom: 100%;
   display: flex;
   flex-direction: column;

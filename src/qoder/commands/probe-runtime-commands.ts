@@ -1,4 +1,4 @@
-import type { AgentInfo, ModelInfo, Options, SDKUserMessage, SlashCommand as SDKSlashCommand } from '@qoder-ai/qoder-agent-sdk';
+import type { AgentInfo, ModelInfo, Options, SDKUserMessage, SlashCommand as SDKSlashCommand, UsageInfo } from '@qoder-ai/qoder-agent-sdk';
 import { qodercliAuth, query as agentQuery } from '@qoder-ai/qoder-agent-sdk';
 
 import { getEnhancedPath, getMissingNodeError } from '../../core/env/environment';
@@ -106,7 +106,7 @@ function mapSdkModels(models: ModelInfo[]): QoderDiscoveredModel[] {
   });
 }
 
-class ProbeInput implements AsyncIterable<SDKUserMessage> {
+export class ProbeInput implements AsyncIterable<SDKUserMessage> {
   private resolveEnd: (() => void) | null = null;
   private readonly ended = new Promise<void>((resolve) => {
     this.resolveEnd = resolve;
@@ -128,7 +128,7 @@ class ProbeInput implements AsyncIterable<SDKUserMessage> {
   }
 }
 
-function buildProbeOptions(
+export function buildProbeOptions(
   plugin: QoderHostContext,
   vaultPath: string,
   cliPath: string,
@@ -155,6 +155,7 @@ export interface QoderRuntimeProbeResult {
   commands: SlashCommand[];
   agents: QoderDiscoveredAgent[];
   models: QoderDiscoveredModel[];
+  usageInfo?: UsageInfo;
 }
 
 export type QoderRuntimeProbeOutcome =
@@ -291,7 +292,14 @@ export async function probeRuntimeCatalog(
       }
     }
 
-    return { commands, agents, models };
+    let usageInfo: UsageInfo | undefined;
+    try {
+      usageInfo = await conversation.getUsageInfo() ?? undefined;
+    } catch {
+      // Usage is best-effort; a failure must not fail the catalog probe.
+    }
+
+    return { commands, agents, models, ...(usageInfo ? { usageInfo } : {}) };
   } catch (error) {
     return { error: classifyQoderProbeError(error, timedOut) };
   } finally {

@@ -274,5 +274,18 @@
       "name": "언어",
       "desc": "플러그인 인터페이스의 표시 언어 변경"
     }
+  },
+  "credits": {
+    "title": "사용량",
+    "viewDetails": "자세히 보기",
+    "planCredits": "플랜 크레딧",
+    "addOnCredits": "개인 리소스 팩",
+    "resourcePackage": "추가 크레딧",
+    "tierTrial": "체험판",
+    "renewsOn": "{date}에 갱신",
+    "usedPercent": "{percent}% 사용",
+    "left": "{count} 남음",
+    "trigger": "사용량 - {percent}%",
+    "unavailable": "사용량을 확인할 수 없음"
   }
 }

@@ -13,6 +13,11 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ### Added
 
+- Credits usage panel in the chat view: a gauge button next to the
+  session history opens a usage popover that mirrors the Qoder IDE
+  view (plan credits with edition badge, personal/add-on resource
+  pack, organization resource package, renewal date) and links to the
+  edition's account usage page.
 - Qoder CLI edition switch in settings (Setup section): choose the
   international build (`qodercli`, config under `~/.qoder`) or the
   China build (`qoderclicn`, config under `~/.qoder-cn`). Auto-
@@ -21,6 +26,10 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ### Fixed
 
+- The model selector dropdown opens above the model button again on
+  wide views instead of anchoring to the far edge of the toolbar, and
+  toolbar dropdowns anchor with logical edges so right-to-left
+  layouts position correctly.
 - The composer now adapts to narrow sidebars: context chips that do
   not fit collapse behind a "+N more" pill (click to expand or
   collapse), the toolbar wraps instead of clipping, and the permission

@@ -64,6 +64,19 @@ export type TranslationKey =
   | 'chat.view.moveBlockedStreaming'
   | 'chat.view.moveFailed'
 
+  // Credits usage panel
+  | 'credits.title'
+  | 'credits.viewDetails'
+  | 'credits.planCredits'
+  | 'credits.addOnCredits'
+  | 'credits.resourcePackage'
+  | 'credits.tierTrial'
+  | 'credits.renewsOn'
+  | 'credits.usedPercent'
+  | 'credits.left'
+  | 'credits.trigger'
+  | 'credits.unavailable'
+
   // Chat - Conversation
   | 'chat.conversation.emptyPreview'
   | 'chat.conversation.deleteFailed'

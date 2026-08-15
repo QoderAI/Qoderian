@@ -274,5 +274,18 @@
       "name": "Язык",
       "desc": "Изменить язык интерфейса плагина"
     }
+  },
+  "credits": {
+    "title": "Использование кредитов",
+    "viewDetails": "Подробнее",
+    "planCredits": "Кредиты плана",
+    "addOnCredits": "Персональный пакет ресурсов",
+    "resourcePackage": "Дополнительные кредиты",
+    "tierTrial": "Пробная версия",
+    "renewsOn": "Обновление {date}",
+    "usedPercent": "использовано {percent}%",
+    "left": "осталось {count}",
+    "trigger": "Использование - {percent}%",
+    "unavailable": "Использование недоступно"
   }
 }

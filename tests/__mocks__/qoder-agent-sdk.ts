@@ -126,6 +126,7 @@ let lastOptions: Options | undefined;
 let mockSupportedCommands: Array<{ name: string; description: string; argumentHint?: string }> = [];
 let mockAvailableModels: any[] = [];
 let mockInitializationModels: any[] | undefined;
+let mockUsageInfo: any = undefined;
 let lastResponse: (AsyncGenerator<any> & {
   interrupt: jest.Mock;
   setModel: jest.Mock;
@@ -136,6 +137,7 @@ let lastResponse: (AsyncGenerator<any> & {
   supportedCommands: jest.Mock;
   getAvailableModels: jest.Mock;
   initializationResult: jest.Mock;
+  getUsageInfo: jest.Mock;
   close: jest.Mock;
 }) | null = null;
 
@@ -157,6 +159,7 @@ export function resetMockMessages() {
   mockSupportedCommands = [];
   mockAvailableModels = [];
   mockInitializationModels = undefined;
+  mockUsageInfo = undefined;
   lastResponse = null;
   shouldThrowOnIteration = false;
   throwAfterChunks = 0;
@@ -175,6 +178,11 @@ export function setMockAvailableModels(models: any[]) {
 
 export function setMockInitializationModels(models: any[]) {
   mockInitializationModels = models;
+}
+
+/** Sets the usage snapshot returned by getUsageInfo(); pass an Error to make it reject. */
+export function setMockUsageInfo(usageInfo: any) {
+  mockUsageInfo = usageInfo;
 }
 
 /**
@@ -331,6 +339,7 @@ export function query({ prompt, options }: { prompt: any; options: Options }): A
     supportedCommands: jest.Mock;
     getAvailableModels: jest.Mock;
     initializationResult: jest.Mock;
+    getUsageInfo: jest.Mock;
     close: jest.Mock;
   };
   gen.interrupt = jest.fn().mockResolvedValue(undefined);
@@ -368,6 +377,10 @@ export function query({ prompt, options }: { prompt: any; options: Options }): A
   });
   gen.close = jest.fn().mockImplementation(async () => {
     await gen.return(undefined);
+  });
+  gen.getUsageInfo = jest.fn().mockImplementation(async () => {
+    if (mockUsageInfo instanceof Error) throw mockUsageInfo;
+    return mockUsageInfo;
   });
   lastResponse = gen;
 
