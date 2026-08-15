@@ -18,6 +18,9 @@ export function getQoderModelOptions(settings: Record<string, unknown>): UIOptio
       group: model.group ?? QODER_MODEL_GROUP,
       ...(priceLabel ? { priceLabel } : {}),
       ...(promotionLabel ? { promotionLabel } : {}),
+      ...(model.contextTiers ? { contextTiers: model.contextTiers } : {}),
+      ...(model.thinkingDisableable ? { thinkingDisableable: true } : {}),
+      ...(model.thinkingEfforts ? { thinkingEfforts: model.thinkingEfforts } : {}),
     };
   });
 }

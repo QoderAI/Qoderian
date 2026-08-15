@@ -5,6 +5,7 @@ import type {
   ManagedMcpServer,
   PluginInfo,
 } from './index';
+import type { ModelContextTier, ModelThinkingEffort } from './settings';
 // ---------------------------------------------------------------------------
 // App-level service interfaces
 // ---------------------------------------------------------------------------
@@ -121,6 +122,12 @@ export interface UIOption {
   priceLabel?: string;
   /** Trailing promotion badge shown on the option row, e.g. '错峰5折'. */
   promotionLabel?: string;
+  /** Configurable context-window tiers for the model edit panel. */
+  contextTiers?: ModelContextTier[];
+  /** Whether the model edit panel may offer disabling thinking. */
+  thinkingDisableable?: boolean;
+  /** Configurable thinking effort levels for the model edit panel. */
+  thinkingEfforts?: ModelThinkingEffort[];
 }
 
 export interface PathIconSvg {

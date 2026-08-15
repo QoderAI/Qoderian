@@ -287,6 +287,8 @@ export function createMockEl(tag = 'div'): any {
       children.length = 0;
       element.innerHTML = '';
       textContent = '';
+      // Real DOM clamps scroll once the scrolled content is removed.
+      element.scrollTop = 0;
     },
     contains(node: any) {
       if (node === element) return true;

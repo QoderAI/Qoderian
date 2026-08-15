@@ -1,11 +1,24 @@
 import { Notice } from 'obsidian';
 
 import type { QoderRuntimeStatus } from '../../../../core/types/services';
-import type { PermissionMode } from '../../../../core/types/settings';
+import type { PermissionMode, QoderModelOverride } from '../../../../core/types/settings';
+import { t } from '../../../../i18n/i18n';
 import { getActiveQoderCliEdition, getQoderCliLoginCommand } from '../../../../qoder/config/cli-edition';
+import { getQoderModelOverride } from '../../../../qoder/config/settings';
 import type { QoderModelConfig } from '../../../../qoder/models/qoder-model-config';
-import { createIconSvg, QODER_ICON } from '../../../../shared/icons';
+import {
+  CHECK_ICON,
+  CHEVRON_LEFT_ICON,
+  createIconSvg,
+  PENCIL_ICON,
+  QODER_ICON,
+} from '../../../../shared/icons';
 import { ClickPopover } from './click-popover';
+import {
+  modelDropdownMaxHeight,
+  modelEditorPaneOffset,
+  shouldFlipModelDropdown,
+} from './model-dropdown-placement';
 
 function runToolbarAction(action: () => Promise<void>, failureMessage: string): void {
   void action().catch(() => {
@@ -24,6 +37,8 @@ export interface ToolbarCallbacks {
   onModelChange: (model: string) => Promise<void>;
   onEffortLevelChange: (effort: string) => Promise<void>;
   onPermissionModeChange: (mode: PermissionMode) => Promise<void>;
+  /** Per-model editor overrides (context window tier, thinking toggle). */
+  onModelOverrideChange?: (model: string, override: Partial<QoderModelOverride>) => Promise<void>;
   getSettings: () => ToolbarSettings;
   getModelConfig: () => QoderModelConfig;
   getRuntimeStatus?: () => QoderRuntimeStatus;
@@ -58,7 +73,10 @@ export class ModelSelector {
   private readonly container: HTMLElement;
   private buttonEl: HTMLElement | null = null;
   private dropdownEl: HTMLElement | null = null;
+  private listPaneEl: HTMLElement | null = null;
+  private editorPaneEl: HTMLElement | null = null;
   private popover: ClickPopover | null = null;
+  private editingModel: string | null = null;
   private unsubscribeRuntimeStatus: (() => void) | null = null;
 
   constructor(parentEl: HTMLElement, private readonly callbacks: ToolbarCallbacks) {
@@ -91,6 +109,10 @@ export class ModelSelector {
     this.updateDisplay();
 
     this.dropdownEl = this.container.createDiv({ cls: 'qoderian-model-dropdown' });
+    // IDE-style cascade: the model list stays visible in the left pane while
+    // the per-model editor expands into the right pane.
+    this.listPaneEl = this.dropdownEl.createDiv({ cls: 'qoderian-model-list-pane' });
+    this.editorPaneEl = this.dropdownEl.createDiv({ cls: 'qoderian-model-editor-pane' });
     this.renderOptions();
     this.popover = new ClickPopover(
       this.container,
@@ -98,6 +120,23 @@ export class ModelSelector {
       this.dropdownEl,
       'qoderian-model-selector--open',
     );
+    // Reopening the dropdown always returns to the model list view. The
+    // popover toggles first, so the open class already reflects the new state.
+    const resetEditingView = () => {
+      if (this.editingModel !== null
+        && this.container.hasClass('qoderian-model-selector--open')) {
+        this.editingModel = null;
+        this.renderOptions();
+      }
+      // Re-measure on every open/close so a resized window cannot leave a
+      // stale placement behind.
+      this.updateDropdownPlacement();
+    };
+    this.buttonEl.addEventListener('click', resetEditingView);
+    this.buttonEl.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      resetEditingView();
+    });
   }
 
   updateDisplay(): void {
@@ -122,8 +161,12 @@ export class ModelSelector {
   }
 
   renderOptions(): void {
-    if (!this.dropdownEl) return;
-    this.dropdownEl.empty();
+    const listPaneEl = this.listPaneEl;
+    const editorPaneEl = this.editorPaneEl;
+    if (!this.dropdownEl || !listPaneEl || !editorPaneEl) return;
+    // Rebuilding the list must not yank the reader back to the top.
+    const previousScrollTop = listPaneEl.scrollTop;
+    listPaneEl.empty();
 
     const currentModel = this.callbacks.getSettings().model;
     const models = this.getAvailableModels();
@@ -131,7 +174,7 @@ export class ModelSelector {
     let lastGroup: string | undefined;
 
     if (status.kind !== 'ready') {
-      const statusEl = this.dropdownEl.createDiv({ cls: 'qoderian-model-runtime-status' });
+      const statusEl = listPaneEl.createDiv({ cls: 'qoderian-model-runtime-status' });
       statusEl.createDiv({ cls: 'qoderian-model-runtime-title', text: getRuntimeStatusLabel(status) });
       statusEl.createDiv({ cls: 'qoderian-model-runtime-message', text: status.message });
       if (status.kind === 'authRequired') {
@@ -161,21 +204,28 @@ export class ModelSelector {
     }
 
     const shouldRenderModels = status.kind === 'ready' || canUseCachedModels(status);
-    if (!shouldRenderModels) return;
+    if (!shouldRenderModels) {
+      // Degrading mid-edit must not strand the editor card behind the status view.
+      this.editingModel = null;
+      editorPaneEl.empty();
+      this.dropdownEl.removeClass('qoderian-model-dropdown--editing');
+      return;
+    }
 
     for (const model of [...models].reverse()) {
       if (model.group && model.group !== lastGroup) {
-        this.dropdownEl.createDiv({
+        listPaneEl.createDiv({
           cls: 'qoderian-model-group',
           text: model.group,
         });
         lastGroup = model.group;
       }
 
-      const option = this.dropdownEl.createDiv({ cls: 'qoderian-model-option' });
+      const option = listPaneEl.createDiv({ cls: 'qoderian-model-option' });
       option.setAttribute('role', 'option');
       option.setAttribute('aria-selected', String(model.value === currentModel));
       if (model.value === currentModel) option.addClass('selected');
+      if (model.value === this.editingModel) option.addClass('editing');
 
       option.appendChild(createIconSvg(QODER_ICON, {
         className: 'qoderian-model-icon',
@@ -193,6 +243,34 @@ export class ModelSelector {
           meta.createSpan({ cls: 'qoderian-model-price', text: model.priceLabel });
         }
       }
+      const editable = ((model.contextTiers?.length ?? 0) > 0
+        || (model.thinkingEfforts?.length ?? 0) > 0
+        || model.thinkingDisableable === true)
+        && this.callbacks.onModelOverrideChange !== undefined;
+      if (editable) {
+        const editEl = option.createDiv({ cls: 'qoderian-model-edit' });
+        editEl.setAttribute('role', 'button');
+        editEl.setAttribute('tabindex', '0');
+        editEl.setAttribute('aria-label', `${t('model.edit')} ${model.label}`);
+        editEl.appendChild(createIconSvg(PENCIL_ICON, {
+          className: 'qoderian-model-edit-icon',
+          height: 11,
+          ownerDocument: option.ownerDocument,
+          width: 11,
+        }));
+        editEl.createSpan({ cls: 'qoderian-model-edit-label', text: t('model.edit') });
+        const enterEditing = (event: Event) => {
+          event.stopPropagation();
+          this.editingModel = model.value;
+          this.renderOptions();
+        };
+        editEl.addEventListener('click', enterEditing);
+        editEl.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          enterEditing(event);
+        });
+      }
       if (model.description) option.setAttribute('title', model.description);
 
       option.addEventListener('click', (event) => {
@@ -204,6 +282,206 @@ export class ModelSelector {
           this.renderOptions();
         }, 'Failed to change model');
       });
+    }
+
+    // The editor pane expands beside the list, mirroring the Qoder IDE.
+    if (this.editingModel !== null) {
+      this.renderEditor(this.editingModel);
+      this.dropdownEl.addClass('qoderian-model-dropdown--editing');
+    } else {
+      editorPaneEl.empty();
+      this.dropdownEl.removeClass('qoderian-model-dropdown--editing');
+    }
+    listPaneEl.scrollTop = previousScrollTop;
+    this.updateDropdownPlacement();
+  }
+
+  /**
+   * Places the dropdown against the real viewport: stay flush with the
+   * trigger (inline-start) and flip only when the panel would overflow,
+   * capping the height to the space above the toolbar. The decision rules
+   * live in model-dropdown-placement.ts so they stay unit-testable.
+   */
+  private updateDropdownPlacement(): void {
+    const dropdownEl = this.dropdownEl;
+    if (!dropdownEl) return;
+    const view = this.container.ownerDocument.defaultView;
+    if (!view) return;
+    const anchor = (dropdownEl.offsetParent ?? this.container).getBoundingClientRect();
+    dropdownEl.toggleClass(
+      'qoderian-model-dropdown--flip',
+      shouldFlipModelDropdown(anchor, dropdownEl.offsetWidth, view.innerWidth),
+    );
+    dropdownEl.setCssProps({
+      '--qoderian-model-dropdown-max-height': `${modelDropdownMaxHeight(anchor.top)}px`,
+    });
+    // Anchor the compact editor card to its edited row, IDE flyout style.
+    if (this.editingModel !== null && this.listPaneEl && this.editorPaneEl) {
+      const rowEl = this.listPaneEl.querySelector('.qoderian-model-option.editing');
+      const rowVisibleTop = rowEl
+        ? rowEl.getBoundingClientRect().top - this.listPaneEl.getBoundingClientRect().top
+        : 0;
+      this.editorPaneEl.setCssProps({
+        '--qoderian-model-editor-offset': `${modelEditorPaneOffset(
+          rowVisibleTop,
+          this.editorPaneEl.offsetHeight,
+          this.listPaneEl.clientHeight,
+        )}px`,
+      });
+    }
+  }
+
+  /** IDE-style per-model editor: context window tiers + thinking toggle. */
+  private renderEditor(modelValue: string): void {
+    const editorPaneEl = this.editorPaneEl;
+    if (!editorPaneEl) return;
+    editorPaneEl.empty();
+
+    const settings = this.callbacks.getSettings();
+    const modelConfig = this.callbacks.getModelConfig();
+    const model = this.getAvailableModels().find(candidate => candidate.value === modelValue);
+
+    const head = editorPaneEl.createDiv({ cls: 'qoderian-model-editor-head' });
+    const backEl = head.createDiv({ cls: 'qoderian-model-editor-back' });
+    backEl.setAttribute('role', 'button');
+    backEl.setAttribute('tabindex', '0');
+    backEl.setAttribute('aria-label', t('model.backToList'));
+    backEl.appendChild(createIconSvg(CHEVRON_LEFT_ICON, {
+      className: 'qoderian-model-editor-back-icon',
+      height: 12,
+      ownerDocument: editorPaneEl.ownerDocument,
+      width: 12,
+    }));
+    const exitEditing = (event: Event) => {
+      event.stopPropagation();
+      this.editingModel = null;
+      this.renderOptions();
+    };
+    backEl.addEventListener('click', exitEditing);
+    backEl.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      exitEditing(event);
+    });
+    head.createSpan({ cls: 'qoderian-model-editor-title', text: model?.label ?? modelValue });
+
+    const tiers = modelConfig.getModelContextTiers(modelValue, settings);
+    if (tiers.length > 0) {
+      editorPaneEl.createDiv({
+        cls: 'qoderian-model-editor-section',
+        text: t('model.contextWindow'),
+      });
+      const effectiveWindow = modelConfig.getEffectiveContextWindowSize(modelValue, settings);
+      for (const tier of tiers) {
+        const selected = tier.tokenCount === effectiveWindow;
+        const row = editorPaneEl.createDiv({ cls: 'qoderian-model-editor-tier' });
+        row.setAttribute('role', 'option');
+        row.setAttribute('aria-selected', String(selected));
+        if (selected) row.addClass('selected');
+        row.createSpan({ cls: 'qoderian-model-editor-tier-label', text: tier.label });
+        if (tier.isDefault) {
+          row.createSpan({
+            cls: 'qoderian-model-editor-tier-default',
+            text: t('model.default'),
+          });
+        }
+        if (selected) {
+          row.appendChild(createIconSvg(CHECK_ICON, {
+            className: 'qoderian-model-editor-check',
+            height: 12,
+            ownerDocument: editorPaneEl.ownerDocument,
+            width: 12,
+          }));
+        }
+        row.addEventListener('click', (event) => {
+          event.stopPropagation();
+          if (selected) return;
+          runToolbarAction(async () => {
+            await this.callbacks.onModelOverrideChange?.(modelValue, {
+              // Choosing the server default clears the override entirely.
+              contextWindow: tier.isDefault ? undefined : tier.tokenCount,
+            });
+            this.renderOptions();
+          }, 'Failed to update model settings');
+        });
+      }
+    }
+
+    if (modelConfig.isThinkingDisableable(modelValue, settings)) {
+      const override = getQoderModelOverride(settings, modelValue);
+      const enabled = override?.thinkingEnabled !== false;
+      const row = editorPaneEl.createDiv({ cls: 'qoderian-model-editor-toggle-row' });
+      row.createSpan({ cls: 'qoderian-model-editor-toggle-label', text: t('model.thinkingMode') });
+      const toggleEl = row.createDiv({ cls: 'qoderian-model-editor-toggle' });
+      toggleEl.setAttribute('role', 'switch');
+      toggleEl.setAttribute('aria-checked', String(enabled));
+      if (enabled) toggleEl.addClass('is-on');
+      toggleEl.addEventListener('click', (event) => {
+        event.stopPropagation();
+        runToolbarAction(async () => {
+          await this.callbacks.onModelOverrideChange?.(modelValue, {
+            thinkingEnabled: !enabled,
+          });
+          this.renderOptions();
+        }, 'Failed to update model settings');
+      });
+    }
+
+    // Server-reported intensity levels render under the switch like the IDE:
+    // models without efforts keep the bare on/off toggle.
+    const efforts = modelConfig.getModelThinkingEfforts(modelValue, settings);
+    const override = getQoderModelOverride(settings, modelValue);
+    if (override?.thinkingEnabled !== false && efforts.length > 0) {
+      editorPaneEl.createDiv({
+        cls: 'qoderian-model-editor-section qoderian-model-editor-section--divided',
+        text: t('model.thinkingEffort'),
+      });
+      const defaultEffort = efforts.find(effort => effort.isDefault)?.value
+        ?? efforts[0]?.value;
+      const globalEffort = typeof settings.effortLevel === 'string'
+        ? settings.effortLevel
+        : undefined;
+      // Without an override the global effort wins when the model offers it,
+      // otherwise the server default applies.
+      const fallbackEffort = globalEffort && efforts.some(effort => effort.value === globalEffort)
+        ? globalEffort
+        : defaultEffort;
+      const effectiveEffort = override?.thinkingEffort ?? fallbackEffort;
+      for (const effort of efforts) {
+        const selected = effort.value === effectiveEffort;
+        const row = editorPaneEl.createDiv({ cls: 'qoderian-model-editor-tier' });
+        row.setAttribute('role', 'option');
+        row.setAttribute('aria-selected', String(selected));
+        if (selected) row.addClass('selected');
+        row.createSpan({ cls: 'qoderian-model-editor-tier-label', text: effort.value });
+        if (effort.isDefault) {
+          row.createSpan({
+            cls: 'qoderian-model-editor-tier-default',
+            text: t('model.default'),
+          });
+        }
+        if (selected) {
+          row.appendChild(createIconSvg(CHECK_ICON, {
+            className: 'qoderian-model-editor-check',
+            height: 12,
+            ownerDocument: editorPaneEl.ownerDocument,
+            width: 12,
+          }));
+        }
+        if (effort.description) row.setAttribute('title', effort.description);
+        row.addEventListener('click', (event) => {
+          event.stopPropagation();
+          if (selected) return;
+          runToolbarAction(async () => {
+            await this.callbacks.onModelOverrideChange?.(modelValue, {
+              // Clearing only when the fallback already yields this value keeps
+              // explicit choices (incl. the server default) effective.
+              thinkingEffort: effort.value === fallbackEffort ? undefined : effort.value,
+            });
+            this.renderOptions();
+          }, 'Failed to update model settings');
+        });
+      }
     }
   }
 }

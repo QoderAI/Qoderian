@@ -6,9 +6,10 @@ import { getEnhancedPath } from '../../../core/env/environment';
 import { getVaultPath } from '../../../core/fs/path';
 import type { ChatRuntime } from '../../../core/runtime/chat-runtime';
 import type { ChatMessage, Conversation, QoderState } from '../../../core/types';
+import type { QoderModelOverride } from '../../../core/types/settings';
 import { t } from '../../../i18n/i18n';
 import type QoderianPlugin from '../../../main';
-import { getQoderSettings } from '../../../qoder/config/settings';
+import { getQoderSettings, updateQoderSettings } from '../../../qoder/config/settings';
 import {
   SlashCommandDropdown,
   toSlashCommandDropdownEntries,
@@ -430,6 +431,37 @@ function initializeInputToolbar(
       await updateTabQoderSettings(tab, plugin, (settings) => {
         settings.effortLevel = effort;
       });
+    },
+    onModelOverrideChange: async (model: string, override: Partial<QoderModelOverride>) => {
+      await updateTabQoderSettings(tab, plugin, (settings) => {
+        const current = getQoderSettings(settings).modelOverrides;
+        const merged: QoderModelOverride = { ...current[model] };
+        for (const [key, value] of Object.entries(override)) {
+          if (value === undefined) {
+            delete merged[key as keyof QoderModelOverride];
+          } else {
+            (merged as Record<string, unknown>)[key] = value;
+          }
+        }
+        const next = { ...current };
+        if (Object.keys(merged).length > 0) next[model] = merged;
+        else delete next[model];
+        updateQoderSettings(settings, { modelOverrides: next });
+      });
+
+      // The context meter tracks the effective window of the edited model.
+      // Overrides for other models must not rewrite this conversation's
+      // usage, which belongs to the currently selected model.
+      const currentUsage = tab.state.usage;
+      if (currentUsage && model === plugin.settings.model) {
+        const modelConfig = getTabModelConfig(tab, plugin);
+        const newContextWindow = modelConfig.getEffectiveContextWindowSize(
+          model,
+          plugin.settings,
+        );
+        tab.state.usage = recalculateUsageForModel(currentUsage, model, newContextWindow);
+        tab.ui.contextUsageMeter?.update(tab.state.usage);
+      }
     },
     onPermissionModeChange: async (mode) => {
       await updateTabQoderSettings(tab, plugin, (settings) => {

@@ -1,8 +1,11 @@
+import type { ModelPolicyContext } from '@qoder-ai/qoder-agent-sdk';
+
 import type { AppPluginManager } from '@/core/types/services';
 import type { PermissionMode, QoderianSettings } from '@/core/types/settings';
 import { DEFAULT_QODER_SETTINGS } from '@/qoder/config/settings';
 import type { McpServerManager } from '@/qoder/mcp/mcp-server-manager';
 import {
+  type ColdStartQueryContext,
   type PersistentQueryContext,
   QueryOptionsBuilder,
 } from '@/qoder/runtime/qoder-query-options-builder';
@@ -37,6 +40,25 @@ function createContext(
     hooks: {},
   };
 }
+
+function createColdStartContext(): ColdStartQueryContext {
+  return {
+    ...createContext('default'),
+    hasEditorContext: false,
+    mcpManager: {
+      getAllDisallowedMcpTools: jest.fn().mockReturnValue([]),
+      getActiveServers: jest.fn().mockReturnValue({}),
+      getDisallowedMcpTools: jest.fn().mockReturnValue([]),
+    } as unknown as McpServerManager,
+  };
+}
+
+const policyContext = {
+  purpose: 'main',
+  sessionId: 'session-1',
+  turnIndex: 0,
+  availableModels: [],
+} as ModelPolicyContext;
 
 describe('QueryOptionsBuilder permissions', () => {
   it.each(['default', 'acceptEdits', 'auto', 'plan'] as const)(
@@ -87,5 +109,51 @@ describe('QueryOptionsBuilder permissions', () => {
     expect(QueryOptionsBuilder.needsRestart(safeConfig, otherSafeConfig)).toBe(false);
     expect(QueryOptionsBuilder.needsRestart(safeConfig, yoloConfig)).toBe(true);
     expect(QueryOptionsBuilder.needsRestart(yoloConfig, safeConfig)).toBe(true);
+  });
+});
+
+describe('QueryOptionsBuilder model policy', () => {
+  it('registers a pull-mode resolveModel provider on persistent queries', () => {
+    const options = QueryOptionsBuilder.buildPersistentQueryOptions(createContext('default'));
+
+    expect(typeof options.resolveModel).toBe('function');
+    expect(options.resolveModel?.(policyContext)).toEqual({ model: 'auto' });
+  });
+
+  it('re-reads live settings so editor overrides apply without a restart', () => {
+    const ctx = createContext('default');
+    const options = QueryOptionsBuilder.buildPersistentQueryOptions(ctx);
+
+    // The user switches model and disables thinking mid-session.
+    (ctx.settings as { model: string }).model = 'qmodel_38max';
+    ctx.settings.qoder.discoveredModels = [{
+      value: 'qmodel_38max',
+      displayName: 'Qwen 3.8 Max',
+      description: '',
+      thinkingDisableable: true,
+    }];
+    ctx.settings.qoder.modelOverrides = {
+      qmodel_38max: { thinkingEnabled: false },
+    };
+
+    expect(options.resolveModel?.(policyContext)).toEqual({
+      model: 'qmodel_38max',
+      parameters: { reasoningEffort: 'none' },
+    });
+  });
+
+  it('registers the provider on cold-start queries with the selected model', () => {
+    const ctx = createColdStartContext();
+    ctx.modelOverride = 'qmodel_38max';
+    ctx.settings.qoder.modelOverrides = {
+      qmodel_38max: { contextWindow: 1000000 },
+    };
+
+    const options = QueryOptionsBuilder.buildColdStartQueryOptions(ctx);
+
+    expect(options.resolveModel?.(policyContext)).toEqual({
+      model: 'qmodel_38max',
+      parameters: { contextWindow: 1000000 },
+    });
   });
 });

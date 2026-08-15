@@ -43,3 +43,6 @@ coverage/
 
 # Local preview material, not shipped
 /docs/preview/
+
+# Temporary screenshots from automated UI verification
+/.cu_crop_*.png

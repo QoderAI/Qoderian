@@ -16,6 +16,7 @@ import {
   type QoderDiscoveredModel,
   resolveQoderSettingSources,
 } from '../config/settings';
+import { sortThinkingEfforts } from '../models/model-catalog';
 import type { QoderHostContext } from '../qoder-host-context';
 import { createCustomSpawnFunction } from '../runtime/custom-spawn';
 
@@ -92,6 +93,8 @@ function mapSdkModels(models: ModelInfo[]): QoderDiscoveredModel[] {
     if (!value || model.isEnabled === false) return [];
     const group = resolveSdkModelGroup(model);
     const promotion = mapSdkPromotion(model);
+    const contextTiers = mapContextTiers(model.context_config);
+    const thinkingEfforts = mapThinkingEfforts(model.thinking_config);
     return [{
       value,
       displayName: model.displayName?.trim() || value,
@@ -102,8 +105,54 @@ function mapSdkModels(models: ModelInfo[]): QoderDiscoveredModel[] {
         ? { originalPriceFactor: model.originalPriceFactor }
         : {}),
       ...(promotion ? { promotion } : {}),
+      ...(contextTiers ? { contextTiers } : {}),
+      ...(model.thinking_config?.disabled !== undefined ? { thinkingDisableable: true } : {}),
+      ...(thinkingEfforts ? { thinkingEfforts } : {}),
     }];
   });
+}
+
+/** Server `thinking_config.enabled.efforts` into editor intensity choices. */
+function mapThinkingEfforts(
+  config: ModelInfo['thinking_config'],
+): QoderDiscoveredModel['thinkingEfforts'] {
+  const efforts = config?.enabled?.efforts;
+  if (!efforts) return undefined;
+
+  const mapped = Object.entries(efforts).flatMap(([value, entry]) => {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+    return [{
+      value: trimmed,
+      isDefault: entry?.is_default === true,
+      ...(typeof entry?.description === 'string' && entry.description.trim()
+        ? { description: entry.description.trim() }
+        : {}),
+    }];
+  });
+
+  // Server key order is arbitrary; the editor shows efforts weakest-first.
+  return mapped.length > 0 ? sortThinkingEfforts(mapped) : undefined;
+}
+
+/** Server `context_config` tiers (label → token_count) into editor choices. */
+function mapContextTiers(
+  config: ModelInfo['context_config'],
+): QoderDiscoveredModel['contextTiers'] {
+  if (!config) return undefined;
+
+  const tiers = Object.entries(config).flatMap(([label, entry]) => {
+    const tokenCount = entry?.token_count;
+    const trimmed = label.trim();
+    if (!trimmed || typeof tokenCount !== 'number' || !isFinite(tokenCount) || tokenCount <= 0) {
+      return [];
+    }
+    return [{ label: trimmed, tokenCount, isDefault: entry.is_default === true }];
+  });
+  // Server key order is arbitrary; the editor shows tiers smallest-first.
+  tiers.sort((a, b) => a.tokenCount - b.tokenCount);
+
+  return tiers.length > 0 ? tiers : undefined;
 }
 
 export class ProbeInput implements AsyncIterable<SDKUserMessage> {

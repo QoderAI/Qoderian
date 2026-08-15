@@ -44,19 +44,76 @@
   inset-inline-start: 0;
   margin-bottom: 0;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background: var(--background-secondary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 4px;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
   z-index: 1000;
   width: max-content;
-  max-width: min(340px, calc(100% - 16px));
-  padding: 4px;
+  max-width: calc(100vw - 16px);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+/* Both panes are separate floating cards, mirroring the Qoder IDE. */
+.qoderian-model-list-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  min-height: 0;
+  flex: 0 1 auto;
+  overflow-y: auto;
+  max-width: min(340px, calc(100vw - 24px));
+  /* Measured by updateDropdownPlacement(); fallback matches the repo-wide
+     popover height convention. */
+  max-height: var(--qoderian-model-dropdown-max-height, 420px);
+  padding: 4px;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Compact editor card: height fits its content and it flyouts beside the
+   row being edited instead of stretching to the list height. */
+.qoderian-model-editor-pane {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow-y: auto;
+  width: 260px;
+  max-width: calc(100vw - 24px);
+  margin-top: var(--qoderian-model-editor-offset, 0px);
+  padding: 4px 8px 8px;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.qoderian-model-dropdown--editing .qoderian-model-editor-pane {
+  display: flex;
+}
+
+/* Flips only when start alignment would overflow the viewport; decided by
+   shouldFlipModelDropdown() against real measurements. */
+.qoderian-model-dropdown--flip {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+/* Very narrow windows: stack the editor card under the list card. */
+@media (max-width: 640px) {
+  .qoderian-model-dropdown--editing {
+    flex-direction: column;
+  }
+
+  .qoderian-model-dropdown--editing .qoderian-model-editor-pane {
+    width: auto;
+    margin-top: 0;
+  }
 }
 
 .qoderian-model-runtime-status {
@@ -182,4 +239,184 @@
   background: rgba(var(--qoderian-brand-rgb), 0.15);
   color: var(--qoderian-brand);
   font-size: 10px;
+}
+
+/* Per-model edit affordance: collapsed and invisible until the row is hovered
+   (or the affordance is focused via keyboard / the row is being edited); the
+   label expands on hover/edit like the IDE. */
+.qoderian-model-edit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: 0;
+  padding-left: 0;
+  flex-shrink: 0;
+  width: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  border-radius: 3px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+}
+
+.qoderian-model-option:hover .qoderian-model-edit,
+.qoderian-model-option.editing .qoderian-model-edit,
+.qoderian-model-edit:focus-visible {
+  width: auto;
+  overflow: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.qoderian-model-edit:hover,
+.qoderian-model-edit:focus-visible {
+  color: var(--text-normal);
+  outline: none;
+}
+
+.qoderian-model-edit-label {
+  display: none;
+  font-size: 11px;
+}
+
+/* When the meta slot is hidden the edit affordance takes the trailing slot. */
+.qoderian-model-option:hover .qoderian-model-edit,
+.qoderian-model-option.editing .qoderian-model-edit,
+.qoderian-model-edit:focus-visible {
+  margin-inline-start: auto;
+  padding-left: 12px;
+}
+
+.qoderian-model-option:hover .qoderian-model-edit-label,
+.qoderian-model-option.editing .qoderian-model-edit-label,
+.qoderian-model-edit:focus-visible .qoderian-model-edit-label {
+  display: inline;
+}
+
+.qoderian-model-option:hover .qoderian-model-meta,
+.qoderian-model-option.editing .qoderian-model-meta {
+  display: none;
+}
+
+/* Per-model editor view (context window tiers + thinking toggle). */
+.qoderian-model-editor-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.qoderian-model-editor-back {
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.qoderian-model-editor-back:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qoderian-model-editor-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.qoderian-model-editor-section {
+  padding: 6px 8px 2px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Separates the Thinking Effort section from the toggle above, mirroring the
+   list pane's group divider so the option groups stay distinct. */
+.qoderian-model-editor-section--divided {
+  margin-top: 4px;
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 6px;
+}
+
+.qoderian-model-editor-tier {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  /* IDE shows every tier row in normal text; selection is marked by the check. */
+  color: var(--text-normal);
+}
+
+.qoderian-model-editor-tier:hover {
+  background: var(--background-modifier-hover);
+}
+
+.qoderian-model-editor-tier.selected {
+  color: var(--text-normal);
+  font-weight: 500;
+}
+
+.qoderian-model-editor-tier-default {
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+.qoderian-model-editor-check {
+  margin-inline-start: auto;
+  color: var(--qoderian-brand);
+}
+
+.qoderian-model-editor-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 8px;
+  border-top: 1px solid var(--background-modifier-border);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* IDE-style green switch. */
+.qoderian-model-editor-toggle {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--background-modifier-border-hover);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.qoderian-model-editor-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  inset-inline-start: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text-normal);
+  transition: inset-inline-start 0.15s ease;
+}
+
+.qoderian-model-editor-toggle.is-on {
+  background: var(--qoderian-brand);
+}
+
+.qoderian-model-editor-toggle.is-on::after {
+  inset-inline-start: 16px;
+  background: #fff;
 }

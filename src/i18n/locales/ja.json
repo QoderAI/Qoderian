@@ -287,5 +287,13 @@
     "left": "残り {count}",
     "trigger": "利用量 - {percent}%",
     "unavailable": "利用量情報を取得できません"
+  },
+  "model": {
+    "edit": "編集",
+    "contextWindow": "コンテキストウィンドウ",
+    "thinkingMode": "思考モード",
+    "thinkingEffort": "Thinking Effort",
+    "default": "デフォルト",
+    "backToList": "モデルリストに戻る"
   }
 }

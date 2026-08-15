@@ -23,6 +23,12 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   China build (`qoderclicn`, config under `~/.qoder-cn`). Auto-
   detection, session history, global plugins, and login hints all
   follow the selected edition.
+- Per-model context and thinking editor in the model selector,
+  mirroring the Qoder IDE: hovering a model row reveals an edit
+  affordance that opens a side editor card with context window
+  tiers, a thinking on/off toggle, and the model's server-provided
+  thinking effort levels. Choices persist per model and are applied
+  to every request.
 
 ### Fixed
 

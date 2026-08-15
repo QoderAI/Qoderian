@@ -65,6 +65,35 @@ export const QODER_ICON: IconSvg = {
   svg: qoderIconSvg,
 };
 
+/** Filled pencil glyph for the per-model edit affordance. */
+export const PENCIL_ICON: IconSvg = {
+  viewBox: '0 0 24 24',
+  path: 'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z',
+};
+
+/** Filled back chevron for the model editor header. */
+export const CHEVRON_LEFT_ICON: IconSvg = {
+  viewBox: '0 0 24 24',
+  path: 'M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z',
+};
+
+/** Stroke-based checkmark for selected editor rows. */
+export const CHECK_ICON: IconSvg = {
+  kind: 'composite',
+  viewBox: '0 0 24 24',
+  children: [{
+    tag: 'path',
+    attributes: {
+      d: 'M20 6L9 17l-5-5',
+      fill: 'none',
+      stroke: 'currentColor',
+      'stroke-width': '3',
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+    },
+  }],
+};
+
 export const QODERIAN_ICON_ID = 'qoderian-logo';
 
 // Obsidian draws registered icons inside a `0 0 100 100` viewport, so the mark

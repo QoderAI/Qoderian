@@ -18,6 +18,19 @@ export const EFFORT_LEVELS: { value: EffortLevel; label: string }[] = [
   { value: 'max', label: 'Max' },
 ];
 
+/**
+ * Order server effort keys by the canonical intensity scale (matching the
+ * Qoder IDE selector). Unknown keys keep their server order at the end.
+ */
+export function sortThinkingEfforts<T extends { value: string }>(efforts: T[]): T[] {
+  const rank = new Map<string, number>(
+    EFFORT_LEVELS.map((level, index) => [level.value, index]),
+  );
+  return [...efforts].sort((a, b) =>
+    (rank.get(a.value) ?? Number.MAX_SAFE_INTEGER)
+    - (rank.get(b.value) ?? Number.MAX_SAFE_INTEGER));
+}
+
 /** Default effort level per model tier. */
 export const DEFAULT_EFFORT_LEVEL: Record<string, EffortLevel> = {
   'auto': 'high',

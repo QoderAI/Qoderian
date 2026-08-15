@@ -1,4 +1,10 @@
-import type { HostnameCliPaths, QoderSettings } from '../../core/types/settings';
+import type {
+  HostnameCliPaths,
+  ModelContextTier,
+  ModelThinkingEffort,
+  QoderModelOverride,
+  QoderSettings,
+} from '../../core/types/settings';
 import { normalizeQoderCliEdition } from './cli-edition';
 
 export type QoderSettingSource = 'user' | 'project' | 'local';
@@ -11,6 +17,12 @@ export interface QoderDiscoveredModel {
   group?: string;
   priceFactor?: number;
   originalPriceFactor?: number;
+  /** Configurable context-window tiers reported by the server. */
+  contextTiers?: ModelContextTier[];
+  /** Whether the server allows explicitly disabling thinking. */
+  thinkingDisableable?: boolean;
+  /** Configurable thinking effort levels reported by the server. */
+  thinkingEfforts?: ModelThinkingEffort[];
   promotion?: {
     active?: boolean;
     badge?: Record<string, string>;
@@ -35,6 +47,7 @@ export const DEFAULT_QODER_SETTINGS: Readonly<QoderSettings> = Object.freeze({
   discoveredModels: [],
   discoveredAgents: [],
   lastModel: 'auto',
+  modelOverrides: {},
 });
 
 function normalizeHostnameCliPaths(value: unknown): HostnameCliPaths {
@@ -66,6 +79,67 @@ function normalizeLocalizedBadge(value: unknown): Record<string, string> | undef
   }
 
   return Object.keys(badge).length > 0 ? badge : undefined;
+}
+
+function normalizeContextTiers(value: unknown): ModelContextTier[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+
+  const tiers = value.flatMap((entry): ModelContextTier[] => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return [];
+    const record = entry as Record<string, unknown>;
+    const label = typeof record.label === 'string' ? record.label.trim() : '';
+    const tokenCount = normalizeFiniteNumber(record.tokenCount);
+    if (!label || tokenCount === undefined || tokenCount === 0) return [];
+    return [{ label, tokenCount, isDefault: record.isDefault === true }];
+  });
+
+  return tiers.length > 0 ? tiers : undefined;
+}
+
+function normalizeThinkingEfforts(value: unknown): ModelThinkingEffort[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+
+  const seen = new Set<string>();
+  const efforts = value.flatMap((entry): ModelThinkingEffort[] => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return [];
+    const record = entry as Record<string, unknown>;
+    const effortValue = typeof record.value === 'string' ? record.value.trim() : '';
+    if (!effortValue || seen.has(effortValue)) return [];
+    seen.add(effortValue);
+    return [{
+      value: effortValue,
+      isDefault: record.isDefault === true,
+      ...(typeof record.description === 'string' && record.description.trim()
+        ? { description: record.description.trim() }
+        : {}),
+    }];
+  });
+
+  return efforts.length > 0 ? efforts : undefined;
+}
+
+function normalizeModelOverride(value: unknown): QoderModelOverride | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  const override: QoderModelOverride = {};
+  const contextWindow = normalizeFiniteNumber(record.contextWindow);
+  if (contextWindow !== undefined && contextWindow > 0) override.contextWindow = contextWindow;
+  if (typeof record.thinkingEnabled === 'boolean') override.thinkingEnabled = record.thinkingEnabled;
+  if (typeof record.thinkingEffort === 'string' && record.thinkingEffort.trim()) {
+    override.thinkingEffort = record.thinkingEffort.trim();
+  }
+  return Object.keys(override).length > 0 ? override : undefined;
+}
+
+function normalizeModelOverrides(value: unknown): Record<string, QoderModelOverride> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+
+  const result: Record<string, QoderModelOverride> = {};
+  for (const [model, override] of Object.entries(value as Record<string, unknown>)) {
+    const normalized = normalizeModelOverride(override);
+    if (normalized) result[model] = normalized;
+  }
+  return result;
 }
 
 function normalizeQoderModelPromotion(value: unknown): QoderDiscoveredModel['promotion'] {
@@ -108,6 +182,8 @@ function normalizeQoderDiscoveredModels(value: unknown): QoderDiscoveredModel[] 
     const priceFactor = normalizeFiniteNumber(record.priceFactor);
     const originalPriceFactor = normalizeFiniteNumber(record.originalPriceFactor);
     const promotion = normalizeQoderModelPromotion(record.promotion);
+    const contextTiers = normalizeContextTiers(record.contextTiers);
+    const thinkingEfforts = normalizeThinkingEfforts(record.thinkingEfforts);
     return [{
       value: modelId,
       displayName,
@@ -116,6 +192,9 @@ function normalizeQoderDiscoveredModels(value: unknown): QoderDiscoveredModel[] 
       ...(priceFactor !== undefined ? { priceFactor } : {}),
       ...(originalPriceFactor !== undefined ? { originalPriceFactor } : {}),
       ...(promotion ? { promotion } : {}),
+      ...(contextTiers ? { contextTiers } : {}),
+      ...(record.thinkingDisableable === true ? { thinkingDisableable: true } : {}),
+      ...(thinkingEfforts ? { thinkingEfforts } : {}),
     }];
   });
 }
@@ -162,7 +241,16 @@ export function getQoderSettings(
     discoveredModels: normalizeQoderDiscoveredModels(config.discoveredModels),
     discoveredAgents: normalizeQoderDiscoveredAgents(config.discoveredAgents),
     lastModel: (config.lastModel as string | undefined) ?? DEFAULT_QODER_SETTINGS.lastModel,
+    modelOverrides: normalizeModelOverrides(config.modelOverrides),
   };
+}
+
+/** Editor override for a model, when the user customized it. */
+export function getQoderModelOverride(
+  settings: Record<string, unknown>,
+  model: string,
+): QoderModelOverride | undefined {
+  return getQoderSettings(settings).modelOverrides[model];
 }
 
 export function resolveQoderSettingSources(
