@@ -356,12 +356,17 @@
   padding: 0;
   border: none;
   border-radius: 8px;
-  /* !important: Obsidian's native button defaults (interactive-normal gray)
-     out-specify a single class; sanctioned override per style/AGENTS.md */
-  background: var(--qoderian-brand) !important;
-  color: rgba(0, 0, 0, 0.7) !important;
   cursor: pointer;
   transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+/* Obsidian's native button defaults (interactive-normal gray) out-specify a
+   single class; raise specificity instead of !important to override them. */
+.qoderian-input-wrapper .qoderian-input-toolbar button.qoderian-composer-action-btn {
+  border: none;
+  box-shadow: none;
+  background: var(--qoderian-brand);
+  color: rgba(0, 0, 0, 0.7);
 }
 
 /* When the permission toggle is hidden the button inherits the row's
