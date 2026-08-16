@@ -28,6 +28,7 @@ import { BangBashService } from '../services/bang-bash-service';
 import { SubagentManager } from '../services/subagent-manager';
 import { ChatState } from '../state/chat-state';
 import { BangBashModeManager as BangBashModeManagerClass } from '../ui/bang-bash-mode-manager';
+import { ComposerActionButton } from '../ui/composer-action-button';
 import { FileContextManager } from '../ui/file-context/file-context-manager';
 import { ImageContextManager } from '../ui/image-context';
 import { createInputToolbar } from '../ui/input-toolbar';
@@ -152,6 +153,7 @@ export function createTab(options: TabCreateOptions): TabData {
       externalContextSelector: null,
       mcpServerSelector: null,
       permissionToggle: null,
+      composerActionButton: null,
       slashCommandDropdown: null,
       instructionModeManager: null,
       bangBashModeManager: null,
@@ -283,6 +285,7 @@ function initializeContextManagers(tab: TabData, plugin: QoderianPlugin): void {
         tab.controllers.canvasSelectionController?.updateContextRowVisibility();
         autoResizeTextarea(dom.inputEl);
         tab.renderer?.scrollToBottomIfNeeded();
+        updateComposerSendAvailability(tab);
       },
     },
     dom.contextRowEl
@@ -363,6 +366,14 @@ function initializeInputModes(tab: TabData, plugin: QoderianPlugin): void {
 
 function isBangBashEnabled(plugin: QoderianPlugin): boolean {
   return getQoderSettings(plugin.settings).enableBangBash;
+}
+
+/** Refreshes the send button's enabled state based on composer content. */
+function updateComposerSendAvailability(tab: TabData): void {
+  const hasContent =
+    tab.dom.inputEl.value.trim().length > 0 ||
+    (tab.ui.imageContextManager?.hasImages() ?? false);
+  tab.ui.composerActionButton?.updateSendAvailability(hasContent);
 }
 
 /**
@@ -482,6 +493,33 @@ function initializeInputToolbar(
   tab.ui.mcpServerSelector = toolbarComponents.mcpServerSelector;
   tab.ui.permissionToggle = toolbarComponents.permissionToggle;
 
+  // Send/stop action button pinned to the end of the toolbar row.
+  // Clicking it is equivalent to pressing Enter (or Esc while streaming).
+  tab.ui.composerActionButton = new ComposerActionButton(inputToolbar, {
+    onSend: () => {
+      // Instruction/bang modes own the Enter key; route through the same
+      // keydown path so their submit logic applies.
+      if (
+        tab.ui.instructionModeManager?.isActive() ||
+        tab.ui.bangBashModeManager?.isActive()
+      ) {
+        dom.inputEl.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+        );
+        return;
+      }
+      void tab.controllers.inputController?.sendMessage();
+    },
+    onStop: () => {
+      tab.controllers.inputController?.cancelStreaming();
+    },
+  });
+
+  const updateSendAvailability = () => updateComposerSendAvailability(tab);
+  dom.inputEl.addEventListener('input', updateSendAvailability);
+  dom.eventCleanups.push(() => dom.inputEl.removeEventListener('input', updateSendAvailability));
+  updateSendAvailability();
+
   tab.ui.mcpServerSelector.setMcpManager(getQoderMcpManager(plugin));
 
   // Sync @-mentions to UI selector
@@ -567,8 +605,20 @@ export function initializeTabUI(
   initializeInputModes(tab, plugin);
   initializeInputToolbar(tab, plugin, options.getQoderCatalogConfig);
 
+  // Chain onto the previously registered streaming callback (tab bar
+  // indicator) so the action button tracks streaming state too.
+  const previousStreamingCallback = state.callbacks.onStreamingStateChanged;
   state.callbacks = {
     ...state.callbacks,
+    onStreamingStateChanged: (isStreaming) => {
+      previousStreamingCallback?.(isStreaming);
+      tab.ui.composerActionButton?.setStreaming(isStreaming);
+      if (!isStreaming) {
+        // The composer may have been cleared programmatically (no input
+        // event); re-evaluate send availability when streaming ends.
+        updateComposerSendAvailability(tab);
+      }
+    },
     onUsageChanged: (usage) => {
       tab.ui.contextUsageMeter?.update(usage);
     },

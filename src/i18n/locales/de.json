@@ -21,6 +21,10 @@
     "refresh": "Aktualisieren",
     "rewind": "Zurückspulen"
   },
+  "composer": {
+    "send": "Nachricht senden",
+    "stop": "Generierung stoppen"
+  },
   "commands": {
     "openView": "Chat-Ansicht öffnen",
     "inlineEdit": "Inline-Bearbeitung",

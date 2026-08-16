@@ -21,6 +21,10 @@
     "refresh": "更新",
     "rewind": "巻き戻し"
   },
+  "composer": {
+    "send": "メッセージを送信",
+    "stop": "生成を停止"
+  },
   "commands": {
     "openView": "チャットビューを開く",
     "inlineEdit": "インライン編集",

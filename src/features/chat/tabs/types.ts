@@ -15,6 +15,7 @@ import type { MessageRenderer } from '../rendering/message-renderer';
 import type { SubagentManager } from '../services/subagent-manager';
 import type { ChatState } from '../state/chat-state';
 import type { BangBashModeManager } from '../ui/bang-bash-mode-manager';
+import type { ComposerActionButton } from '../ui/composer-action-button';
 import type { FileContextManager } from '../ui/file-context/file-context-manager';
 import type { ImageContextManager } from '../ui/image-context';
 import type {
@@ -121,6 +122,7 @@ export interface TabUIComponents {
   externalContextSelector: ExternalContextSelector | null;
   mcpServerSelector: McpServerSelector | null;
   permissionToggle: PermissionToggle | null;
+  composerActionButton: ComposerActionButton | null;
   slashCommandDropdown: SlashCommandDropdown | null;
   instructionModeManager: InstructionModeManager | null;
   bangBashModeManager: BangBashModeManager | null;

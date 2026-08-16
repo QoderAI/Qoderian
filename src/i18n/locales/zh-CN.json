@@ -21,6 +21,10 @@
     "refresh": "刷新",
     "rewind": "回退"
   },
+  "composer": {
+    "send": "发送消息",
+    "stop": "停止生成"
+  },
   "commands": {
     "openView": "打开聊天视图",
     "inlineEdit": "内联编辑",

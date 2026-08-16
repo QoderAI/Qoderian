@@ -21,6 +21,10 @@
     "refresh": "Refresh",
     "rewind": "Rewind"
   },
+  "composer": {
+    "send": "Send message",
+    "stop": "Stop generation"
+  },
   "commands": {
     "openView": "Open chat view",
     "inlineEdit": "Inline edit",
