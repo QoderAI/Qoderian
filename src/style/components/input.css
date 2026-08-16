@@ -345,6 +345,54 @@
   height: 14px;
 }
 
+/* Send/stop action button - IDE-style green rounded square with dark icon */
+.qoderian-composer-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  /* !important: Obsidian's native button defaults (interactive-normal gray)
+     out-specify a single class; sanctioned override per style/AGENTS.md */
+  background: var(--qoderian-brand) !important;
+  color: rgba(0, 0, 0, 0.7) !important;
+  cursor: pointer;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+/* When the permission toggle is hidden the button inherits the row's
+   right alignment instead of sitting next to the left group. */
+.qoderian-permission-toggle.qoderian-hidden ~ .qoderian-composer-action-btn {
+  margin-inline-start: auto;
+}
+
+.qoderian-composer-action-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.qoderian-composer-action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Stop mode: filled square icon, slightly emphasized */
+.qoderian-composer-action-btn.is-stop svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+/* Idle with empty composer: dimmed, not clickable */
+.qoderian-composer-action-btn.is-disabled,
+.qoderian-composer-action-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 /* Light blue border when instruction mode is active */
 .qoderian-input-wrapper.qoderian-input-instruction-mode {
   --qoderian-input-wrapper-border-color: #60a5fa;

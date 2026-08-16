@@ -33,6 +33,10 @@ export type TranslationKey =
   | 'common.refresh'
   | 'common.rewind'
 
+  // Composer - send/stop action button
+  | 'composer.send'
+  | 'composer.stop'
+
   // Chat - Rewind
   | 'chat.rewind.confirmMessage'
   | 'chat.rewind.confirmMessageConversationOnly'

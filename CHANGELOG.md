@@ -18,6 +18,10 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   view (plan credits with edition badge, personal/add-on resource
   pack, organization resource package, renewal date) and links to the
   edition's account usage page.
+- Send/stop action button in the chat composer: a round button at the
+  end of the input toolbar sends the message (same path as Enter),
+  turns into a stop control while a response is streaming (same path
+  as Esc), and stays disabled while the composer is empty.
 - Qoder CLI edition switch in settings (Setup section): choose the
   international build (`qodercli`, config under `~/.qoder`) or the
   China build (`qoderclicn`, config under `~/.qoder-cn`). Auto-

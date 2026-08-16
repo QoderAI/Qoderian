@@ -21,6 +21,10 @@
     "refresh": "새로고침",
     "rewind": "되감기"
   },
+  "composer": {
+    "send": "메시지 보내기",
+    "stop": "생성 중지"
+  },
   "commands": {
     "openView": "채팅 뷰 열기",
     "inlineEdit": "인라인 편집",
