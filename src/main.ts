@@ -6,7 +6,7 @@ import type { Editor, WorkspaceLeaf } from 'obsidian';
 import { addIcon, MarkdownView, Notice, Plugin } from 'obsidian';
 
 import { QoderianStorage } from './app/storage/app-storage';
-import { beginRestoreReport } from './core/diagnostics/restore-report';
+import { beginRestoreReport, reportRestoreIssue } from './core/diagnostics/restore-report';
 import { buildCursorContext } from './core/editor/editor-context';
 import { getVaultPath } from './core/fs/path';
 import type {
@@ -25,9 +25,11 @@ import { type InlineEditContext, InlineEditModal } from './features/inline-edit/
 import { QoderianSettingTab } from './features/settings/settings-tab';
 import { setLocale, t } from './i18n/i18n';
 import type { Locale } from './i18n/types';
-import { setActiveQoderCliEdition } from './qoder/config/cli-edition';
+import { getActiveQoderCliEdition, setActiveQoderCliEdition } from './qoder/config/cli-edition';
 import { normalizeQoderSettings } from './qoder/config/qoder-settings-reconciler';
 import { getQoderSettings } from './qoder/config/settings';
+import { sdkSessionExistsForEdition } from './qoder/history/sdk-session-paths';
+import { resolveLegacySessionEdition, selectMetadataForEdition } from './qoder/history/session-edition-filter';
 import { extractUserDisplayContent } from './qoder/prompt/context/prompt-context';
 import {
   createQoderServices,
@@ -395,6 +397,7 @@ export default class QoderianPlugin extends Plugin {
       enabledMcpServers: conversation.enabledMcpServers,
       usage: conversation.usage,
       resumeAtMessageId: conversation.resumeAtMessageId,
+      edition: conversation.edition ?? getActiveQoderCliEdition(),
     };
   }
 
@@ -415,28 +418,8 @@ export default class QoderianPlugin extends Plugin {
     const didNormalizeModelVariants = this.normalizeModelVariantSettings();
 
     const allMetadata = await this.storage.sessions.listMetadata();
-    this.conversations = allMetadata.map(meta => {
-      const resumeSessionId = meta.sessionId !== undefined ? meta.sessionId : meta.id;
-
-      return {
-        id: meta.id,
-        title: meta.title,
-        createdAt: meta.createdAt,
-        updatedAt: meta.updatedAt,
-        lastResponseAt: meta.lastResponseAt,
-        sessionId: resumeSessionId,
-        qoderState: meta.qoderState,
-        messages: [],
-        currentNote: meta.currentNote,
-        externalContextPaths: meta.externalContextPaths,
-        enabledMcpServers: meta.enabledMcpServers,
-        usage: meta.usage,
-        titleGenerationStatus: meta.titleGenerationStatus,
-        resumeAtMessageId: meta.resumeAtMessageId,
-      };
-    }).sort(
-      (a, b) => (b.lastResponseAt ?? b.updatedAt) - (a.lastResponseAt ?? a.updatedAt)
-    );
+    await this.migrateLegacySessionEditions(allMetadata);
+    this.conversations = await this.buildConversationIndex(allMetadata);
     setLocale(this.settings.locale as Locale);
 
     if (didNormalizeModelVariants) {
@@ -456,6 +439,93 @@ export default class QoderianPlugin extends Plugin {
   /** Keeps the edition-aware path helpers aligned with the persisted settings. */
   private syncActiveQoderCliEdition() {
     setActiveQoderCliEdition(getQoderSettings(this.settings).edition);
+  }
+
+  /**
+   * Builds the in-memory conversation index from session metadata, keeping
+   * only the sessions owned by the active CLI edition.
+   */
+  private async buildConversationIndex(allMetadata: SessionMetadata[]): Promise<Conversation[]> {
+    const edition = getActiveQoderCliEdition();
+    const otherEdition = edition === 'cn' ? 'global' : 'cn';
+    const vaultPath = getVaultPath(this.app);
+    const visible = selectMetadataForEdition(
+      allMetadata,
+      edition,
+      (sessionId) => vaultPath !== null
+        && sdkSessionExistsForEdition(vaultPath, sessionId, otherEdition),
+    );
+
+    return visible.map(meta => {
+      const resumeSessionId = meta.sessionId !== undefined ? meta.sessionId : meta.id;
+
+      return {
+        id: meta.id,
+        title: meta.title,
+        createdAt: meta.createdAt,
+        updatedAt: meta.updatedAt,
+        lastResponseAt: meta.lastResponseAt,
+        sessionId: resumeSessionId,
+        qoderState: meta.qoderState,
+        messages: [],
+        currentNote: meta.currentNote,
+        externalContextPaths: meta.externalContextPaths,
+        enabledMcpServers: meta.enabledMcpServers,
+        usage: meta.usage,
+        titleGenerationStatus: meta.titleGenerationStatus,
+        resumeAtMessageId: meta.resumeAtMessageId,
+        edition: meta.edition ?? edition,
+      };
+    }).sort(
+      (a, b) => (b.lastResponseAt ?? b.updatedAt) - (a.lastResponseAt ?? a.updatedAt)
+    );
+  }
+
+  /** Rebuilds the conversation index after the CLI edition changes. */
+  async reloadConversationIndex(): Promise<void> {
+    const allMetadata = await this.storage.sessions.listMetadata();
+    this.conversations = await this.buildConversationIndex(allMetadata);
+  }
+
+  /**
+   * One-shot upgrade for metadata written before the `edition` field existed:
+   * stamps each legacy session with the edition whose config root holds its
+   * history file, so future loads no longer depend on filesystem probing.
+   * Sessions whose files are missing everywhere stay unstamped.
+   */
+  private async migrateLegacySessionEditions(allMetadata: SessionMetadata[]): Promise<void> {
+    const edition = getActiveQoderCliEdition();
+    const otherEdition = edition === 'cn' ? 'global' : 'cn';
+    const vaultPath = getVaultPath(this.app);
+    if (vaultPath === null) {
+      return;
+    }
+
+    for (const meta of allMetadata) {
+      if (meta.edition !== undefined) {
+        continue;
+      }
+      const resolved = resolveLegacySessionEdition(meta, edition, (sessionId) => {
+        if (sdkSessionExistsForEdition(vaultPath, sessionId, edition)) {
+          return 'active';
+        }
+        return sdkSessionExistsForEdition(vaultPath, sessionId, otherEdition)
+          ? 'other'
+          : 'unknown';
+      });
+      if (resolved === undefined) {
+        continue;
+      }
+      try {
+        await this.storage.sessions.saveMetadata({ ...meta, edition: resolved });
+        meta.edition = resolved;
+      } catch {
+        reportRestoreIssue(
+          'metadata',
+          `Failed to stamp edition on session metadata "${meta.id}"; it will be re-attempted on next load.`,
+        );
+      }
+    }
   }
 
   getResolvedQoderCliPath(): string | null {
@@ -511,6 +581,7 @@ export default class QoderianPlugin extends Plugin {
       updatedAt: Date.now(),
       sessionId: sessionId ?? null,
       messages: [],
+      edition: getActiveQoderCliEdition(),
     };
 
     this.conversations.unshift(conversation);

@@ -1,4 +1,5 @@
 import type { ToolUseResult } from './diff';
+import type { QoderCliEdition } from './settings';
 import type { SubagentInfo, SubagentMode, ToolCallInfo } from './tools';
 
 /** Fork origin reference: identifies the source session and checkpoint. */
@@ -97,6 +98,8 @@ export interface Conversation {
   enabledMcpServers?: string[];
   /** Assistant checkpoint identifier for resumeAtMessageId after rewind. */
   resumeAtMessageId?: string;
+  /** Qoder CLI edition whose config root stores this conversation's history. */
+  edition?: QoderCliEdition;
 }
 
 /** Lightweight conversation metadata for the history dropdown. */
@@ -134,6 +137,8 @@ export interface SessionMetadata {
   usage?: UsageInfo;
   /** Assistant checkpoint identifier for resumeAtMessageId after rewind. */
   resumeAtMessageId?: string;
+  /** Qoder CLI edition owning the session history (absent in legacy files). */
+  edition?: QoderCliEdition;
 }
 
 /**
