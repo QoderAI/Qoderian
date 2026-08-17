@@ -67,14 +67,10 @@ export function normalizeQoderSettings(settings: Record<string, unknown>): boole
   }
 
   if (model) {
-    const allowedEffortLevels = new Set(
-      qoderModelConfig.getReasoningOptions(model).map((option) => option.value),
-    );
-    if (
-      typeof settings.effortLevel !== 'string'
-      || !allowedEffortLevels.has(settings.effortLevel)
-    ) {
-      settings.effortLevel = qoderModelConfig.getDefaultReasoningValue(model);
+    // The global effort selector was removed; per-model editor overrides now
+    // own the reasoning effort. Drop the legacy field so it does not linger.
+    if ('effortLevel' in settings) {
+      delete settings.effortLevel;
       changed = true;
     }
   }

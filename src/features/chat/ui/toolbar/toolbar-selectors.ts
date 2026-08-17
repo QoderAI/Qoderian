@@ -28,14 +28,12 @@ function runToolbarAction(action: () => Promise<void>, failureMessage: string): 
 
 export interface ToolbarSettings {
   model: string;
-  effortLevel: string;
   permissionMode: PermissionMode;
   [key: string]: unknown;
 }
 
 export interface ToolbarCallbacks {
   onModelChange: (model: string) => Promise<void>;
-  onEffortLevelChange: (effort: string) => Promise<void>;
   onPermissionModeChange: (mode: PermissionMode) => Promise<void>;
   /** Per-model editor overrides (context window tier, thinking toggle). */
   onModelOverrideChange?: (model: string, override: Partial<QoderModelOverride>) => Promise<void>;
@@ -438,14 +436,8 @@ export class ModelSelector {
       });
       const defaultEffort = efforts.find(effort => effort.isDefault)?.value
         ?? efforts[0]?.value;
-      const globalEffort = typeof settings.effortLevel === 'string'
-        ? settings.effortLevel
-        : undefined;
-      // Without an override the global effort wins when the model offers it,
-      // otherwise the server default applies.
-      const fallbackEffort = globalEffort && efforts.some(effort => effort.value === globalEffort)
-        ? globalEffort
-        : defaultEffort;
+      // Without an override the server default applies.
+      const fallbackEffort = defaultEffort;
       const effectiveEffort = override?.thinkingEffort ?? fallbackEffort;
       for (const effort of efforts) {
         const selected = effort.value === effectiveEffort;
@@ -483,90 +475,6 @@ export class ModelSelector {
         });
       }
     }
-  }
-}
-
-export class EffortSelector {
-  private readonly container: HTMLElement;
-  private effortEl: HTMLElement | null = null;
-  private effortGearsEl: HTMLElement | null = null;
-  private popover: ClickPopover | null = null;
-
-  constructor(parentEl: HTMLElement, private readonly callbacks: ToolbarCallbacks) {
-    this.container = parentEl.createDiv({ cls: 'qoderian-thinking-selector' });
-    this.render();
-  }
-
-  destroy(): void {
-    this.popover?.destroy();
-    this.popover = null;
-  }
-
-  private render(): void {
-    this.container.empty();
-    this.effortEl = this.container.createDiv({ cls: 'qoderian-thinking-effort' });
-    this.effortEl.createSpan({ cls: 'qoderian-thinking-label-text', text: 'Effort:' });
-    this.effortGearsEl = this.effortEl.createDiv({ cls: 'qoderian-thinking-gears' });
-    this.updateDisplay();
-  }
-
-  private renderEffortGears(): void {
-    if (!this.effortGearsEl) return;
-    this.popover?.destroy();
-    this.effortGearsEl.empty();
-
-    const currentEffort = this.callbacks.getSettings().effortLevel;
-    const modelConfig = this.callbacks.getModelConfig();
-    const model = this.callbacks.getSettings().model;
-    const options = modelConfig.getReasoningOptions(model);
-    const currentInfo = options.find(effort => effort.value === currentEffort);
-
-    const currentEl = this.effortGearsEl.createDiv({
-      cls: 'qoderian-thinking-current',
-      text: currentInfo?.label || options[0]?.label || 'High',
-    });
-    const optionsEl = this.effortGearsEl.createDiv({ cls: 'qoderian-thinking-options' });
-
-    for (const effort of [...options].reverse()) {
-      const option = optionsEl.createDiv({ cls: 'qoderian-thinking-gear', text: effort.label });
-      option.setAttribute('role', 'option');
-      option.setAttribute('aria-selected', String(effort.value === currentEffort));
-      if (effort.value === currentEffort) option.addClass('selected');
-
-      option.addEventListener('click', (event) => {
-        event.stopPropagation();
-        this.popover?.close();
-        runToolbarAction(async () => {
-          await this.callbacks.onEffortLevelChange(effort.value);
-          this.updateDisplay();
-        }, 'Failed to change effort level');
-      });
-    }
-
-    this.popover = new ClickPopover(
-      this.effortGearsEl,
-      currentEl,
-      optionsEl,
-      'qoderian-thinking-gears--open',
-    );
-  }
-
-  updateDisplay(): void {
-    const settings = this.callbacks.getSettings();
-    const modelConfig = this.callbacks.getModelConfig();
-    const options = modelConfig.getReasoningOptions(settings.model);
-    const defaultValue = modelConfig.getDefaultReasoningValue(settings.model);
-    const shouldHide = options.length === 0
-      || (options.length === 1 && options[0]?.value === defaultValue);
-
-    if (shouldHide) {
-      this.popover?.close();
-      this.effortEl?.addClass('qoderian-hidden');
-      return;
-    }
-
-    this.effortEl?.removeClass('qoderian-hidden');
-    this.renderEffortGears();
   }
 }
 

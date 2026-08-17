@@ -23,7 +23,6 @@ export const DEFAULT_QODERIAN_SETTINGS: QoderianSettings = {
   permissionMode: 'acceptEdits',
 
   model: 'auto',
-  effortLevel: 'high',
   enableAutoTitleGeneration: true,
   titleGenerationModel: 'auto',
 

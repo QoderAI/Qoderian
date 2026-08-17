@@ -11,7 +11,6 @@ import type { TabData, TabManagerViewHost, TabQoderContext } from './types';
 
 export type TabQoderSettings = Record<string, unknown> & {
   model: string;
-  effortLevel: string;
   permissionMode: QoderianSettings['permissionMode'];
 };
 
@@ -95,7 +94,6 @@ export function refreshTabQoderUI(tab: TabData, plugin: QoderianPlugin): void {
   const permissionMode = getTabPermissionMode(tab, plugin);
   tab.ui.modelSelector?.updateDisplay();
   tab.ui.modelSelector?.renderOptions();
-  tab.ui.effortSelector?.updateDisplay();
   tab.ui.permissionToggle?.updateDisplay();
   tab.dom.inputWrapper.toggleClass('qoderian-input-plan-mode', permissionMode === 'plan');
 }

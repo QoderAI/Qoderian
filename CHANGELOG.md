@@ -34,6 +34,13 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   thinking effort levels. Choices persist per model and are applied
   to every request.
 
+### Removed
+
+- The global "Effort" dropdown in the input toolbar: reasoning effort
+  is now configured only through the per-model editor in the model
+  selector, which already offered the same levels. Models without an
+  explicit choice fall back to their server default effort.
+
 ### Fixed
 
 - The model selector dropdown opens above the model button again on

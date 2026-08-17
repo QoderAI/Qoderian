@@ -6,10 +6,8 @@ import type {
 import type { McpServerConfig } from '../../core/types';
 import type { PermissionMode, QoderianSettings } from '../../core/types/settings';
 import type { McpServerManager } from '../mcp/mcp-server-manager';
-import {
-  resolveEffortLevel,
-} from '../models/model-catalog';
 import { toQoderRuntimeModelId } from '../models/model-selection';
+import { resolveModelReasoningEffort } from '../models/qoder-model-config';
 import type {
   ClosePersistentQueryOptions,
   PersistentQueryConfig,
@@ -75,7 +73,7 @@ export async function applyQoderDynamicUpdates(
     }
   }
 
-  const effortLevel = resolveEffortLevel(selectedModel, settings.effortLevel);
+  const effortLevel = resolveModelReasoningEffort(selectedModel, settings);
   const currentEffort = deps.getCurrentConfig()?.effortLevel ?? null;
   if (effortLevel !== currentEffort) {
     try {

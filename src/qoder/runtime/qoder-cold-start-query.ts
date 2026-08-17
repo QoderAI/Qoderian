@@ -7,10 +7,10 @@ import {
   getQoderSettings,
   resolveQoderSettingSources,
 } from '../config/settings';
-import {
-  resolveEffortLevel,
-} from '../models/model-catalog';
 import { toQoderRuntimeModelId } from '../models/model-selection';
+import {
+  resolveModelReasoningEffort,
+} from '../models/qoder-model-config';
 import type { QoderHostContext } from '../qoder-host-context';
 import { extractAssistantText } from '../services/extract-assistant-text';
 import { createCustomSpawnFunction } from './custom-spawn';
@@ -105,7 +105,7 @@ export async function runColdStartQuery(
   }
 
   if (!config.thinking?.disabled) {
-    const effortLevel = resolveEffortLevel(selectedModel, settings.effortLevel);
+    const effortLevel = resolveModelReasoningEffort(selectedModel, settings);
     options.extraArgs = { ...options.extraArgs, 'reasoning-effort': effortLevel };
   }
 

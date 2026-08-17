@@ -6,7 +6,7 @@
 src/style/
 ├── base/           # container, animations (@keyframes), variables
 ├── components/     # header, history, messages, code, thinking, toolcalls, status-panel, subagent, input, context-footer, tabs, nav-sidebar
-├── toolbar/        # model-selector, thinking-selector, permission-toggle, external-context, mcp-selector
+├── toolbar/        # model-selector, permission-toggle, external-context, mcp-selector
 ├── features/       # file-context, image-context, image-modal, inline-edit, diff, slash-commands, file-link, image-embed, plan-mode, ask-user-question, resume-session
 ├── modals/         # instruction, mcp-modal, fork-target
 ├── settings/       # base (shared .qoderian-sp-* panel layout), env-snippets, slash-settings, mcp-settings, plugin-settings, agent-settings

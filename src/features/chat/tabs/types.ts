@@ -20,7 +20,6 @@ import type { FileContextManager } from '../ui/file-context/file-context-manager
 import type { ImageContextManager } from '../ui/image-context';
 import type {
   ContextUsageMeter,
-  EffortSelector,
   ExternalContextSelector,
   McpServerSelector,
   ModelSelector,
@@ -118,7 +117,6 @@ export interface TabUIComponents {
   fileContextManager: FileContextManager | null;
   imageContextManager: ImageContextManager | null;
   modelSelector: ModelSelector | null;
-  effortSelector: EffortSelector | null;
   externalContextSelector: ExternalContextSelector | null;
   mcpServerSelector: McpServerSelector | null;
   permissionToggle: PermissionToggle | null;
