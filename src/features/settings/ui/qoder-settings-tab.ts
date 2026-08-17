@@ -163,7 +163,9 @@ export function renderQoderCliPathControl(
 /**
  * Attaches the CLI edition dropdown to `setting`. Switching editions changes
  * the executable name and the CLI's user config root, so the resolver cache
- * is dropped and every tab restarts, mirroring a CLI path change.
+ * is dropped, every open tab is force-closed (users must not continue a
+ * conversation owned by the other edition), the conversation index is
+ * rebuilt for the new edition, and a blank tab takes over.
  */
 export function renderQoderCliEditionControl(
   setting: Setting,
@@ -179,14 +181,21 @@ export function renderQoderCliEditionControl(
       .setValue(getQoderSettings(settingsBag).edition)
       .onChange(async (value) => {
         const edition = normalizeQoderCliEdition(value);
+        // Close every tab (even streaming ones) before activating the new
+        // edition so no conversation from the previous edition stays open and
+        // in-flight saves still stamp the outgoing edition. Closing the last
+        // tab spawns a blank one.
+        const tabManager = context.plugin.getView()?.getTabManager();
+        if (tabManager) {
+          for (const tab of [...tabManager.getAllTabs()]) {
+            await tabManager.closeTab(tab.id, true);
+          }
+        }
         updateQoderSettings(settingsBag, { edition });
         await context.plugin.saveSettings();
         qoderWorkspace.cliResolver.reset();
         await qoderWorkspace.pluginManager.loadPlugins();
-        const view = context.plugin.getView();
-        await view?.getTabManager()?.broadcastToAllTabs(
-          (service) => Promise.resolve(service.cleanup())
-        );
+        await context.plugin.reloadConversationIndex();
         void qoderWorkspace.agentCatalog.refresh();
       });
   });
