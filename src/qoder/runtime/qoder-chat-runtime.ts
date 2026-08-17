@@ -59,6 +59,7 @@ import { getActiveQoderCliEdition, getQoderCliBinaryBaseName } from '../config/c
 import { loadSubagentFinalResult, loadSubagentToolCalls } from '../history/qoder-history-store';
 import type { McpServerManager } from '../mcp/mcp-server-manager';
 import { toQoderRuntimeModelId } from '../models/model-selection';
+import { qoderModelConfig } from '../models/qoder-model-config';
 import { stripCurrentNoteContext } from '../prompt/context/prompt-context';
 import { encodeQoderTurn } from '../prompt/qoder-turn-encoder';
 import type { QoderHostContext } from '../qoder-host-context';
@@ -183,6 +184,10 @@ export class QoderChatRuntime implements ChatRuntime {
       getCurrentQuery: () => this.persistentQuery,
       getMessageChannel: () => this.messageChannel,
       getConfiguredModel: () => this.getScopedSettings().model,
+      getConfiguredContextWindow: () => {
+        const settings = this.getScopedSettings();
+        return qoderModelConfig.getEffectiveContextWindowSize(settings.model, settings);
+      },
       getSessionId: () => this.sessionManager.getSessionId(),
       onSessionInit: event => {
         const wasFork = this.pendingForkSession;
