@@ -7,6 +7,7 @@ import { getQoderSettings, updateQoderSettings } from '../config/settings';
 import {
   DEFAULT_EFFORT_LEVEL,
   EFFORT_LEVELS,
+  type EffortLevel,
   getContextWindowSize,
   normalizeEffortLevel,
   sortThinkingEfforts,
@@ -102,7 +103,6 @@ export const qoderModelConfig: QoderModelConfig = {
     const target = settings as Record<string, unknown>;
 
     const runtimeModel = toQoderRuntimeModelId(model);
-    target.effortLevel = normalizeEffortLevel(runtimeModel, target.effortLevel);
     updateQoderSettings(target, { lastModel: runtimeModel });
   },
 
@@ -116,6 +116,19 @@ export const qoderModelConfig: QoderModelConfig = {
   },
 
 };
+
+/**
+ * Reasoning effort to send to qodercli for a model: the per-model editor
+ * override when set, otherwise the model's built-in default tier.
+ */
+export function resolveModelReasoningEffort(
+  model: string,
+  settings: Record<string, unknown>,
+): EffortLevel {
+  const runtimeModel = toQoderRuntimeModelId(model);
+  const override = getQoderSettings(settings).modelOverrides[runtimeModel];
+  return normalizeEffortLevel(runtimeModel, override?.thinkingEffort);
+}
 
 /** Re-export for type-only use elsewhere in the settings UI. */
 export type { UIOption };

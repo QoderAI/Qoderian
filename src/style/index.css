@@ -22,7 +22,6 @@
 
 /* Toolbar */
 @import "./toolbar/model-selector.css";
-@import "./toolbar/thinking-selector.css";
 @import "./toolbar/permission-toggle.css";
 @import "./toolbar/external-context.css";
 @import "./toolbar/mcp-selector.css";

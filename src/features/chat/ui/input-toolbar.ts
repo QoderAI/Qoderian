@@ -11,14 +11,12 @@ import type {
 import type { McpServerManager } from '../../../qoder/mcp/mcp-server-manager';
 import { appendCheckIcon, appendMcpIcon } from '../../../shared/icons';
 import {
-  EffortSelector,
   ModelSelector,
   PermissionToggle,
   type ToolbarCallbacks,
 } from './toolbar/toolbar-selectors';
 
 export {
-  EffortSelector,
   ModelSelector,
   PermissionToggle,
   type ToolbarCallbacks,
@@ -733,14 +731,12 @@ export function createInputToolbar(
   callbacks: ToolbarCallbacks
 ): {
   modelSelector: ModelSelector;
-  effortSelector: EffortSelector;
   contextUsageMeter: ContextUsageMeter | null;
   externalContextSelector: ExternalContextSelector;
   mcpServerSelector: McpServerSelector;
   permissionToggle: PermissionToggle;
 } {
   const modelSelector = new ModelSelector(parentEl, callbacks);
-  const effortSelector = new EffortSelector(parentEl, callbacks);
   const contextUsageMeter = new ContextUsageMeter(parentEl);
   const externalContextSelector = new ExternalContextSelector(parentEl, callbacks);
   const mcpServerSelector = new McpServerSelector(parentEl);
@@ -748,7 +744,6 @@ export function createInputToolbar(
 
   return {
     modelSelector,
-    effortSelector,
     contextUsageMeter,
     externalContextSelector,
     mcpServerSelector,

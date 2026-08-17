@@ -20,7 +20,7 @@ Open the chat sidebar from the ribbon icon or the command palette (`Open Qoderia
 
 **Bash Mode (`!`)** — Press `!` in an empty input to run a shell command in the vault directory directly.
 
-**Model & Effort Controls** — Pick a model and reasoning effort below the input, and watch context usage reported by the Qoder Agent SDK.
+**Model & Effort Controls** — Pick a model below the input and tune its reasoning effort in the per-model editor, and watch context usage reported by the Qoder Agent SDK.
 
 **MCP Servers** — Connect external tools over the Model Context Protocol (stdio, SSE, HTTP), configured in-app.
 
@@ -38,7 +38,7 @@ Open the chat sidebar from the ribbon icon or the command palette (`Open Qoderia
 | `efficient` | Fast and cost-effective |
 | `lite` | Lightweight and fast |
 
-Adaptive thinking models accept an effort level of `Low`, `Med`, `High`, `XHigh`, or `Max`. The selector consumes the runtime catalog returned by the Qoder Agent SDK, including models configured in qodercli.
+Adaptive thinking models accept an effort level of `Low`, `Med`, `High`, `XHigh`, or `Max`, configured per model through the editor in the model selector. The selector consumes the runtime catalog returned by the Qoder Agent SDK, including models configured in qodercli.
 
 ## Requirements
 

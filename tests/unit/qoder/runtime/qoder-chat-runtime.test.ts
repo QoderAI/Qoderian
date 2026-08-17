@@ -1692,7 +1692,9 @@ describe('QoderChatRuntime', () => {
 
     it('should update effort level when changed for adaptive models', async () => {
       (mockPlugin as any).settings.model = 'sonnet';
-      (mockPlugin as any).settings.effortLevel = 'max';
+      (mockPlugin as any).settings.qoder = {
+        modelOverrides: { sonnet: { thinkingEffort: 'max' } },
+      };
 
       await (service as any).applyDynamicUpdates({});
 
@@ -1702,7 +1704,9 @@ describe('QoderChatRuntime', () => {
 
     it('should update effort level for custom model ids', async () => {
       (mockPlugin as any).settings.model = 'custom-model';
-      (mockPlugin as any).settings.effortLevel = 'max';
+      (mockPlugin as any).settings.qoder = {
+        modelOverrides: { 'custom-model': { thinkingEffort: 'max' } },
+      };
 
       await (service as any).applyDynamicUpdates({});
 
@@ -1711,6 +1715,12 @@ describe('QoderChatRuntime', () => {
 
     it('should keep effort active when switching from custom to built-in model ids', async () => {
       (mockPlugin as any).settings.model = 'custom-model';
+      (mockPlugin as any).settings.qoder = {
+        modelOverrides: {
+          'custom-model': { thinkingEffort: 'max' },
+          sonnet: { thinkingEffort: 'max' },
+        },
+      };
       (service as any).currentConfig = (service as any).buildPersistentQueryConfig(
         '/mock/vault/path',
         '/usr/local/bin/qoder',
@@ -1722,7 +1732,6 @@ describe('QoderChatRuntime', () => {
       mockPersistentQuery.applyFlagSettings.mockClear();
 
       (mockPlugin as any).settings.model = 'sonnet';
-      (mockPlugin as any).settings.effortLevel = 'max';
 
       const previousQuery = mockPersistentQuery;
       await (service as any).applyDynamicUpdates({});
@@ -1733,7 +1742,12 @@ describe('QoderChatRuntime', () => {
 
     it('should keep effort active when switching from built-in to custom model ids', async () => {
       (mockPlugin as any).settings.model = 'sonnet';
-      (mockPlugin as any).settings.effortLevel = 'max';
+      (mockPlugin as any).settings.qoder = {
+        modelOverrides: {
+          sonnet: { thinkingEffort: 'max' },
+          'custom-model': { thinkingEffort: 'max' },
+        },
+      };
       (service as any).currentConfig = (service as any).buildPersistentQueryConfig(
         '/mock/vault/path',
         '/usr/local/bin/qoder',
@@ -1896,7 +1910,9 @@ describe('QoderChatRuntime', () => {
 
     it('should silently handle effort level update error', async () => {
       (mockPlugin as any).settings.model = 'sonnet';
-      (mockPlugin as any).settings.effortLevel = 'max';
+      (mockPlugin as any).settings.qoder = {
+        modelOverrides: { sonnet: { thinkingEffort: 'max' } },
+      };
       mockPersistentQuery.applyFlagSettings.mockRejectedValueOnce(new Error('Effort error'));
 
       await expect((service as any).applyDynamicUpdates({})).resolves.toBeUndefined();

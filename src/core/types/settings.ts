@@ -159,7 +159,6 @@ export interface QoderianSettings {
 
   // Qoder model and reasoning effort
   model: string;
-  effortLevel: string;
   enableAutoTitleGeneration: boolean;
   titleGenerationModel: string;
 

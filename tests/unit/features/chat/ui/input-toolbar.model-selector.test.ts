@@ -1,6 +1,6 @@
 import { createMockEl } from '@test/helpers/mock-element';
 
-import { EffortSelector, ModelSelector, PermissionToggle } from '@/features/chat/ui/input-toolbar';
+import { ModelSelector, PermissionToggle } from '@/features/chat/ui/input-toolbar';
 
 jest.mock('@/shared/icons', () => ({
   QODER_ICON: {},
@@ -14,11 +14,9 @@ describe('ModelSelector', () => {
     const parentEl = createMockEl();
     const callbacks = {
       onModelChange: jest.fn().mockResolvedValue(undefined),
-      onEffortLevelChange: jest.fn().mockResolvedValue(undefined),
       onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
       getSettings: jest.fn().mockReturnValue({
         model: 'auto',
-        effortLevel: 'high',
         permissionMode: 'acceptEdits',
       }),
       getEnvironmentVariables: jest.fn().mockReturnValue(''),
@@ -44,11 +42,9 @@ describe('ModelSelector', () => {
     const parentEl = createMockEl();
     const callbacks = {
       onModelChange: jest.fn().mockResolvedValue(undefined),
-      onEffortLevelChange: jest.fn().mockResolvedValue(undefined),
       onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
       getSettings: jest.fn().mockReturnValue({
         model: 'qmodel',
-        effortLevel: 'high',
         permissionMode: 'acceptEdits',
       }),
       getEnvironmentVariables: jest.fn().mockReturnValue(''),
@@ -75,11 +71,9 @@ describe('ModelSelector', () => {
     const parentEl = createMockEl();
     const callbacks = {
       onModelChange: jest.fn().mockResolvedValue(undefined),
-      onEffortLevelChange: jest.fn().mockResolvedValue(undefined),
       onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
       getSettings: jest.fn().mockReturnValue({
         model: 'auto',
-        effortLevel: 'high',
         permissionMode: 'acceptEdits',
       }),
       getEnvironmentVariables: jest.fn().mockReturnValue(''),
@@ -114,11 +108,9 @@ describe('ModelSelector', () => {
     const retryRuntimeCatalog = jest.fn().mockResolvedValue(undefined);
     const callbacks = {
       onModelChange: jest.fn().mockResolvedValue(undefined),
-      onEffortLevelChange: jest.fn().mockResolvedValue(undefined),
       onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
       getSettings: jest.fn().mockReturnValue({
         model: 'auto',
-        effortLevel: 'high',
         permissionMode: 'acceptEdits',
       }),
       getModelConfig: jest.fn().mockReturnValue({
@@ -147,11 +139,9 @@ describe('ModelSelector', () => {
     const parentEl = createMockEl();
     const callbacks = {
       onModelChange: jest.fn().mockResolvedValue(undefined),
-      onEffortLevelChange: jest.fn().mockResolvedValue(undefined),
       onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
       getSettings: jest.fn().mockReturnValue({
         model: 'auto',
-        effortLevel: 'high',
         permissionMode: 'acceptEdits',
       }),
       getModelConfig: jest.fn().mockReturnValue({
@@ -191,13 +181,11 @@ describe('ModelSelector', () => {
     ) {
       const settings = {
         model: 'qmodel',
-        effortLevel: 'high',
         permissionMode: 'acceptEdits',
         qoder: { modelOverrides: overrides },
       };
       return {
         onModelChange: jest.fn().mockResolvedValue(undefined),
-        onEffortLevelChange: jest.fn().mockResolvedValue(undefined),
         onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
         getSettings: jest.fn().mockReturnValue(settings),
         getEnvironmentVariables: jest.fn().mockReturnValue(''),
@@ -314,7 +302,6 @@ describe('ModelSelector', () => {
         onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
         getSettings: jest.fn().mockReturnValue({
           model: 'qmodel',
-          effortLevel: 'high',
           permissionMode: 'acceptEdits',
           qoder: { modelOverrides: { qmodel: { thinkingEnabled: false } } },
         }),
@@ -451,7 +438,7 @@ describe('ModelSelector', () => {
           row.querySelector('.qoderian-model-editor-tier-label')?.textContent
         )).toEqual(['low', 'medium', 'xhigh']);
         expect(rows[3].getAttribute('title')).toBe('Minimal reasoning');
-        // Global effort 'high' is not in the list → server default is checked.
+        // No override set → the server default is checked.
         expect(rows[4].hasClass('selected')).toBe(true);
         expect(rows[4].getAttribute('aria-selected')).toBe('true');
         expect(rows[3].hasClass('selected')).toBe(false);
@@ -501,84 +488,7 @@ describe('ModelSelector', () => {
         expect(onModelOverrideChange).toHaveBeenCalledWith('qmodel', { thinkingEffort: undefined });
         expect(overrides.qmodel?.thinkingEffort).toBeUndefined();
       });
-      it('persists the server default explicitly when the global effort is offered', async () => {
-        // DeepSeek-V4-Pro shape (low/high/max), as delivered sorted by the
-        // getter: global 'high' is offered, max is the server default.
-        // Clicking max must stick instead of clearing to high.
-        const deepseekEfforts = [
-          { value: 'low', isDefault: false },
-          { value: 'high', isDefault: false },
-          { value: 'max', isDefault: true },
-        ];
-        const parentEl = createMockEl();
-        const overrides: Record<string, Record<string, unknown>> = {};
-        const onModelOverrideChange = jest.fn(async (_model: string, patch: Record<string, unknown>) => {
-          const current = overrides.qmodel ?? {};
-          for (const [key, value] of Object.entries(patch)) {
-            if (value === undefined) delete current[key];
-            else current[key] = value;
-          }
-          if (Object.keys(current).length > 0) overrides.qmodel = current;
-          else delete overrides.qmodel;
-        });
-        new ModelSelector(parentEl, buildCallbacks({ onModelOverrideChange }, overrides, deepseekEfforts));
-
-        parentEl.querySelector('.qoderian-model-edit')?.click();
-        // Effective starts at the global 'high'; choosing max persists it.
-        parentEl.querySelectorAll('.qoderian-model-editor-tier')[5]?.click();
-        await Promise.resolve();
-        await Promise.resolve();
-        expect(onModelOverrideChange).toHaveBeenCalledWith('qmodel', { thinkingEffort: 'max' });
-        expect(parentEl.querySelectorAll('.qoderian-model-editor-tier')[5]?.hasClass('selected'))
-          .toBe(true);
-
-        // Choosing the fallback value (global high) clears the override.
-        parentEl.querySelectorAll('.qoderian-model-editor-tier')[4]?.click();
-        await Promise.resolve();
-        await Promise.resolve();
-        expect(onModelOverrideChange).toHaveBeenCalledWith('qmodel', { thinkingEffort: undefined });
-        expect(overrides.qmodel).toBeUndefined();
-      });
     });
-  });
-});
-
-describe('EffortSelector', () => {
-  it('opens only when clicked and closes after choosing an effort', () => {
-    const parentEl = createMockEl();
-    const callbacks = {
-      onModelChange: jest.fn().mockResolvedValue(undefined),
-      onEffortLevelChange: jest.fn().mockResolvedValue(undefined),
-      onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
-      getSettings: jest.fn().mockReturnValue({
-        model: 'qmodel',
-        effortLevel: 'medium',
-        permissionMode: 'acceptEdits',
-      }),
-      getModelConfig: jest.fn().mockReturnValue({
-        getReasoningOptions: jest.fn().mockReturnValue([
-          { value: 'low', label: 'Low' },
-          { value: 'medium', label: 'Med' },
-          { value: 'high', label: 'High' },
-        ]),
-        getDefaultReasoningValue: jest.fn().mockReturnValue('medium'),
-      }),
-    };
-
-    new EffortSelector(parentEl, callbacks);
-
-    const gears = parentEl.querySelector('.qoderian-thinking-gears');
-    const current = parentEl.querySelector('.qoderian-thinking-current');
-    const option = parentEl.querySelectorAll('.qoderian-thinking-gear')[0];
-
-    gears?.dispatchEvent('mouseenter', { type: 'mouseenter' });
-    expect(gears?.hasClass('qoderian-thinking-gears--open')).toBe(false);
-
-    current?.click();
-    expect(gears?.hasClass('qoderian-thinking-gears--open')).toBe(true);
-
-    option?.click();
-    expect(gears?.hasClass('qoderian-thinking-gears--open')).toBe(false);
   });
 });
 
@@ -587,7 +497,6 @@ describe('PermissionToggle', () => {
     const parentEl = createMockEl();
     const settings = {
       model: 'auto',
-      effortLevel: 'high',
       permissionMode: 'default' as const,
     };
     const onPermissionModeChange = jest.fn(async (mode) => {
@@ -595,7 +504,6 @@ describe('PermissionToggle', () => {
     });
     const callbacks = {
       onModelChange: jest.fn().mockResolvedValue(undefined),
-      onEffortLevelChange: jest.fn().mockResolvedValue(undefined),
       onPermissionModeChange,
       getSettings: jest.fn(() => settings),
       getModelConfig: jest.fn(),

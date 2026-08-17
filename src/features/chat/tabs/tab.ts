@@ -149,7 +149,6 @@ export function createTab(options: TabCreateOptions): TabData {
       fileContextManager: null,
       imageContextManager: null,
       modelSelector: null,
-      effortSelector: null,
       externalContextSelector: null,
       mcpServerSelector: null,
       permissionToggle: null,
@@ -415,7 +414,6 @@ function initializeInputToolbar(
           settings.model = model;
           modelConfig.applyModelDefaults(model, settings);
         });
-        tab.ui.effortSelector?.updateDisplay();
         tab.ui.modelSelector?.updateDisplay();
         tab.ui.modelSelector?.renderOptions();
         applyQoderUIGating(tab, plugin);
@@ -427,7 +425,6 @@ function initializeInputToolbar(
         settings.model = model;
         modelConfig.applyModelDefaults(model, settings);
       });
-      tab.ui.effortSelector?.updateDisplay();
       tab.ui.modelSelector?.updateDisplay();
       tab.ui.modelSelector?.renderOptions();
 
@@ -437,11 +434,6 @@ function initializeInputToolbar(
         const newContextWindow = modelConfig.getContextWindowSize(model);
         tab.state.usage = recalculateUsageForModel(currentUsage, model, newContextWindow);
       }
-    },
-    onEffortLevelChange: async (effort: string) => {
-      await updateTabQoderSettings(tab, plugin, (settings) => {
-        settings.effortLevel = effort;
-      });
     },
     onModelOverrideChange: async (model: string, override: Partial<QoderModelOverride>) => {
       await updateTabQoderSettings(tab, plugin, (settings) => {
@@ -487,7 +479,6 @@ function initializeInputToolbar(
   });
 
   tab.ui.modelSelector = toolbarComponents.modelSelector;
-  tab.ui.effortSelector = toolbarComponents.effortSelector;
   tab.ui.contextUsageMeter = toolbarComponents.contextUsageMeter;
   tab.ui.externalContextSelector = toolbarComponents.externalContextSelector;
   tab.ui.mcpServerSelector = toolbarComponents.mcpServerSelector;

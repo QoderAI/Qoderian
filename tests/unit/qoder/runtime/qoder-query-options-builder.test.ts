@@ -15,7 +15,6 @@ function createContext(
 ): PersistentQueryContext {
   const settings = {
     model: 'auto',
-    effortLevel: 'medium',
     permissionMode,
     mediaFolder: '',
     systemPrompt: '',

@@ -1601,13 +1601,14 @@ describe('QoderChatRuntime', () => {
 
     it('updates effort level via applyFlagSettings without restarting', async () => {
       mockPlugin.settings.model = 'sonnet';
-      mockPlugin.settings.effortLevel = 'high';
 
       const chunks1: any[] = [];
       for await (const c of queryText(service, 'first')) chunks1.push(c);
 
       const queryCountBefore = getQueryCallCount();
-      mockPlugin.settings.effortLevel = 'max';
+      mockPlugin.settings.qoder = {
+        modelOverrides: { sonnet: { thinkingEffort: 'max' } },
+      };
 
       const chunks2: any[] = [];
       for await (const c of queryText(service, 'second')) chunks2.push(c);

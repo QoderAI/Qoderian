@@ -12,11 +12,9 @@ import {
   resolveQoderSettingSources,
 } from '../config/settings';
 import type { McpServerManager } from '../mcp/mcp-server-manager';
-import {
-  resolveEffortLevel,
-} from '../models/model-catalog';
 import { createQoderModelPolicyProvider } from '../models/model-policy';
 import { toQoderRuntimeModelId } from '../models/model-selection';
+import { resolveModelReasoningEffort } from '../models/qoder-model-config';
 import {
   buildSystemPrompt,
   computeSystemPromptKey,
@@ -117,7 +115,7 @@ export class QueryOptionsBuilder {
 
     return {
       model: runtimeModel,
-      effortLevel: resolveEffortLevel(runtimeModel, ctx.settings.effortLevel),
+            effortLevel: resolveModelReasoningEffort(runtimeModel, ctx.settings),
       permissionMode: ctx.settings.permissionMode,
       sdkPermissionMode,
       systemPromptKey: computeSystemPromptKey(systemPromptSettings),
@@ -290,7 +288,7 @@ export class QueryOptionsBuilder {
     settings: QoderianSettings,
     model: string
   ): void {
-    const effortLevel = resolveEffortLevel(model, settings.effortLevel);
+    const effortLevel = resolveModelReasoningEffort(model, settings);
     options.extraArgs = {
       ...options.extraArgs,
       'reasoning-effort': effortLevel,

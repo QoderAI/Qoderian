@@ -18,11 +18,9 @@ jest.mock('fs');
 function createMockCallbacks() {
   return {
     onModelChange: jest.fn(),
-    onEffortLevelChange: jest.fn().mockResolvedValue(undefined),
     onPermissionModeChange: jest.fn(),
     getSettings: jest.fn().mockReturnValue({
       model: 'haiku',
-      effortLevel: 'high',
       permissionMode: 'yolo',
     }),
     getEnvironmentVariables: jest.fn().mockReturnValue(''),

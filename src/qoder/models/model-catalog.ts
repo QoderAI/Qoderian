@@ -93,13 +93,6 @@ export function normalizeEffortLevel(
   return DEFAULT_EFFORT_LEVEL[normalizeModelId(model)] ?? 'high';
 }
 
-export function resolveEffortLevel(
-  model: string,
-  effortLevel: unknown,
-): EffortLevel {
-  return normalizeEffortLevel(model, effortLevel);
-}
-
 export const CONTEXT_WINDOW_STANDARD = 200_000;
 export const CONTEXT_WINDOW_1M = 1_000_000;
 

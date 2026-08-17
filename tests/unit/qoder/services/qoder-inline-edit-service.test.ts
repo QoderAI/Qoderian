@@ -413,7 +413,9 @@ describe('QoderInlineEditService', () => {
 
     it('should pass configured Qoder reasoning effort for custom models', async () => {
       mockPlugin.settings.model = 'custom-model';
-      mockPlugin.settings.effortLevel = 'medium';
+      mockPlugin.settings.qoder = {
+        modelOverrides: { 'custom-model': { thinkingEffort: 'medium' } },
+      };
       service = new QoderInlineEditService(mockPlugin);
 
       setMockMessages([

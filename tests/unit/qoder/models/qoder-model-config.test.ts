@@ -38,14 +38,11 @@ describe('qoderModelConfig', () => {
   });
 
   describe('applyModelDefaults', () => {
-    it('clamps stale effort and records a discovered SDK model as the last model', () => {
-      const settings: Record<string, unknown> = {
-        effortLevel: 'xhigh',
-      };
+    it('records a discovered SDK model as the last model', () => {
+      const settings: Record<string, unknown> = {};
 
       qoderModelConfig.applyModelDefaults('qoder-sonnet-4-5', settings);
 
-      expect(settings.effortLevel).toBe('high');
       expect(settings.qoder).toEqual(expect.objectContaining({ lastModel: 'qoder-sonnet-4-5' }));
     });
   });
