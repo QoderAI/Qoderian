@@ -1381,16 +1381,24 @@ describe('QoderChatRuntime', () => {
       });
     });
 
-    it('should prefer public context token counts when Qoder CLI returns them', async () => {
+    it('should derive token counts from the percentage against the catalog window', async () => {
       (service as any).persistentQuery = {
         getContextUsage: jest.fn().mockResolvedValue({
           model: 'ultimate',
-          tokenCountsAvailable: true,
-          contextWindow: { usedPercentage: 4, usedTokens: 12_000, maxTokens: 300_000 },
+          contextWindow: { usedPercentage: 4 },
           categories: [
-            { type: 'system_prompt', tokens: 2_000, percentage: 0.7 },
-            { type: 'messages', tokens: 10_000, percentage: 3.3 },
+            { type: 'system_prompt', percentage: 0.7 },
+            { type: 'messages', percentage: 3.3 },
           ],
+          autoCompact: { enabled: true, thresholdPercentage: 92 },
+          skills: { count: 0, percentageOfContext: 0, items: [] },
+          duplicateFileReads: [],
+          session: {
+            messageCount: 2,
+            promptCount: 1,
+            toolCalls: { total: 0, succeeded: 0, failed: 0 },
+            linesChanged: { added: 0, removed: 0 },
+          },
         }),
       };
 
@@ -1407,9 +1415,9 @@ describe('QoderChatRuntime', () => {
           inputTokens: 0,
           cacheCreationInputTokens: 0,
           cacheReadInputTokens: 0,
-          contextWindow: 300_000,
-          contextWindowIsAuthoritative: true,
-          contextTokens: 12_000,
+          contextWindow: 200_000,
+          contextWindowIsAuthoritative: false,
+          contextTokens: 8_000,
           percentage: 4,
         },
         sessionId: null,
