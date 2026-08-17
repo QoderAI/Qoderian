@@ -1338,6 +1338,49 @@ describe('QoderChatRuntime', () => {
       expect(onDone).toHaveBeenCalled();
     });
 
+    it('should honor the configured context-window tier when the CLI omits the window', async () => {
+      (mockPlugin as any).settings.model = 'performance';
+      (mockPlugin as any).settings.qoder = {
+        discoveredModels: [{
+          value: 'performance',
+          contextTiers: [
+            { label: '200K', tokenCount: 200_000, isDefault: true },
+            { label: '400K', tokenCount: 400_000, isDefault: false },
+          ],
+        }],
+        modelOverrides: { performance: { contextWindow: 400_000 } },
+      };
+      (service as any).persistentQuery = {
+        getContextUsage: jest.fn().mockResolvedValue({
+          model: 'performance',
+          tokenCountsAvailable: false,
+          contextWindow: { usedPercentage: 10 },
+          categories: [],
+        }),
+      };
+
+      await (service as any).responseRouter.route({
+        type: 'result',
+        subtype: 'success',
+        result: 'completed',
+      });
+
+      expect(onChunk).toHaveBeenCalledWith({
+        type: 'usage',
+        usage: {
+          model: 'performance',
+          inputTokens: 0,
+          cacheCreationInputTokens: 0,
+          cacheReadInputTokens: 0,
+          contextWindow: 400_000,
+          contextWindowIsAuthoritative: false,
+          contextTokens: 40_000,
+          percentage: 10,
+        },
+        sessionId: null,
+      });
+    });
+
     it('should prefer public context token counts when Qoder CLI returns them', async () => {
       (service as any).persistentQuery = {
         getContextUsage: jest.fn().mockResolvedValue({

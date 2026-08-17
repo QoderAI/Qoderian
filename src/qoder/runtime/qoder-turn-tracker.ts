@@ -16,6 +16,8 @@ interface ContextUsageRequest {
   query: Query | null;
   isCurrentQuery: (query: Query) => boolean;
   configuredModel: string;
+  /** Effective context window from the per-model editor override, if any. */
+  configuredContextWindow?: number;
   sessionId: string | null;
 }
 
@@ -128,7 +130,14 @@ export class QoderTurnTracker {
       const previousContextWindow = previousUsage?.model === model && previousUsage.contextWindow > 0
         ? previousUsage.contextWindow
         : undefined;
+      // Without a CLI-reported window the configured tier is the source of
+      // truth; buffered chunks only carry catalog fallbacks.
+      const configuredContextWindow = Number.isFinite(request.configuredContextWindow)
+        && (request.configuredContextWindow as number) > 0
+        ? request.configuredContextWindow
+        : undefined;
       const contextWindow = reportedMaxTokens
+        ?? configuredContextWindow
         ?? previousContextWindow
         ?? getContextWindowSize(model);
 

@@ -16,6 +16,8 @@ interface QoderResponseRouterDeps {
   getCurrentQuery: () => Query | null;
   getMessageChannel: () => QoderMessageChannel | null;
   getConfiguredModel: () => string;
+  /** Effective context window from the per-model override, if any. */
+  getConfiguredContextWindow: () => number | undefined;
   getSessionId: () => string | null;
   onSessionInit: (event: SessionInitEvent) => void;
   onPlanModeEntered: () => void;
@@ -137,6 +139,7 @@ export class QoderResponseRouter {
       query: this.deps.getCurrentQuery(),
       isCurrentQuery: query => this.deps.getCurrentQuery() === query,
       configuredModel: this.deps.getConfiguredModel(),
+      configuredContextWindow: this.deps.getConfiguredContextWindow(),
       sessionId: this.deps.getSessionId(),
     });
     if (contextUsageChunk) {

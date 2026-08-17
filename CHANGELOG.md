@@ -62,6 +62,10 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   1.1.21 changed its context-usage report to a percentage-based shape
   without absolute token counts, which the meter could not read, so it
   stayed stuck at its "appears after the first response" placeholder.
+- The context usage meter keeps the context-window tier chosen in the
+  per-model editor after a response; previously the post-response
+  refresh silently fell back to the model catalog default (such as
+  200K), so a 400K selection reverted to 200K once a message was sent.
 
 ## [1.0.4] - 2026-08-12
 
