@@ -7,8 +7,10 @@ jest.mock('@/qoder/history/qoder-history-store', () => ({
   sdkSessionExists: jest.fn(),
 }));
 
+import { beginRestoreReport, finishRestoreReport } from '@/core/diagnostics/restore-report';
 import type { Conversation } from '@/core/types';
 import { QoderConversationHistoryService } from '@/qoder/history/qoder-conversation-history-service';
+import { loadSDKSessionMessages, sdkSessionExists } from '@/qoder/history/qoder-history-store';
 
 describe('QoderConversationHistoryService deletion', () => {
   beforeEach(() => {
@@ -50,5 +52,72 @@ describe('QoderConversationHistoryService deletion', () => {
     } as Conversation, null);
 
     expect(mockDeleteSDKSessionArtifacts).not.toHaveBeenCalled();
+  });
+});
+
+describe('QoderConversationHistoryService restore diagnostics', () => {
+  const mockLoad = loadSDKSessionMessages as jest.Mock;
+  const mockExists = sdkSessionExists as jest.Mock;
+
+  beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    finishRestoreReport();
+    mockLoad.mockReset();
+    mockExists.mockReset();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const conversation = {
+    id: 'conv-1',
+    title: 'Conversation',
+    createdAt: 1,
+    updatedAt: 2,
+    sessionId: 'sess-1',
+    messages: [],
+  } as Conversation;
+
+  it('reports a history issue when session files fail to load', async () => {
+    mockExists.mockReturnValue(true);
+    mockLoad.mockResolvedValue({ messages: [], skippedLines: 0, error: 'read failed' });
+    const service = new QoderConversationHistoryService();
+
+    beginRestoreReport();
+    await service.hydrateConversationHistory(conversation, '/vault');
+
+    const issues = finishRestoreReport();
+    expect(issues).toHaveLength(1);
+    expect(issues[0]).toMatchObject({
+      stage: 'history',
+      detail: expect.stringContaining('conv-1'),
+    });
+  });
+
+  it('reports a history issue when session files are missing on disk', async () => {
+    mockExists.mockReturnValue(false);
+    const service = new QoderConversationHistoryService();
+
+    beginRestoreReport();
+    await service.hydrateConversationHistory(conversation, '/vault');
+
+    const issues = finishRestoreReport();
+    expect(issues).toHaveLength(1);
+    expect(issues[0]).toMatchObject({
+      stage: 'history',
+      detail: expect.stringContaining('missing'),
+    });
+  });
+
+  it('does not report when hydration succeeds', async () => {
+    mockExists.mockReturnValue(true);
+    mockLoad.mockResolvedValue({ messages: [], skippedLines: 0 });
+    const service = new QoderConversationHistoryService();
+
+    beginRestoreReport();
+    await service.hydrateConversationHistory(conversation, '/vault');
+
+    expect(finishRestoreReport()).toEqual([]);
   });
 });

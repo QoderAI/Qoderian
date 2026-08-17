@@ -1,5 +1,6 @@
 import { Notice } from 'obsidian';
 
+import { reportRestoreIssue } from '../../../core/diagnostics/restore-report';
 import type { ChatRuntime } from '../../../core/runtime/chat-runtime';
 import { t } from '../../../i18n/i18n';
 import type QoderianPlugin from '../../../main';
@@ -537,8 +538,9 @@ export class TabManager implements TabManagerInterface {
             activate: false,
             ...(typeof tabState.draftModel === 'string' ? { draftModel: tabState.draftModel } : {}),
           });
-        } catch {
-          // Continue restoring other tabs
+        } catch (error) {
+          // Continue restoring other tabs, but surface the skipped one.
+          reportRestoreIssue('tab', `Failed to restore tab "${tabState.tabId}": ${errorMessage(error)}`);
         }
       }
     } finally {
@@ -557,8 +559,8 @@ export class TabManager implements TabManagerInterface {
     if (targetTabId) {
       try {
         await this.switchToTab(targetTabId);
-      } catch {
-        // Ignore switch errors
+      } catch (error) {
+        reportRestoreIssue('tab', `Failed to activate restored tab "${targetTabId}": ${errorMessage(error)}`);
       }
     }
 
@@ -633,4 +635,8 @@ export class TabManager implements TabManagerInterface {
     this.tabs.clear();
     this.activeTabId = null;
   }
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }

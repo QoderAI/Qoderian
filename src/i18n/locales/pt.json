@@ -25,6 +25,9 @@
     "send": "Enviar mensagem",
     "stop": "Parar geração"
   },
+  "restore": {
+    "failed": "Algumas abas ou conversas não puderam ser restauradas ({count} problema(s)). Detalhes no console do desenvolvedor."
+  },
   "commands": {
     "openView": "Abrir visualização de chat",
     "inlineEdit": "Edição inline",

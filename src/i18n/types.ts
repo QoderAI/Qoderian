@@ -36,6 +36,7 @@ export type TranslationKey =
   // Composer - send/stop action button
   | 'composer.send'
   | 'composer.stop'
+  | 'restore.failed'
 
   // Chat - Rewind
   | 'chat.rewind.confirmMessage'

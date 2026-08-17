@@ -6,6 +6,7 @@ import type { Editor, WorkspaceLeaf } from 'obsidian';
 import { addIcon, MarkdownView, Notice, Plugin } from 'obsidian';
 
 import { QoderianStorage } from './app/storage/app-storage';
+import { beginRestoreReport } from './core/diagnostics/restore-report';
 import { buildCursorContext } from './core/editor/editor-context';
 import { getVaultPath } from './core/fs/path';
 import type {
@@ -398,6 +399,8 @@ export default class QoderianPlugin extends Plugin {
   }
 
   async loadSettings() {
+    // Open the restore diagnostics window before any persisted state is read.
+    beginRestoreReport();
     this.storage = new QoderianStorage(this);
     const { qoderian } = await this.storage.initialize();
     this.lastKnownTabManagerState = await this.storage.getTabManagerState();
