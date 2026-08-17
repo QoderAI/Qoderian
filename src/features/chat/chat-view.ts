@@ -11,6 +11,7 @@ import {
   scheduleAnimationFrame,
   type ScheduledAnimationFrame,
 } from '../../shared/dom/animation-frame';
+import { setButtonTooltip } from '../../shared/dom/tooltip';
 import { createIconSvg, QODER_ICON,QODERIAN_ICON_ID } from '../../shared/icons';
 import type { HistoryConversationStatus } from './controllers/conversation-controller';
 import {
@@ -244,14 +245,14 @@ export class QoderianView extends ItemView {
 
     this.newTabButtonEl = navActionsEl.createDiv({ cls: 'qoderian-input-nav-btn qoderian-new-tab-btn' });
     setIcon(this.newTabButtonEl, 'square-plus');
-    this.newTabButtonEl.setAttribute('aria-label', 'New tab');
+    setButtonTooltip(this.newTabButtonEl, 'New tab');
     this.newTabButtonEl.addEventListener('click', () => {
       void this.createNewTab().catch(() => new Notice('Failed to create tab'));
     });
 
     const newBtn = navActionsEl.createDiv({ cls: 'qoderian-input-nav-btn' });
     setIcon(newBtn, 'square-pen');
-    newBtn.setAttribute('aria-label', 'New conversation');
+    setButtonTooltip(newBtn, 'New conversation');
     newBtn.addEventListener('click', () => {
       void (async () => {
         await this.tabManager?.createNewConversation();
@@ -263,7 +264,7 @@ export class QoderianView extends ItemView {
     const historyContainer = navActionsEl.createDiv({ cls: 'qoderian-history-container' });
     const historyBtn = historyContainer.createDiv({ cls: 'qoderian-input-nav-btn' });
     setIcon(historyBtn, 'history');
-    historyBtn.setAttribute('aria-label', 'Chat history');
+    setButtonTooltip(historyBtn, 'Chat history');
 
     this.historyDropdown = historyContainer.createDiv({ cls: 'qoderian-history-menu' });
 

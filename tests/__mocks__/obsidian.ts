@@ -263,6 +263,15 @@ export const MarkdownRenderer = {
 
 export const setIcon = jest.fn();
 
+// Mirrors the real helper: writes aria-label plus any delay override that the
+// native tooltip system would read back on hover.
+export function setTooltip(el: HTMLElement, tooltip: string, options?: { delay?: number }): void {
+  el.setAttribute('aria-label', tooltip);
+  if (options?.delay !== undefined) {
+    el.setAttribute('data-tooltip-delay', String(options.delay));
+  }
+}
+
 // Tests run against the newest API surface, so version gates take the
 // modern branch by default.
 export const requireApiVersion = jest.fn(() => true);
