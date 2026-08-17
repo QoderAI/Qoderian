@@ -1381,16 +1381,24 @@ describe('QoderChatRuntime', () => {
       });
     });
 
-    it('should prefer public context token counts when Qoder CLI returns them', async () => {
+    it('should derive token counts from the percentage against the catalog window', async () => {
       (service as any).persistentQuery = {
         getContextUsage: jest.fn().mockResolvedValue({
           model: 'ultimate',
-          tokenCountsAvailable: true,
-          contextWindow: { usedPercentage: 4, usedTokens: 12_000, maxTokens: 300_000 },
+          contextWindow: { usedPercentage: 4 },
           categories: [
-            { type: 'system_prompt', tokens: 2_000, percentage: 0.7 },
-            { type: 'messages', tokens: 10_000, percentage: 3.3 },
+            { type: 'system_prompt', percentage: 0.7 },
+            { type: 'messages', percentage: 3.3 },
           ],
+          autoCompact: { enabled: true, thresholdPercentage: 92 },
+          skills: { count: 0, percentageOfContext: 0, items: [] },
+          duplicateFileReads: [],
+          session: {
+            messageCount: 2,
+            promptCount: 1,
+            toolCalls: { total: 0, succeeded: 0, failed: 0 },
+            linesChanged: { added: 0, removed: 0 },
+          },
         }),
       };
 
@@ -1407,13 +1415,62 @@ describe('QoderChatRuntime', () => {
           inputTokens: 0,
           cacheCreationInputTokens: 0,
           cacheReadInputTokens: 0,
-          contextWindow: 300_000,
-          contextWindowIsAuthoritative: true,
-          contextTokens: 12_000,
+          contextWindow: 200_000,
+          contextWindowIsAuthoritative: false,
+          contextTokens: 8_000,
           percentage: 4,
         },
         sessionId: null,
       });
+    });
+
+    it('should size streamed usage chunks against the configured context-window tier', async () => {
+      (mockPlugin as any).settings.model = 'performance';
+      (mockPlugin as any).settings.qoder = {
+        discoveredModels: [{
+          value: 'performance',
+          contextTiers: [
+            { label: '200K', tokenCount: 200_000, isDefault: true },
+            { label: '400K', tokenCount: 400_000, isDefault: false },
+          ],
+        }],
+        modelOverrides: { performance: { contextWindow: 400_000 } },
+      };
+
+      await (service as any).responseRouter.route({
+        type: 'assistant',
+        message: {
+          content: [{ type: 'text', text: 'ok' }],
+          usage: { input_tokens: 20_000 },
+        },
+      });
+
+      expect(onChunk).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'usage',
+        usage: expect.objectContaining({
+          contextWindow: 400_000,
+          contextTokens: 20_000,
+          percentage: 5,
+        }),
+      }));
+    });
+
+    it('should not flash the meter to zero when streaming emits a zeroed usage snapshot', async () => {
+      await (service as any).responseRouter.route({
+        type: 'assistant',
+        message: { content: [], usage: { input_tokens: 10_000 } },
+      });
+      onChunk.mockClear();
+
+      await (service as any).responseRouter.route({
+        type: 'assistant',
+        message: { content: [], usage: { input_tokens: 0 } },
+      });
+
+      const zeroChunks = onChunk.mock.calls.filter(
+        ([chunk]: any) => chunk.type === 'usage' && chunk.usage.contextTokens <= 0,
+      );
+      expect(zeroChunks).toHaveLength(0);
     });
 
     it('should still finish the turn when getContextUsage is unavailable', async () => {

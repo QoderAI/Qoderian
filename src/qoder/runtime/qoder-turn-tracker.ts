@@ -21,24 +21,6 @@ interface ContextUsageRequest {
   sessionId: string | null;
 }
 
-/**
- * Wire shape returned by the qodercli `get_context_usage` control API
- * (1.1.21+). Percentages are reported in percent units (5.4 === 5.4%);
- * absolute token counts only appear when the CLI can provide them.
- * The SDK's declared response type still mirrors an older shape, so the
- * tracker reads the payload through this interface.
- */
-interface CliContextUsagePayload {
-  model?: string;
-  tokenCountsAvailable?: boolean;
-  contextWindow?: {
-    usedPercentage?: number;
-    usedTokens?: number;
-    maxTokens?: number;
-  };
-  categories?: Array<{ type?: string; tokens?: number; percentage?: number }>;
-}
-
 /** Owns metadata and usage state that lives for exactly one Qoder turn. */
 export class QoderTurnTracker {
   private metadata: ChatTurnMetadata = {};
@@ -49,13 +31,11 @@ export class QoderTurnTracker {
   consumeMetadata(): ChatTurnMetadata {
     const metadata = { ...this.metadata };
     this.metadata = {};
-    this.bufferedUsageChunk = null;
     return metadata;
   }
 
   reset(): void {
     this.metadata = {};
-    this.bufferedUsageChunk = null;
     this.clearTransformState();
   }
 
@@ -71,6 +51,15 @@ export class QoderTurnTracker {
   bufferUsage(chunk: UsageChunk): UsageChunk {
     this.bufferedUsageChunk = chunk;
     return chunk;
+  }
+
+  /**
+   * Whether a non-zero usage reading is buffered. The reading survives
+   * across turns so mid-turn zeroed snapshots cannot flash the meter
+   * back to its placeholder; only a fresh runtime starts empty.
+   */
+  hasBufferedUsage(): boolean {
+    return (this.bufferedUsageChunk?.usage.contextTokens ?? 0) > 0;
   }
 
   updateContextWindow(contextWindow: number): UsageChunk | null {
@@ -96,9 +85,10 @@ export class QoderTurnTracker {
     return nextChunk;
   }
 
-  getTransformOptions(model: string) {
+  getTransformOptions(model: string, contextWindow?: number) {
     return {
       intendedModel: toQoderRuntimeModelId(model),
+      contextWindow,
       streamState: this.streamState,
       usageState: this.usageState,
     };
@@ -112,7 +102,9 @@ export class QoderTurnTracker {
     }
 
     try {
-      const payload = await activeQuery.getContextUsage() as unknown as CliContextUsagePayload;
+      // The CLI reports occupancy as a percentage only; absolute token
+      // counts are derived against the effective context window below.
+      const payload = await activeQuery.getContextUsage();
       if (!request.isCurrentQuery(activeQuery)) {
         return null;
       }
@@ -121,23 +113,16 @@ export class QoderTurnTracker {
       const model = toQoderRuntimeModelId(
         payload.model || previousUsage?.model || request.configuredModel,
       );
-      const rawMaxTokens = payload.contextWindow?.maxTokens;
-      const reportedMaxTokens = typeof rawMaxTokens === 'number'
-        && Number.isFinite(rawMaxTokens) && rawMaxTokens > 0
-        ? rawMaxTokens
-        : undefined;
-      const hasReportedWindow = reportedMaxTokens !== undefined;
+      // The CLI reports occupancy only; the window comes from the
+      // configured tier, the previous turn, or the model catalog.
       const previousContextWindow = previousUsage?.model === model && previousUsage.contextWindow > 0
         ? previousUsage.contextWindow
         : undefined;
-      // Without a CLI-reported window the configured tier is the source of
-      // truth; buffered chunks only carry catalog fallbacks.
       const configuredContextWindow = Number.isFinite(request.configuredContextWindow)
         && (request.configuredContextWindow as number) > 0
         ? request.configuredContextWindow
         : undefined;
-      const contextWindow = reportedMaxTokens
-        ?? configuredContextWindow
+      const contextWindow = configuredContextWindow
         ?? previousContextWindow
         ?? getContextWindowSize(model);
 
@@ -146,27 +131,10 @@ export class QoderTurnTracker {
         && Number.isFinite(rawUsedPercentage);
       const ratio = hasReportedRatio ? Math.min(1, Math.max(0, rawUsedPercentage / 100)) : 0;
 
-      // Absolute counts are only meaningful when the CLI can provide them.
-      const categoryTokens = payload.tokenCountsAvailable === true
-        ? (payload.categories ?? []).reduce(
-          (sum, category) => sum + (typeof category.tokens === 'number'
-            && Number.isFinite(category.tokens) && category.tokens > 0
-            ? category.tokens
-            : 0),
-          0,
-        )
-        : 0;
-      const rawUsedTokens = payload.contextWindow?.usedTokens;
-      const usedTokens = typeof rawUsedTokens === 'number'
-        && Number.isFinite(rawUsedTokens) && rawUsedTokens > 0
-        ? rawUsedTokens
-        : 0;
-      const reportedTotalTokens = [usedTokens, categoryTokens].find(value => value > 0) ?? 0;
       const estimatedContextTokens = ratio > 0
         ? Math.max(1, Math.round(contextWindow * ratio))
         : 0;
-      const contextTokens = reportedTotalTokens
-        || estimatedContextTokens
+      const contextTokens = estimatedContextTokens
         || previousUsage?.contextTokens
         || 0;
 
@@ -178,7 +146,7 @@ export class QoderTurnTracker {
           cacheCreationInputTokens: previousUsage?.cacheCreationInputTokens || 0,
           cacheReadInputTokens: previousUsage?.cacheReadInputTokens || 0,
           contextWindow,
-          contextWindowIsAuthoritative: hasReportedWindow,
+          contextWindowIsAuthoritative: false,
           contextTokens,
           percentage: hasReportedRatio
             ? Math.round(ratio * 100)

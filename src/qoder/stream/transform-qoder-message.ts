@@ -80,6 +80,8 @@ function transformTaskNotification(message: SDKMessage): StreamChunk | null {
 export interface TransformOptions {
   /** The intended model from settings/query (used for context window size). */
   intendedModel?: string;
+  /** Effective context window from the per-model editor override, if any. */
+  contextWindow?: number;
   /** Tracks active streamed tool blocks so input_json_delta can be normalized. */
   streamState?: TransformStreamState;
   /** Tracks prompt-token usage across SDK-compatible stream events. */
@@ -322,7 +324,9 @@ function samePromptUsage(a: PromptUsageSnapshot, b: PromptUsageSnapshot): boolea
 
 function buildUsageInfo(promptUsage: PromptUsageSnapshot, options?: TransformOptions): UsageInfo {
   const model = options?.intendedModel ?? 'sonnet';
-  const contextWindow = getContextWindowSize(model);
+  const contextWindow = typeof options?.contextWindow === 'number' && options.contextWindow > 0
+    ? options.contextWindow
+    : getContextWindowSize(model);
   const percentage = Math.min(100, Math.max(0, Math.round((promptUsage.contextTokens / contextWindow) * 100)));
 
   return {

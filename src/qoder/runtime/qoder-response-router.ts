@@ -65,6 +65,7 @@ export class QoderResponseRouter {
     const autoTurnBufferStartLength = this.autoTurnBuffer.length;
     const transformOptions = this.deps.turnTracker.getTransformOptions(
       this.deps.getConfiguredModel(),
+      this.deps.getConfiguredContextWindow(),
     );
 
     for (const event of transformSDKMessage(message, transformOptions)) {
@@ -91,6 +92,15 @@ export class QoderResponseRouter {
       }
 
       if (!isStreamChunk(event)) continue;
+
+      // Streaming can emit zeroed usage snapshots (the CLI masks counts
+      // mid-turn); dropping them keeps the meter on its last real reading
+      // instead of flashing back to the placeholder.
+      if (event.type === 'usage'
+        && event.usage.contextTokens <= 0
+        && this.deps.turnTracker.hasBufferedUsage()) {
+        continue;
+      }
 
       if (
         message.type === 'assistant'
