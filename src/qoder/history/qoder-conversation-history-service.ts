@@ -385,6 +385,7 @@ export class QoderConversationHistoryService {
     let missingSessionCount = 0;
     let errorCount = 0;
     let successCount = 0;
+    const loadErrors: string[] = [];
 
     const currentSessionId = isPendingFork
       ? state.forkSource!.sessionId
@@ -404,6 +405,7 @@ export class QoderConversationHistoryService {
 
       if (result.error) {
         errorCount++;
+        loadErrors.push(`${sessionId}: ${result.error}`);
         continue;
       }
 
@@ -415,7 +417,8 @@ export class QoderConversationHistoryService {
     if (errorCount > 0) {
       reportRestoreIssue(
         'history',
-        `Conversation "${conversation.id}": ${errorCount} of ${allSessionIds.length} session file(s) failed to load.`,
+        `Conversation "${conversation.id}": ${errorCount} of ${allSessionIds.length} session file(s) failed to load. `
+          + `Errors: ${loadErrors.join('; ')}`,
       );
     } else if (allSessionsMissing) {
       reportRestoreIssue(

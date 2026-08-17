@@ -55,7 +55,9 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - Startup session restore no longer fails silently: when the tab
   layout, an individual tab, session metadata, or conversation history
   cannot be read, Qoderian now shows a single notice with the issue
-  count and logs per-stage details to the developer console.
+  count and logs per-stage details to the developer console, including
+  the underlying file error (such as a permission denial) for each
+  session history file that fails to load.
 
 ## [1.0.4] - 2026-08-12
 
