@@ -1424,6 +1424,55 @@ describe('QoderChatRuntime', () => {
       });
     });
 
+    it('should size streamed usage chunks against the configured context-window tier', async () => {
+      (mockPlugin as any).settings.model = 'performance';
+      (mockPlugin as any).settings.qoder = {
+        discoveredModels: [{
+          value: 'performance',
+          contextTiers: [
+            { label: '200K', tokenCount: 200_000, isDefault: true },
+            { label: '400K', tokenCount: 400_000, isDefault: false },
+          ],
+        }],
+        modelOverrides: { performance: { contextWindow: 400_000 } },
+      };
+
+      await (service as any).responseRouter.route({
+        type: 'assistant',
+        message: {
+          content: [{ type: 'text', text: 'ok' }],
+          usage: { input_tokens: 20_000 },
+        },
+      });
+
+      expect(onChunk).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'usage',
+        usage: expect.objectContaining({
+          contextWindow: 400_000,
+          contextTokens: 20_000,
+          percentage: 5,
+        }),
+      }));
+    });
+
+    it('should not flash the meter to zero when streaming emits a zeroed usage snapshot', async () => {
+      await (service as any).responseRouter.route({
+        type: 'assistant',
+        message: { content: [], usage: { input_tokens: 10_000 } },
+      });
+      onChunk.mockClear();
+
+      await (service as any).responseRouter.route({
+        type: 'assistant',
+        message: { content: [], usage: { input_tokens: 0 } },
+      });
+
+      const zeroChunks = onChunk.mock.calls.filter(
+        ([chunk]: any) => chunk.type === 'usage' && chunk.usage.contextTokens <= 0,
+      );
+      expect(zeroChunks).toHaveLength(0);
+    });
+
     it('should still finish the turn when getContextUsage is unavailable', async () => {
       (service as any).persistentQuery = {
         getContextUsage: jest.fn().mockRejectedValue(new Error('unsupported')),

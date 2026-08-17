@@ -31,13 +31,11 @@ export class QoderTurnTracker {
   consumeMetadata(): ChatTurnMetadata {
     const metadata = { ...this.metadata };
     this.metadata = {};
-    this.bufferedUsageChunk = null;
     return metadata;
   }
 
   reset(): void {
     this.metadata = {};
-    this.bufferedUsageChunk = null;
     this.clearTransformState();
   }
 
@@ -53,6 +51,15 @@ export class QoderTurnTracker {
   bufferUsage(chunk: UsageChunk): UsageChunk {
     this.bufferedUsageChunk = chunk;
     return chunk;
+  }
+
+  /**
+   * Whether a non-zero usage reading is buffered. The reading survives
+   * across turns so mid-turn zeroed snapshots cannot flash the meter
+   * back to its placeholder; only a fresh runtime starts empty.
+   */
+  hasBufferedUsage(): boolean {
+    return (this.bufferedUsageChunk?.usage.contextTokens ?? 0) > 0;
   }
 
   updateContextWindow(contextWindow: number): UsageChunk | null {
@@ -78,9 +85,10 @@ export class QoderTurnTracker {
     return nextChunk;
   }
 
-  getTransformOptions(model: string) {
+  getTransformOptions(model: string, contextWindow?: number) {
     return {
       intendedModel: toQoderRuntimeModelId(model),
+      contextWindow,
       streamState: this.streamState,
       usageState: this.usageState,
     };

@@ -66,6 +66,10 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   per-model editor after a response; previously the post-response
   refresh silently fell back to the model catalog default (such as
   200K), so a 400K selection reverted to 200K once a message was sent.
+- The context usage meter no longer flickers to 0% or to the catalog
+  default window while a response is streaming: mid-turn usage
+  snapshots now carry the configured context-window tier, and zeroed
+  snapshots can no longer overwrite an existing reading.
 
 ## [1.0.4] - 2026-08-12
 
