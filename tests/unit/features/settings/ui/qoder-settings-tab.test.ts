@@ -320,13 +320,18 @@ function createPlugin(overrides: Record<string, unknown> = {}): any {
         getModelOptions: jest.fn().mockReturnValue([]),
       },
       mcpStorage: {},
-      pluginManager: {},
+      pluginManager: {
+        loadPlugins: jest.fn().mockResolvedValue(undefined),
+      },
     },
     saveSettings: mockSaveSettings,
     normalizeModelVariantSettings: jest.fn(() => false),
+    reloadConversationIndex: jest.fn().mockResolvedValue(undefined),
     getView: jest.fn(() => ({
       getTabManager: jest.fn(() => ({
         broadcastToAllTabs: jest.fn().mockResolvedValue(undefined),
+        getAllTabs: jest.fn(() => []),
+        closeTab: jest.fn().mockResolvedValue(true),
       })),
     })),
     app: {
@@ -385,6 +390,28 @@ describe('QoderSettingsTab', () => {
     expect(editionDropdown.value).toBe('global');
 
     expect(cliPathInput.placeholder).toContain('qodercli');
+  });
+
+  it('force-closes all open tabs when switching editions', async () => {
+    const plugin = createPlugin();
+    const closeTab = jest.fn().mockResolvedValue(true);
+    const getAllTabs = jest.fn(() => [{ id: 'tab-1' }, { id: 'tab-2' }]);
+    plugin.getView = jest.fn(() => ({
+      getTabManager: jest.fn(() => ({ getAllTabs, closeTab })),
+    }));
+
+    renderQoderCliPathSetting(createContainer(), { plugin });
+
+    const editionDropdown = findSetting('settings.cliEdition.name').dropdownComponents[0];
+    await editionDropdown.onChangeCallback?.('cn');
+
+    expect(closeTab).toHaveBeenCalledWith('tab-1', true);
+    expect(closeTab).toHaveBeenCalledWith('tab-2', true);
+    // Tabs close before the new edition activates so saves stamp the outgoing one.
+    expect(closeTab.mock.invocationCallOrder[0])
+      .toBeLessThan(mockSaveSettings.mock.invocationCallOrder[0]);
+    expect(plugin.settings.qoder.edition).toBe('cn');
+    expect(plugin.reloadConversationIndex).toHaveBeenCalled();
   });
 
   it('does not duplicate the toolbar permission selector in settings', () => {

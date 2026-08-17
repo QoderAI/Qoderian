@@ -2,6 +2,7 @@ import { existsSync } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
+import type { QoderCliEdition } from '../../core/types/settings';
 import { getActiveQoderCliEdition, getQoderCliHomeDir } from '../config/cli-edition';
 import type { SDKNativeMessage, SDKSessionReadResult } from './sdk-history-types';
 
@@ -35,14 +36,34 @@ export function isValidSessionId(sessionId: string): boolean {
   return isPathSafeId(sessionId);
 }
 
-export function getSDKSessionPath(vaultPath: string, sessionId: string): string {
+export function getSDKSessionPathForEdition(
+  vaultPath: string,
+  sessionId: string,
+  edition: QoderCliEdition,
+): string {
   if (!isValidSessionId(sessionId)) {
     throw new Error(`Invalid session ID: ${sessionId}`);
   }
 
-  const projectsPath = getSDKProjectsPath();
+  const projectsPath = path.join(getQoderCliHomeDir(edition), 'projects');
   const encodedVault = encodeVaultPathForSDK(vaultPath);
   return path.join(projectsPath, encodedVault, `${sessionId}.jsonl`);
+}
+
+export function getSDKSessionPath(vaultPath: string, sessionId: string): string {
+  return getSDKSessionPathForEdition(vaultPath, sessionId, getActiveQoderCliEdition());
+}
+
+export function sdkSessionExistsForEdition(
+  vaultPath: string,
+  sessionId: string,
+  edition: QoderCliEdition,
+): boolean {
+  try {
+    return existsSync(getSDKSessionPathForEdition(vaultPath, sessionId, edition));
+  } catch {
+    return false;
+  }
 }
 
 export function sdkSessionExists(vaultPath: string, sessionId: string): boolean {

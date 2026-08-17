@@ -26,7 +26,11 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   international build (`qodercli`, config under `~/.qoder`) or the
   China build (`qoderclicn`, config under `~/.qoder-cn`). Auto-
   detection, session history, global plugins, and login hints all
-  follow the selected edition.
+  follow the selected edition. Session history is isolated per
+  edition: each conversation is stamped with the edition that owns
+  it, switching editions force-closes all open tabs, and the history
+  list shows only the active edition's sessions (pre-existing
+  sessions are attributed by where their history files live).
 - Per-model context and thinking editor in the model selector,
   mirroring the Qoder IDE: hovering a model row reveals an edit
   affordance that opens a side editor card with context window
