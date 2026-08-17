@@ -1305,17 +1305,13 @@ describe('QoderChatRuntime', () => {
     it('should use getContextUsage percentage when Qoder CLI masks token counts', async () => {
       (service as any).persistentQuery = {
         getContextUsage: jest.fn().mockResolvedValue({
-          totalTokens: 0,
-          maxTokens: 0,
-          rawMaxTokens: 0,
-          percentage: 0.125,
           model: 'performance',
-          apiUsage: {
-            input_tokens: 0,
-            output_tokens: 0,
-            cache_creation_input_tokens: 0,
-            cache_read_input_tokens: 0,
-          },
+          tokenCountsAvailable: false,
+          contextWindow: { usedPercentage: 12.5 },
+          categories: [
+            { type: 'system_prompt', percentage: 2.5 },
+            { type: 'messages', percentage: 10 },
+          ],
         }),
       };
 
@@ -1345,17 +1341,13 @@ describe('QoderChatRuntime', () => {
     it('should prefer public context token counts when Qoder CLI returns them', async () => {
       (service as any).persistentQuery = {
         getContextUsage: jest.fn().mockResolvedValue({
-          totalTokens: 12_000,
-          maxTokens: 280_000,
-          rawMaxTokens: 300_000,
-          percentage: 0.04,
           model: 'ultimate',
-          apiUsage: {
-            input_tokens: 10_000,
-            output_tokens: 500,
-            cache_creation_input_tokens: 1_000,
-            cache_read_input_tokens: 1_000,
-          },
+          tokenCountsAvailable: true,
+          contextWindow: { usedPercentage: 4, usedTokens: 12_000, maxTokens: 300_000 },
+          categories: [
+            { type: 'system_prompt', tokens: 2_000, percentage: 0.7 },
+            { type: 'messages', tokens: 10_000, percentage: 3.3 },
+          ],
         }),
       };
 
@@ -1369,9 +1361,9 @@ describe('QoderChatRuntime', () => {
         type: 'usage',
         usage: {
           model: 'ultimate',
-          inputTokens: 10_000,
-          cacheCreationInputTokens: 1_000,
-          cacheReadInputTokens: 1_000,
+          inputTokens: 0,
+          cacheCreationInputTokens: 0,
+          cacheReadInputTokens: 0,
           contextWindow: 300_000,
           contextWindowIsAuthoritative: true,
           contextTokens: 12_000,

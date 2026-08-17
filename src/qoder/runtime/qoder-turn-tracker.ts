@@ -19,6 +19,24 @@ interface ContextUsageRequest {
   sessionId: string | null;
 }
 
+/**
+ * Wire shape returned by the qodercli `get_context_usage` control API
+ * (1.1.21+). Percentages are reported in percent units (5.4 === 5.4%);
+ * absolute token counts only appear when the CLI can provide them.
+ * The SDK's declared response type still mirrors an older shape, so the
+ * tracker reads the payload through this interface.
+ */
+interface CliContextUsagePayload {
+  model?: string;
+  tokenCountsAvailable?: boolean;
+  contextWindow?: {
+    usedPercentage?: number;
+    usedTokens?: number;
+    maxTokens?: number;
+  };
+  categories?: Array<{ type?: string; tokens?: number; percentage?: number }>;
+}
+
 /** Owns metadata and usage state that lives for exactly one Qoder turn. */
 export class QoderTurnTracker {
   private metadata: ChatTurnMetadata = {};
@@ -92,29 +110,49 @@ export class QoderTurnTracker {
     }
 
     try {
-      const response = await activeQuery.getContextUsage();
+      const payload = await activeQuery.getContextUsage() as unknown as CliContextUsagePayload;
       if (!request.isCurrentQuery(activeQuery)) {
         return null;
       }
 
       const previousUsage = this.bufferedUsageChunk?.usage;
       const model = toQoderRuntimeModelId(
-        response.model || previousUsage?.model || request.configuredModel,
+        payload.model || previousUsage?.model || request.configuredModel,
       );
-      const reportedContextWindow = [response.rawMaxTokens, response.maxTokens]
-        .find(value => Number.isFinite(value) && value > 0);
+      const rawMaxTokens = payload.contextWindow?.maxTokens;
+      const reportedMaxTokens = typeof rawMaxTokens === 'number'
+        && Number.isFinite(rawMaxTokens) && rawMaxTokens > 0
+        ? rawMaxTokens
+        : undefined;
+      const hasReportedWindow = reportedMaxTokens !== undefined;
       const previousContextWindow = previousUsage?.model === model && previousUsage.contextWindow > 0
         ? previousUsage.contextWindow
         : undefined;
-      const contextWindow = reportedContextWindow
+      const contextWindow = reportedMaxTokens
         ?? previousContextWindow
         ?? getContextWindowSize(model);
-      const ratio = Number.isFinite(response.percentage)
-        ? Math.min(1, Math.max(0, response.percentage))
+
+      const rawUsedPercentage = payload.contextWindow?.usedPercentage;
+      const hasReportedRatio = typeof rawUsedPercentage === 'number'
+        && Number.isFinite(rawUsedPercentage);
+      const ratio = hasReportedRatio ? Math.min(1, Math.max(0, rawUsedPercentage / 100)) : 0;
+
+      // Absolute counts are only meaningful when the CLI can provide them.
+      const categoryTokens = payload.tokenCountsAvailable === true
+        ? (payload.categories ?? []).reduce(
+          (sum, category) => sum + (typeof category.tokens === 'number'
+            && Number.isFinite(category.tokens) && category.tokens > 0
+            ? category.tokens
+            : 0),
+          0,
+        )
         : 0;
-      const reportedTotalTokens = Number.isFinite(response.totalTokens) && response.totalTokens > 0
-        ? response.totalTokens
+      const rawUsedTokens = payload.contextWindow?.usedTokens;
+      const usedTokens = typeof rawUsedTokens === 'number'
+        && Number.isFinite(rawUsedTokens) && rawUsedTokens > 0
+        ? rawUsedTokens
         : 0;
+      const reportedTotalTokens = [usedTokens, categoryTokens].find(value => value > 0) ?? 0;
       const estimatedContextTokens = ratio > 0
         ? Math.max(1, Math.round(contextWindow * ratio))
         : 0;
@@ -122,23 +160,18 @@ export class QoderTurnTracker {
         || estimatedContextTokens
         || previousUsage?.contextTokens
         || 0;
-      const apiUsage = response.apiUsage;
 
       return {
         type: 'usage',
         usage: {
           model,
-          inputTokens: apiUsage?.input_tokens || previousUsage?.inputTokens || 0,
-          cacheCreationInputTokens: apiUsage?.cache_creation_input_tokens
-            || previousUsage?.cacheCreationInputTokens
-            || 0,
-          cacheReadInputTokens: apiUsage?.cache_read_input_tokens
-            || previousUsage?.cacheReadInputTokens
-            || 0,
+          inputTokens: previousUsage?.inputTokens || 0,
+          cacheCreationInputTokens: previousUsage?.cacheCreationInputTokens || 0,
+          cacheReadInputTokens: previousUsage?.cacheReadInputTokens || 0,
           contextWindow,
-          contextWindowIsAuthoritative: reportedContextWindow !== undefined,
+          contextWindowIsAuthoritative: hasReportedWindow,
           contextTokens,
-          percentage: Number.isFinite(response.percentage)
+          percentage: hasReportedRatio
             ? Math.round(ratio * 100)
             : Math.min(100, Math.max(0, Math.round((contextTokens / contextWindow) * 100))),
         },

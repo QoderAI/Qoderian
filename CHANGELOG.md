@@ -58,6 +58,10 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   count and logs per-stage details to the developer console, including
   the underlying file error (such as a permission denial) for each
   session history file that fails to load.
+- The context usage meter updates again after each response: Qoder CLI
+  1.1.21 changed its context-usage report to a percentage-based shape
+  without absolute token counts, which the meter could not read, so it
+  stayed stuck at its "appears after the first response" placeholder.
 
 ## [1.0.4] - 2026-08-12
 
