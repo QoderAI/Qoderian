@@ -93,6 +93,8 @@ describe('QoderConversationHistoryService restore diagnostics', () => {
       stage: 'history',
       detail: expect.stringContaining('conv-1'),
     });
+    // The underlying error and session id must surface for diagnostics.
+    expect(issues[0].detail).toContain('sess-1: read failed');
   });
 
   it('reports a history issue when session files are missing on disk', async () => {
