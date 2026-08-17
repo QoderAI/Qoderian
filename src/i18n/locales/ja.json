@@ -38,6 +38,11 @@
     "newSession": "新しいセッション（現在のタブ）",
     "closeCurrentTab": "現在のタブを閉じる"
   },
+  "nav": {
+    "newConversation": "新しい会話",
+    "chatHistory": "チャット履歴",
+    "newChat": "新しいチャット"
+  },
   "chat": {
     "rewind": {
       "confirmMessage": "この時点に巻き戻しますか？このメッセージ以降のファイル変更が元に戻されます。手動またはbashで編集されたファイルには影響しません。",

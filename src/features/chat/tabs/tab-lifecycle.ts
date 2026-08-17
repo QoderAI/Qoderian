@@ -1,3 +1,4 @@
+import { t } from '../../../i18n/i18n';
 import type QoderianPlugin from '../../../main';
 import { cleanupThinkingBlock } from '../rendering/thinking-block-renderer';
 import type { TabData } from './types';
@@ -71,5 +72,5 @@ export function getTabTitle(tab: TabData, plugin: QoderianPlugin): string {
     const conversation = plugin.getConversationSync(tab.conversationId);
     if (conversation?.title) return conversation.title;
   }
-  return 'New Chat';
+  return t('nav.newChat');
 }

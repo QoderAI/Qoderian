@@ -38,6 +38,11 @@
     "newSession": "New session (in current tab)",
     "closeCurrentTab": "Close current tab"
   },
+  "nav": {
+    "newConversation": "New conversation",
+    "chatHistory": "Chat history",
+    "newChat": "New Chat"
+  },
   "chat": {
     "rewind": {
       "confirmMessage": "Rewind to this point? File changes after this message will be reverted. Rewinding does not affect files edited manually or via bash.",

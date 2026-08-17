@@ -245,14 +245,14 @@ export class QoderianView extends ItemView {
 
     this.newTabButtonEl = navActionsEl.createDiv({ cls: 'qoderian-input-nav-btn qoderian-new-tab-btn' });
     setIcon(this.newTabButtonEl, 'square-plus');
-    setButtonTooltip(this.newTabButtonEl, 'New tab');
+    setButtonTooltip(this.newTabButtonEl, t('commands.newTab'));
     this.newTabButtonEl.addEventListener('click', () => {
       void this.createNewTab().catch(() => new Notice('Failed to create tab'));
     });
 
     const newBtn = navActionsEl.createDiv({ cls: 'qoderian-input-nav-btn' });
     setIcon(newBtn, 'square-pen');
-    setButtonTooltip(newBtn, 'New conversation');
+    setButtonTooltip(newBtn, t('nav.newConversation'));
     newBtn.addEventListener('click', () => {
       void (async () => {
         await this.tabManager?.createNewConversation();
@@ -264,7 +264,7 @@ export class QoderianView extends ItemView {
     const historyContainer = navActionsEl.createDiv({ cls: 'qoderian-history-container' });
     const historyBtn = historyContainer.createDiv({ cls: 'qoderian-input-nav-btn' });
     setIcon(historyBtn, 'history');
-    setButtonTooltip(historyBtn, 'Chat history');
+    setButtonTooltip(historyBtn, t('nav.chatHistory'));
 
     this.historyDropdown = historyContainer.createDiv({ cls: 'qoderian-history-menu' });
 

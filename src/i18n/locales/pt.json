@@ -38,6 +38,11 @@
     "newSession": "Nova sessão (na aba atual)",
     "closeCurrentTab": "Fechar aba atual"
   },
+  "nav": {
+    "newConversation": "Nova conversa",
+    "chatHistory": "Histórico de conversas",
+    "newChat": "Novo chat"
+  },
   "chat": {
     "rewind": {
       "confirmMessage": "Retroceder até este ponto? As alterações de arquivos após esta mensagem serão revertidas. O retrocesso não afeta arquivos editados manualmente ou via bash.",
