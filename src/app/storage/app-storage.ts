@@ -1,6 +1,7 @@
 import type { Plugin } from 'obsidian';
 import { Notice } from 'obsidian';
 
+import { reportRestoreIssue } from '../../core/diagnostics/restore-report';
 import { VaultFileAdapter } from '../../core/storage/vault-file-adapter';
 import type { AppTabManagerState } from '../../core/types/services';
 import {
@@ -12,6 +13,10 @@ import { QODERIAN_STORAGE_PATH } from './storage-paths';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 export class QoderianStorage {
@@ -62,17 +67,43 @@ export class QoderianStorage {
     try {
       const data: unknown = await this.plugin.loadData();
       if (!isRecord(data) || !data.tabManagerState) {
+        await this.reportUnreadablePluginData();
         return null;
       }
 
-      return this.validateTabManagerState(data.tabManagerState);
-    } catch {
+      const state = this.validateTabManagerState(data.tabManagerState);
+      if (!state) {
+        reportRestoreIssue('layout', 'Persisted tab layout failed validation.');
+      }
+      return state;
+    } catch (error) {
+      reportRestoreIssue('layout', `Failed to read persisted tab layout: ${errorMessage(error)}`);
       return null;
     }
   }
 
   getAdapter(): VaultFileAdapter {
     return this.adapter;
+  }
+
+  /**
+   * Obsidian may return null from loadData for corrupt JSON instead of
+   * throwing; a non-empty raw data file therefore means unreadable content.
+   */
+  private async reportUnreadablePluginData(): Promise<void> {
+    const pluginId = this.plugin.manifest?.id ?? 'qoderian';
+    const dataPath = `${this.plugin.app.vault.configDir}/plugins/${pluginId}/data.json`;
+    try {
+      const raw = await this.adapter.read(dataPath);
+      if (raw.trim().length > 0) {
+        reportRestoreIssue(
+          'layout',
+          `Plugin data file "${dataPath}" could not be read; loaded an empty layout instead.`,
+        );
+      }
+    } catch {
+      // Missing file: first run, nothing to report.
+    }
   }
 
   private async ensureDirectories(): Promise<void> {

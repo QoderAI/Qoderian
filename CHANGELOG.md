@@ -45,6 +45,10 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   collapse), the toolbar wraps instead of clipping, and the permission
   mode and model dropdowns shrink to stay inside the sidebar, with
   long model names ellipsized.
+- Startup session restore no longer fails silently: when the tab
+  layout, an individual tab, session metadata, or conversation history
+  cannot be read, Qoderian now shows a single notice with the issue
+  count and logs per-stage details to the developer console.
 
 ## [1.0.4] - 2026-08-12
 

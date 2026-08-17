@@ -1,3 +1,4 @@
+import { reportRestoreIssue } from '../../core/diagnostics/restore-report';
 import type { VaultFileAdapter } from '../../core/storage/vault-file-adapter';
 import type { SessionMetadata } from '../../core/types';
 import { SESSIONS_PATH } from './storage-paths';
@@ -21,7 +22,8 @@ export class SessionStorage {
     try {
       const content = await this.adapter.read(this.getMetadataPath(id));
       return JSON.parse(content) as SessionMetadata;
-    } catch {
+    } catch (error) {
+      reportRestoreIssue('metadata', `Failed to read session metadata "${id}": ${errorMessage(error)}`);
       return null;
     }
   }
@@ -37,8 +39,9 @@ export class SessionStorage {
       try {
         const content = await this.adapter.read(filePath);
         metas.push(JSON.parse(content) as SessionMetadata);
-      } catch {
-        // Skip files that fail to load.
+      } catch (error) {
+        // Skip files that fail to load, but surface the skip.
+        reportRestoreIssue('metadata', `Failed to read session metadata file "${filePath}": ${errorMessage(error)}`);
       }
     }
 
@@ -49,8 +52,13 @@ export class SessionStorage {
     try {
       const files = await this.adapter.listFiles(SESSIONS_PATH);
       return files.filter((filePath) => filePath.endsWith('.meta.json'));
-    } catch {
+    } catch (error) {
+      reportRestoreIssue('metadata', `Failed to list session metadata files: ${errorMessage(error)}`);
       return [];
     }
   }
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }

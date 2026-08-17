@@ -25,6 +25,9 @@
     "send": "Enviar mensaje",
     "stop": "Detener generación"
   },
+  "restore": {
+    "failed": "No se pudieron restaurar algunas pestañas o conversaciones ({count} problema(s)). Detalles en la consola de desarrollador."
+  },
   "commands": {
     "openView": "Abrir vista de chat",
     "inlineEdit": "Edición en línea",

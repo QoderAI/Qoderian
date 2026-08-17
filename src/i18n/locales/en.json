@@ -25,6 +25,9 @@
     "send": "Send message",
     "stop": "Stop generation"
   },
+  "restore": {
+    "failed": "Some of your previous tabs or conversations could not be restored ({count} issue(s)). Details are in the developer console."
+  },
   "commands": {
     "openView": "Open chat view",
     "inlineEdit": "Inline edit",

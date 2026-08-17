@@ -1,3 +1,4 @@
+import { reportRestoreIssue } from '../../core/diagnostics/restore-report';
 import type {
   AsyncSubagentStatus,
   ChatMessage,
@@ -411,6 +412,17 @@ export class QoderConversationHistoryService {
     }
 
     const allSessionsMissing = missingSessionCount === allSessionIds.length;
+    if (errorCount > 0) {
+      reportRestoreIssue(
+        'history',
+        `Conversation "${conversation.id}": ${errorCount} of ${allSessionIds.length} session file(s) failed to load.`,
+      );
+    } else if (allSessionsMissing) {
+      reportRestoreIssue(
+        'history',
+        `Conversation "${conversation.id}": session file(s) missing on disk.`,
+      );
+    }
     const hasLoadErrors = errorCount > 0 && successCount === 0 && !allSessionsMissing;
     if (hasLoadErrors) {
       return;

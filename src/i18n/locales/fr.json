@@ -25,6 +25,9 @@
     "send": "Envoyer le message",
     "stop": "Arrêter la génération"
   },
+  "restore": {
+    "failed": "Certains onglets ou conversations n'ont pas pu être restaurés ({count} problème(s)). Détails dans la console développeur."
+  },
   "commands": {
     "openView": "Ouvrir la vue de discussion",
     "inlineEdit": "Édition en ligne",

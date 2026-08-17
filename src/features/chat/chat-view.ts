@@ -1,7 +1,9 @@
 import type { EventRef, WorkspaceLeaf } from 'obsidian';
 import { ItemView, Notice, Scope, setIcon } from 'obsidian';
 
+import { finishRestoreReport } from '../../core/diagnostics/restore-report';
 import { VIEW_TYPE_QODERIAN } from '../../core/types';
+import { t } from '../../i18n/i18n';
 import type QoderianPlugin from '../../main';
 import { fetchCreditsUsage } from '../../qoder/services/credits-usage';
 import {
@@ -607,17 +609,24 @@ export class QoderianView extends ItemView {
   // ============================================
 
   private async restoreOrCreateTabs(): Promise<void> {
-    if (!this.tabManager) return;
+    try {
+      if (!this.tabManager) return;
 
-    // Try to restore from persisted state
-    const persistedState = await this.plugin.storage.getTabManagerState();
-    if (persistedState && persistedState.openTabs.length > 0) {
-      await this.tabManager.restoreState(persistedState);
-      return;
+      // Try to restore from persisted state
+      const persistedState = await this.plugin.storage.getTabManagerState();
+      if (persistedState && persistedState.openTabs.length > 0) {
+        await this.tabManager.restoreState(persistedState);
+      } else {
+        // Fallback: create a new empty tab
+        await this.tabManager.createTab();
+      }
+    } finally {
+      // Drain startup restore diagnostics and surface them once, aggregated.
+      const issues = finishRestoreReport();
+      if (issues.length > 0) {
+        new Notice(t('restore.failed', { count: issues.length }), 10000);
+      }
     }
-
-    // Fallback: create a new empty tab
-    await this.tabManager.createTab();
   }
 
   /**

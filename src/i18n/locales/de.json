@@ -25,6 +25,9 @@
     "send": "Nachricht senden",
     "stop": "Generierung stoppen"
   },
+  "restore": {
+    "failed": "Einige Tabs oder Unterhaltungen konnten nicht wiederhergestellt werden ({count} Problem(e)). Details in der Entwicklerkonsole."
+  },
   "commands": {
     "openView": "Chat-Ansicht öffnen",
     "inlineEdit": "Inline-Bearbeitung",
