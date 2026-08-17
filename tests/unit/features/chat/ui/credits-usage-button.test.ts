@@ -41,11 +41,12 @@ function createButton(cached: CreditsUsageSnapshot | null = SNAPSHOT): ButtonHar
 }
 
 describe('CreditsUsageButton', () => {
-  it('shows the overall percentage as the button tooltip', () => {
+  it('shows a static usage tooltip like the other nav-row buttons', () => {
     const { parentEl } = createButton();
 
-    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('title'))
-      .toBe('Usage - 100%');
+    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('aria-label'))
+      .toBe('Usage');
+    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('title')).toBeNull();
   });
 
   it('renders plan and resource package sections like the IDE usage panel', () => {
@@ -118,8 +119,8 @@ describe('CreditsUsageButton', () => {
   it('shows an unavailable state without a snapshot', () => {
     const { parentEl } = createButton(null);
 
-    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('title'))
-      .toBe('Usage unavailable');
+    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('aria-label'))
+      .toBe('Usage');
     expect(parentEl.querySelector('.qoderian-credits-empty')?.textContent)
       .toBe('Usage unavailable');
   });
@@ -131,8 +132,8 @@ describe('CreditsUsageButton', () => {
     await flushPromises();
 
     expect(fetchUsage).toHaveBeenCalledTimes(1);
-    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('title'))
-      .toBe('Usage - 100%');
+    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('aria-label'))
+      .toBe('Usage');
     expect(parentEl.querySelector('.qoderian-credits-empty')).toBeNull();
   });
 

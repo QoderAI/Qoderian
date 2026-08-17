@@ -292,7 +292,7 @@
     "renewsOn": "{date}에 갱신",
     "usedPercent": "{percent}% 사용",
     "left": "{count} 남음",
-    "trigger": "사용량 - {percent}%",
+    "trigger": "사용량",
     "unavailable": "사용량을 확인할 수 없음"
   },
   "model": {

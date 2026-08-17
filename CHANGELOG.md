@@ -75,6 +75,12 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   snapshots now carry the configured context-window tier, and zeroed
   snapshots can no longer overwrite an existing reading.
 
+### Changed
+
+- The credits usage button now shows a static "Usage" tooltip through
+  Obsidian's native tooltip (aria-label), matching the other nav-row
+  buttons, instead of a browser title tooltip with the live percentage.
+
 ## [1.0.4] - 2026-08-12
 
 ### Fixed

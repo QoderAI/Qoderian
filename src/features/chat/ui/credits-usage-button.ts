@@ -125,12 +125,9 @@ export class CreditsUsageButton {
   };
 
   private updateButton(): void {
-    const percent = this.snapshot?.totalUsagePercentage;
-    if (typeof percent === 'number') {
-      this.buttonEl.setAttribute('title', t('credits.trigger', { percent: Math.round(percent) }));
-    } else {
-      this.buttonEl.setAttribute('title', t('credits.unavailable'));
-    }
+    // Static label via aria-label so the button gets the same native Obsidian
+    // tooltip as the other nav-row buttons (title would use the browser one).
+    this.buttonEl.setAttribute('aria-label', t('credits.trigger'));
   }
 
   private renderPanel(): void {

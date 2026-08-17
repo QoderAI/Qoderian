@@ -292,7 +292,7 @@
     "renewsOn": "Renouvellement le {date}",
     "usedPercent": "{percent}% utilisés",
     "left": "{count} restants",
-    "trigger": "Utilisation - {percent}%",
+    "trigger": "Utilisation",
     "unavailable": "Utilisation indisponible"
   },
   "model": {

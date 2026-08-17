@@ -292,7 +292,7 @@
     "renewsOn": "将于 {date} 刷新",
     "usedPercent": "已使用 {percent}%",
     "left": "剩余 {count}",
-    "trigger": "用量 - {percent}%",
+    "trigger": "用量",
     "unavailable": "用量暂不可用"
   },
   "model": {
