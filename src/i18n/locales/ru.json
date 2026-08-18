@@ -98,6 +98,15 @@
     "conversation": {
       "emptyPreview": "Новый диалог",
       "deleteFailed": "Не удалось удалить диалог: {error}"
+    },
+    "queue": {
+      "title": "Ждут отправки {count}",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "drag": "Перетащить",
+      "dragTooltip": "Перетащите, чтобы изменить порядок",
+      "collapse": "Свернуть очередь",
+      "expand": "Развернуть очередь"
     }
   },
   "settings": {

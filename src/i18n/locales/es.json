@@ -98,6 +98,15 @@
     "conversation": {
       "emptyPreview": "Nueva conversación",
       "deleteFailed": "Error al eliminar la conversación: {error}"
+    },
+    "queue": {
+      "title": "Esperando para enviar {count}",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "drag": "Arrastrar",
+      "dragTooltip": "Arrastra para reordenar",
+      "collapse": "Contraer cola",
+      "expand": "Expandir cola"
     }
   },
   "settings": {

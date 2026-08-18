@@ -528,10 +528,6 @@ export class InputController {
     this.queuedMessages.clear();
   }
 
-  withdrawQueuedMessageToComposer(): void {
-    this.queuedMessages.withdrawToComposer();
-  }
-
   private async buildTurnSubmission(options: {
     content: string;
     images?: ChatMessage['images'];
@@ -822,8 +818,6 @@ export class InputController {
     const { state, streamController } = this.deps;
     if (!state.isStreaming) return;
     state.cancelRequested = true;
-    // Restore queued message to input instead of discarding
-    this.queuedMessages.restorePendingToComposer();
     this.getAgentService()?.cancel();
     streamController.hideThinkingIndicator();
   }

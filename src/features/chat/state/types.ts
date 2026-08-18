@@ -15,6 +15,8 @@ import type { WriteEditState } from '../rendering/write-edit-renderer';
 
 /** Queued message waiting to be sent after current streaming completes. */
 export interface QueuedMessage {
+  /** Stable id used for list rendering and per-item actions. */
+  id: string;
   content: string;
   images?: ImageAttachment[];
   editorContext: EditorSelectionContext | null;
@@ -61,8 +63,8 @@ export interface ChatStateData {
   // Conversation identity
   currentConversationId: string | null;
 
-  // Queued message
-  queuedMessage: QueuedMessage | null;
+  // Queued messages (FIFO; drained one per completed turn)
+  queuedMessages: QueuedMessage[];
 
   // Active streaming DOM state
   currentContentEl: HTMLElement | null;

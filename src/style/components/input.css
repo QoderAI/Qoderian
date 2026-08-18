@@ -274,68 +274,127 @@
   background: var(--background-modifier-hover);
 }
 
-/* Composer queue status row for queued follow-up previews. */
+/* Composer send-queue panel: collapsible list of pending turns. */
 .qoderian-input-queue-row {
   display: none;
-  font-size: 12px;
+  flex-direction: column;
+  margin: 0 2px 8px 2px;
+  padding: 4px 6px 6px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 10px;
+  background: var(--background-secondary);
+  font-size: 13px;
   color: var(--text-muted);
   font-style: normal;
-  align-items: center;
-  gap: 8px;
-  padding: 0 2px 8px 2px;
 }
 
-.qoderian-queue-indicator-text {
+.qoderian-queue-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+}
+
+/* Scoped button selectors outrank Obsidian's default button chrome. */
+.qoderian-input-queue-row button.qoderian-queue-header-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.qoderian-input-queue-row button.qoderian-queue-header-toggle:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qoderian-queue-header-toggle svg {
+  width: 14px;
+  height: 14px;
+}
+
+.qoderian-queue-header-title {
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.qoderian-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.qoderian-queue-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.qoderian-queue-row:hover {
+  background: var(--background-modifier-hover);
+}
+
+.qoderian-queue-row-dragging {
+  opacity: 0.5;
+}
+
+.qoderian-queue-row-handle {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  color: var(--text-faint);
+  cursor: grab;
+}
+
+.qoderian-queue-row-handle svg {
+  width: 14px;
+  height: 14px;
+}
+
+.qoderian-queue-row-text {
   min-width: 0;
   flex: 1 1 auto;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--text-normal);
 }
 
-.qoderian-queue-indicator-actions {
+.qoderian-queue-row-actions {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
-.qoderian-queue-indicator-action {
-  flex: 0 0 auto;
-  padding: 1px 8px;
-  border: 0;
-  background: transparent;
-  color: var(--interactive-accent);
-  font: inherit;
-  cursor: pointer;
-}
-
-.qoderian-queue-indicator-action:hover {
-  text-decoration: underline;
-}
-
-.qoderian-queue-indicator-action[disabled] {
-  color: var(--text-faint);
-  cursor: default;
-  text-decoration: none;
-}
-
-.qoderian-queue-indicator-icon-action {
+.qoderian-input-queue-row button.qoderian-queue-indicator-icon-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
-  border-radius: 4px;
+  border-radius: 6px;
   background: transparent;
+  box-shadow: none;
   color: var(--text-muted);
   cursor: pointer;
 }
 
-.qoderian-queue-indicator-icon-action:hover {
+.qoderian-input-queue-row button.qoderian-queue-indicator-icon-action:hover {
   background: var(--background-modifier-hover);
   color: var(--text-normal);
 }

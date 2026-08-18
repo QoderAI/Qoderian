@@ -98,6 +98,15 @@
     "conversation": {
       "emptyPreview": "新しい会話",
       "deleteFailed": "会話の削除に失敗しました：{error}"
+    },
+    "queue": {
+      "title": "送信待ち {count}",
+      "edit": "編集",
+      "delete": "削除",
+      "drag": "ドラッグ",
+      "dragTooltip": "ドラッグで順序を変更",
+      "collapse": "キューを折りたたむ",
+      "expand": "キューを展開"
     }
   },
   "settings": {

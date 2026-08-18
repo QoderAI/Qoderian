@@ -98,6 +98,15 @@
     "conversation": {
       "emptyPreview": "Nouvelle conversation",
       "deleteFailed": "Échec de la suppression de la conversation : {error}"
+    },
+    "queue": {
+      "title": "En attente d'envoi {count}",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "drag": "Glisser",
+      "dragTooltip": "Glisser pour réordonner",
+      "collapse": "Replier la file",
+      "expand": "Déplier la file"
     }
   },
   "settings": {

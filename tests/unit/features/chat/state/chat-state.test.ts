@@ -47,7 +47,7 @@ describe('ChatState', () => {
       expect(state.isCreatingConversation).toBe(false);
       expect(state.isSwitchingConversation).toBe(false);
       expect(state.currentConversationId).toBeNull();
-      expect(state.queuedMessage).toBeNull();
+      expect(state.queuedMessages).toEqual([]);
       expect(state.currentContentEl).toBeNull();
       expect(state.currentTextEl).toBeNull();
       expect(state.currentTextContent).toBe('');
@@ -172,13 +172,13 @@ describe('ChatState', () => {
   });
 
   describe('queued message', () => {
-    it('stores and retrieves queued message', () => {
+    it('stores and retrieves queued messages', () => {
       const chatState = new ChatState();
-      const queued = { content: 'queued', editorContext: null, canvasContext: null };
+      const queued = { id: 'q1', content: 'queued', editorContext: null, canvasContext: null };
 
-      chatState.queuedMessage = queued;
+      chatState.queuedMessages = [queued];
 
-      expect(chatState.queuedMessage).toBe(queued);
+      expect(chatState.queuedMessages).toEqual([queued]);
     });
   });
 
@@ -417,7 +417,7 @@ describe('ChatState', () => {
       chatState.cancelRequested = true;
       chatState.currentContentEl = {} as HTMLElement;
       chatState.toolCallElements.set('a', {} as HTMLElement);
-      chatState.queuedMessage = { content: 'queued', editorContext: null, canvasContext: null };
+      chatState.queuedMessages = [{ id: 'q1', content: 'queued', editorContext: null, canvasContext: null }];
       chatState.usage = { inputTokens: 100, outputTokens: 50 } as any;
       // autoScrollEnabled defaults to true, set to false first so reset triggers change
       chatState.autoScrollEnabled = false;
@@ -434,7 +434,7 @@ describe('ChatState', () => {
       expect(chatState.toolCallElements.size).toBe(0);
       expect(chatState.writeEditStates.size).toBe(0);
       expect(chatState.pendingTools.size).toBe(0);
-      expect(chatState.queuedMessage).toBeNull();
+      expect(chatState.queuedMessages).toEqual([]);
       expect(chatState.usage).toBeNull();
       expect(chatState.autoScrollEnabled).toBe(true);
 

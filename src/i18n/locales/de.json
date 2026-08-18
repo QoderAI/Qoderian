@@ -98,6 +98,15 @@
     "conversation": {
       "emptyPreview": "Neue Unterhaltung",
       "deleteFailed": "Unterhaltung konnte nicht gelöscht werden: {error}"
+    },
+    "queue": {
+      "title": "Warten auf Senden {count}",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "drag": "Ziehen",
+      "dragTooltip": "Ziehen, um die Reihenfolge zu ändern",
+      "collapse": "Warteschlange einklappen",
+      "expand": "Warteschlange ausklappen"
     }
   },
   "settings": {

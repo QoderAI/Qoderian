@@ -98,6 +98,15 @@
     "conversation": {
       "emptyPreview": "New conversation",
       "deleteFailed": "Failed to delete conversation: {error}"
+    },
+    "queue": {
+      "title": "Waiting to send {count}",
+      "edit": "Edit",
+      "delete": "Delete",
+      "drag": "Drag",
+      "dragTooltip": "Drag to reorder",
+      "collapse": "Collapse queue",
+      "expand": "Expand queue"
     }
   },
   "settings": {
