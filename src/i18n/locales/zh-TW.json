@@ -106,7 +106,9 @@
       "drag": "拖曳",
       "dragTooltip": "拖曳調整順序",
       "collapse": "折疊佇列",
-      "expand": "展開佇列"
+      "expand": "展開佇列",
+      "paused": "由於你中斷了當前回應，佇列已暫停",
+      "resume": "繼續"
     }
   },
   "settings": {

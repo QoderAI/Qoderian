@@ -65,6 +65,8 @@ export interface ChatStateData {
 
   // Queued messages (FIFO; drained one per completed turn)
   queuedMessages: QueuedMessage[];
+  /** Queue auto-drain suspended after the user interrupted a turn. */
+  queuePaused: boolean;
 
   // Active streaming DOM state
   currentContentEl: HTMLElement | null;

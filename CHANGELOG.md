@@ -21,9 +21,10 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ### Changed
 
-- Stopping a streaming turn no longer withdraws queued messages into the
-  composer: the queue is preserved as-is and the head entry is still sent
-  after the interrupted turn settles (stop now means "skip this turn").
+- Stopping a streaming turn now pauses the send queue (Codex-style):
+  queued messages are preserved but no longer auto-sent, the panel header
+  switches to a "queue paused" notice with a Resume action, and resuming
+  (or clearing the queue) restores the normal one-per-turn drain.
 
 ## [1.0.5] - 2026-08-18
 

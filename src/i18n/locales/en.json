@@ -106,7 +106,9 @@
       "drag": "Drag",
       "dragTooltip": "Drag to reorder",
       "collapse": "Collapse queue",
-      "expand": "Expand queue"
+      "expand": "Expand queue",
+      "paused": "Queue paused because you interrupted the current response",
+      "resume": "Resume"
     }
   },
   "settings": {

@@ -106,7 +106,9 @@
       "drag": "Ziehen",
       "dragTooltip": "Ziehen, um die Reihenfolge zu ändern",
       "collapse": "Warteschlange einklappen",
-      "expand": "Warteschlange ausklappen"
+      "expand": "Warteschlange ausklappen",
+      "paused": "Warteschlange pausiert, weil du die aktuelle Antwort unterbrochen hast",
+      "resume": "Fortsetzen"
     }
   },
   "settings": {

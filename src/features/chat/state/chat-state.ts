@@ -20,6 +20,7 @@ function createInitialState(): ChatStateData {
     hasPendingConversationSave: false,
     currentConversationId: null,
     queuedMessages: [],
+    queuePaused: false,
     currentContentEl: null,
     currentTextEl: null,
     currentTextContent: '',
@@ -169,6 +170,14 @@ export class ChatState {
 
   set queuedMessages(value: QueuedMessage[]) {
     this.state.queuedMessages = value;
+  }
+
+  get queuePaused(): boolean {
+    return this.state.queuePaused;
+  }
+
+  set queuePaused(value: boolean) {
+    this.state.queuePaused = value;
   }
 
   // ============================================
@@ -393,6 +402,7 @@ export class ChatState {
     this.resetStreamingState();
     this.clearMaps();
     this.state.queuedMessages = [];
+    this.state.queuePaused = false;
     this.usage = null;
     this.autoScrollEnabled = true;
   }

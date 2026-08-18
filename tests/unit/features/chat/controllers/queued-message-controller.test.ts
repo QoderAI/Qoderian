@@ -146,6 +146,28 @@ describe('QueuedMessageController', () => {
     expect(state.queuedMessages.map(message => message.content)).toEqual(['first']);
   });
 
+  it('pause blocks process until resume', () => {
+    const { controller, state, sendQueuedTurn } = createController();
+    controller.enqueue('first', turnRequest('first'));
+    controller.enqueue('second', turnRequest('second'));
+
+    controller.pause();
+    controller.process();
+    jest.runAllTimers();
+
+    expect(sendQueuedTurn).not.toHaveBeenCalled();
+    expect(state.queuedMessages).toHaveLength(2);
+    expect(state.queueIndicatorEl!.querySelector('.qoderian-queue-resume')).not.toBeNull();
+
+    const resumeEl = state.queueIndicatorEl!.querySelector('.qoderian-queue-resume') as HTMLElement;
+    resumeEl.dispatchEvent(new Event('click'));
+    jest.runAllTimers();
+
+    expect(sendQueuedTurn).toHaveBeenCalledTimes(1);
+    expect(state.queuedMessages.map(message => message.content)).toEqual(['second']);
+    expect(state.queueIndicatorEl!.querySelector('.qoderian-queue-resume')).toBeNull();
+  });
+
   it('clear empties the queue and hides the panel', () => {
     const { controller, state } = createController();
     controller.enqueue('first', turnRequest('first'));
