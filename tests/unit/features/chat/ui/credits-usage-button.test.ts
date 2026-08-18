@@ -46,9 +46,11 @@ describe('CreditsUsageButton', () => {
   it('shows a static usage tooltip like the other nav-row buttons', () => {
     const { parentEl } = createButton();
 
-    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('aria-label'))
-      .toBe('Usage');
-    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('title')).toBeNull();
+    const btn = parentEl.querySelector('.qoderian-credits-btn');
+    expect(btn?.getAttribute('aria-label')).toBe('Usage');
+    // Same shared helper as the other nav buttons: 300ms hover delay.
+    expect(btn?.getAttribute('data-tooltip-delay')).toBe('300');
+    expect(btn?.getAttribute('title')).toBeNull();
   });
 
   it('re-applies localized text when the locale changes', () => {
