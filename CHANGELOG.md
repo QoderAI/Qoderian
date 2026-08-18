@@ -11,6 +11,20 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Added
+
+- Multi-message send queue in the chat composer: while a response is
+  streaming, further sends stack into a collapsible panel above the
+  composer (aligned with the Qoder IDE send queue). Each entry shows a
+  drag handle for reordering plus edit (withdraw into the composer) and
+  delete actions, and entries drain one per turn end in FIFO order.
+
+### Changed
+
+- Stopping a streaming turn no longer withdraws queued messages into the
+  composer: the queue is preserved as-is and the head entry is still sent
+  after the interrupted turn settles (stop now means "skip this turn").
+
 ## [1.0.5] - 2026-08-18
 
 ### Added

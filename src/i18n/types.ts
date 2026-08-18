@@ -117,6 +117,15 @@ export type TranslationKey =
   | 'chat.fork.commandNoMessages'
   | 'chat.fork.commandNoAssistantUuid'
 
+  // Send queue (multi-message queue above the composer)
+  | 'chat.queue.title'
+  | 'chat.queue.edit'
+  | 'chat.queue.delete'
+  | 'chat.queue.drag'
+  | 'chat.queue.dragTooltip'
+  | 'chat.queue.collapse'
+  | 'chat.queue.expand'
+
   // Settings - Section Headings
   | 'settings.title'
   | 'settings.display'

@@ -98,6 +98,15 @@
     "conversation": {
       "emptyPreview": "新對話",
       "deleteFailed": "刪除對話失敗：{error}"
+    },
+    "queue": {
+      "title": "等待發送 {count}",
+      "edit": "編輯",
+      "delete": "刪除",
+      "drag": "拖曳",
+      "dragTooltip": "拖曳調整順序",
+      "collapse": "折疊佇列",
+      "expand": "展開佇列"
     }
   },
   "settings": {

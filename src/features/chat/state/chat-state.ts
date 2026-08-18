@@ -19,7 +19,7 @@ function createInitialState(): ChatStateData {
     isSwitchingConversation: false,
     hasPendingConversationSave: false,
     currentConversationId: null,
-    queuedMessage: null,
+    queuedMessages: [],
     currentContentEl: null,
     currentTextEl: null,
     currentTextContent: '',
@@ -163,12 +163,12 @@ export class ChatState {
   // Queued Message
   // ============================================
 
-  get queuedMessage(): QueuedMessage | null {
-    return this.state.queuedMessage;
+  get queuedMessages(): QueuedMessage[] {
+    return this.state.queuedMessages;
   }
 
-  set queuedMessage(value: QueuedMessage | null) {
-    this.state.queuedMessage = value;
+  set queuedMessages(value: QueuedMessage[]) {
+    this.state.queuedMessages = value;
   }
 
   // ============================================
@@ -392,7 +392,7 @@ export class ChatState {
     this.clearMessages();
     this.resetStreamingState();
     this.clearMaps();
-    this.state.queuedMessage = null;
+    this.state.queuedMessages = [];
     this.usage = null;
     this.autoScrollEnabled = true;
   }

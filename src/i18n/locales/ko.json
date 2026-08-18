@@ -98,6 +98,15 @@
     "conversation": {
       "emptyPreview": "새 대화",
       "deleteFailed": "대화 삭제 실패: {error}"
+    },
+    "queue": {
+      "title": "전송 대기 {count}",
+      "edit": "편집",
+      "delete": "삭제",
+      "drag": "드래그",
+      "dragTooltip": "드래그하여 순서 변경",
+      "collapse": "큐 접기",
+      "expand": "큐 펼치기"
     }
   },
   "settings": {
