@@ -25,6 +25,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   queued messages are preserved but no longer auto-sent, the panel header
   switches to a "queue paused" notice with a Resume action, and resuming
   (or clearing the queue) restores the normal one-per-turn drain.
+- Editing a queued message now replaces the composer content instead of
+  appending to it.
 
 ## [1.0.5] - 2026-08-18
 

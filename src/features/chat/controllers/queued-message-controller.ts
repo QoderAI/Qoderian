@@ -2,7 +2,6 @@ import { setIcon } from 'obsidian';
 
 import type { ChatTurnRequest } from '../../../core/runtime/types';
 import { t } from '../../../i18n/i18n';
-import { appendMarkdownSnippet } from '../../../shared/markdown/markdown';
 import type { ChatState } from '../state/chat-state';
 import type { QueuedMessage } from '../state/types';
 import type { ImageContextManager } from '../ui/image-context';
@@ -78,13 +77,13 @@ export class QueuedMessageController {
     this.updateIndicator();
   }
 
-  /** Withdraw one item back into the composer. */
+  /** Withdraw one item back into the composer, replacing its content. */
   withdrawToComposer(id: string): void {
     const { state } = this.deps;
     const target = state.queuedMessages.find(message => message.id === id);
     if (!target) return;
     state.queuedMessages = state.queuedMessages.filter(message => message.id !== id);
-    this.restoreMessageToInput(target, true);
+    this.restoreMessageToInput(target);
     this.updateIndicator();
   }
 
@@ -192,19 +191,12 @@ export class QueuedMessageController {
     });
   }
 
-  private restoreMessageToInput(message: QueuedMessage, mergeWithComposer: boolean): void {
+  private restoreMessageToInput(message: QueuedMessage): void {
     const inputEl = this.deps.getInputEl();
-    const currentContent = mergeWithComposer ? inputEl.value.trim() : '';
-    inputEl.value = currentContent
-      ? appendMarkdownSnippet(message.content, currentContent)
-      : message.content;
+    inputEl.value = message.content;
 
     const imageContextManager = this.deps.getImageContextManager();
-    const currentImages = mergeWithComposer
-      ? (imageContextManager?.getAttachedImages() ?? [])
-      : [];
-    const restoredImages = [...(message.images ?? []), ...currentImages];
-    if (restoredImages.length > 0) imageContextManager?.setImages(restoredImages);
+    imageContextManager?.setImages([...(message.images ?? [])]);
     this.deps.resetInputHeight();
     inputEl.focus();
   }

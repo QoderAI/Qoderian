@@ -135,8 +135,9 @@ describe('QueuedMessageController', () => {
     expect(state.queuedMessages.map(message => message.content)).toEqual(['second']);
   });
 
-  it('withdrawToComposer moves one item back into the input', () => {
+  it('withdrawToComposer replaces the input content', () => {
     const { controller, state, inputEl } = createController();
+    inputEl.value = 'draft in progress';
     controller.enqueue('first', turnRequest('first'));
     controller.enqueue('second', turnRequest('second'));
 
