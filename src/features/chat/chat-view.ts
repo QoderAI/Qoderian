@@ -45,6 +45,8 @@ export class QoderianView extends ItemView {
   private viewContainerEl: HTMLElement | null = null;
   private logoEl: HTMLElement | null = null;
   private newTabButtonEl: HTMLElement | null = null;
+  private newConversationButtonEl: HTMLElement | null = null;
+  private historyButtonEl: HTMLElement | null = null;
 
   // Header elements
   private historyDropdown: HTMLElement | null = null;
@@ -253,6 +255,7 @@ export class QoderianView extends ItemView {
     const newBtn = navActionsEl.createDiv({ cls: 'qoderian-input-nav-btn' });
     setIcon(newBtn, 'square-pen');
     setButtonTooltip(newBtn, t('nav.newConversation'));
+    this.newConversationButtonEl = newBtn;
     newBtn.addEventListener('click', () => {
       void (async () => {
         await this.tabManager?.createNewConversation();
@@ -265,6 +268,7 @@ export class QoderianView extends ItemView {
     const historyBtn = historyContainer.createDiv({ cls: 'qoderian-input-nav-btn' });
     setIcon(historyBtn, 'history');
     setButtonTooltip(historyBtn, t('nav.chatHistory'));
+    this.historyButtonEl = historyBtn;
 
     this.historyDropdown = historyContainer.createDiv({ cls: 'qoderian-history-menu' });
 
@@ -345,6 +349,17 @@ export class QoderianView extends ItemView {
   /** Refreshes tab controls after settings that affect tab availability change. */
   refreshTabControls(): void {
     this.updateTabBarVisibility();
+  }
+
+  /** Re-applies locale-dependent static text after a language change. */
+  refreshLocalizedChrome(): void {
+    if (this.newTabButtonEl) setButtonTooltip(this.newTabButtonEl, t('commands.newTab'));
+    if (this.newConversationButtonEl) {
+      setButtonTooltip(this.newConversationButtonEl, t('nav.newConversation'));
+    }
+    if (this.historyButtonEl) setButtonTooltip(this.historyButtonEl, t('nav.chatHistory'));
+    this.creditsUsageButton?.refreshLocale();
+    this.updateTabBar();
   }
 
   // ============================================

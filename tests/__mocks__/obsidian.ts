@@ -32,6 +32,17 @@ export class PluginSettingTab {
   }
 
   display() {}
+
+  // Mirrors the 1.13 declarative base: mutates plugin.settings in place.
+  getControlValue(key: string): unknown {
+    return (this.plugin.settings as Record<string, unknown>)[key];
+  }
+
+  setControlValue(key: string, value: unknown): void {
+    (this.plugin.settings as Record<string, unknown>)[key] = value;
+  }
+
+  update() {}
 }
 
 export class ItemView {

@@ -97,6 +97,12 @@ export class CreditsUsageButton {
     this.container.remove();
   }
 
+  /** Re-applies locale-dependent text after a language change. */
+  refreshLocale(): void {
+    this.updateButton();
+    this.renderPanel();
+  }
+
   /** Fetches a fresh snapshot; cached snapshots within the TTL are kept. */
   async refresh(force: boolean): Promise<void> {
     if (this.loading) return;
