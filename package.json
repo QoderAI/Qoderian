@@ -1,6 +1,6 @@
 {
   "name": "qoderian",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
   "description": "Qoder CLI embedded in the Obsidian sidebar",
   "main": "main.js",
