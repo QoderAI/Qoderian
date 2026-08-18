@@ -75,6 +75,22 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   snapshots now carry the configured context-window tier, and zeroed
   snapshots can no longer overwrite an existing reading.
 
+### Changed
+
+- The credits usage button now shows a static "Usage" tooltip through
+  Obsidian's native tooltip (aria-label), matching the other nav-row
+  buttons, instead of a browser title tooltip with the live percentage.
+
+### Fixed
+
+- Settings changed on Obsidian 1.13+ (language, auto-scroll, and the
+  other simple toggles) now persist across restarts: the declarative
+  control writes were only mirrored into the plugin data file, not the
+  `.qoderian/qoderian-settings.json` store Qoderian loads at startup.
+  Changing the language also re-localizes open chat views immediately
+  (nav tooltips and tab titles) instead of keeping the old language
+  until the view is reopened.
+
 ## [1.0.4] - 2026-08-12
 
 ### Fixed

@@ -2,6 +2,7 @@ import { createMockEl } from '@test/helpers/mock-element';
 
 import type { CreditsUsageSnapshot } from '@/core/types/services';
 import { CreditsUsageButton } from '@/features/chat/ui/credits-usage-button';
+import { setLocale } from '@/i18n/i18n';
 import { setActiveQoderCliEdition } from '@/qoder/config/cli-edition';
 
 const SNAPSHOT: CreditsUsageSnapshot = {
@@ -27,25 +28,42 @@ function flushPromises(): Promise<void> {
 interface ButtonHarness {
   parentEl: ReturnType<typeof createMockEl>;
   fetchUsage: jest.Mock;
+  button: CreditsUsageButton;
 }
 
 function createButton(cached: CreditsUsageSnapshot | null = SNAPSHOT): ButtonHarness {
   const parentEl = createMockEl();
   const fetchUsage = jest.fn().mockResolvedValue(SNAPSHOT);
-  new CreditsUsageButton(parentEl, {
+  const button = new CreditsUsageButton(parentEl, {
     getCachedUsage: () => cached,
     fetchUsage,
     subscribeRuntimeStatus: jest.fn().mockReturnValue(() => {}),
   });
-  return { parentEl, fetchUsage };
+  return { parentEl, fetchUsage, button };
 }
 
 describe('CreditsUsageButton', () => {
-  it('shows the overall percentage as the button tooltip', () => {
+  it('shows a static usage tooltip like the other nav-row buttons', () => {
     const { parentEl } = createButton();
 
-    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('title'))
-      .toBe('Usage - 100%');
+    const btn = parentEl.querySelector('.qoderian-credits-btn');
+    expect(btn?.getAttribute('aria-label')).toBe('Usage');
+    // Same shared helper as the other nav buttons: 300ms hover delay.
+    expect(btn?.getAttribute('data-tooltip-delay')).toBe('300');
+    expect(btn?.getAttribute('title')).toBeNull();
+  });
+
+  it('re-applies localized text when the locale changes', () => {
+    const { parentEl, button } = createButton();
+
+    setLocale('zh-CN');
+    try {
+      button.refreshLocale();
+      expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('aria-label'))
+        .toBe('用量');
+    } finally {
+      setLocale('en');
+    }
   });
 
   it('renders plan and resource package sections like the IDE usage panel', () => {
@@ -118,8 +136,8 @@ describe('CreditsUsageButton', () => {
   it('shows an unavailable state without a snapshot', () => {
     const { parentEl } = createButton(null);
 
-    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('title'))
-      .toBe('Usage unavailable');
+    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('aria-label'))
+      .toBe('Usage');
     expect(parentEl.querySelector('.qoderian-credits-empty')?.textContent)
       .toBe('Usage unavailable');
   });
@@ -131,8 +149,8 @@ describe('CreditsUsageButton', () => {
     await flushPromises();
 
     expect(fetchUsage).toHaveBeenCalledTimes(1);
-    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('title'))
-      .toBe('Usage - 100%');
+    expect(parentEl.querySelector('.qoderian-credits-btn')?.getAttribute('aria-label'))
+      .toBe('Usage');
     expect(parentEl.querySelector('.qoderian-credits-empty')).toBeNull();
   });
 

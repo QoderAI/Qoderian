@@ -1,4 +1,5 @@
 import { scheduleAnimationFrame } from '../../../shared/dom/animation-frame';
+import { setButtonTooltip } from '../../../shared/dom/tooltip';
 import type { TabBarItem, TabId } from './types';
 
 const EXPANDED_TITLE_MAX_LENGTH = 32;
@@ -82,7 +83,7 @@ export class TabBar {
     });
 
     // Obsidian uses aria-label for hover tooltips here; adding title causes duplicate tooltip text.
-    badgeEl.setAttribute('aria-label', item.title);
+    setButtonTooltip(badgeEl, item.title);
     badgeEl.setAttribute('data-title-expanded', isTitleExpanded ? 'true' : 'false');
 
     // Click handler to switch tab

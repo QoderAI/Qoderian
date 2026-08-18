@@ -11,6 +11,11 @@ export type TranslationKey =
   | 'commands.newSession'
   | 'commands.closeCurrentTab'
 
+  // Nav row buttons and tab badges
+  | 'nav.newConversation'
+  | 'nav.chatHistory'
+  | 'nav.newChat'
+
   // Common UI elements
   | 'common.save'
   | 'common.cancel'

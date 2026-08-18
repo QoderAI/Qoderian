@@ -417,15 +417,30 @@ export class QoderianSettingTab extends PluginSettingTab {
         return this.plugin.saveSettings();
       }
 
-      if (key === 'mediaFolder') {
-        return super.setControlValue(key, String(value).trim());
-      }
+      return this.persistControlValue(key, value);
+    }
+    // Unreachable: Obsidian < 1.13 never calls setControlValue.
+  }
 
-      const result = super.setControlValue(key, value);
+  /**
+   * The declarative base class persists into the plugin data file, but
+   * Qoderian keeps its settings in .qoderian/qoderian-settings.json, so per
+   * the API contract ("override to write to a different data source") we
+   * mutate the settings bag ourselves and save once through the store that
+   * loadSettings() actually reads — no duplicate write to data.json.
+   */
+  private async persistControlValue(key: string, value: unknown): Promise<void> {
+    // Only reached from setControlValue on Obsidian 1.13+; re-checked here so
+    // the 1.13-only view-refresh calls stay behind an explicit version guard.
+    if (requireApiVersion('1.13.0')) {
+      const settings = this.plugin.settings as unknown as Record<string, unknown>;
+      settings[key] = key === 'mediaFolder' ? String(value).trim() : value;
+      await this.plugin.saveSettings();
 
       if (key === 'locale') {
         setLocale(this.plugin.settings.locale as Locale);
         this.update();
+        this.refreshViewChrome();
       } else if (key === 'maxTabs') {
         for (const view of this.plugin.getAllViews()) {
           view.refreshTabControls();
@@ -435,10 +450,14 @@ export class QoderianSettingTab extends PluginSettingTab {
       } else if (PROMPT_SETTING_KEYS.has(key)) {
         this.schedulePromptRestart();
       }
-
-      return result;
     }
-    // Unreachable: Obsidian < 1.13 never calls setControlValue.
+  }
+
+  /** Re-applies locale-dependent text in open chat views after a language change. */
+  private refreshViewChrome(): void {
+    for (const view of this.plugin.getAllViews()) {
+      view.refreshLocalizedChrome();
+    }
   }
 
   /**
@@ -518,6 +537,7 @@ export class QoderianSettingTab extends PluginSettingTab {
             this.plugin.settings.locale = locale;
             await this.plugin.saveSettings();
             this.display();
+            this.refreshViewChrome();
           });
       });
 

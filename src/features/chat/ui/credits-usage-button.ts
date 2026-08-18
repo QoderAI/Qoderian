@@ -7,6 +7,7 @@ import type {
 } from '../../../core/types/services';
 import { getLocale, t } from '../../../i18n/i18n';
 import { getQoderAccountUsageUrl } from '../../../qoder/config/cli-edition';
+import { setButtonTooltip } from '../../../shared/dom/tooltip';
 import { ClickPopover } from './toolbar/click-popover';
 
 /** Usage snapshots older than this are refreshed when the panel opens. */
@@ -97,6 +98,12 @@ export class CreditsUsageButton {
     this.container.remove();
   }
 
+  /** Re-applies locale-dependent text after a language change. */
+  refreshLocale(): void {
+    this.updateButton();
+    this.renderPanel();
+  }
+
   /** Fetches a fresh snapshot; cached snapshots within the TTL are kept. */
   async refresh(force: boolean): Promise<void> {
     if (this.loading) return;
@@ -125,12 +132,9 @@ export class CreditsUsageButton {
   };
 
   private updateButton(): void {
-    const percent = this.snapshot?.totalUsagePercentage;
-    if (typeof percent === 'number') {
-      this.buttonEl.setAttribute('title', t('credits.trigger', { percent: Math.round(percent) }));
-    } else {
-      this.buttonEl.setAttribute('title', t('credits.unavailable'));
-    }
+    // Same tooltip path as the other nav-row buttons (aria-label + 300ms
+    // delay); only the click behavior (popover) differs.
+    setButtonTooltip(this.buttonEl, t('credits.trigger'));
   }
 
   private renderPanel(): void {

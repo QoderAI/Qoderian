@@ -38,6 +38,11 @@
     "newSession": "Nueva sesión (en la pestaña actual)",
     "closeCurrentTab": "Cerrar pestaña actual"
   },
+  "nav": {
+    "newConversation": "Nueva conversación",
+    "chatHistory": "Historial del chat",
+    "newChat": "Nuevo chat"
+  },
   "chat": {
     "rewind": {
       "confirmMessage": "¿Rebobinar a este punto? Los cambios de archivos después de este mensaje serán revertidos. El rebobinado no afecta archivos editados manualmente o mediante bash.",
@@ -292,7 +297,7 @@
     "renewsOn": "Se renueva el {date}",
     "usedPercent": "{percent}% usado",
     "left": "{count} restantes",
-    "trigger": "Uso - {percent}%",
+    "trigger": "Uso",
     "unavailable": "Uso no disponible"
   },
   "model": {

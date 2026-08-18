@@ -38,6 +38,11 @@
     "newSession": "Nouvelle session (dans l'onglet actuel)",
     "closeCurrentTab": "Fermer l'onglet actuel"
   },
+  "nav": {
+    "newConversation": "Nouvelle conversation",
+    "chatHistory": "Historique du chat",
+    "newChat": "Nouveau chat"
+  },
   "chat": {
     "rewind": {
       "confirmMessage": "Rembobiner jusqu'à ce point ? Les modifications de fichiers après ce message seront annulées. Le rembobinage n'affecte pas les fichiers modifiés manuellement ou via bash.",
@@ -292,7 +297,7 @@
     "renewsOn": "Renouvellement le {date}",
     "usedPercent": "{percent}% utilisés",
     "left": "{count} restants",
-    "trigger": "Utilisation - {percent}%",
+    "trigger": "Utilisation",
     "unavailable": "Utilisation indisponible"
   },
   "model": {

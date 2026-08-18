@@ -38,6 +38,11 @@
     "newSession": "Neue Sitzung (im aktuellen Tab)",
     "closeCurrentTab": "Aktuellen Tab schließen"
   },
+  "nav": {
+    "newConversation": "Neue Unterhaltung",
+    "chatHistory": "Chatverlauf",
+    "newChat": "Neuer Chat"
+  },
   "chat": {
     "rewind": {
       "confirmMessage": "Zu diesem Punkt zurückspulen? Dateiänderungen nach dieser Nachricht werden rückgängig gemacht. Das Zurückspulen betrifft keine manuell oder über Bash bearbeiteten Dateien.",
@@ -292,7 +297,7 @@
     "renewsOn": "Verlängert am {date}",
     "usedPercent": "{percent}% verwendet",
     "left": "{count} übrig",
-    "trigger": "Nutzung - {percent}%",
+    "trigger": "Nutzung",
     "unavailable": "Nutzung nicht verfügbar"
   },
   "model": {

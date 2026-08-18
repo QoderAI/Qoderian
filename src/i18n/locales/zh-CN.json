@@ -38,6 +38,11 @@
     "newSession": "新建会话（当前标签页）",
     "closeCurrentTab": "关闭当前标签页"
   },
+  "nav": {
+    "newConversation": "新建会话",
+    "chatHistory": "聊天历史",
+    "newChat": "新会话"
+  },
   "chat": {
     "rewind": {
       "confirmMessage": "回退到此处？此消息之后的文件更改将被还原。回退不会影响手动或通过 bash 编辑的文件。",
@@ -292,7 +297,7 @@
     "renewsOn": "将于 {date} 刷新",
     "usedPercent": "已使用 {percent}%",
     "left": "剩余 {count}",
-    "trigger": "用量 - {percent}%",
+    "trigger": "用量",
     "unavailable": "用量暂不可用"
   },
   "model": {

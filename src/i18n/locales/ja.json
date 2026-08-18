@@ -38,6 +38,11 @@
     "newSession": "新しいセッション（現在のタブ）",
     "closeCurrentTab": "現在のタブを閉じる"
   },
+  "nav": {
+    "newConversation": "新しい会話",
+    "chatHistory": "チャット履歴",
+    "newChat": "新しいチャット"
+  },
   "chat": {
     "rewind": {
       "confirmMessage": "この時点に巻き戻しますか？このメッセージ以降のファイル変更が元に戻されます。手動またはbashで編集されたファイルには影響しません。",
@@ -292,7 +297,7 @@
     "renewsOn": "{date} に更新",
     "usedPercent": "{percent}% 使用済み",
     "left": "残り {count}",
-    "trigger": "利用量 - {percent}%",
+    "trigger": "利用量",
     "unavailable": "利用量情報を取得できません"
   },
   "model": {

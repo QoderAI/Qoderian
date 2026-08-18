@@ -38,6 +38,11 @@
     "newSession": "新增工作階段（目前分頁）",
     "closeCurrentTab": "關閉目前分頁"
   },
+  "nav": {
+    "newConversation": "新建對話",
+    "chatHistory": "聊天歷史",
+    "newChat": "新對話"
+  },
   "chat": {
     "rewind": {
       "confirmMessage": "回退到此處？此訊息之後的檔案變更將被還原。回退不會影響手動或透過 bash 編輯的檔案。",
@@ -292,7 +297,7 @@
     "renewsOn": "將於 {date} 刷新",
     "usedPercent": "已使用 {percent}%",
     "left": "剩餘 {count}",
-    "trigger": "用量 - {percent}%",
+    "trigger": "用量",
     "unavailable": "用量暫不可用"
   },
   "model": {

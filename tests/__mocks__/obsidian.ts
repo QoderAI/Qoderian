@@ -32,6 +32,17 @@ export class PluginSettingTab {
   }
 
   display() {}
+
+  // Mirrors the 1.13 declarative base: mutates plugin.settings in place.
+  getControlValue(key: string): unknown {
+    return (this.plugin.settings as Record<string, unknown>)[key];
+  }
+
+  setControlValue(key: string, value: unknown): void {
+    (this.plugin.settings as Record<string, unknown>)[key] = value;
+  }
+
+  update() {}
 }
 
 export class ItemView {
@@ -262,6 +273,15 @@ export const MarkdownRenderer = {
 };
 
 export const setIcon = jest.fn();
+
+// Mirrors the real helper: writes aria-label plus any delay override that the
+// native tooltip system would read back on hover.
+export function setTooltip(el: HTMLElement, tooltip: string, options?: { delay?: number }): void {
+  el.setAttribute('aria-label', tooltip);
+  if (options?.delay !== undefined) {
+    el.setAttribute('data-tooltip-delay', String(options.delay));
+  }
+}
 
 // Tests run against the newest API surface, so version gates take the
 // modern branch by default.
