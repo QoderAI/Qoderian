@@ -818,6 +818,8 @@ export class InputController {
     const { state, streamController } = this.deps;
     if (!state.isStreaming) return;
     state.cancelRequested = true;
+    // Codex-style: interrupting a turn pauses the queue instead of draining it.
+    this.queuedMessages.pause();
     this.getAgentService()?.cancel();
     streamController.hideThinkingIndicator();
   }

@@ -106,7 +106,9 @@
       "drag": "드래그",
       "dragTooltip": "드래그하여 순서 변경",
       "collapse": "큐 접기",
-      "expand": "큐 펼치기"
+      "expand": "큐 펼치기",
+      "paused": "현재 응답을 중단했기 때문에 대기열이 일시 중지되었습니다",
+      "resume": "계속"
     }
   },
   "settings": {

@@ -106,7 +106,9 @@
       "drag": "Arrastar",
       "dragTooltip": "Arraste para reordenar",
       "collapse": "Recolher fila",
-      "expand": "Expandir fila"
+      "expand": "Expandir fila",
+      "paused": "Fila pausada porque você interrompeu a resposta atual",
+      "resume": "Continuar"
     }
   },
   "settings": {

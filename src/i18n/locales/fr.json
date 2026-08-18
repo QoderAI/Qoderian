@@ -106,7 +106,9 @@
       "drag": "Glisser",
       "dragTooltip": "Glisser pour réordonner",
       "collapse": "Replier la file",
-      "expand": "Déplier la file"
+      "expand": "Déplier la file",
+      "paused": "File en pause car vous avez interrompu la réponse en cours",
+      "resume": "Reprendre"
     }
   },
   "settings": {

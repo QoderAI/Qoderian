@@ -2,7 +2,6 @@ import { setIcon } from 'obsidian';
 
 import type { ChatTurnRequest } from '../../../core/runtime/types';
 import { t } from '../../../i18n/i18n';
-import { appendMarkdownSnippet } from '../../../shared/markdown/markdown';
 import type { ChatState } from '../state/chat-state';
 import type { QueuedMessage } from '../state/types';
 import type { ImageContextManager } from '../ui/image-context';
@@ -42,32 +41,19 @@ export class QueuedMessageController {
 
     const messages = state.queuedMessages;
     if (messages.length === 0) {
+      state.queuePaused = false;
       containerEl.removeClass('qoderian-visible-flex');
       containerEl.addClass('qoderian-hidden');
       return;
     }
 
-    const headerEl = containerEl.createDiv({ cls: 'qoderian-queue-header' });
-    const toggleEl = headerEl.createEl('button', {
-      cls: 'qoderian-queue-header-toggle',
-      attr: {
-        'aria-label': this.collapsed ? t('chat.queue.expand') : t('chat.queue.collapse'),
-        title: this.collapsed ? t('chat.queue.expand') : t('chat.queue.collapse'),
-        type: 'button',
-      },
-    });
-    setIcon(toggleEl, this.collapsed ? 'chevron-right' : 'chevron-down');
-    toggleEl.addEventListener('click', (event) => {
-      event.stopPropagation();
-      this.collapsed = !this.collapsed;
-      this.updateIndicator();
-    });
-    headerEl.createSpan({
-      cls: 'qoderian-queue-header-title',
-      text: t('chat.queue.title', { count: messages.length }),
-    });
+    if (state.queuePaused) {
+      this.renderPausedHeader(containerEl);
+    } else {
+      this.renderCollapsibleHeader(containerEl, messages.length);
+    }
 
-    if (!this.collapsed) {
+    if (!this.collapsed || state.queuePaused) {
       const listEl = containerEl.createDiv({ cls: 'qoderian-queue-list' });
       for (const message of messages) {
         this.renderRow(listEl, message);
@@ -91,24 +77,83 @@ export class QueuedMessageController {
     this.updateIndicator();
   }
 
-  /** Withdraw one item back into the composer. */
+  /** Withdraw one item back into the composer, replacing its content. */
   withdrawToComposer(id: string): void {
     const { state } = this.deps;
     const target = state.queuedMessages.find(message => message.id === id);
     if (!target) return;
     state.queuedMessages = state.queuedMessages.filter(message => message.id !== id);
-    this.restoreMessageToInput(target, true);
+    this.restoreMessageToInput(target);
     this.updateIndicator();
+  }
+
+  /** Suspend auto-drain after the user interrupts a turn (Codex-style pause). */
+  pause(): void {
+    const { state } = this.deps;
+    if (state.queuedMessages.length === 0) return;
+    state.queuePaused = true;
+    this.updateIndicator();
+  }
+
+  /** Resume auto-drain and immediately send the head entry. */
+  resume(): void {
+    const { state } = this.deps;
+    state.queuePaused = false;
+    this.updateIndicator();
+    this.process();
   }
 
   /** Drain the head of the queue at turn end. */
   process(): void {
     const { state } = this.deps;
+    if (state.queuePaused) return;
     const next = state.queuedMessages[0];
     if (!next) return;
     state.queuedMessages = state.queuedMessages.slice(1);
     this.updateIndicator();
     window.setTimeout(() => this.deps.sendQueuedTurn(this.toQueuedChatTurn(next)), 0);
+  }
+
+  private renderCollapsibleHeader(containerEl: HTMLElement, count: number): void {
+    const headerEl = containerEl.createDiv({ cls: 'qoderian-queue-header' });
+    const toggleEl = headerEl.createEl('button', {
+      cls: 'qoderian-queue-header-toggle',
+      attr: {
+        'aria-label': this.collapsed ? t('chat.queue.expand') : t('chat.queue.collapse'),
+        title: this.collapsed ? t('chat.queue.expand') : t('chat.queue.collapse'),
+        type: 'button',
+      },
+    });
+    setIcon(toggleEl, this.collapsed ? 'chevron-right' : 'chevron-down');
+    toggleEl.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.collapsed = !this.collapsed;
+      this.updateIndicator();
+    });
+    headerEl.createSpan({
+      cls: 'qoderian-queue-header-title',
+      text: t('chat.queue.title', { count }),
+    });
+  }
+
+  private renderPausedHeader(containerEl: HTMLElement): void {
+    const headerEl = containerEl.createDiv({ cls: 'qoderian-queue-header qoderian-queue-header-paused' });
+    const pauseIconEl = headerEl.createSpan({ cls: 'qoderian-queue-paused-icon' });
+    setIcon(pauseIconEl, 'pause');
+    headerEl.createSpan({
+      cls: 'qoderian-queue-header-title',
+      text: t('chat.queue.paused'),
+    });
+    const resumeEl = headerEl.createEl('button', {
+      cls: 'qoderian-queue-resume',
+      attr: { 'aria-label': t('chat.queue.resume'), title: t('chat.queue.resume'), type: 'button' },
+    });
+    setIcon(resumeEl, 'play');
+    resumeEl.createSpan({ cls: 'qoderian-queue-resume-label', text: t('chat.queue.resume') });
+    resumeEl.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.resume();
+    });
   }
 
   private renderRow(listEl: HTMLElement, message: QueuedMessage): void {
@@ -146,19 +191,12 @@ export class QueuedMessageController {
     });
   }
 
-  private restoreMessageToInput(message: QueuedMessage, mergeWithComposer: boolean): void {
+  private restoreMessageToInput(message: QueuedMessage): void {
     const inputEl = this.deps.getInputEl();
-    const currentContent = mergeWithComposer ? inputEl.value.trim() : '';
-    inputEl.value = currentContent
-      ? appendMarkdownSnippet(message.content, currentContent)
-      : message.content;
+    inputEl.value = message.content;
 
     const imageContextManager = this.deps.getImageContextManager();
-    const currentImages = mergeWithComposer
-      ? (imageContextManager?.getAttachedImages() ?? [])
-      : [];
-    const restoredImages = [...(message.images ?? []), ...currentImages];
-    if (restoredImages.length > 0) imageContextManager?.setImages(restoredImages);
+    imageContextManager?.setImages([...(message.images ?? [])]);
     this.deps.resetInputHeight();
     inputEl.focus();
   }

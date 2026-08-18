@@ -106,7 +106,9 @@
       "drag": "拖拽",
       "dragTooltip": "拖拽调整顺序",
       "collapse": "折叠队列",
-      "expand": "展开队列"
+      "expand": "展开队列",
+      "paused": "由于你中断了当前响应，队列已暂停",
+      "resume": "继续"
     }
   },
   "settings": {

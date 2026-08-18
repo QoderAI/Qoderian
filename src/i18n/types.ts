@@ -125,6 +125,8 @@ export type TranslationKey =
   | 'chat.queue.dragTooltip'
   | 'chat.queue.collapse'
   | 'chat.queue.expand'
+  | 'chat.queue.paused'
+  | 'chat.queue.resume'
 
   // Settings - Section Headings
   | 'settings.title'

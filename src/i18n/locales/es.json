@@ -106,7 +106,9 @@
       "drag": "Arrastrar",
       "dragTooltip": "Arrastra para reordenar",
       "collapse": "Contraer cola",
-      "expand": "Expandir cola"
+      "expand": "Expandir cola",
+      "paused": "Cola en pausa porque interrumpiste la respuesta actual",
+      "resume": "Continuar"
     }
   },
   "settings": {
