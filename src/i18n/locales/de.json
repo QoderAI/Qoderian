@@ -109,6 +109,9 @@
       "expand": "Warteschlange ausklappen",
       "paused": "Warteschlange pausiert, weil du die aktuelle Antwort unterbrochen hast",
       "resume": "Fortsetzen"
+    },
+    "drop": {
+      "context": "Notizen oder Ordner hier ablegen, um sie als Kontext hinzuzufügen"
     }
   },
   "settings": {

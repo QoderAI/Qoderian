@@ -109,6 +109,9 @@
       "expand": "Expandir fila",
       "paused": "Fila pausada porque você interrompeu a resposta atual",
       "resume": "Continuar"
+    },
+    "drop": {
+      "context": "Solte notas ou pastas aqui para adicioná-las como contexto"
     }
   },
   "settings": {

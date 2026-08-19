@@ -128,6 +128,9 @@ export type TranslationKey =
   | 'chat.queue.paused'
   | 'chat.queue.resume'
 
+  // Vault drag & drop into composer
+  | 'chat.drop.context'
+
   // Settings - Section Headings
   | 'settings.title'
   | 'settings.display'

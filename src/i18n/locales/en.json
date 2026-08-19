@@ -109,6 +109,9 @@
       "expand": "Expand queue",
       "paused": "Queue paused because you interrupted the current response",
       "resume": "Resume"
+    },
+    "drop": {
+      "context": "Drop notes or folders here to add as context"
     }
   },
   "settings": {
