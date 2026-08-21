@@ -23,7 +23,8 @@ import {
   normalizeMathDelimitersForObsidian,
 } from '../../../shared/markdown/markdown-math';
 import { replaceMentionTokensWithHtml } from '../../../shared/markdown/mention-chip';
-import { openVaultEntry } from '../../../shared/obsidian/compat';
+import type { ReferenceChipKind } from '../../../shared/mention/types';
+import { openReferenceChip } from '../../../shared/obsidian/compat';
 import { formatConversationDirectoryTitle } from '../utils/conversation-directory-title';
 import { findRewindContext } from '../utils/rewind';
 import {
@@ -734,8 +735,9 @@ export class MessageRenderer {
       }
       chip.addEventListener('click', () => {
         const path = chip.dataset.path;
-        if (!path) return;
-        openVaultEntry(this.app, path);
+        const kind = chip.dataset.kind as ReferenceChipKind | undefined;
+        if (!path || !kind) return;
+        openReferenceChip(this.app, kind, path);
       });
     });
   }
