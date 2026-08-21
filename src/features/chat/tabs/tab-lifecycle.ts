@@ -38,6 +38,8 @@ export async function destroyTab(tab: TabData): Promise<void> {
   tab.controllers.inputController?.destroyResumeDropdown();
 
   tab.ui.fileContextManager?.destroy();
+  tab.ui.composerBridge?.destroy();
+  tab.ui.composerBridge = null;
   tab.ui.modelSelector?.destroy();
   tab.ui.modelSelector = null;
   tab.ui.slashCommandDropdown?.destroy();

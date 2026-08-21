@@ -15,6 +15,7 @@ import type { MessageRenderer } from '../rendering/message-renderer';
 import type { SubagentManager } from '../services/subagent-manager';
 import type { ChatState } from '../state/chat-state';
 import type { BangBashModeManager } from '../ui/bang-bash-mode-manager';
+import type { ComposerBridge } from '../ui/composer/composer-bridge';
 import type { ComposerActionButton } from '../ui/composer-action-button';
 import type { FileContextManager } from '../ui/file-context/file-context-manager';
 import type { ImageContextManager } from '../ui/image-context';
@@ -114,6 +115,8 @@ export interface TabServices {
  * UI components managed per-tab.
  */
 export interface TabUIComponents {
+  /** Bridges the legacy textarea with the CodeMirror live composer. */
+  composerBridge: ComposerBridge | null;
   fileContextManager: FileContextManager | null;
   imageContextManager: ImageContextManager | null;
   modelSelector: ModelSelector | null;

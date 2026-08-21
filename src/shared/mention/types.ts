@@ -57,3 +57,19 @@ export type MentionItem =
   | ContextFileMentionItem
   | ContextFolderMentionItem
   | ExtensionMentionItem;
+
+/**
+ * Kinds a reference chip can represent. Drives the chip icon and the click
+ * behavior dispatched by `openReferenceChip`; extend this union (and the
+ * action registry) to support new reference targets.
+ */
+export type ReferenceChipKind = 'file' | 'folder';
+
+/** A reference token inserted into the input by selecting a mention item. */
+export interface MentionInsertReference {
+  /** Token text inserted into the input, including the leading `@`. */
+  token: string;
+  /** Path used for chip labels and open actions. */
+  path: string;
+  kind: ReferenceChipKind;
+}

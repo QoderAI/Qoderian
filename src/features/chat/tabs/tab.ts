@@ -14,6 +14,7 @@ import {
   SlashCommandDropdown,
   toSlashCommandDropdownEntries,
 } from '../../../shared/components/slash-command-dropdown';
+import { openVaultEntry } from '../../../shared/obsidian/compat';
 import { BrowserSelectionController } from '../controllers/browser-selection-controller';
 import { CanvasSelectionController } from '../controllers/canvas-selection-controller';
 import { ContextRowOverflowController } from '../controllers/context-row-overflow';
@@ -28,6 +29,7 @@ import { BangBashService } from '../services/bang-bash-service';
 import { SubagentManager } from '../services/subagent-manager';
 import { ChatState } from '../state/chat-state';
 import { BangBashModeManager as BangBashModeManagerClass } from '../ui/bang-bash-mode-manager';
+import { ComposerBridge } from '../ui/composer/composer-bridge';
 import { ComposerActionButton } from '../ui/composer-action-button';
 import { FileContextManager } from '../ui/file-context/file-context-manager';
 import { ImageContextManager } from '../ui/image-context';
@@ -146,6 +148,7 @@ export function createTab(options: TabCreateOptions): TabData {
       titleGenerationService: null,
     },
     ui: {
+      composerBridge: null,
       fileContextManager: null,
       imageContextManager: null,
       modelSelector: null,
@@ -253,6 +256,14 @@ function initializeContextManagers(tab: TabData, plugin: QoderianPlugin): void {
   const { dom } = tab;
   const app = plugin.app;
 
+  // Live composer bridge - must exist before other input consumers so its
+  // textarea interceptors cover every later listener/programmatic access.
+  tab.ui.composerBridge = new ComposerBridge(dom.inputEl, {
+    onOpenReference: (reference) => {
+      openVaultEntry(app, reference.path);
+    },
+  });
+
   // File context manager - chips in contextRowEl, dropdown in inputContainerEl
   tab.ui.fileContextManager = new FileContextManager(
     app,
@@ -266,6 +277,9 @@ function initializeContextManagers(tab: TabData, plugin: QoderianPlugin): void {
         tab.controllers.canvasSelectionController?.updateContextRowVisibility();
         autoResizeTextarea(dom.inputEl);
         tab.renderer?.scrollToBottomIfNeeded();
+      },
+      onReferencesChanged: (references) => {
+        tab.ui.composerBridge?.setReferences(references);
       },
       getExternalContexts: () => tab.ui.externalContextSelector?.getExternalContexts() || [],
     },
