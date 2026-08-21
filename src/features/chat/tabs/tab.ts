@@ -14,7 +14,7 @@ import {
   SlashCommandDropdown,
   toSlashCommandDropdownEntries,
 } from '../../../shared/components/slash-command-dropdown';
-import { openVaultEntry } from '../../../shared/obsidian/compat';
+import { openReferenceChip } from '../../../shared/obsidian/compat';
 import { BrowserSelectionController } from '../controllers/browser-selection-controller';
 import { CanvasSelectionController } from '../controllers/canvas-selection-controller';
 import { ContextRowOverflowController } from '../controllers/context-row-overflow';
@@ -260,7 +260,7 @@ function initializeContextManagers(tab: TabData, plugin: QoderianPlugin): void {
   // textarea interceptors cover every later listener/programmatic access.
   tab.ui.composerBridge = new ComposerBridge(dom.inputEl, {
     onOpenReference: (reference) => {
-      openVaultEntry(app, reference.path);
+      openReferenceChip(app, reference.kind, reference.path);
     },
   });
 

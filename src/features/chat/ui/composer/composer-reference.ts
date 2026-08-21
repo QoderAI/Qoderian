@@ -7,7 +7,9 @@
  * source of truth that gets sent to the agent.
  */
 
-export type ComposerReferenceKind = 'file' | 'folder';
+import type { ReferenceChipKind } from '../../../../shared/mention/types';
+
+export type ComposerReferenceKind = ReferenceChipKind;
 
 export interface ComposerReference {
   /** Full token text including the leading `@`; folders keep the trailing slash. */

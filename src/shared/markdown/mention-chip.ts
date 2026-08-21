@@ -11,6 +11,7 @@
 import type { App, TAbstractFile } from 'obsidian';
 import { TFile, TFolder } from 'obsidian';
 
+import type { ReferenceChipKind } from '../mention/types';
 import { escapeHtml } from './html';
 
 /** Trailing punctuation stripped from a candidate token before vault lookup. */
@@ -101,7 +102,7 @@ function collectSegmentCandidates(
   }
 }
 
-function createChipHtml(path: string, kind: 'file' | 'folder'): string {
+function createChipHtml(path: string, kind: ReferenceChipKind): string {
   const label = escapeHtml(formatReferenceLabel(path));
   const escapedPath = escapeHtml(path);
   const title = escapeHtml(`@${path}${kind === 'folder' ? '/' : ''}`);
@@ -140,7 +141,7 @@ export function replaceMentionTokensWithHtml(markdown: string, app: App): string
     } catch {
       // Vault lookup failures leave the token untouched.
     }
-    const kind = resolved instanceof TFolder
+    const kind: ReferenceChipKind | null = resolved instanceof TFolder
       ? 'folder'
       : resolved instanceof TFile
         ? 'file'
