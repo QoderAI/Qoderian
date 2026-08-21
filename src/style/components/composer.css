@@ -1,0 +1,111 @@
+/* Live composer (CodeMirror-backed input with inline reference chips) */
+
+/* The legacy textarea stays in the DOM as the wiring target; the bridge
+   hides it and renders the CodeMirror surface in its place. */
+.qoderian-input-wrapper textarea.qoderian-input.qoderian-composer-source {
+  display: none;
+}
+
+.qoderian-input-wrapper .qoderian-live-composer-host {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* Editor surface mirrors the old textarea box model (padding, font metrics,
+   height bounds) so the wrapper layout stays identical. */
+.qoderian-input-wrapper .qoderian-live-composer.cm-editor {
+  flex: 1 1 auto;
+  min-height: var(--qoderian-textarea-min-height, 60px);
+  max-height: var(--qoderian-textarea-max-height, none);
+  background: transparent;
+  color: var(--text-normal);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.qoderian-input-wrapper .qoderian-live-composer.cm-focused {
+  outline: none;
+}
+
+.qoderian-input-wrapper .qoderian-live-composer .cm-scroller {
+  font-family: inherit;
+  line-height: 1.4;
+  overflow-y: auto;
+}
+
+.qoderian-input-wrapper .qoderian-live-composer .cm-content {
+  padding: 8px 10px 10px 10px;
+  caret-color: var(--text-normal);
+}
+
+.qoderian-input-wrapper .qoderian-live-composer .cm-placeholder {
+  color: var(--text-faint);
+  opacity: 0.8;
+}
+
+/* Monospace input while in bash mode (mirrors the textarea rule) */
+.qoderian-input-wrapper.qoderian-input-bang-bash-mode .qoderian-live-composer .cm-scroller {
+  font-family: var(--font-monospace);
+}
+
+/* Inline reference chip replacing an `@path` token in the text flow */
+.qoderian-composer-reference {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 1px;
+  padding: 2px 6px;
+  background: var(--background-modifier-hover);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.2;
+  max-width: 220px;
+  vertical-align: baseline;
+  cursor: pointer;
+}
+
+.qoderian-composer-reference:hover {
+  background: var(--background-modifier-active-hover);
+}
+
+.qoderian-composer-reference--selected {
+  border-color: var(--interactive-accent);
+  background: var(--background-modifier-active-hover);
+}
+
+.qoderian-composer-reference-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.qoderian-composer-reference-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.qoderian-composer-reference-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-normal);
+}
+
+/* Chips inside user message bubbles sit on the dark bubble background;
+   translucent white reads as a highlight pill there. */
+.qoderian-message-user .qoderian-composer-reference {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.qoderian-message-user .qoderian-composer-reference:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.qoderian-message-user .qoderian-composer-reference-label {
+  color: var(--text-normal);
+}
