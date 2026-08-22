@@ -2,7 +2,8 @@ import { Notice, setIcon } from 'obsidian';
 import * as os from 'os';
 import * as path from 'path';
 
-import { filterValidPaths, findConflictingPath, isDuplicatePath, isValidDirectoryPath, validateDirectoryPath } from '../../../core/context/external-context';
+import type { PathConflict } from '../../../core/context/external-context';
+import { filterValidPaths, findAllConflictingPaths, findConflictingPath, isDuplicatePath, isValidDirectoryPath, validateDirectoryPath } from '../../../core/context/external-context';
 import { expandHomePath, normalizePathForFilesystem } from '../../../core/fs/path';
 import type {
   ManagedMcpServer,
@@ -261,14 +262,14 @@ export class ExternalContextSelector {
           return;
         }
 
-        // Check for nested/overlapping paths
-        const conflict = findConflictingPath(selectedPath, this.externalContextPaths);
-        if (conflict) {
-          new Notice(this.formatConflictMessage(selectedPath, conflict), 5000);
-          return;
+        // Re-selecting a nested folder refreshes the selection: conflicting
+        // entries are replaced by the new pick instead of being rejected.
+        const conflicts = findAllConflictingPaths(selectedPath, this.externalContextPaths);
+        if (conflicts.length > 0) {
+          this.replaceConflictingPaths(conflicts, selectedPath);
+        } else {
+          this.externalContextPaths = [...this.externalContextPaths, selectedPath];
         }
-
-        this.externalContextPaths = [...this.externalContextPaths, selectedPath];
         this.onChangeCallback?.(this.externalContextPaths);
         this.updateDisplay();
         this.renderDropdown();
@@ -276,6 +277,32 @@ export class ExternalContextSelector {
     } catch {
       new Notice('Unable to open folder picker.', 5000);
     }
+  }
+
+  /**
+   * Refresh semantics for the folder picker: entries nesting with the
+   * re-selected folder are replaced by it. Persistence (lock) is inherited
+   * when any replaced entry was persistent.
+   */
+  private replaceConflictingPaths(conflicts: PathConflict[], selectedPath: string): void {
+    const replaced = new Set(conflicts.map((conflict) => conflict.path));
+    const hadPersistent = conflicts.some((conflict) => this.persistentPaths.has(conflict.path));
+
+    this.externalContextPaths = [
+      ...this.externalContextPaths.filter((p) => !replaced.has(p)),
+      selectedPath,
+    ];
+
+    if (hadPersistent) {
+      for (const p of replaced) {
+        this.persistentPaths.delete(p);
+      }
+      this.persistentPaths.add(selectedPath);
+      this.onPersistenceChangeCallback?.([...this.persistentPaths]);
+    }
+
+    const replacedNames = conflicts.map((conflict) => this.shortenPath(conflict.path)).join(', ');
+    new Notice(`Replaced ${replacedNames} with "${this.shortenPath(selectedPath)}"`, 5000);
   }
 
   /** Formats a conflict error message for display. */

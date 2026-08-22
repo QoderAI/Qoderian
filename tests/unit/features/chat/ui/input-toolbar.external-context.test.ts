@@ -14,6 +14,22 @@ jest.mock('obsidian', () => ({
 // Mock fs
 jest.mock('fs');
 
+// Mock electron remote dialog used by the native folder picker
+jest.mock(
+  'electron',
+  () => ({
+    remote: {
+      dialog: { showOpenDialog: jest.fn() },
+    },
+  }),
+  { virtual: true }
+);
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const electronMock = require('electron') as {
+  remote: { dialog: { showOpenDialog: jest.Mock } };
+};
+
 // Mock callbacks
 function createMockCallbacks() {
   return {
@@ -532,6 +548,66 @@ describe('ExternalContextSelector', () => {
       expect(selector.getPersistentPaths()).toEqual([]);
       expect(selector.getExternalContexts()).toEqual([]);
       expect(onPersistenceChange).toHaveBeenCalledWith([]);
+    });
+  });
+
+  describe('folder picker refresh semantics', () => {
+    const showOpenDialog = electronMock.remote.dialog.showOpenDialog;
+
+    async function pickFolder(paths: string[]): Promise<void> {
+      showOpenDialog.mockResolvedValue({ canceled: false, filePaths: paths });
+      // openFolderPicker is private; exercised end-to-end here.
+      await (selector as unknown as { openFolderPicker(): Promise<void> }).openFolderPicker();
+    }
+
+    beforeEach(() => {
+      showOpenDialog.mockReset();
+    });
+
+    it('replaces a child entry when its parent is re-selected', async () => {
+      selector.addExternalContext('/vault/kb/qa');
+
+      await pickFolder(['/vault/kb']);
+
+      expect(selector.getExternalContexts()).toEqual(['/vault/kb']);
+    });
+
+    it('replaces a parent entry when a child is re-selected', async () => {
+      selector.addExternalContext('/vault/kb');
+
+      await pickFolder(['/vault/kb/qa']);
+
+      expect(selector.getExternalContexts()).toEqual(['/vault/kb/qa']);
+    });
+
+    it('inherits persistence from a replaced entry', async () => {
+      const onPersistenceChange = jest.fn();
+      selector.setOnPersistenceChange(onPersistenceChange);
+      selector.addExternalContext('/vault/kb');
+      selector.togglePersistence('/vault/kb');
+      onPersistenceChange.mockClear();
+
+      await pickFolder(['/vault/kb/qa']);
+
+      expect(selector.getExternalContexts()).toEqual(['/vault/kb/qa']);
+      expect(selector.getPersistentPaths()).toEqual(['/vault/kb/qa']);
+      expect(onPersistenceChange).toHaveBeenCalledWith(['/vault/kb/qa']);
+    });
+
+    it('still appends unrelated folders', async () => {
+      selector.addExternalContext('/vault/kb');
+
+      await pickFolder(['/other/docs']);
+
+      expect(selector.getExternalContexts()).toEqual(['/vault/kb', '/other/docs']);
+    });
+
+    it('still rejects exact duplicates', async () => {
+      selector.addExternalContext('/vault/kb');
+
+      await pickFolder(['/vault/kb']);
+
+      expect(selector.getExternalContexts()).toEqual(['/vault/kb']);
     });
   });
 });

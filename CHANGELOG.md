@@ -31,6 +31,14 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - Editing a queued message now replaces the composer content instead of
   appending to it.
 
+### Fixed
+
+- Re-selecting a folder in the external context picker that nests inside
+  (or contains) an existing entry now refreshes the selection: the
+  conflicting entry is replaced by the new pick (persistence inherited)
+  instead of being silently rejected, so the workspace folder visibly
+  updates after re-selection.
+
 ## [1.0.5] - 2026-08-18
 
 ### Added

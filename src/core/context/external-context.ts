@@ -50,6 +50,31 @@ export function findConflictingPath(
   return null;
 }
 
+/**
+ * Returns every existing path that nests with the new path (either direction).
+ * Used by the folder picker's refresh semantics: re-selecting a nested folder
+ * replaces the conflicting entries instead of being rejected.
+ */
+export function findAllConflictingPaths(
+  newPath: string,
+  existingPaths: string[]
+): PathConflict[] {
+  const normalizedNew = normalizePathForComparison(newPath);
+  const conflicts: PathConflict[] = [];
+
+  for (const existing of existingPaths) {
+    const normalizedExisting = normalizePathForComparison(existing);
+
+    if (normalizedNew.startsWith(normalizedExisting + '/')) {
+      conflicts.push({ path: existing, type: 'parent' });
+    } else if (normalizedExisting.startsWith(normalizedNew + '/')) {
+      conflicts.push({ path: existing, type: 'child' });
+    }
+  }
+
+  return conflicts;
+}
+
 export function getFolderName(p: string): string {
   const normalized = normalizePathForDisplay(p);
   const segments = normalized.split('/');
