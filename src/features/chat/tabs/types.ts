@@ -28,6 +28,7 @@ import type {
 import type { InstructionModeManager } from '../ui/instruction-mode-manager';
 import type { NavigationSidebar } from '../ui/navigation-sidebar';
 import type { StatusPanel } from '../ui/status-panel';
+import type { VaultDropController } from '../ui/vault-drop';
 
 /**
  * Default number of tabs allowed.
@@ -116,6 +117,7 @@ export interface TabServices {
 export interface TabUIComponents {
   fileContextManager: FileContextManager | null;
   imageContextManager: ImageContextManager | null;
+  vaultDropController: VaultDropController | null;
   modelSelector: ModelSelector | null;
   externalContextSelector: ExternalContextSelector | null;
   mcpServerSelector: McpServerSelector | null;

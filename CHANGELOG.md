@@ -18,6 +18,9 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   composer (aligned with the Qoder IDE send queue). Each entry shows a
   drag handle for reordering plus edit (withdraw into the composer) and
   delete actions, and entries drain one per turn end in FIFO order.
+- Drag notes or folders from the Obsidian file explorer into the chat
+  composer: they are inserted as `@note` / `@folder/` context mentions at
+  the caret, with duplicates skipped and a drop overlay while dragging.
 
 ### Changed
 

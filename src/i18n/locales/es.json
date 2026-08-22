@@ -109,6 +109,9 @@
       "expand": "Expandir cola",
       "paused": "Cola en pausa porque interrumpiste la respuesta actual",
       "resume": "Continuar"
+    },
+    "drop": {
+      "context": "Arrastra notas o carpetas aquí para añadirlas como contexto"
     }
   },
   "settings": {

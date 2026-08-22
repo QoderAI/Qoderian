@@ -109,6 +109,9 @@
       "expand": "Déplier la file",
       "paused": "File en pause car vous avez interrompu la réponse en cours",
       "resume": "Reprendre"
+    },
+    "drop": {
+      "context": "Déposez des notes ou des dossiers ici pour les ajouter comme contexte"
     }
   },
   "settings": {

@@ -36,6 +36,7 @@ import { InstructionModeManager as InstructionModeManagerClass } from '../ui/ins
 import { NavigationSidebar } from '../ui/navigation-sidebar';
 import { StatusPanel } from '../ui/status-panel';
 import { autoResizeTextarea } from '../ui/textarea-resize';
+import { VaultDropController } from '../ui/vault-drop';
 import { findRewindContext } from '../utils/rewind';
 import { recalculateUsageForModel } from '../utils/usage-info';
 import { generateMessageId } from './message-id';
@@ -148,6 +149,7 @@ export function createTab(options: TabCreateOptions): TabData {
     ui: {
       fileContextManager: null,
       imageContextManager: null,
+      vaultDropController: null,
       modelSelector: null,
       externalContextSelector: null,
       mcpServerSelector: null,
@@ -272,6 +274,10 @@ function initializeContextManagers(tab: TabData, plugin: QoderianPlugin): void {
     dom.inputContainerEl
   );
   tab.ui.fileContextManager.setMcpManager(getQoderMcpManager(plugin));
+
+  // Vault file/folder drop - must attach before ImageContextManager so vault
+  // drags are claimed before the image drop handlers run.
+  tab.ui.vaultDropController = new VaultDropController(app, dom.inputWrapper, dom.inputEl);
 
   // Image context manager - drag/drop uses inputContainerEl, preview in contextRowEl
   tab.ui.imageContextManager = new ImageContextManager(
