@@ -22,8 +22,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   composer: they are inserted as `@note` / `@folder/` context mentions at
   the caret, with duplicates skipped and a drop overlay while dragging.
 - `@file` / `@folder/` references render as inline chips in the composer
-  and in sent message bubbles; chips open with Cmd/Ctrl-click and delete
-  atomically with Backspace/Delete.
+  and in sent message bubbles; clicking a chip opens the note (both
+  surfaces), and Backspace/Delete removes a composer chip atomically.
 
 ### Changed
 

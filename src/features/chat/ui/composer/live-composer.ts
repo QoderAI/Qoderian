@@ -61,7 +61,7 @@ class ReferenceWidget extends WidgetType {
   }
 
   toDOM(view: EditorView): HTMLElement {
-    const { reference, from, to } = this.range;
+    const { reference } = this.range;
     const element = createDetachedElement(view, 'span');
     const icon = createDetachedElement(view, 'span');
     const label = createDetachedElement(view, 'span');
@@ -76,14 +76,10 @@ class ReferenceWidget extends WidgetType {
     label.classList.add('qoderian-composer-reference-label');
     label.textContent = formatReferenceLabel(reference.path);
     element.append(icon, label);
+    // Plain click opens the reference, same as message-bubble chips.
     element.addEventListener('click', (event) => {
       event.preventDefault();
-      if (event.metaKey || event.ctrlKey) {
-        this.onOpenReference?.(reference);
-        return;
-      }
-      view.dispatch({ selection: EditorSelection.range(from, to) });
-      view.focus();
+      this.onOpenReference?.(reference);
     });
     return element;
   }
