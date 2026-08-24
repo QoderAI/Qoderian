@@ -48,8 +48,17 @@ function isTokenBoundary(char: string | undefined): boolean {
   return char === undefined || /\s/.test(char);
 }
 
-/** Finds `@path` candidates outside code spans; verification is left to the caller. */
-export function findMentionCandidates(text: string): MentionCandidate[] {
+/**
+ * Finds `@path` candidates outside code spans.
+ *
+ * Without a resolver, tokens end at the first whitespace. With one, the
+ * longest span (up to a newline) is tried first and shrunk word-by-word from
+ * the right until the path resolves, so paths containing spaces chipify.
+ */
+export function findMentionCandidates(
+  text: string,
+  resolvePath?: (path: string) => boolean,
+): MentionCandidate[] {
   const candidates: MentionCandidate[] = [];
   const segments = text.split(CODE_SEGMENTS);
   let offset = 0;
@@ -57,7 +66,7 @@ export function findMentionCandidates(text: string): MentionCandidate[] {
 
   for (const segment of segments) {
     if (!isCodeSegment) {
-      collectSegmentCandidates(segment, offset, candidates);
+      collectSegmentCandidates(segment, offset, candidates, resolvePath);
     }
     offset += segment.length;
     isCodeSegment = !isCodeSegment;
@@ -70,19 +79,27 @@ function collectSegmentCandidates(
   segment: string,
   segmentOffset: number,
   candidates: MentionCandidate[],
+  resolvePath?: (path: string) => boolean,
 ): void {
   for (let index = 0; index < segment.length; index++) {
     if (segment[index] !== '@') continue;
     if (!isTokenBoundary(segment[index - 1])) continue;
 
-    let end = index + 1;
-    while (end < segment.length && !/\s/.test(segment[end])) {
-      end++;
+    let firstSpaceEnd = index + 1;
+    while (firstSpaceEnd < segment.length && !/\s/.test(segment[firstSpaceEnd])) {
+      firstSpaceEnd++;
     }
-    const raw = segment.slice(index, end);
+
+    const resolved = resolvePath
+      ? resolveLongestPath(segment, index, resolvePath)
+      : null;
+
+    const raw = segment.slice(index, resolved ? resolved.end : firstSpaceEnd);
     if (raw.length <= 1) continue;
 
-    const stripped = raw.slice(1).replace(TRAILING_PUNCTUATION, '');
+    const stripped = resolved
+      ? resolved.stripped
+      : raw.slice(1).replace(TRAILING_PUNCTUATION, '');
     if (stripped.length === 0) continue;
 
     const hasTrailingSlash = stripped.endsWith('/');
@@ -98,8 +115,48 @@ function collectSegmentCandidates(
       end: segmentOffset + index + stripped.length + 1,
     });
 
-    index = end - 1;
+    index = (resolved ? resolved.end : firstSpaceEnd) - 1;
   }
+}
+
+/**
+ * Tries the longest `@` span (up to a newline, trailing whitespace trimmed)
+ * and shrinks it word-by-word from the right until `resolvePath` accepts the
+ * path. Longest-first keeps a following sentence from being swallowed when a
+ * shorter path also exists.
+ */
+function resolveLongestPath(
+  segment: string,
+  atIndex: number,
+  resolvePath: (path: string) => boolean,
+): { stripped: string; end: number } | null {
+  let maxEnd = atIndex + 1;
+  while (maxEnd < segment.length && segment[maxEnd] !== '\n') maxEnd++;
+  while (maxEnd > atIndex + 1 && /\s/.test(segment[maxEnd - 1])) maxEnd--;
+
+  let spanEnd = maxEnd;
+  while (spanEnd > atIndex + 1) {
+    const stripped = segment.slice(atIndex + 1, spanEnd).replace(TRAILING_PUNCTUATION, '');
+    if (stripped.length > 0) {
+      const path = stripped.endsWith('/') ? stripped.slice(0, -1) : stripped;
+      if (path.length > 0 && resolvePath(path)) {
+        return { stripped, end: atIndex + 1 + stripped.length + 1 };
+      }
+    }
+
+    const span = segment.slice(atIndex + 1, spanEnd);
+    let lastSpace = -1;
+    for (let i = span.length - 1; i >= 0; i--) {
+      if (/\s/.test(span[i])) {
+        lastSpace = i;
+        break;
+      }
+    }
+    if (lastSpace === -1) return null;
+    spanEnd = atIndex + 1 + lastSpace;
+    while (spanEnd > atIndex + 1 && /\s/.test(segment[spanEnd - 1])) spanEnd--;
+  }
+  return null;
 }
 
 function createChipHtml(path: string, kind: ReferenceChipKind): string {
@@ -125,7 +182,14 @@ export function replaceMentionTokensWithHtml(markdown: string, app: App): string
     return markdown;
   }
 
-  const candidates = findMentionCandidates(markdown);
+  const resolvePath = (path: string): boolean => {
+    try {
+      return app.vault.getAbstractFileByPath(path) !== null;
+    } catch {
+      return false;
+    }
+  };
+  const candidates = findMentionCandidates(markdown, resolvePath);
   if (candidates.length === 0) {
     return markdown;
   }

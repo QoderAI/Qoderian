@@ -21,6 +21,9 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - Drag notes or folders from the Obsidian file explorer into the chat
   composer: they are inserted as `@note` / `@folder/` context mentions at
   the caret, with duplicates skipped and a drop overlay while dragging.
+- `@file` / `@folder/` references render as inline chips in the composer
+  and in sent message bubbles; chips open with Cmd/Ctrl-click and delete
+  atomically with Backspace/Delete.
 
 ### Changed
 
@@ -30,6 +33,15 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   (or clearing the queue) restores the normal one-per-turn drain.
 - Editing a queued message now replaces the composer content instead of
   appending to it.
+
+### Fixed
+
+- Mention chips in message bubbles now resolve paths containing spaces
+  (longest-match vault verification) instead of truncating at the first
+  space.
+- Dropping a vault note or folder into the composer no longer pastes the
+  raw `obsidian://open` URI next to the mention, and the inserted mention
+  chipifies like dropdown insertions.
 
 ## [1.0.5] - 2026-08-18
 

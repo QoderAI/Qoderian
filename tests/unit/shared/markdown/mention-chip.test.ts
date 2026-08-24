@@ -38,6 +38,12 @@ describe('formatReferenceLabel', () => {
 });
 
 describe('findMentionCandidates', () => {
+  it('resolves spaced paths when a resolver is provided', () => {
+    const candidates = findMentionCandidates('a @my notes/file.md b', (p) => p === 'my notes/file.md');
+
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0].path).toBe('my notes/file.md');
+  });
   it('finds a path token surrounded by whitespace', () => {
     const candidates = findMentionCandidates('look at @notes/idea.md now');
     expect(candidates).toHaveLength(1);
@@ -123,5 +129,39 @@ describe('replaceMentionTokensWithHtml', () => {
   it('handles text without a vault', () => {
     const app = {} as App;
     expect(replaceMentionTokensWithHtml('see @notes/idea.md', app)).toBe('see @notes/idea.md');
+  });
+
+  describe('paths containing spaces', () => {
+    it('chipifies a spaced file path via longest-match shrinking', () => {
+      const app = createMockApp(['00-入口/Qoderian 宣传文档.md']);
+      const result = replaceMentionTokensWithHtml('看 @00-入口/Qoderian 宣传文档.md 谢谢', app);
+
+      expect(result).toContain('data-path="00-入口/Qoderian 宣传文档.md"');
+      expect(result).toContain('谢谢');
+    });
+
+    it('does not swallow the following sentence when only a shorter path exists', () => {
+      const app = createMockApp(['notes/idea.md']);
+      const result = replaceMentionTokensWithHtml('see @notes/idea.md and summarize', app);
+
+      expect(result).toContain('data-path="notes/idea.md"');
+      expect(result).toContain(' and summarize');
+    });
+
+    it('keeps later mentions when an earlier span does not resolve', () => {
+      const app = createMockApp(['notes/idea.md']);
+      const result = replaceMentionTokensWithHtml('@missing one two @notes/idea.md', app);
+
+      expect(result.match(/qoderian-msg-reference/g)).toHaveLength(1);
+      expect(result).toContain('@missing one two');
+    });
+
+    it('resolves spaced folder tokens', () => {
+      const app = createMockApp([], ['my projects']);
+      const result = replaceMentionTokensWithHtml('scan @my projects/ now', app);
+
+      expect(result).toContain('data-kind="folder"');
+      expect(result).toContain('data-path="my projects"');
+    });
   });
 });

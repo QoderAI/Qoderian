@@ -361,8 +361,8 @@ export class FileContextManager {
   // Composer References
   // ========================================
 
-  /** Registers a reference inserted via the mention dropdown and updates chips. */
-  private registerComposerReference(reference: MentionInsertReference): void {
+  /** Registers a reference inserted via the mention dropdown or a vault drop. */
+  registerComposerReference(reference: MentionInsertReference): void {
     this.composerReferences.set(reference.token, reference);
     this.notifyReferencesChanged();
   }

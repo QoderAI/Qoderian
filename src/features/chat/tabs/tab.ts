@@ -291,7 +291,11 @@ function initializeContextManagers(tab: TabData, plugin: QoderianPlugin): void {
 
   // Vault file/folder drop - must attach before ImageContextManager so vault
   // drags are claimed before the image drop handlers run.
-  tab.ui.vaultDropController = new VaultDropController(app, dom.inputWrapper, dom.inputEl);
+  tab.ui.vaultDropController = new VaultDropController(app, dom.inputWrapper, dom.inputEl, {
+    onInsertReference: (reference) => {
+      tab.ui.fileContextManager?.registerComposerReference(reference);
+    },
+  });
 
   // Image context manager - drag/drop uses inputContainerEl, preview in contextRowEl
   tab.ui.imageContextManager = new ImageContextManager(
