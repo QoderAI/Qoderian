@@ -61,10 +61,11 @@ class ReferenceWidget extends WidgetType {
   }
 
   toDOM(view: EditorView): HTMLElement {
-    const { reference } = this.range;
+    const { reference, from, to } = this.range;
     const element = createDetachedElement(view, 'span');
     const icon = createDetachedElement(view, 'span');
     const label = createDetachedElement(view, 'span');
+    const remove = createDetachedElement(view, 'span');
 
     element.classList.add('qoderian-composer-reference');
     element.classList.toggle('qoderian-composer-reference--selected', this.selected);
@@ -75,11 +76,21 @@ class ReferenceWidget extends WidgetType {
     setIcon(icon, reference.kind === 'folder' ? 'folder' : 'file-text');
     label.classList.add('qoderian-composer-reference-label');
     label.textContent = formatReferenceLabel(reference.path);
-    element.append(icon, label);
+    remove.classList.add('qoderian-composer-reference-remove');
+    remove.setAttribute('aria-label', `Remove ${reference.token}`);
+    setIcon(remove, 'x');
+    element.append(icon, label, remove);
     // Plain click opens the reference, same as message-bubble chips.
     element.addEventListener('click', (event) => {
       event.preventDefault();
       this.onOpenReference?.(reference);
+    });
+    // The remove button deletes the whole token, like an atomic Backspace.
+    remove.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      view.dispatch({ changes: { from, to } });
+      view.focus();
     });
     return element;
   }

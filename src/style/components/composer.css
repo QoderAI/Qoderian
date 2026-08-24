@@ -95,6 +95,25 @@
   color: var(--text-normal);
 }
 
+/* Composer-only remove button; bubble chips are built without it. */
+.qoderian-composer-reference-remove {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.qoderian-composer-reference-remove:hover {
+  color: var(--text-normal);
+}
+
+.qoderian-composer-reference-remove svg {
+  width: 11px;
+  height: 11px;
+}
+
 /* Chips inside user message bubbles sit on the dark bubble background;
    translucent white reads as a highlight pill there. */
 .qoderian-message-user .qoderian-composer-reference {

@@ -23,7 +23,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   the caret, with duplicates skipped and a drop overlay while dragging.
 - `@file` / `@folder/` references render as inline chips in the composer
   and in sent message bubbles; clicking a chip opens the note (both
-  surfaces), and Backspace/Delete removes a composer chip atomically.
+  surfaces), and a composer chip can be removed via its × button or
+  atomically with Backspace/Delete.
 
 ### Changed
 
