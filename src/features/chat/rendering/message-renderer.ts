@@ -22,6 +22,9 @@ import {
   escapeMathDelimitersForStreaming,
   normalizeMathDelimitersForObsidian,
 } from '../../../shared/markdown/markdown-math';
+import { replaceMentionTokensWithHtml } from '../../../shared/markdown/mention-chip';
+import type { ReferenceChipKind } from '../../../shared/mention/types';
+import { openReferenceChip } from '../../../shared/obsidian/compat';
 import { formatConversationDirectoryTitle } from '../utils/conversation-directory-title';
 import { findRewindContext } from '../utils/rewind';
 import {
@@ -34,6 +37,8 @@ import { renderStoredWriteEdit } from './write-edit-renderer';
 
 export interface RenderContentOptions {
   deferMath?: boolean;
+  /** Render `@path` tokens that resolve in the vault as reference chips. */
+  userReferenceChips?: boolean;
 }
 
 export type RenderContentFn = (
@@ -135,7 +140,7 @@ export class MessageRenderer {
       const textToShow = this.getUserMessageTextToShow(msg);
       if (textToShow) {
         const textEl = contentEl.createDiv({ cls: 'qoderian-text-block' });
-        void this.renderContent(textEl, textToShow);
+        void this.renderContent(textEl, textToShow, { userReferenceChips: true });
         this.addUserCopyButton(msgEl, textToShow);
         this.applyTocTitle(msgEl, textToShow);
       }
@@ -169,7 +174,7 @@ export class MessageRenderer {
     const textToShow = this.getUserMessageTextToShow(msg);
     if (textToShow) {
       const textEl = contentEl.createDiv({ cls: 'qoderian-text-block' });
-      void this.renderContent(textEl, textToShow);
+      void this.renderContent(textEl, textToShow, { userReferenceChips: true });
       this.applyTocTitle(msgEl, textToShow);
     } else {
       msgEl.removeAttribute('data-toc-title');
@@ -270,7 +275,7 @@ export class MessageRenderer {
       const textToShow = this.getUserMessageTextToShow(msg);
       if (textToShow) {
         const textEl = contentEl.createDiv({ cls: 'qoderian-text-block' });
-        void this.renderContent(textEl, textToShow);
+        void this.renderContent(textEl, textToShow, { userReferenceChips: true });
         this.addUserCopyButton(msgEl, textToShow);
         this.applyTocTitle(msgEl, textToShow);
       }
@@ -641,11 +646,14 @@ export class MessageRenderer {
         ? escapeMathDelimitersForStreaming(normalizedMarkdown)
         : normalizedMarkdown;
       // Normalize embeds before MarkdownRenderer consumes them.
-      const processedMarkdown = replaceImageEmbedsWithHtml(
+      let processedMarkdown = replaceImageEmbedsWithHtml(
         renderMarkdown,
         this.app,
         { mediaFolder: this.plugin.settings.mediaFolder }
       );
+      if (options?.userReferenceChips) {
+        processedMarkdown = replaceMentionTokensWithHtml(processedMarkdown, this.app);
+      }
       await MarkdownRenderer.render(
         this.app,
         processedMarkdown,
@@ -653,6 +661,10 @@ export class MessageRenderer {
         '',
         this.component
       );
+
+      if (options?.userReferenceChips) {
+        this.enhanceMentionChips(el);
+      }
 
       // Wrap pre elements and move buttons outside scroll area
       el.querySelectorAll('pre').forEach((pre) => {
@@ -709,6 +721,25 @@ export class MessageRenderer {
         text: 'Failed to render message content.',
       });
     }
+  }
+
+  /**
+   * Fills chip icons and click-to-open behavior on rendered mention chips.
+   * The HTML pass only carries data attributes; DOM APIs finish the job.
+   */
+  private enhanceMentionChips(el: HTMLElement): void {
+    el.querySelectorAll<HTMLElement>('.qoderian-msg-reference').forEach((chip) => {
+      const iconEl = chip.querySelector<HTMLElement>('.qoderian-composer-reference-icon');
+      if (iconEl) {
+        setIcon(iconEl, chip.dataset.kind === 'folder' ? 'folder' : 'file-text');
+      }
+      chip.addEventListener('click', () => {
+        const path = chip.dataset.path;
+        const kind = chip.dataset.kind as ReferenceChipKind | undefined;
+        if (!path || !kind) return;
+        openReferenceChip(this.app, kind, path);
+      });
+    });
   }
 
   // ============================================

@@ -7,6 +7,7 @@ import { SelectableDropdown } from '../components/selectable-dropdown';
 import {
   type FolderMentionItem,
   type MentionExtensionProvider,
+  type MentionInsertReference,
   type MentionItem,
 } from './types';
 
@@ -16,6 +17,8 @@ export interface MentionDropdownOptions {
 
 export interface MentionDropdownCallbacks {
   onAttachFile: (path: string) => void;
+  /** Notified with the exact token inserted for file/folder/context-file mentions. */
+  onInsertReference?: (reference: MentionInsertReference) => void;
   getExternalContexts: () => string[];
   getCachedVaultFolders: () => Array<Pick<FolderMentionItem, 'name' | 'path'>>;
   getCachedVaultFiles: () => TFile[];
@@ -536,12 +539,23 @@ export class MentionDropdownController {
         if (selectedItem.absolutePath) {
           this.callbacks.onAttachFile(selectedItem.absolutePath);
         }
+        this.callbacks.onInsertReference?.({
+          token: displayName,
+          path: selectedItem.absolutePath || selectedItem.name,
+          kind: 'file',
+        });
         this.insertReplacement(beforeAt, `${displayName} `, afterCursor);
         break;
       }
       case 'folder': {
         const normalizedPath = this.callbacks.normalizePathForVault(selectedItem.path);
-        this.insertReplacement(beforeAt, `@${normalizedPath ?? selectedItem.path}/ `, afterCursor);
+        const folderPath = normalizedPath ?? selectedItem.path;
+        this.callbacks.onInsertReference?.({
+          token: `@${folderPath}/`,
+          path: folderPath,
+          kind: 'folder',
+        });
+        this.insertReplacement(beforeAt, `@${folderPath}/ `, afterCursor);
         break;
       }
       default: {
@@ -549,6 +563,11 @@ export class MentionDropdownController {
         const normalizedPath = this.callbacks.normalizePathForVault(rawPath);
         if (normalizedPath) {
           this.callbacks.onAttachFile(normalizedPath);
+          this.callbacks.onInsertReference?.({
+            token: `@${normalizedPath}`,
+            path: normalizedPath,
+            kind: 'file',
+          });
         }
         this.insertReplacement(beforeAt, `@${normalizedPath ?? selectedItem.name} `, afterCursor);
         break;

@@ -177,6 +177,26 @@ describe('VaultDropController', () => {
 
       expect(seen).toEqual(['input']);
     });
+
+    it('reports inserted references so they can be chipified', () => {
+      const app = createApp({ type: 'files', files: [makeFile('a b.md'), makeFolder('dir')] });
+      const onInsertReference = jest.fn();
+      new VaultDropController(app, wrapper, inputEl, { onInsertReference });
+
+      wrapper.dispatchEvent('drop', createDropEvent());
+
+      expect(onInsertReference).toHaveBeenCalledTimes(2);
+      expect(onInsertReference).toHaveBeenNthCalledWith(1, {
+        token: '@a b.md',
+        path: 'a b.md',
+        kind: 'file',
+      });
+      expect(onInsertReference).toHaveBeenNthCalledWith(2, {
+        token: '@dir/',
+        path: 'dir',
+        kind: 'folder',
+      });
+    });
   });
 
   describe('overlay visibility', () => {

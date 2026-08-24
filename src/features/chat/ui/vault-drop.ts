@@ -2,11 +2,17 @@ import type { App } from 'obsidian';
 import { TFile, TFolder } from 'obsidian';
 
 import { t } from '@/i18n/i18n';
+import type { MentionInsertReference } from '@/shared/mention/types';
 
 /** A vault file or folder reference extracted from an Obsidian drag payload. */
 export interface VaultDropReference {
   path: string;
   kind: 'file' | 'folder';
+}
+
+export interface VaultDropOptions {
+  /** Called for every inserted reference so consumers can chipify it. */
+  onInsertReference?: (reference: MentionInsertReference) => void;
 }
 
 interface DragManagerHost {
@@ -18,28 +24,33 @@ interface DragManagerHost {
  * `@path` / `@path/ ` mention tokens at the caret position.
  *
  * Must be attached before ImageContextManager so vault drags can be claimed
- * via stopImmediatePropagation before the image drop handlers run.
+ * via stopImmediatePropagation before the image drop handlers run. The drop
+ * listener runs in the capture phase so inner editors (CodeMirror) never see
+ * vault drops and cannot paste the OS-level `obsidian://` URI payload.
  */
 export class VaultDropController {
   private readonly dropOverlayEl: HTMLElement;
+  private readonly onInsertReference?: (reference: MentionInsertReference) => void;
 
   constructor(
     private readonly app: App,
     private readonly inputWrapperEl: HTMLElement,
     private readonly inputEl: HTMLTextAreaElement,
+    options: VaultDropOptions = {},
   ) {
+    this.onInsertReference = options.onInsertReference;
     this.dropOverlayEl = this.createDropOverlay();
     this.inputWrapperEl.addEventListener('dragenter', this.handleDragEnter);
     this.inputWrapperEl.addEventListener('dragover', this.handleDragOver);
     this.inputWrapperEl.addEventListener('dragleave', this.handleDragLeave);
-    this.inputWrapperEl.addEventListener('drop', this.handleDrop);
+    this.inputWrapperEl.addEventListener('drop', this.handleDrop, true);
   }
 
   destroy(): void {
     this.inputWrapperEl.removeEventListener('dragenter', this.handleDragEnter);
     this.inputWrapperEl.removeEventListener('dragover', this.handleDragOver);
     this.inputWrapperEl.removeEventListener('dragleave', this.handleDragLeave);
-    this.inputWrapperEl.removeEventListener('drop', this.handleDrop);
+    this.inputWrapperEl.removeEventListener('drop', this.handleDrop, true);
     this.dropOverlayEl.remove();
   }
 
@@ -81,6 +92,13 @@ export class VaultDropController {
     const newReferences = references.filter((reference) => !this.inputContainsReference(reference));
     if (newReferences.length > 0) {
       this.insertReferences(newReferences);
+      for (const reference of newReferences) {
+        this.onInsertReference?.({
+          token: this.mentionToken(reference),
+          path: reference.path,
+          kind: reference.kind,
+        });
+      }
       this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
     }
     this.inputEl.focus();

@@ -17,7 +17,9 @@ import type { McpServerManager } from '../../../../qoder/mcp/mcp-server-manager'
 import { appendMcpIcon } from '../../../../shared/icons';
 import { MentionDropdownController } from '../../../../shared/mention/mention-dropdown-controller';
 import type { ExtensionMentionItem, MentionExtensionProvider } from '../../../../shared/mention/types';
+import type { MentionInsertReference } from '../../../../shared/mention/types';
 import { VaultMentionIndex } from '../../../../shared/mention/vault-mention-index';
+import type { ComposerReference } from '../composer/composer-reference';
 import { FileChipsView } from './file-chips-view';
 import { FileContextState } from './file-context-state';
 import { isTagExcluded } from './tag-exclusion';
@@ -25,6 +27,8 @@ import { isTagExcluded } from './tag-exclusion';
 export interface FileContextCallbacks {
   getExcludedTags: () => string[];
   onChipsChanged?: () => void;
+  /** Notified whenever the composer reference set changes (insert/rename/delete). */
+  onReferencesChanged?: (references: readonly ComposerReference[]) => void;
   getExternalContexts?: () => string[];
   /** Called when an agent is selected from the @ mention dropdown. */
   onAgentMentionSelect?: (agentId: string) => void;
@@ -47,6 +51,9 @@ export class FileContextManager {
 
   // Current note (shown as chip)
   private currentNotePath: string | null = null;
+
+  // Reference tokens inserted via the mention dropdown, keyed by token text
+  private readonly composerReferences = new Map<string, ComposerReference>();
 
   // MCP server support
   private onMcpMentionChange: ((servers: Set<string>) => void) | null = null;
@@ -97,6 +104,7 @@ export class FileContextManager {
       this.inputEl,
       {
         onAttachFile: (filePath) => this.state.attachFile(filePath),
+        onInsertReference: (reference) => this.registerComposerReference(reference),
         getExternalContexts: () => this.callbacks.getExternalContexts?.() || [],
         getCachedVaultFolders: () => this.mentionIndex.getCachedVaultFolders(),
         getCachedVaultFiles: () => this.mentionIndex.getCachedVaultFiles(),
@@ -311,6 +319,11 @@ export class FileContextManager {
       needsUpdate = true;
     }
 
+    // Update composer reference tokens so chips survive renames
+    if (this.renameComposerReferences(normalizedOld, normalizedNew)) {
+      needsUpdate = true;
+    }
+
     if (needsUpdate) {
       this.refreshCurrentNoteChip();
     }
@@ -334,9 +347,65 @@ export class FileContextManager {
       needsUpdate = true;
     }
 
+    // Drop composer references whose file no longer exists
+    if (this.removeComposerReferencesForPath(normalized)) {
+      needsUpdate = true;
+    }
+
     if (needsUpdate) {
       this.refreshCurrentNoteChip();
     }
+  }
+
+  // ========================================
+  // Composer References
+  // ========================================
+
+  /** Registers a reference inserted via the mention dropdown or a vault drop. */
+  registerComposerReference(reference: MentionInsertReference): void {
+    this.composerReferences.set(reference.token, reference);
+    this.notifyReferencesChanged();
+  }
+
+  /**
+   * Rewrites references under a renamed path: tokens in the input text are
+   * replaced so chips keep pointing at the new location.
+   */
+  private renameComposerReferences(oldPath: string, newPath: string | null): boolean {
+    let changed = false;
+    for (const [token, reference] of Array.from(this.composerReferences.entries())) {
+      if (reference.path !== oldPath) continue;
+
+      this.composerReferences.delete(token);
+      if (newPath) {
+        const newToken = token.replace(oldPath, newPath);
+        const renamed = { ...reference, token: newToken, path: newPath };
+        this.composerReferences.set(newToken, renamed);
+        this.inputEl.value = this.inputEl.value.split(token).join(newToken);
+      } else {
+        this.inputEl.value = this.inputEl.value.split(token).join('');
+      }
+      changed = true;
+    }
+    if (changed) this.notifyReferencesChanged();
+    return changed;
+  }
+
+  /** Removes references pointing at a deleted path, dropping their tokens. */
+  private removeComposerReferencesForPath(deletedPath: string): boolean {
+    let changed = false;
+    for (const [token, reference] of Array.from(this.composerReferences.entries())) {
+      if (reference.path !== deletedPath) continue;
+      this.composerReferences.delete(token);
+      this.inputEl.value = this.inputEl.value.split(token).join('');
+      changed = true;
+    }
+    if (changed) this.notifyReferencesChanged();
+    return changed;
+  }
+
+  private notifyReferencesChanged(): void {
+    this.callbacks.onReferencesChanged?.(Array.from(this.composerReferences.values()));
   }
 
   // ========================================
