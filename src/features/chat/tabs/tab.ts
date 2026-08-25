@@ -32,7 +32,7 @@ import { BangBashModeManager as BangBashModeManagerClass } from '../ui/bang-bash
 import { ComposerBridge } from '../ui/composer/composer-bridge';
 import { ComposerActionButton } from '../ui/composer-action-button';
 import { FileContextManager } from '../ui/file-context/file-context-manager';
-import { ImageContextManager, imageMediaTypeForFilename } from '../ui/image-context';
+import { ImageContextManager } from '../ui/image-context';
 import { createInputToolbar } from '../ui/input-toolbar';
 import { InstructionModeManager as InstructionModeManagerClass } from '../ui/instruction-mode-manager';
 import { NavigationSidebar } from '../ui/navigation-sidebar';
@@ -294,16 +294,6 @@ function initializeContextManagers(tab: TabData, plugin: QoderianPlugin): void {
   tab.ui.vaultDropController = new VaultDropController(app, dom.inputWrapper, dom.inputEl, {
     onInsertReference: (reference) => {
       tab.ui.fileContextManager?.registerComposerReference(reference);
-    },
-    onDropImages: (files) => {
-      void (async (): Promise<void> => {
-        for (const file of files) {
-          const mediaType = imageMediaTypeForFilename(file.name);
-          if (!mediaType) continue;
-          const buffer = await app.vault.readBinary(file);
-          await tab.ui.imageContextManager?.attachImageBuffer(file.name, mediaType, buffer, 'drop');
-        }
-      })();
     },
   });
 

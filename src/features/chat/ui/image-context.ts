@@ -193,35 +193,32 @@ export class ImageContextManager {
     return file.type.startsWith('image/') && imageMediaTypeForFilename(file.name) !== null;
   }
 
-  /**
-   * Attaches an image from raw bytes (vault drags). Mirrors the paste
-   * pipeline so dropped vault images preview and send like pasted ones.
-   */
-  async attachImageBuffer(
-    name: string,
-    mediaType: ImageMediaType,
-    buffer: ArrayBuffer,
-    source: 'paste' | 'drop' = 'drop',
-  ): Promise<boolean> {
+  private async addImageFromFile(file: File, source: 'paste' | 'drop'): Promise<boolean> {
     if (!this.enabled) {
       new Notice('Image attachments are not supported by this Qoder runtime.');
       return false;
     }
 
-    if (buffer.byteLength > MAX_IMAGE_SIZE) {
+    if (file.size > MAX_IMAGE_SIZE) {
       this.notifyImageError(`Image exceeds ${this.formatSize(MAX_IMAGE_SIZE)} limit.`);
       return false;
     }
 
+    const mediaType = imageMediaTypeForFilename(file.name) || (file.type as ImageMediaType);
+    if (!mediaType) {
+      this.notifyImageError('Unsupported image type.');
+      return false;
+    }
+
     try {
-      const base64 = Buffer.from(buffer).toString('base64');
+      const base64 = await this.fileToBase64(file);
 
       const attachment: ImageAttachment = {
         id: this.generateId(),
-        name: name || `image-${Date.now()}.${mediaType.split('/')[1]}`,
+        name: file.name || `image-${Date.now()}.${mediaType.split('/')[1]}`,
         mediaType,
         data: base64,
-        size: buffer.byteLength,
+        size: file.size,
         source,
       };
 
@@ -235,19 +232,10 @@ export class ImageContextManager {
     }
   }
 
-  private async addImageFromFile(file: File, source: 'paste' | 'drop'): Promise<boolean> {
-    const mediaType = imageMediaTypeForFilename(file.name) || (file.type as ImageMediaType);
-    if (!mediaType) {
-      this.notifyImageError('Unsupported image type.');
-      return false;
-    }
-
-    try {
-      return await this.attachImageBuffer(file.name, mediaType, await file.arrayBuffer(), source);
-    } catch (error) {
-      this.notifyImageError('Failed to attach image.', error);
-      return false;
-    }
+  private async fileToBase64(file: File): Promise<string> {
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    return buffer.toString('base64');
   }
 
   // ============================================

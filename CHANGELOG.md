@@ -51,10 +51,10 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - The queue's Steer action now tracks the streaming state: it no longer
   goes missing on remaining rows after queued messages auto-drain, and no
   longer lingers after a turn ends through plan approval paths.
-- Vault images dragged into the composer now attach like pasted images,
-  with a preview chip and an image bubble on send; mixed drags combine
-  mentions and attachments, and only truly unsupported file types are
-  reported as ignored.
+- Vault images dragged into the composer are now inserted as `@path`
+  mentions just like notes (chipified, no attachment preview); mixed
+  drags combine note, folder, and image mentions, and only truly
+  unsupported file types are reported as ignored.
 
 ## [1.0.5] - 2026-08-18
 

@@ -134,31 +134,34 @@ describe('VaultDropController', () => {
       expect(inputEl.value).toBe('@a.md ');
     });
 
-    it('routes vault image drags to the image pipeline', () => {
-      const png = makeFile('pics/logo.png');
-      const app = createApp({ type: 'files', files: [png] });
-      const onDropImages = jest.fn();
-      new VaultDropController(app, wrapper, inputEl, { onDropImages });
+    it('inserts an image mention like a regular file', () => {
+      const app = createApp({ type: 'files', files: [makeFile('pics/logo.png')] });
+      const onInsertReference = jest.fn();
+      new VaultDropController(app, wrapper, inputEl, { onInsertReference });
 
       const event = createDropEvent();
       wrapper.dispatchEvent('drop', event);
 
-      expect(inputEl.value).toBe('');
+      expect(inputEl.value).toBe('@pics/logo.png ');
       expect(event.preventDefault).toHaveBeenCalled();
-      expect(onDropImages).toHaveBeenCalledWith([png]);
+      expect(onInsertReference).toHaveBeenCalledWith({
+        token: '@pics/logo.png',
+        path: 'pics/logo.png',
+        kind: 'file',
+      });
       expect(Notice).not.toHaveBeenCalled();
     });
 
-    it('combines mentions and image attachments for note+image drags', () => {
-      const png = makeFile('logo.png');
-      const app = createApp({ type: 'files', files: [makeFile('a.md'), png] });
-      const onDropImages = jest.fn();
-      new VaultDropController(app, wrapper, inputEl, { onDropImages });
+    it('combines note and image mentions for mixed drags', () => {
+      const app = createApp({
+        type: 'files',
+        files: [makeFile('a.md'), makeFile('logo.png')],
+      });
+      new VaultDropController(app, wrapper, inputEl);
 
       wrapper.dispatchEvent('drop', createDropEvent());
 
-      expect(inputEl.value).toBe('@a.md ');
-      expect(onDropImages).toHaveBeenCalledWith([png]);
+      expect(inputEl.value).toBe('@a.md @logo.png ');
       expect(Notice).not.toHaveBeenCalled();
     });
 

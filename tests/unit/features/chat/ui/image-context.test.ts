@@ -118,36 +118,6 @@ describe('ImageContextManager', () => {
     });
   });
 
-  describe('attachImageBuffer', () => {
-    it('attaches an image from raw bytes like the paste pipeline', async () => {
-      const buffer = new Uint8Array([1, 2, 3]).buffer;
-
-      const ok = await manager.attachImageBuffer('dropped.png', 'image/png', buffer, 'drop');
-
-      expect(ok).toBe(true);
-      const images = manager.getAttachedImages();
-      expect(images).toHaveLength(1);
-      expect(images[0]).toMatchObject({
-        name: 'dropped.png',
-        mediaType: 'image/png',
-        source: 'drop',
-        size: 3,
-        data: Buffer.from([1, 2, 3]).toString('base64'),
-      });
-      expect(callbacks.onImagesChanged).toHaveBeenCalled();
-    });
-
-    it('rejects buffers above the size limit', async () => {
-      const buffer = new ArrayBuffer(5 * 1024 * 1024 + 1);
-
-      const ok = await manager.attachImageBuffer('big.png', 'image/png', buffer);
-
-      expect(ok).toBe(false);
-      expect(manager.hasImages()).toBe(false);
-      expect(Notice).toHaveBeenCalled();
-    });
-  });
-
   describe('setImages', () => {
     it('should replace existing images', () => {
       manager.setImages([createImageAttachment({ id: 'old' })]);
@@ -380,7 +350,7 @@ describe('ImageContextManager - Private Helpers', () => {
         name: 'huge.png',
         type: 'image/png',
         size: 6 * 1024 * 1024, // 6MB > 5MB limit
-        arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(6 * 1024 * 1024)),
+        arrayBuffer: jest.fn(),
       } as unknown as File;
 
       const result = await manager['addImageFromFile'](file, 'paste');
@@ -773,22 +743,19 @@ describe('ImageContextManager - Private Helpers', () => {
   });
 
   describe('fileToBase64', () => {
-    it('should convert file bytes to base64 through the attach pipeline', async () => {
+    it('should convert file to base64 string', async () => {
       const textEncoder = new TextEncoder();
       const bytes = textEncoder.encode('hello');
       const mockBuffer = bytes.buffer;
       const file = {
-        name: 'hello.png',
-        type: 'image/png',
-        size: 5,
         arrayBuffer: jest.fn().mockResolvedValue(mockBuffer),
       } as unknown as File;
 
-      const result = await manager['addImageFromFile'](file, 'paste');
-      expect(result).toBe(true);
-
-      const images = manager.getAttachedImages();
-      const decoded = Buffer.from(images[0].data, 'base64').toString();
+      const result = await manager['fileToBase64'](file);
+      expect(typeof result).toBe('string');
+      expect(result.length).toBeGreaterThan(0);
+      // Verify it's valid base64
+      const decoded = Buffer.from(result, 'base64').toString();
       expect(decoded).toBe('hello');
     });
   });
