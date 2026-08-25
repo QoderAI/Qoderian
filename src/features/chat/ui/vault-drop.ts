@@ -1,8 +1,10 @@
 import type { App } from 'obsidian';
-import { TFile, TFolder } from 'obsidian';
+import { Notice, TFile, TFolder } from 'obsidian';
 
 import { t } from '@/i18n/i18n';
 import type { MentionInsertReference } from '@/shared/mention/types';
+
+import { imageMediaTypeForFilename } from './image-context';
 
 /** A vault file or folder reference extracted from an Obsidian drag payload. */
 export interface VaultDropReference {
@@ -21,7 +23,8 @@ interface DragManagerHost {
 
 /**
  * Accepts Obsidian file-explorer drags on the composer and inserts them as
- * `@path` / `@path/ ` mention tokens at the caret position.
+ * `@path` / `@path/ ` mention tokens at the caret position. Notes, folders,
+ * and images are accepted; anything else is ignored.
  *
  * Must be attached before ImageContextManager so vault drags can be claimed
  * via stopImmediatePropagation before the image drop handlers run. The drop
@@ -55,20 +58,20 @@ export class VaultDropController {
   }
 
   private readonly handleDragEnter = (event: DragEvent): void => {
-    if (this.getDraggedReferences().length === 0) return;
+    if (!this.hasClaimableDrag()) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     this.dropOverlayEl.addClass('visible');
   };
 
   private readonly handleDragOver = (event: DragEvent): void => {
-    if (this.getDraggedReferences().length === 0) return;
+    if (!this.hasClaimableDrag()) return;
     event.preventDefault();
     event.stopImmediatePropagation();
   };
 
   private readonly handleDragLeave = (event: DragEvent): void => {
-    if (this.getDraggedReferences().length === 0) return;
+    if (!this.hasClaimableDrag()) return;
     event.stopImmediatePropagation();
 
     const rect = this.inputWrapperEl.getBoundingClientRect();
@@ -83,7 +86,7 @@ export class VaultDropController {
   };
 
   private readonly handleDrop = (event: DragEvent): void => {
-    const references = this.getDraggedReferences();
+    const { references, ignoredCount } = this.collectDragged();
     if (references.length === 0) return;
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -101,7 +104,16 @@ export class VaultDropController {
       }
       this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
     }
+    // Mixed drags are claimed wholesale, so surface the items we dropped.
+    if (ignoredCount > 0) {
+      new Notice(t('chat.drop.ignored', { count: ignoredCount }));
+    }
     this.inputEl.focus();
+  };
+
+  private hasClaimableDrag(): boolean {
+    const { references } = this.collectDragged();
+    return references.length > 0;
   };
 
   private getDraggedItems(): unknown[] {
@@ -123,21 +135,28 @@ export class VaultDropController {
     return typeof value === 'object' && value !== null;
   }
 
-  private getDraggedReferences(): VaultDropReference[] {
+  private collectDragged(): { references: VaultDropReference[]; ignoredCount: number } {
     const references: VaultDropReference[] = [];
     const seenPaths = new Set<string>();
+    let ignoredCount = 0;
     for (const item of this.getDraggedItems()) {
       const reference =
         item instanceof TFolder && item.path !== '/' && item.path !== ''
           ? { path: item.path, kind: 'folder' as const }
-          : item instanceof TFile && item.extension.toLowerCase() === 'md'
+          : item instanceof TFile &&
+              (item.extension.toLowerCase() === 'md' ||
+                imageMediaTypeForFilename(item.name) !== null)
             ? { path: item.path, kind: 'file' as const }
             : null;
-      if (!reference || seenPaths.has(reference.path)) continue;
+      if (!reference) {
+        ignoredCount += 1;
+        continue;
+      }
+      if (seenPaths.has(reference.path)) continue;
       seenPaths.add(reference.path);
       references.push(reference);
     }
-    return references;
+    return { references, ignoredCount };
   }
 
   private mentionToken(reference: VaultDropReference): string {

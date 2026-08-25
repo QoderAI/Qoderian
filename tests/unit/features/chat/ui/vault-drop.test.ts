@@ -2,13 +2,14 @@
  * @jest-environment jsdom
  */
 import { createMockEl } from '@test/helpers/mock-element';
-import { TFile, TFolder } from 'obsidian';
+import { Notice, TFile, TFolder } from 'obsidian';
 
 import { VaultDropController } from '@/features/chat/ui/vault-drop';
 
 function makeFile(path: string): any {
   const file = new (TFile as unknown as new () => Record<string, unknown>)();
   file.path = path;
+  file.name = path.split('/').pop() ?? path;
   file.extension = path.split('.').pop() ?? '';
   return file;
 }
@@ -69,6 +70,7 @@ describe('VaultDropController', () => {
   let inputEl: any;
 
   beforeEach(() => {
+    (Notice as unknown as jest.Mock).mockClear();
     wrapper = createMockEl();
     wrapper.getBoundingClientRect = () => ({
       top: 0,
@@ -115,11 +117,11 @@ describe('VaultDropController', () => {
       expect(inputEl.value).toBe('@a.md @dir/ @b.md ');
     });
 
-    it('skips non-markdown files, root folder, and duplicates', () => {
+    it('skips unsupported files, root folder, and duplicates', () => {
       const app = createApp({
         type: 'files',
         files: [
-          makeFile('image.png'),
+          makeFile('report.pdf'),
           makeFolder('/'),
           makeFile('a.md'),
           makeFile('a.md'),
@@ -130,6 +132,62 @@ describe('VaultDropController', () => {
       wrapper.dispatchEvent('drop', createDropEvent());
 
       expect(inputEl.value).toBe('@a.md ');
+    });
+
+    it('inserts an image mention like a regular file', () => {
+      const app = createApp({ type: 'files', files: [makeFile('pics/logo.png')] });
+      const onInsertReference = jest.fn();
+      new VaultDropController(app, wrapper, inputEl, { onInsertReference });
+
+      const event = createDropEvent();
+      wrapper.dispatchEvent('drop', event);
+
+      expect(inputEl.value).toBe('@pics/logo.png ');
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(onInsertReference).toHaveBeenCalledWith({
+        token: '@pics/logo.png',
+        path: 'pics/logo.png',
+        kind: 'file',
+      });
+      expect(Notice).not.toHaveBeenCalled();
+    });
+
+    it('combines note and image mentions for mixed drags', () => {
+      const app = createApp({
+        type: 'files',
+        files: [makeFile('a.md'), makeFile('logo.png')],
+      });
+      new VaultDropController(app, wrapper, inputEl);
+
+      wrapper.dispatchEvent('drop', createDropEvent());
+
+      expect(inputEl.value).toBe('@a.md @logo.png ');
+      expect(Notice).not.toHaveBeenCalled();
+    });
+
+    it('notifies about ignored unsupported items in mixed drags', () => {
+      const app = createApp({
+        type: 'files',
+        files: [makeFile('a.md'), makeFile('logo.pdf')],
+      });
+      new VaultDropController(app, wrapper, inputEl);
+
+      wrapper.dispatchEvent('drop', createDropEvent());
+
+      expect(inputEl.value).toBe('@a.md ');
+      expect(Notice).toHaveBeenCalledWith(expect.stringContaining('1'));
+    });
+
+    it('does not notify when every dragged item is a note or folder', () => {
+      const app = createApp({
+        type: 'files',
+        files: [makeFile('a.md'), makeFolder('dir')],
+      });
+      new VaultDropController(app, wrapper, inputEl);
+
+      wrapper.dispatchEvent('drop', createDropEvent());
+
+      expect(Notice).not.toHaveBeenCalled();
     });
 
     it('does not insert a mention that already exists in the input', () => {
@@ -233,6 +291,18 @@ describe('VaultDropController', () => {
       const overlay = findOverlay(wrapper);
       expect(overlay.className).not.toContain('visible');
       expect(event.stopImmediatePropagation).not.toHaveBeenCalled();
+    });
+
+    it('shows the overlay for image-only vault drags', () => {
+      const app = createApp({ type: 'files', files: [makeFile('logo.png')] });
+      new VaultDropController(app, wrapper, inputEl);
+
+      const event = createDragEvent('dragenter');
+      wrapper.dispatchEvent('dragenter', event);
+
+      const overlay = findOverlay(wrapper);
+      expect(overlay.className).toContain('visible');
+      expect(event.stopImmediatePropagation).toHaveBeenCalled();
     });
   });
 

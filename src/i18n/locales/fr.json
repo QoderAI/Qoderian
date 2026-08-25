@@ -113,7 +113,8 @@
       "steerUnavailable": "Impossible d'orienter pour le moment. Le message reste dans la file d'attente."
     },
     "drop": {
-      "context": "Déposez des notes ou des dossiers ici pour les ajouter comme contexte"
+      "context": "Déposez des notes, des dossiers ou des images ici pour les ajouter comme contexte",
+      "ignored": "{count} fichiers non pris en charge ignorés ; seules les notes, dossiers et images peuvent être déposés"
     }
   },
   "settings": {

@@ -79,6 +79,13 @@ export class InputController {
   private readonly inputCommands: InputCommandController;
   private readonly queuedMessages: QueuedMessageController;
   private activeStreamingAssistantMessage: ChatMessage | null = null;
+  // Contract: `user_message_start` / `assistant_message_start` boundary
+  // chunks currently have no producer in the runtime — they are a reserved
+  // mechanism, so the handlers below are dormant. Steering relies on
+  // immediate UI-side splicing (spliceRuntimeUserMessage) and does NOT echo
+  // through this path. If a producer is ever wired up, queued-message
+  // steering must first register its expected echo here, otherwise the echo
+  // would splice a second, duplicate bubble for the same message.
   private pendingRuntimeUserMessages: Array<{
     displayContent: string;
     persistedContent?: string;
@@ -233,6 +240,9 @@ export class InputController {
     state.isStreaming = true;
     state.cancelRequested = false;
     state.ignoreUsageUpdates = false; // Allow usage updates for new query
+    // Re-render the send queue so steer buttons reflect the now-active turn
+    // (rows rendered during the brief idle gap after process() lost them).
+    this.updateQueueIndicator();
     this.deps.getSubagentManager().resetSpawnedCount();
     state.autoScrollEnabled = plugin.settings.enableAutoScroll ?? true; // Reset auto-scroll based on setting
     const streamGeneration = state.bumpStreamGeneration();
@@ -408,6 +418,9 @@ export class InputController {
         streamController.hideThinkingIndicator();
         state.isStreaming = false;
         state.cancelRequested = false;
+        // Re-render the send queue so steer buttons drop now that the turn
+        // ended (guards the paused/revised paths that skip process()).
+        this.updateQueueIndicator();
         // Capture response duration before resetting state (skip for interrupted responses and compaction)
         const hasCompactBoundary = finalAssistantMsg.contentBlocks?.some(b => b.type === 'context_compacted');
         const hasError = hasErrorContentBlock(finalAssistantMsg);

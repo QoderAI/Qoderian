@@ -222,6 +222,23 @@ describe('QueuedMessageController', () => {
     expect(plain.state.queueIndicatorEl!.querySelector('.qoderian-queue-row-steer')).toBeNull();
   });
 
+  it('picks up steer availability changes on re-render', () => {
+    let steerable = false;
+    const { controller, state } = createController({ canSteerQueuedTurn: () => steerable });
+    controller.enqueue('first', turnRequest('first'));
+    expect(state.queueIndicatorEl!.querySelector('.qoderian-queue-row-steer')).toBeNull();
+
+    // Streaming started: a plain re-render must surface the action.
+    steerable = true;
+    controller.updateIndicator();
+    expect(state.queueIndicatorEl!.querySelector('.qoderian-queue-row-steer')).not.toBeNull();
+
+    // Streaming ended: the next re-render must drop it again.
+    steerable = false;
+    controller.updateIndicator();
+    expect(state.queueIndicatorEl!.querySelector('.qoderian-queue-row-steer')).toBeNull();
+  });
+
   it('steerToTurn removes the item when the runtime accepts it', () => {
     const steerQueuedTurn = jest.fn().mockReturnValue(true);
     const { controller, state, sendQueuedTurn } = createController({

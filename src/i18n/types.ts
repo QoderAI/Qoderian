@@ -132,6 +132,7 @@ export type TranslationKey =
 
   // Vault drag & drop into composer
   | 'chat.drop.context'
+  | 'chat.drop.ignored'
 
   // Settings - Section Headings
   | 'settings.title'

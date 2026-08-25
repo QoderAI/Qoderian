@@ -153,6 +153,7 @@ export class FileContextManager {
   /** Resets state for a new conversation. */
   resetForNewConversation() {
     this.currentNotePath = null;
+    this.clearComposerReferences();
     this.state.resetForNewConversation();
     this.refreshCurrentNoteChip();
   }
@@ -160,6 +161,7 @@ export class FileContextManager {
   /** Resets state for loading an existing conversation. */
   resetForLoadedConversation(hasMessages: boolean) {
     this.currentNotePath = null;
+    this.clearComposerReferences();
     this.state.resetForLoadedConversation(hasMessages);
     this.refreshCurrentNoteChip();
   }
@@ -364,6 +366,13 @@ export class FileContextManager {
   /** Registers a reference inserted via the mention dropdown or a vault drop. */
   registerComposerReference(reference: MentionInsertReference): void {
     this.composerReferences.set(reference.token, reference);
+    this.notifyReferencesChanged();
+  }
+
+  /** Drops all tracked composer references at a conversation boundary. */
+  private clearComposerReferences(): void {
+    if (this.composerReferences.size === 0) return;
+    this.composerReferences.clear();
     this.notifyReferencesChanged();
   }
 

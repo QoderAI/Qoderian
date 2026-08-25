@@ -2,7 +2,7 @@ import { createMockEl } from '@test/helpers/mock-element';
 import { Notice } from 'obsidian';
 
 import type { ImageAttachment } from '@/core/types';
-import { ImageContextManager } from '@/features/chat/ui/image-context';
+import { ImageContextManager, imageMediaTypeForFilename } from '@/features/chat/ui/image-context';
 
 jest.mock('obsidian', () => ({
   Notice: jest.fn(),
@@ -246,41 +246,41 @@ describe('ImageContextManager - Private Helpers', () => {
     });
   });
 
-  describe('getMediaType', () => {
+  describe('imageMediaTypeForFilename', () => {
     it('should return correct media type for .jpg', () => {
-      expect(manager['getMediaType']('photo.jpg')).toBe('image/jpeg');
+      expect(imageMediaTypeForFilename('photo.jpg')).toBe('image/jpeg');
     });
 
     it('should return correct media type for .jpeg', () => {
-      expect(manager['getMediaType']('photo.jpeg')).toBe('image/jpeg');
+      expect(imageMediaTypeForFilename('photo.jpeg')).toBe('image/jpeg');
     });
 
     it('should return correct media type for .png', () => {
-      expect(manager['getMediaType']('image.png')).toBe('image/png');
+      expect(imageMediaTypeForFilename('image.png')).toBe('image/png');
     });
 
     it('should return correct media type for .gif', () => {
-      expect(manager['getMediaType']('animation.gif')).toBe('image/gif');
+      expect(imageMediaTypeForFilename('animation.gif')).toBe('image/gif');
     });
 
     it('should return correct media type for .webp', () => {
-      expect(manager['getMediaType']('photo.webp')).toBe('image/webp');
+      expect(imageMediaTypeForFilename('photo.webp')).toBe('image/webp');
     });
 
     it('should return null for unsupported extension', () => {
-      expect(manager['getMediaType']('document.pdf')).toBeNull();
+      expect(imageMediaTypeForFilename('document.pdf')).toBeNull();
     });
 
     it('should return null for no extension', () => {
-      expect(manager['getMediaType']('noextension')).toBeNull();
+      expect(imageMediaTypeForFilename('noextension')).toBeNull();
     });
 
     it('should handle uppercase extensions', () => {
-      expect(manager['getMediaType']('PHOTO.JPG')).toBe('image/jpeg');
+      expect(imageMediaTypeForFilename('PHOTO.JPG')).toBe('image/jpeg');
     });
 
     it('should handle mixed case extensions', () => {
-      expect(manager['getMediaType']('image.Png')).toBe('image/png');
+      expect(imageMediaTypeForFilename('image.Png')).toBe('image/png');
     });
   });
 
@@ -372,7 +372,7 @@ describe('ImageContextManager - Private Helpers', () => {
     });
 
     it('should add valid image file and invoke callback', async () => {
-      const mockBuffer = new ArrayBuffer(4);
+      const mockBuffer = new ArrayBuffer(1024);
       const file = {
         name: 'test.png',
         type: 'image/png',

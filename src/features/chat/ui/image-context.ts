@@ -13,6 +13,12 @@ const IMAGE_EXTENSIONS: Record<string, ImageMediaType> = {
   '.webp': 'image/webp',
 };
 
+/** Maps supported image filenames to their media types. */
+export function imageMediaTypeForFilename(filename: string): ImageMediaType | null {
+  const ext = path.extname(filename).toLowerCase();
+  return IMAGE_EXTENSIONS[ext] || null;
+}
+
 export interface ImageContextCallbacks {
   onImagesChanged: () => void;
 }
@@ -184,12 +190,7 @@ export class ImageContextManager {
   }
 
   private isImageFile(file: File): boolean {
-    return file.type.startsWith('image/') && this.getMediaType(file.name) !== null;
-  }
-
-  private getMediaType(filename: string): ImageMediaType | null {
-    const ext = path.extname(filename).toLowerCase();
-    return IMAGE_EXTENSIONS[ext] || null;
+    return file.type.startsWith('image/') && imageMediaTypeForFilename(file.name) !== null;
   }
 
   private async addImageFromFile(file: File, source: 'paste' | 'drop'): Promise<boolean> {
@@ -203,7 +204,7 @@ export class ImageContextManager {
       return false;
     }
 
-    const mediaType = this.getMediaType(file.name) || (file.type as ImageMediaType);
+    const mediaType = imageMediaTypeForFilename(file.name) || (file.type as ImageMediaType);
     if (!mediaType) {
       this.notifyImageError('Unsupported image type.');
       return false;
