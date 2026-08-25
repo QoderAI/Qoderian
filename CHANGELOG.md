@@ -55,6 +55,9 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   mentions just like notes (chipified, no attachment preview); mixed
   drags combine note, folder, and image mentions, and only truly
   unsupported file types are reported as ignored.
+- The settings language row now updates its own label and description
+  immediately when the display language is changed, instead of keeping
+  the previous language's text until the settings tab is reopened.
 
 ## [1.0.5] - 2026-08-18
 

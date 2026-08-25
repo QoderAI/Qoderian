@@ -438,8 +438,11 @@ export class QoderianSettingTab extends PluginSettingTab {
       await this.plugin.saveSettings();
 
       if (key === 'locale') {
+        const previousName = t('settings.language.name');
+        const previousDesc = t('settings.language.desc');
         setLocale(this.plugin.settings.locale as Locale);
         this.update();
+        this.refreshLocalizedLanguageRow(previousName, previousDesc);
         this.refreshViewChrome();
       } else if (key === 'maxTabs') {
         for (const view of this.plugin.getAllViews()) {
@@ -457,6 +460,26 @@ export class QoderianSettingTab extends PluginSettingTab {
   private refreshViewChrome(): void {
     for (const view of this.plugin.getAllViews()) {
       view.refreshLocalizedChrome();
+    }
+  }
+
+  /**
+   * Obsidian's declarative reconciler refreshes every row except the one
+   * whose control triggered the change, so after a live language switch the
+   * language row would keep the previous locale's labels until the tab is
+   * reopened. Patch its leaf text nodes directly; any later full render
+   * produces the same strings, so this cannot conflict.
+   */
+  private refreshLocalizedLanguageRow(previousName: string, previousDesc: string): void {
+    const newName = t('settings.language.name');
+    const newDesc = t('settings.language.desc');
+    for (const el of Array.from(this.containerEl.querySelectorAll('*'))) {
+      if (el.children.length !== 0) continue;
+      if (el.textContent === previousName) {
+        el.setText(newName);
+      } else if (el.textContent === previousDesc) {
+        el.setText(newDesc);
+      }
     }
   }
 
