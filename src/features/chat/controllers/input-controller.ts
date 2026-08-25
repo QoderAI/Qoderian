@@ -33,7 +33,7 @@ import type { CanvasSelectionController } from './canvas-selection-controller';
 import type { ConversationController } from './conversation-controller';
 import { InputCommandController } from './input-command-controller';
 import { QueuedMessageController } from './queued-message-controller';
-import { cloneChatTurnRequest } from './queued-turn';
+import { cloneChatTurnRequest, type QueuedChatTurn } from './queued-turn';
 import type { SelectionController } from './selection-controller';
 import type { StreamController } from './stream-controller';
 
@@ -111,6 +111,8 @@ export class InputController {
       getInputEl: deps.getInputEl,
       getImageContextManager: deps.getImageContextManager,
       resetInputHeight: deps.resetInputHeight,
+      canSteerQueuedTurn: () => this.canSteerQueuedTurn(),
+      steerQueuedTurn: message => this.steerQueuedTurn(message),
       sendQueuedTurn: message => {
         void this.sendMessage({
           content: message.displayContent,
@@ -528,6 +530,32 @@ export class InputController {
     this.queuedMessages.clear();
   }
 
+  /** Steering is only possible while a turn is streaming mid-flight. */
+  private canSteerQueuedTurn(): boolean {
+    const { state } = this.deps;
+    return state.isStreaming
+      && !state.cancelRequested
+      && !!this.getAgentService()?.steerTurn;
+  }
+
+  /**
+   * Codex-style steering: inject a queued turn into the in-flight turn. The
+   * CLI applies it at the next step boundary. Returns false when steering is
+   * not possible right now; the message should stay queued then.
+   */
+  steerQueuedTurn(turn: QueuedChatTurn): boolean {
+    if (!this.canSteerQueuedTurn()) return false;
+    const text = turn.request.text.trim();
+    if (!text) return false;
+    const accepted = this.getAgentService()?.steerTurn?.(text) ?? false;
+    if (!accepted) return false;
+    void this.spliceRuntimeUserMessage({
+      displayContent: turn.displayContent,
+      persistedContent: text,
+    });
+    return true;
+  }
+
   private async buildTurnSubmission(options: {
     content: string;
     images?: ChatMessage['images'];
@@ -636,7 +664,25 @@ export class InputController {
     }
 
     this.updateQueueIndicator();
+    await this.spliceRuntimeUserMessage({
+      displayContent: expected?.displayContent ?? chunk.content,
+      persistedContent: expected?.persistedContent,
+      images: expected?.images,
+      currentNote: expected?.currentNote,
+    });
+  }
 
+  /**
+   * Finalize the streaming assistant bubble, render a user bubble, and open a
+   * fresh assistant bubble below it. Shared by runtime user-message echoes
+   * and queued-message steering.
+   */
+  private async spliceRuntimeUserMessage(details: {
+    displayContent: string;
+    persistedContent?: string;
+    images?: ChatMessage['images'];
+    currentNote?: string;
+  }): Promise<void> {
     const previousAssistant = this.activeStreamingAssistantMessage;
     const shouldDiscardPlaceholder = this.shouldDiscardPendingAssistantPlaceholder(previousAssistant);
     if (previousAssistant) {
@@ -649,9 +695,8 @@ export class InputController {
     }
     this.deps.streamController.hideThinkingIndicator();
 
-    const displayContent = expected?.displayContent ?? chunk.content;
-    const persistedContent = expected?.persistedContent ?? displayContent;
-    const images = expected?.images;
+    const { displayContent, images } = details;
+    const persistedContent = details.persistedContent ?? displayContent;
     if (displayContent || (images?.length ?? 0) > 0) {
       const userMessage: ChatMessage = {
         id: this.deps.generateId(),
@@ -659,7 +704,7 @@ export class InputController {
         content: persistedContent,
         displayContent,
         timestamp: Date.now(),
-        currentNote: expected?.currentNote,
+        currentNote: details.currentNote,
         images,
       };
       this.deps.state.addMessage(userMessage);

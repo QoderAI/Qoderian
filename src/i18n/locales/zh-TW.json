@@ -108,7 +108,9 @@
       "collapse": "折疊佇列",
       "expand": "展開佇列",
       "paused": "由於你中斷了當前回應，佇列已暫停",
-      "resume": "繼續"
+      "resume": "繼續",
+      "steer": "引導",
+      "steerUnavailable": "目前無法引導，訊息仍保留在佇列中。"
     },
     "drop": {
       "context": "拖曳筆記或資料夾到此處，新增為上下文"

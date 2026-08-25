@@ -108,7 +108,9 @@
       "collapse": "Replier la file",
       "expand": "Déplier la file",
       "paused": "File en pause car vous avez interrompu la réponse en cours",
-      "resume": "Reprendre"
+      "resume": "Reprendre",
+      "steer": "Orienter",
+      "steerUnavailable": "Impossible d'orienter pour le moment. Le message reste dans la file d'attente."
     },
     "drop": {
       "context": "Déposez des notes ou des dossiers ici pour les ajouter comme contexte"

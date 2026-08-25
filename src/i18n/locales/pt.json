@@ -108,7 +108,9 @@
       "collapse": "Recolher fila",
       "expand": "Expandir fila",
       "paused": "Fila pausada porque você interrompeu a resposta atual",
-      "resume": "Continuar"
+      "resume": "Continuar",
+      "steer": "Redirecionar",
+      "steerUnavailable": "Não é possível redirecionar agora. A mensagem permanece na fila."
     },
     "drop": {
       "context": "Solte notas ou pastas aqui para adicioná-las como contexto"

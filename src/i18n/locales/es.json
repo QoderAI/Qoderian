@@ -108,7 +108,9 @@
       "collapse": "Contraer cola",
       "expand": "Expandir cola",
       "paused": "Cola en pausa porque interrumpiste la respuesta actual",
-      "resume": "Continuar"
+      "resume": "Continuar",
+      "steer": "Redirigir",
+      "steerUnavailable": "Ahora no se puede redirigir. El mensaje permanece en la cola."
     },
     "drop": {
       "context": "Arrastra notas o carpetas aquí para añadirlas como contexto"

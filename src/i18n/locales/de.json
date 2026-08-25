@@ -108,7 +108,9 @@
       "collapse": "Warteschlange einklappen",
       "expand": "Warteschlange ausklappen",
       "paused": "Warteschlange pausiert, weil du die aktuelle Antwort unterbrochen hast",
-      "resume": "Fortsetzen"
+      "resume": "Fortsetzen",
+      "steer": "Steuern",
+      "steerUnavailable": "Steuern ist gerade nicht möglich. Die Nachricht bleibt in der Warteschlange."
     },
     "drop": {
       "context": "Notizen oder Ordner hier ablegen, um sie als Kontext hinzuzufügen"
