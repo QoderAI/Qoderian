@@ -13,6 +13,12 @@ const IMAGE_EXTENSIONS: Record<string, ImageMediaType> = {
   '.webp': 'image/webp',
 };
 
+/** Maps supported image filenames to their media types. */
+export function imageMediaTypeForFilename(filename: string): ImageMediaType | null {
+  const ext = path.extname(filename).toLowerCase();
+  return IMAGE_EXTENSIONS[ext] || null;
+}
+
 export interface ImageContextCallbacks {
   onImagesChanged: () => void;
 }
@@ -184,40 +190,38 @@ export class ImageContextManager {
   }
 
   private isImageFile(file: File): boolean {
-    return file.type.startsWith('image/') && this.getMediaType(file.name) !== null;
+    return file.type.startsWith('image/') && imageMediaTypeForFilename(file.name) !== null;
   }
 
-  private getMediaType(filename: string): ImageMediaType | null {
-    const ext = path.extname(filename).toLowerCase();
-    return IMAGE_EXTENSIONS[ext] || null;
-  }
-
-  private async addImageFromFile(file: File, source: 'paste' | 'drop'): Promise<boolean> {
+  /**
+   * Attaches an image from raw bytes (vault drags). Mirrors the paste
+   * pipeline so dropped vault images preview and send like pasted ones.
+   */
+  async attachImageBuffer(
+    name: string,
+    mediaType: ImageMediaType,
+    buffer: ArrayBuffer,
+    source: 'paste' | 'drop' = 'drop',
+  ): Promise<boolean> {
     if (!this.enabled) {
       new Notice('Image attachments are not supported by this Qoder runtime.');
       return false;
     }
 
-    if (file.size > MAX_IMAGE_SIZE) {
+    if (buffer.byteLength > MAX_IMAGE_SIZE) {
       this.notifyImageError(`Image exceeds ${this.formatSize(MAX_IMAGE_SIZE)} limit.`);
       return false;
     }
 
-    const mediaType = this.getMediaType(file.name) || (file.type as ImageMediaType);
-    if (!mediaType) {
-      this.notifyImageError('Unsupported image type.');
-      return false;
-    }
-
     try {
-      const base64 = await this.fileToBase64(file);
+      const base64 = Buffer.from(buffer).toString('base64');
 
       const attachment: ImageAttachment = {
         id: this.generateId(),
-        name: file.name || `image-${Date.now()}.${mediaType.split('/')[1]}`,
+        name: name || `image-${Date.now()}.${mediaType.split('/')[1]}`,
         mediaType,
         data: base64,
-        size: file.size,
+        size: buffer.byteLength,
         source,
       };
 
@@ -231,10 +235,19 @@ export class ImageContextManager {
     }
   }
 
-  private async fileToBase64(file: File): Promise<string> {
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    return buffer.toString('base64');
+  private async addImageFromFile(file: File, source: 'paste' | 'drop'): Promise<boolean> {
+    const mediaType = imageMediaTypeForFilename(file.name) || (file.type as ImageMediaType);
+    if (!mediaType) {
+      this.notifyImageError('Unsupported image type.');
+      return false;
+    }
+
+    try {
+      return await this.attachImageBuffer(file.name, mediaType, await file.arrayBuffer(), source);
+    } catch (error) {
+      this.notifyImageError('Failed to attach image.', error);
+      return false;
+    }
   }
 
   // ============================================

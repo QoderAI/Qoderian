@@ -2,7 +2,7 @@ import { createMockEl } from '@test/helpers/mock-element';
 import { Notice } from 'obsidian';
 
 import type { ImageAttachment } from '@/core/types';
-import { ImageContextManager } from '@/features/chat/ui/image-context';
+import { ImageContextManager, imageMediaTypeForFilename } from '@/features/chat/ui/image-context';
 
 jest.mock('obsidian', () => ({
   Notice: jest.fn(),
@@ -115,6 +115,36 @@ describe('ImageContextManager', () => {
 
       manager.clearImages();
       expect(callbacks.onImagesChanged).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('attachImageBuffer', () => {
+    it('attaches an image from raw bytes like the paste pipeline', async () => {
+      const buffer = new Uint8Array([1, 2, 3]).buffer;
+
+      const ok = await manager.attachImageBuffer('dropped.png', 'image/png', buffer, 'drop');
+
+      expect(ok).toBe(true);
+      const images = manager.getAttachedImages();
+      expect(images).toHaveLength(1);
+      expect(images[0]).toMatchObject({
+        name: 'dropped.png',
+        mediaType: 'image/png',
+        source: 'drop',
+        size: 3,
+        data: Buffer.from([1, 2, 3]).toString('base64'),
+      });
+      expect(callbacks.onImagesChanged).toHaveBeenCalled();
+    });
+
+    it('rejects buffers above the size limit', async () => {
+      const buffer = new ArrayBuffer(5 * 1024 * 1024 + 1);
+
+      const ok = await manager.attachImageBuffer('big.png', 'image/png', buffer);
+
+      expect(ok).toBe(false);
+      expect(manager.hasImages()).toBe(false);
+      expect(Notice).toHaveBeenCalled();
     });
   });
 
@@ -246,41 +276,41 @@ describe('ImageContextManager - Private Helpers', () => {
     });
   });
 
-  describe('getMediaType', () => {
+  describe('imageMediaTypeForFilename', () => {
     it('should return correct media type for .jpg', () => {
-      expect(manager['getMediaType']('photo.jpg')).toBe('image/jpeg');
+      expect(imageMediaTypeForFilename('photo.jpg')).toBe('image/jpeg');
     });
 
     it('should return correct media type for .jpeg', () => {
-      expect(manager['getMediaType']('photo.jpeg')).toBe('image/jpeg');
+      expect(imageMediaTypeForFilename('photo.jpeg')).toBe('image/jpeg');
     });
 
     it('should return correct media type for .png', () => {
-      expect(manager['getMediaType']('image.png')).toBe('image/png');
+      expect(imageMediaTypeForFilename('image.png')).toBe('image/png');
     });
 
     it('should return correct media type for .gif', () => {
-      expect(manager['getMediaType']('animation.gif')).toBe('image/gif');
+      expect(imageMediaTypeForFilename('animation.gif')).toBe('image/gif');
     });
 
     it('should return correct media type for .webp', () => {
-      expect(manager['getMediaType']('photo.webp')).toBe('image/webp');
+      expect(imageMediaTypeForFilename('photo.webp')).toBe('image/webp');
     });
 
     it('should return null for unsupported extension', () => {
-      expect(manager['getMediaType']('document.pdf')).toBeNull();
+      expect(imageMediaTypeForFilename('document.pdf')).toBeNull();
     });
 
     it('should return null for no extension', () => {
-      expect(manager['getMediaType']('noextension')).toBeNull();
+      expect(imageMediaTypeForFilename('noextension')).toBeNull();
     });
 
     it('should handle uppercase extensions', () => {
-      expect(manager['getMediaType']('PHOTO.JPG')).toBe('image/jpeg');
+      expect(imageMediaTypeForFilename('PHOTO.JPG')).toBe('image/jpeg');
     });
 
     it('should handle mixed case extensions', () => {
-      expect(manager['getMediaType']('image.Png')).toBe('image/png');
+      expect(imageMediaTypeForFilename('image.Png')).toBe('image/png');
     });
   });
 
@@ -350,7 +380,7 @@ describe('ImageContextManager - Private Helpers', () => {
         name: 'huge.png',
         type: 'image/png',
         size: 6 * 1024 * 1024, // 6MB > 5MB limit
-        arrayBuffer: jest.fn(),
+        arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(6 * 1024 * 1024)),
       } as unknown as File;
 
       const result = await manager['addImageFromFile'](file, 'paste');
@@ -372,7 +402,7 @@ describe('ImageContextManager - Private Helpers', () => {
     });
 
     it('should add valid image file and invoke callback', async () => {
-      const mockBuffer = new ArrayBuffer(4);
+      const mockBuffer = new ArrayBuffer(1024);
       const file = {
         name: 'test.png',
         type: 'image/png',
@@ -743,19 +773,22 @@ describe('ImageContextManager - Private Helpers', () => {
   });
 
   describe('fileToBase64', () => {
-    it('should convert file to base64 string', async () => {
+    it('should convert file bytes to base64 through the attach pipeline', async () => {
       const textEncoder = new TextEncoder();
       const bytes = textEncoder.encode('hello');
       const mockBuffer = bytes.buffer;
       const file = {
+        name: 'hello.png',
+        type: 'image/png',
+        size: 5,
         arrayBuffer: jest.fn().mockResolvedValue(mockBuffer),
       } as unknown as File;
 
-      const result = await manager['fileToBase64'](file);
-      expect(typeof result).toBe('string');
-      expect(result.length).toBeGreaterThan(0);
-      // Verify it's valid base64
-      const decoded = Buffer.from(result, 'base64').toString();
+      const result = await manager['addImageFromFile'](file, 'paste');
+      expect(result).toBe(true);
+
+      const images = manager.getAttachedImages();
+      const decoded = Buffer.from(images[0].data, 'base64').toString();
       expect(decoded).toBe('hello');
     });
   });

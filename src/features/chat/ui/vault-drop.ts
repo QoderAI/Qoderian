@@ -4,6 +4,8 @@ import { Notice, TFile, TFolder } from 'obsidian';
 import { t } from '@/i18n/i18n';
 import type { MentionInsertReference } from '@/shared/mention/types';
 
+import { imageMediaTypeForFilename } from './image-context';
+
 /** A vault file or folder reference extracted from an Obsidian drag payload. */
 export interface VaultDropReference {
   path: string;
@@ -13,6 +15,8 @@ export interface VaultDropReference {
 export interface VaultDropOptions {
   /** Called for every inserted reference so consumers can chipify it. */
   onInsertReference?: (reference: MentionInsertReference) => void;
+  /** Called with vault image files so consumers can attach them. */
+  onDropImages?: (files: TFile[]) => void;
 }
 
 interface DragManagerHost {
@@ -20,8 +24,9 @@ interface DragManagerHost {
 }
 
 /**
- * Accepts Obsidian file-explorer drags on the composer and inserts them as
- * `@path` / `@path/ ` mention tokens at the caret position.
+ * Accepts Obsidian file-explorer drags on the composer: notes and folders
+ * are inserted as `@path` / `@path/ ` mention tokens at the caret, vault
+ * images are routed to the image attachment pipeline.
  *
  * Must be attached before ImageContextManager so vault drags can be claimed
  * via stopImmediatePropagation before the image drop handlers run. The drop
@@ -31,6 +36,7 @@ interface DragManagerHost {
 export class VaultDropController {
   private readonly dropOverlayEl: HTMLElement;
   private readonly onInsertReference?: (reference: MentionInsertReference) => void;
+  private readonly onDropImages?: (files: TFile[]) => void;
 
   constructor(
     private readonly app: App,
@@ -39,6 +45,7 @@ export class VaultDropController {
     options: VaultDropOptions = {},
   ) {
     this.onInsertReference = options.onInsertReference;
+    this.onDropImages = options.onDropImages;
     this.dropOverlayEl = this.createDropOverlay();
     this.inputWrapperEl.addEventListener('dragenter', this.handleDragEnter);
     this.inputWrapperEl.addEventListener('dragover', this.handleDragOver);
@@ -55,20 +62,20 @@ export class VaultDropController {
   }
 
   private readonly handleDragEnter = (event: DragEvent): void => {
-    if (this.collectDragged().references.length === 0) return;
+    if (!this.hasClaimableDrag()) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     this.dropOverlayEl.addClass('visible');
   };
 
   private readonly handleDragOver = (event: DragEvent): void => {
-    if (this.collectDragged().references.length === 0) return;
+    if (!this.hasClaimableDrag()) return;
     event.preventDefault();
     event.stopImmediatePropagation();
   };
 
   private readonly handleDragLeave = (event: DragEvent): void => {
-    if (this.collectDragged().references.length === 0) return;
+    if (!this.hasClaimableDrag()) return;
     event.stopImmediatePropagation();
 
     const rect = this.inputWrapperEl.getBoundingClientRect();
@@ -83,8 +90,8 @@ export class VaultDropController {
   };
 
   private readonly handleDrop = (event: DragEvent): void => {
-    const { references, ignoredCount } = this.collectDragged();
-    if (references.length === 0) return;
+    const { references, imageFiles, ignoredCount } = this.collectDragged();
+    if (references.length === 0 && imageFiles.length === 0) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     this.dropOverlayEl.removeClass('visible');
@@ -101,11 +108,19 @@ export class VaultDropController {
       }
       this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
     }
+    if (imageFiles.length > 0) {
+      this.onDropImages?.(imageFiles);
+    }
     // Mixed drags are claimed wholesale, so surface the items we dropped.
     if (ignoredCount > 0) {
       new Notice(t('chat.drop.ignored', { count: ignoredCount }));
     }
     this.inputEl.focus();
+  };
+
+  private hasClaimableDrag(): boolean {
+    const { references, imageFiles } = this.collectDragged();
+    return references.length > 0 || imageFiles.length > 0;
   };
 
   private getDraggedItems(): unknown[] {
@@ -127,11 +142,22 @@ export class VaultDropController {
     return typeof value === 'object' && value !== null;
   }
 
-  private collectDragged(): { references: VaultDropReference[]; ignoredCount: number } {
+  private collectDragged(): {
+    references: VaultDropReference[];
+    imageFiles: TFile[];
+    ignoredCount: number;
+  } {
     const references: VaultDropReference[] = [];
+    const imageFiles: TFile[] = [];
     const seenPaths = new Set<string>();
     let ignoredCount = 0;
     for (const item of this.getDraggedItems()) {
+      if (item instanceof TFile && imageMediaTypeForFilename(item.name) !== null) {
+        if (seenPaths.has(item.path)) continue;
+        seenPaths.add(item.path);
+        imageFiles.push(item);
+        continue;
+      }
       const reference =
         item instanceof TFolder && item.path !== '/' && item.path !== ''
           ? { path: item.path, kind: 'folder' as const }
@@ -146,7 +172,7 @@ export class VaultDropController {
       seenPaths.add(reference.path);
       references.push(reference);
     }
-    return { references, ignoredCount };
+    return { references, imageFiles, ignoredCount };
   }
 
   private mentionToken(reference: VaultDropReference): string {

@@ -113,8 +113,8 @@
       "steerUnavailable": "Steuern ist gerade nicht möglich. Die Nachricht bleibt in der Warteschlange."
     },
     "drop": {
-      "context": "Notizen oder Ordner hier ablegen, um sie als Kontext hinzuzufügen",
-      "ignored": "{count} Dateien ignoriert, die keine Notizen sind; es können nur Notizen und Ordner abgelegt werden"
+      "context": "Notizen, Ordner oder Bilder hier ablegen, um sie als Kontext hinzuzufügen",
+      "ignored": "{count} nicht unterstützte Dateien ignoriert; es können nur Notizen, Ordner und Bilder abgelegt werden"
     }
   },
   "settings": {

@@ -113,8 +113,8 @@
       "steerUnavailable": "Can't steer right now. The message stays in the queue."
     },
     "drop": {
-      "context": "Drop notes or folders here to add as context",
-      "ignored": "Ignored {count} non-note file(s); only notes and folders can be dropped"
+      "context": "Drop notes, folders, or images here to add as context",
+      "ignored": "Ignored {count} unsupported file(s); only notes, folders, and images can be dropped"
     }
   },
   "settings": {

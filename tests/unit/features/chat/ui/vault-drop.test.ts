@@ -9,6 +9,7 @@ import { VaultDropController } from '@/features/chat/ui/vault-drop';
 function makeFile(path: string): any {
   const file = new (TFile as unknown as new () => Record<string, unknown>)();
   file.path = path;
+  file.name = path.split('/').pop() ?? path;
   file.extension = path.split('.').pop() ?? '';
   return file;
 }
@@ -116,11 +117,11 @@ describe('VaultDropController', () => {
       expect(inputEl.value).toBe('@a.md @dir/ @b.md ');
     });
 
-    it('skips non-markdown files, root folder, and duplicates', () => {
+    it('skips unsupported files, root folder, and duplicates', () => {
       const app = createApp({
         type: 'files',
         files: [
-          makeFile('image.png'),
+          makeFile('report.pdf'),
           makeFolder('/'),
           makeFile('a.md'),
           makeFile('a.md'),
@@ -133,10 +134,38 @@ describe('VaultDropController', () => {
       expect(inputEl.value).toBe('@a.md ');
     });
 
-    it('notifies about ignored non-note items in mixed drags', () => {
+    it('routes vault image drags to the image pipeline', () => {
+      const png = makeFile('pics/logo.png');
+      const app = createApp({ type: 'files', files: [png] });
+      const onDropImages = jest.fn();
+      new VaultDropController(app, wrapper, inputEl, { onDropImages });
+
+      const event = createDropEvent();
+      wrapper.dispatchEvent('drop', event);
+
+      expect(inputEl.value).toBe('');
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(onDropImages).toHaveBeenCalledWith([png]);
+      expect(Notice).not.toHaveBeenCalled();
+    });
+
+    it('combines mentions and image attachments for note+image drags', () => {
+      const png = makeFile('logo.png');
+      const app = createApp({ type: 'files', files: [makeFile('a.md'), png] });
+      const onDropImages = jest.fn();
+      new VaultDropController(app, wrapper, inputEl, { onDropImages });
+
+      wrapper.dispatchEvent('drop', createDropEvent());
+
+      expect(inputEl.value).toBe('@a.md ');
+      expect(onDropImages).toHaveBeenCalledWith([png]);
+      expect(Notice).not.toHaveBeenCalled();
+    });
+
+    it('notifies about ignored unsupported items in mixed drags', () => {
       const app = createApp({
         type: 'files',
-        files: [makeFile('a.md'), makeFile('logo.png')],
+        files: [makeFile('a.md'), makeFile('logo.pdf')],
       });
       new VaultDropController(app, wrapper, inputEl);
 
@@ -259,6 +288,18 @@ describe('VaultDropController', () => {
       const overlay = findOverlay(wrapper);
       expect(overlay.className).not.toContain('visible');
       expect(event.stopImmediatePropagation).not.toHaveBeenCalled();
+    });
+
+    it('shows the overlay for image-only vault drags', () => {
+      const app = createApp({ type: 'files', files: [makeFile('logo.png')] });
+      new VaultDropController(app, wrapper, inputEl);
+
+      const event = createDragEvent('dragenter');
+      wrapper.dispatchEvent('dragenter', event);
+
+      const overlay = findOverlay(wrapper);
+      expect(overlay.className).toContain('visible');
+      expect(event.stopImmediatePropagation).toHaveBeenCalled();
     });
   });
 
