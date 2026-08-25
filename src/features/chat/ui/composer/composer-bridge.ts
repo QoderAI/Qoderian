@@ -142,45 +142,48 @@ export class ComposerBridge {
   };
 
   private installSourceInterceptors(): void {
-    const nativeValueGet = this.descriptors.value.get!;
-    const nativeValueSet = this.descriptors.value.set!;
-    const nativeSelectionStartGet = this.descriptors.selectionStart.get!;
-    const nativeSelectionStartSet = this.descriptors.selectionStart.set!;
-    const nativeSelectionEndGet = this.descriptors.selectionEnd.get!;
-    const nativeSelectionEndSet = this.descriptors.selectionEnd.set!;
-    const nativePlaceholderGet = this.descriptors.placeholder.get!;
-    const nativePlaceholderSet = this.descriptors.placeholder.set!;
     const sourceEl = this.sourceEl;
+    // Bind the native accessors to the element up front: they must always run
+    // with the textarea as `this`, and the bound references carry precise
+    // types instead of the descriptors' `any` signatures.
+    const nativeValueGet = this.descriptors.value.get!.bind(sourceEl) as () => string;
+    const nativeValueSet = this.descriptors.value.set!.bind(sourceEl) as (value: string) => void;
+    const nativeSelectionStartGet = this.descriptors.selectionStart.get!.bind(sourceEl) as () => number;
+    const nativeSelectionStartSet = this.descriptors.selectionStart.set!.bind(sourceEl) as (position: number | null) => void;
+    const nativeSelectionEndGet = this.descriptors.selectionEnd.get!.bind(sourceEl) as () => number;
+    const nativeSelectionEndSet = this.descriptors.selectionEnd.set!.bind(sourceEl) as (position: number | null) => void;
+    const nativePlaceholderGet = this.descriptors.placeholder.get!.bind(sourceEl) as () => string;
+    const nativePlaceholderSet = this.descriptors.placeholder.set!.bind(sourceEl) as (value: string) => void;
 
     Object.defineProperty(sourceEl, 'value', {
       configurable: true,
-      get: () => nativeValueGet.call(sourceEl),
+      get: () => nativeValueGet(),
       set: (value: string) => {
-        nativeValueSet.call(sourceEl, value);
+        nativeValueSet(value);
         this.syncComposerFromSource();
       },
     });
     Object.defineProperty(sourceEl, 'selectionStart', {
       configurable: true,
-      get: () => nativeSelectionStartGet.call(sourceEl),
+      get: () => nativeSelectionStartGet(),
       set: (position: number | null) => {
-        nativeSelectionStartSet.call(sourceEl, position);
+        nativeSelectionStartSet(position);
         this.syncComposerSelectionFromSource();
       },
     });
     Object.defineProperty(sourceEl, 'selectionEnd', {
       configurable: true,
-      get: () => nativeSelectionEndGet.call(sourceEl),
+      get: () => nativeSelectionEndGet(),
       set: (position: number | null) => {
-        nativeSelectionEndSet.call(sourceEl, position);
+        nativeSelectionEndSet(position);
         this.syncComposerSelectionFromSource();
       },
     });
     Object.defineProperty(sourceEl, 'placeholder', {
       configurable: true,
-      get: () => nativePlaceholderGet.call(sourceEl),
+      get: () => nativePlaceholderGet(),
       set: (value: string) => {
-        nativePlaceholderSet.call(sourceEl, value);
+        nativePlaceholderSet(value);
         if (!this.destroyed) this.composer.setPlaceholder(value);
       },
     });
