@@ -48,6 +48,12 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - Dropping a vault note or folder into the composer no longer pastes the
   raw `obsidian://open` URI next to the mention, and the inserted mention
   chipifies like dropdown insertions.
+- The queue's Steer action now tracks the streaming state: it no longer
+  goes missing on remaining rows after queued messages auto-drain, and no
+  longer lingers after a turn ends through plan approval paths.
+- Mixed drags into the composer (notes together with images or other
+  files) now show a notice counting the ignored non-note items instead of
+  dropping them silently.
 
 ## [1.0.5] - 2026-08-18
 

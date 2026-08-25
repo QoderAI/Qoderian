@@ -1,5 +1,5 @@
 import type { App } from 'obsidian';
-import { TFile, TFolder } from 'obsidian';
+import { Notice, TFile, TFolder } from 'obsidian';
 
 import { t } from '@/i18n/i18n';
 import type { MentionInsertReference } from '@/shared/mention/types';
@@ -55,20 +55,20 @@ export class VaultDropController {
   }
 
   private readonly handleDragEnter = (event: DragEvent): void => {
-    if (this.getDraggedReferences().length === 0) return;
+    if (this.collectDragged().references.length === 0) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     this.dropOverlayEl.addClass('visible');
   };
 
   private readonly handleDragOver = (event: DragEvent): void => {
-    if (this.getDraggedReferences().length === 0) return;
+    if (this.collectDragged().references.length === 0) return;
     event.preventDefault();
     event.stopImmediatePropagation();
   };
 
   private readonly handleDragLeave = (event: DragEvent): void => {
-    if (this.getDraggedReferences().length === 0) return;
+    if (this.collectDragged().references.length === 0) return;
     event.stopImmediatePropagation();
 
     const rect = this.inputWrapperEl.getBoundingClientRect();
@@ -83,7 +83,7 @@ export class VaultDropController {
   };
 
   private readonly handleDrop = (event: DragEvent): void => {
-    const references = this.getDraggedReferences();
+    const { references, ignoredCount } = this.collectDragged();
     if (references.length === 0) return;
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -100,6 +100,10 @@ export class VaultDropController {
         });
       }
       this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    // Mixed drags are claimed wholesale, so surface the items we dropped.
+    if (ignoredCount > 0) {
+      new Notice(t('chat.drop.ignored', { count: ignoredCount }));
     }
     this.inputEl.focus();
   };
@@ -123,9 +127,10 @@ export class VaultDropController {
     return typeof value === 'object' && value !== null;
   }
 
-  private getDraggedReferences(): VaultDropReference[] {
+  private collectDragged(): { references: VaultDropReference[]; ignoredCount: number } {
     const references: VaultDropReference[] = [];
     const seenPaths = new Set<string>();
+    let ignoredCount = 0;
     for (const item of this.getDraggedItems()) {
       const reference =
         item instanceof TFolder && item.path !== '/' && item.path !== ''
@@ -133,11 +138,15 @@ export class VaultDropController {
           : item instanceof TFile && item.extension.toLowerCase() === 'md'
             ? { path: item.path, kind: 'file' as const }
             : null;
-      if (!reference || seenPaths.has(reference.path)) continue;
+      if (!reference) {
+        ignoredCount += 1;
+        continue;
+      }
+      if (seenPaths.has(reference.path)) continue;
       seenPaths.add(reference.path);
       references.push(reference);
     }
-    return references;
+    return { references, ignoredCount };
   }
 
   private mentionToken(reference: VaultDropReference): string {

@@ -113,7 +113,8 @@
       "steerUnavailable": "Não é possível redirecionar agora. A mensagem permanece na fila."
     },
     "drop": {
-      "context": "Solte notas ou pastas aqui para adicioná-las como contexto"
+      "context": "Solte notas ou pastas aqui para adicioná-las como contexto",
+      "ignored": "{count} arquivos que não são notas foram ignorados; apenas notas e pastas podem ser soltas"
     }
   },
   "settings": {

@@ -113,7 +113,8 @@
       "steerUnavailable": "Ahora no se puede redirigir. El mensaje permanece en la cola."
     },
     "drop": {
-      "context": "Arrastra notas o carpetas aquí para añadirlas como contexto"
+      "context": "Arrastra notas o carpetas aquí para añadirlas como contexto",
+      "ignored": "Se ignoraron {count} archivos que no son notas; solo se pueden soltar notas y carpetas"
     }
   },
   "settings": {

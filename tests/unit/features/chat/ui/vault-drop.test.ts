@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { createMockEl } from '@test/helpers/mock-element';
-import { TFile, TFolder } from 'obsidian';
+import { Notice, TFile, TFolder } from 'obsidian';
 
 import { VaultDropController } from '@/features/chat/ui/vault-drop';
 
@@ -69,6 +69,7 @@ describe('VaultDropController', () => {
   let inputEl: any;
 
   beforeEach(() => {
+    (Notice as unknown as jest.Mock).mockClear();
     wrapper = createMockEl();
     wrapper.getBoundingClientRect = () => ({
       top: 0,
@@ -130,6 +131,31 @@ describe('VaultDropController', () => {
       wrapper.dispatchEvent('drop', createDropEvent());
 
       expect(inputEl.value).toBe('@a.md ');
+    });
+
+    it('notifies about ignored non-note items in mixed drags', () => {
+      const app = createApp({
+        type: 'files',
+        files: [makeFile('a.md'), makeFile('logo.png')],
+      });
+      new VaultDropController(app, wrapper, inputEl);
+
+      wrapper.dispatchEvent('drop', createDropEvent());
+
+      expect(inputEl.value).toBe('@a.md ');
+      expect(Notice).toHaveBeenCalledWith(expect.stringContaining('1'));
+    });
+
+    it('does not notify when every dragged item is a note or folder', () => {
+      const app = createApp({
+        type: 'files',
+        files: [makeFile('a.md'), makeFolder('dir')],
+      });
+      new VaultDropController(app, wrapper, inputEl);
+
+      wrapper.dispatchEvent('drop', createDropEvent());
+
+      expect(Notice).not.toHaveBeenCalled();
     });
 
     it('does not insert a mention that already exists in the input', () => {

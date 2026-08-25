@@ -501,6 +501,27 @@ describe('FileContextManager', () => {
       expect(manager.isSessionStarted()).toBe(false);
       manager.destroy();
     });
+
+    it('clears tracked composer references at conversation boundaries', () => {
+      const app = createMockApp();
+      const onReferencesChanged = jest.fn();
+      const manager = new FileContextManager(
+        app, containerEl as any, inputEl, { ...createMockCallbacks(), onReferencesChanged }
+      );
+
+      manager.registerComposerReference({ token: '@a.md', path: 'a.md', kind: 'file' });
+      expect(onReferencesChanged).toHaveBeenLastCalledWith(
+        [expect.objectContaining({ token: '@a.md' })],
+      );
+
+      manager.resetForNewConversation();
+      expect(onReferencesChanged).toHaveBeenLastCalledWith([]);
+
+      manager.registerComposerReference({ token: '@b.md', path: 'b.md', kind: 'file' });
+      manager.resetForLoadedConversation(true);
+      expect(onReferencesChanged).toHaveBeenLastCalledWith([]);
+      manager.destroy();
+    });
   });
 
   describe('handleFileOpen', () => {
