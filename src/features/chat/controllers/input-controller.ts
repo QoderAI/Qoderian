@@ -559,8 +559,9 @@ export class InputController {
 
   /**
    * Codex-style steering: inject a queued turn into the in-flight turn. The
-   * CLI applies it at the next step boundary. Returns false when steering is
-   * not possible right now; the message should stay queued then.
+   * CLI interrupts the active turn and handles the text immediately
+   * (`priority: 'now'`). Returns false when steering is not possible right
+   * now; the message should stay queued then.
    */
   steerQueuedTurn(turn: QueuedChatTurn): boolean {
     if (!this.canSteerQueuedTurn()) return false;

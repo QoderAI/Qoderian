@@ -1163,8 +1163,9 @@ export class QoderChatRuntime implements ChatRuntime {
   }
 
   /**
-   * Inject a text message into the in-flight turn. The CLI applies it at the
-   * next step boundary (between tool calls). Fails when no turn is running.
+   * Inject a text message into the in-flight turn (steering). The channel
+   * stamps `priority: 'now'` so the CLI interrupts the active turn and
+   * handles the text immediately. Fails when no turn is running.
    */
   steerTurn(text: string): boolean {
     return this.messageChannel?.steer(text) ?? false;
