@@ -133,6 +133,19 @@ export class QoderMessageChannel implements AsyncIterable<SDKUserMessage> {
     }
   }
 
+  /**
+   * Deliver a text message into the in-flight turn (steering). The CLI picks
+   * it up at the next step boundary. Returns false when there is no active
+   * turn or no consumer waiting; callers should keep the message queued then.
+   */
+  steer(text: string): boolean {
+    if (this.closed || !this.turnActive || !this.resolveNext) return false;
+    const resolve = this.resolveNext;
+    this.resolveNext = null;
+    resolve({ value: this.pendingToMessage({ type: 'text', content: text }), done: false });
+    return true;
+  }
+
   close(): void {
     this.closed = true;
     this.queue = [];

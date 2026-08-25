@@ -415,6 +415,38 @@
   gap: 2px;
 }
 
+/* Steering action - icon + label, echoes the resume button treatment */
+.qoderian-input-queue-row button.qoderian-queue-row-steer {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.qoderian-input-queue-row button.qoderian-queue-row-steer:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qoderian-queue-row-steer-icon,
+.qoderian-queue-row-steer-icon svg {
+  display: inline-flex;
+}
+
+.qoderian-queue-row-steer svg {
+  width: 12px;
+  height: 12px;
+}
+
 .qoderian-input-queue-row button.qoderian-queue-indicator-icon-action {
   display: inline-flex;
   align-items: center;

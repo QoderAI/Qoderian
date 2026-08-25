@@ -18,6 +18,11 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   composer (aligned with the Qoder IDE send queue). Each entry shows a
   drag handle for reordering plus edit (withdraw into the composer) and
   delete actions, and entries drain one per turn end in FIFO order.
+- Steer an in-flight turn from the send queue (Codex-style): while a
+  response is streaming, each queued entry without images gains a Steer
+  action that injects it into the running turn at the next step boundary,
+  rendering it as a user message immediately instead of waiting for the
+  turn to end.
 - Drag notes or folders from the Obsidian file explorer into the chat
   composer: they are inserted as `@note` / `@folder/` context mentions at
   the caret, with duplicates skipped and a drop overlay while dragging.

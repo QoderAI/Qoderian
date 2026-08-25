@@ -69,6 +69,8 @@ if (!proto.createSpan) {
 
 function createController(overrides?: Partial<{
   sendQueuedTurn: (turn: QueuedChatTurn) => void;
+  canSteerQueuedTurn: () => boolean;
+  steerQueuedTurn: (turn: QueuedChatTurn) => boolean;
 }>) {
   const state = new ChatState();
   state.queueIndicatorEl = document.createElement('div');
@@ -80,6 +82,8 @@ function createController(overrides?: Partial<{
     getImageContextManager: () => null,
     resetInputHeight: jest.fn(),
     sendQueuedTurn,
+    canSteerQueuedTurn: overrides?.canSteerQueuedTurn,
+    steerQueuedTurn: overrides?.steerQueuedTurn,
   });
   return { controller, state, inputEl, sendQueuedTurn };
 }
@@ -206,5 +210,64 @@ describe('QueuedMessageController', () => {
     const toggleAgain = state.queueIndicatorEl!.querySelector('.qoderian-queue-header-toggle') as HTMLElement;
     toggleAgain.dispatchEvent(new Event('click'));
     expect(state.queueIndicatorEl!.querySelectorAll('.qoderian-queue-row')).toHaveLength(1);
+  });
+
+  it('renders the steer action only while steering is available', () => {
+    const steerable = createController({ canSteerQueuedTurn: () => true });
+    steerable.controller.enqueue('first', turnRequest('first'));
+    expect(steerable.state.queueIndicatorEl!.querySelector('.qoderian-queue-row-steer')).not.toBeNull();
+
+    const plain = createController();
+    plain.controller.enqueue('first', turnRequest('first'));
+    expect(plain.state.queueIndicatorEl!.querySelector('.qoderian-queue-row-steer')).toBeNull();
+  });
+
+  it('steerToTurn removes the item when the runtime accepts it', () => {
+    const steerQueuedTurn = jest.fn().mockReturnValue(true);
+    const { controller, state, sendQueuedTurn } = createController({
+      canSteerQueuedTurn: () => true,
+      steerQueuedTurn,
+    });
+    controller.enqueue('first', turnRequest('first'));
+    controller.enqueue('second', turnRequest('second'));
+
+    const steerEl = state.queueIndicatorEl!.querySelector('.qoderian-queue-row-steer') as HTMLElement;
+    steerEl.dispatchEvent(new Event('click'));
+
+    expect(steerQueuedTurn).toHaveBeenCalledWith(expect.objectContaining({ displayContent: 'first' }));
+    expect(state.queuedMessages.map(message => message.content)).toEqual(['second']);
+    expect(sendQueuedTurn).not.toHaveBeenCalled();
+  });
+
+  it('steerToTurn keeps the item queued when the runtime declines', () => {
+    const steerQueuedTurn = jest.fn().mockReturnValue(false);
+    const { controller, state, sendQueuedTurn } = createController({
+      canSteerQueuedTurn: () => true,
+      steerQueuedTurn,
+    });
+    controller.enqueue('first', turnRequest('first'));
+
+    const steerEl = state.queueIndicatorEl!.querySelector('.qoderian-queue-row-steer') as HTMLElement;
+    steerEl.dispatchEvent(new Event('click'));
+
+    expect(state.queuedMessages.map(message => message.content)).toEqual(['first']);
+    expect(sendQueuedTurn).not.toHaveBeenCalled();
+  });
+
+  it('hides the steer action for queued items that carry images', () => {
+    const { controller, state } = createController({ canSteerQueuedTurn: () => true });
+    controller.enqueue('with image', {
+      ...turnRequest('with image'),
+      images: [{
+        id: 'img-1',
+        name: 'shot.png',
+        mediaType: 'image/png',
+        data: 'aW1hZ2U=',
+        size: 7,
+        source: 'paste',
+      }],
+    });
+
+    expect(state.queueIndicatorEl!.querySelector('.qoderian-queue-row-steer')).toBeNull();
   });
 });

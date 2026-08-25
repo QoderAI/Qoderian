@@ -32,6 +32,11 @@ export interface ChatRuntime {
     queryOptions?: ChatRuntimeQueryOptions,
   ): AsyncGenerator<StreamChunk>;
   cancel(): void;
+  /**
+   * Inject a text message into the in-flight turn (steering). Returns false
+   * when the runtime cannot steer right now; the message stays queued then.
+   */
+  steerTurn?(text: string): boolean;
   resetSession(): void;
   getSessionId(): string | null;
   consumeSessionInvalidation(): boolean;

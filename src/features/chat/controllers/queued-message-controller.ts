@@ -1,4 +1,4 @@
-import { setIcon } from 'obsidian';
+import { Notice, setIcon } from 'obsidian';
 
 import type { ChatTurnRequest } from '../../../core/runtime/types';
 import { t } from '../../../i18n/i18n';
@@ -16,6 +16,10 @@ export interface QueuedMessageControllerDeps {
   getImageContextManager: () => ImageContextManager | null;
   resetInputHeight: () => void;
   sendQueuedTurn: (message: QueuedChatTurn) => void;
+  /** Whether the in-flight turn currently accepts steering. */
+  canSteerQueuedTurn?: () => boolean;
+  /** Inject a queued turn into the in-flight turn; false keeps it queued. */
+  steerQueuedTurn?: (message: QueuedChatTurn) => boolean;
 }
 
 let nextQueuedMessageId = 1;
@@ -114,6 +118,19 @@ export class QueuedMessageController {
     window.setTimeout(() => this.deps.sendQueuedTurn(this.toQueuedChatTurn(next)), 0);
   }
 
+  /** Inject one queued item into the in-flight turn (Codex “Steer”). */
+  steerToTurn(id: string): void {
+    const target = this.deps.state.queuedMessages.find(message => message.id === id);
+    if (!target) return;
+    const accepted = this.deps.steerQueuedTurn?.(this.toQueuedChatTurn(target)) ?? false;
+    if (!accepted) {
+      new Notice(t('chat.queue.steerUnavailable'));
+      this.updateIndicator();
+      return;
+    }
+    this.discard(id);
+  }
+
   private renderCollapsibleHeader(containerEl: HTMLElement, count: number): void {
     const headerEl = containerEl.createDiv({ cls: 'qoderian-queue-header' });
     const toggleEl = headerEl.createEl('button', {
@@ -178,6 +195,20 @@ export class QueuedMessageController {
     });
 
     const actionsEl = rowEl.createDiv({ cls: 'qoderian-queue-row-actions' });
+    if (this.deps.canSteerQueuedTurn?.() && (message.images?.length ?? 0) === 0) {
+      const steerEl = actionsEl.createEl('button', {
+        cls: 'qoderian-queue-row-steer',
+        attr: { 'aria-label': t('chat.queue.steer'), title: t('chat.queue.steer'), type: 'button' },
+      });
+      const steerIconEl = steerEl.createSpan({ cls: 'qoderian-queue-row-steer-icon' });
+      setIcon(steerIconEl, 'corner-down-right');
+      steerEl.createSpan({ cls: 'qoderian-queue-row-steer-label', text: t('chat.queue.steer') });
+      steerEl.addEventListener('click', (event) => {
+        event.stopPropagation();
+        this.steerToTurn(message.id);
+      });
+    }
+
     const editEl = this.createIconButton(actionsEl, 'pencil', t('chat.queue.edit'));
     editEl.addEventListener('click', (event) => {
       event.stopPropagation();

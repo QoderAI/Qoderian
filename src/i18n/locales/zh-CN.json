@@ -108,7 +108,9 @@
       "collapse": "折叠队列",
       "expand": "展开队列",
       "paused": "由于你中断了当前响应，队列已暂停",
-      "resume": "继续"
+      "resume": "继续",
+      "steer": "引导",
+      "steerUnavailable": "当前无法引导，消息仍保留在队列中。"
     },
     "drop": {
       "context": "拖拽笔记或文件夹到此处，添加为上下文"

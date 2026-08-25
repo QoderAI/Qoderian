@@ -108,7 +108,9 @@
       "collapse": "Collapse queue",
       "expand": "Expand queue",
       "paused": "Queue paused because you interrupted the current response",
-      "resume": "Resume"
+      "resume": "Resume",
+      "steer": "Steer",
+      "steerUnavailable": "Can't steer right now. The message stays in the queue."
     },
     "drop": {
       "context": "Drop notes or folders here to add as context"

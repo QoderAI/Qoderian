@@ -127,6 +127,8 @@ export type TranslationKey =
   | 'chat.queue.expand'
   | 'chat.queue.paused'
   | 'chat.queue.resume'
+  | 'chat.queue.steer'
+  | 'chat.queue.steerUnavailable'
 
   // Vault drag & drop into composer
   | 'chat.drop.context'
