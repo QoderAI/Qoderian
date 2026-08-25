@@ -332,6 +332,9 @@ export class InputController {
         new Notice('Failed to initialize agent service. Please try again.');
         streamController.hideThinkingIndicator();
         state.isStreaming = false;
+        // Re-render the send queue so steer buttons drop now that the turn
+        // ended before it started (same contract as the normal exit path).
+        this.updateQueueIndicator();
         this.activeStreamingAssistantMessage = null;
         this.resetRuntimeMessageBoundaryState();
         return;
@@ -341,6 +344,9 @@ export class InputController {
     const agentService = this.getAgentService();
     if (!agentService) {
       new Notice('Agent service not available. Please reload the plugin.');
+      streamController.hideThinkingIndicator();
+      state.isStreaming = false;
+      this.updateQueueIndicator();
       this.activeStreamingAssistantMessage = null;
       this.resetRuntimeMessageBoundaryState();
       return;
