@@ -480,11 +480,16 @@ export class QoderianSettingTab extends PluginSettingTab {
   }
 
   /**
-   * Imperative renderer for Obsidian versions older than 1.13.0, which
+   * Imperative entry point for Obsidian versions older than 1.13.0, which
    * never consult getSettingDefinitions(). Kept as the documented fallback
    * and sharing the same builders as the declarative render rows.
    */
   display(): void {
+    this.renderLegacySettings();
+  }
+
+  /** Rebuilds the legacy page; re-invoked directly after a locale change. */
+  private renderLegacySettings(): void {
     const { containerEl } = this;
     containerEl.empty();
     containerEl.addClass('qoderian-settings');
@@ -536,7 +541,7 @@ export class QoderianSettingTab extends PluginSettingTab {
             }
             this.plugin.settings.locale = locale;
             await this.plugin.saveSettings();
-            this.display();
+            this.renderLegacySettings();
             this.refreshViewChrome();
           });
       });
