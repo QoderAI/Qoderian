@@ -68,13 +68,12 @@ describe('QoderResponseRouter', () => {
       expect(events.onDone).toHaveBeenCalledTimes(1);
     });
 
-    it('routes the abort receipt to the handler as a notice chunk', async () => {
+    it('routes nothing to the handler for an abort receipt', async () => {
       const { router, chunks } = createRouterHarness();
 
       await router.route(buildAbortResult());
 
-      expect(chunks).toContainEqual({ type: 'notice', content: 'Turn interrupted' });
-      expect(chunks.filter(chunk => chunk.type === 'error')).toEqual([]);
+      expect(chunks).toEqual([]);
     });
 
     it('completes the handler for non-abort error results', async () => {

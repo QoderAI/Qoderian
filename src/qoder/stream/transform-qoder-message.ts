@@ -607,19 +607,13 @@ export function* transformSDKMessage(
         }
         options.usageState.clear();
       }
-      if (isResultError(message)) {
-        if (isAbortedResult(message)) {
-          // Cancellation receipt, not a failure: render as a notice and let
-          // the router keep the turn stream alive for the successor turn.
-          yield { type: 'notice', content: 'Turn interrupted' };
+      if (isResultError(message) && !isAbortedResult(message)) {
+        const errors = message.errors.filter((error) => error.trim().length > 0);
+        if (errors.length === 0) {
+          yield { type: 'error', content: `Result error: ${message.subtype}` };
         } else {
-          const errors = message.errors.filter((error) => error.trim().length > 0);
-          if (errors.length === 0) {
-            yield { type: 'error', content: `Result error: ${message.subtype}` };
-          } else {
-            for (const error of errors) {
-              yield { type: 'error', content: error };
-            }
+          for (const error of errors) {
+            yield { type: 'error', content: error };
           }
         }
       }

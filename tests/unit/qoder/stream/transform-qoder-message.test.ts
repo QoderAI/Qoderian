@@ -1175,8 +1175,9 @@ describe('transformSDKMessage', () => {
       ]);
     });
 
-    it('renders an aborted_streaming result as a notice, not an error', () => {
-      // Receipt for a deliberately interrupted turn (Esc or priority-'now' steer).
+    it('stays silent for an aborted_streaming result', () => {
+      // Receipt for a deliberately interrupted turn (Esc or priority-'now' steer);
+      // the user already saw the interruption, no bubble output is wanted.
       const message = msg({
         type: 'result',
         subtype: 'error_during_execution',
@@ -1186,11 +1187,10 @@ describe('transformSDKMessage', () => {
 
       const results = [...transformSDKMessage(message)];
 
-      expect(results.filter(result => result.type === 'error')).toEqual([]);
-      expect(results).toContainEqual({ type: 'notice', content: 'Turn interrupted' });
+      expect(results.filter(result => result.type === 'error' || result.type === 'notice')).toEqual([]);
     });
 
-    it('renders an aborted_tools result as a notice, not an error', () => {
+    it('stays silent for an aborted_tools result', () => {
       const message = msg({
         type: 'result',
         subtype: 'error_during_execution',
@@ -1200,8 +1200,7 @@ describe('transformSDKMessage', () => {
 
       const results = [...transformSDKMessage(message)];
 
-      expect(results.filter(result => result.type === 'error')).toEqual([]);
-      expect(results).toContainEqual({ type: 'notice', content: 'Turn interrupted' });
+      expect(results.filter(result => result.type === 'error' || result.type === 'notice')).toEqual([]);
     });
 
     it('keeps error events for non-abort terminal reasons', () => {
