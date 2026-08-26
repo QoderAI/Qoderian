@@ -69,6 +69,9 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - Steering a queued message no longer drops or misplaces the opening of
   the steered reply: chunks that arrive while the chat swaps streaming
   bubbles are buffered and replayed into the fresh bubble in order.
+- The steered reply streams incrementally again: the interrupted turn's
+  receipt no longer triggers a context-usage request that stalled the
+  response consumer, which made the whole reply appear only at the end.
 
 ## [1.0.5] - 2026-08-18
 
