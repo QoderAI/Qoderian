@@ -79,6 +79,13 @@ export class InputController {
   private readonly inputCommands: InputCommandController;
   private readonly queuedMessages: QueuedMessageController;
   private activeStreamingAssistantMessage: ChatMessage | null = null;
+  // While a steer splice is swapping the render target (finalizing the old
+  // bubble is async), the send loop buffers successor chunks instead of
+  // rendering them into the old bubble; the splice replays them into the
+  // fresh bubble afterwards. Without this, the steered reply's opening
+  // tokens land in the interrupted bubble and look lost/misplaced.
+  private steerSpliceActive = false;
+  private steerSpliceBuffer: StreamChunk[] = [];
   // Contract: `user_message_start` / `assistant_message_start` boundary
   // chunks currently have no producer in the runtime — they are a reserved
   // mechanism, so the handlers below are dormant. Steering relies on
@@ -393,6 +400,11 @@ export class InputController {
           continue;
         }
 
+        if (this.steerSpliceActive) {
+          this.steerSpliceBuffer.push(chunk);
+          continue;
+        }
+
         await streamController.handleStreamChunk(
           chunk,
           this.activeStreamingAssistantMessage ?? assistantMsg,
@@ -569,11 +581,51 @@ export class InputController {
     if (!text) return false;
     const accepted = this.getAgentService()?.steerTurn?.(text) ?? false;
     if (!accepted) return false;
-    void this.spliceRuntimeUserMessage({
+    this.beginSteerSplice({
       displayContent: turn.displayContent,
       persistedContent: text,
     });
     return true;
+  }
+
+  /**
+   * Runs the steer splice with chunk buffering active: successor chunks that
+   * arrive while the splice awaits the old bubble's finalization are held
+   * back and replayed into the fresh bubble once the splice completes.
+   */
+  private beginSteerSplice(details: { displayContent: string; persistedContent?: string }): void {
+    if (!this.steerSpliceActive) {
+      this.steerSpliceActive = true;
+      this.steerSpliceBuffer = [];
+    }
+    void this.spliceRuntimeUserMessage(details)
+      .catch(() => undefined)
+      .then(() => this.drainSteerSpliceBuffer())
+      .catch(() => {
+        this.steerSpliceActive = false;
+        this.steerSpliceBuffer = [];
+      });
+  }
+
+  /** Replays chunks buffered during the splice, then reopens direct rendering. */
+  private async drainSteerSpliceBuffer(): Promise<void> {
+    try {
+      while (this.steerSpliceBuffer.length > 0) {
+        const chunk = this.steerSpliceBuffer.shift()!;
+        const target = this.activeStreamingAssistantMessage;
+        if (target) await this.deps.streamController.handleStreamChunk(chunk, target);
+      }
+    } catch (error) {
+      const target = this.activeStreamingAssistantMessage;
+      if (target) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        await this.deps.streamController
+          .handleStreamChunk({ type: 'error', content: message }, target)
+          .catch(() => undefined);
+      }
+    } finally {
+      this.steerSpliceActive = false;
+    }
   }
 
   private async buildTurnSubmission(options: {

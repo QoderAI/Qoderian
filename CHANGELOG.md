@@ -66,6 +66,9 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   failure) now fully clean up the streaming state and queue indicator,
   so the composer no longer stays stuck as "streaming" after an early
   send error.
+- Steering a queued message no longer drops or misplaces the opening of
+  the steered reply: chunks that arrive while the chat swaps streaming
+  bubbles are buffered and replayed into the fresh bubble in order.
 
 ## [1.0.5] - 2026-08-18
 
