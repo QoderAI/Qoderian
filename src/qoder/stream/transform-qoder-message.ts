@@ -128,6 +128,22 @@ function isResultError(message: { type: 'result'; subtype: string }): message is
   return !!message.subtype && message.subtype !== 'success';
 }
 
+const ABORT_TERMINAL_REASONS = new Set(['aborted_streaming', 'aborted_tools']);
+
+/**
+ * A result whose `terminal_reason` marks a deliberate abort (Esc interrupt or
+ * a priority-'now' steer), per the CLI protocol. The CLI emits these as
+ * error_during_execution results, but they are cancellation receipts, not
+ * failures — the CLI's own headless consumer maps them to SIGINT's exit code.
+ */
+export function isAbortedResult(
+  message: { type: string; terminal_reason?: string | null },
+): boolean {
+  return message.type === 'result'
+    && !!message.terminal_reason
+    && ABORT_TERMINAL_REASONS.has(message.terminal_reason);
+}
+
 function normalizeQoderModelId(model: string): string {
   const normalized = model.trim().toLowerCase();
   const qoderIndex = normalized.indexOf('qoder-');
@@ -591,7 +607,7 @@ export function* transformSDKMessage(
         }
         options.usageState.clear();
       }
-      if (isResultError(message)) {
+      if (isResultError(message) && !isAbortedResult(message)) {
         const errors = message.errors.filter((error) => error.trim().length > 0);
         if (errors.length === 0) {
           yield { type: 'error', content: `Result error: ${message.subtype}` };

@@ -1175,6 +1175,47 @@ describe('transformSDKMessage', () => {
       ]);
     });
 
+    it('stays silent for an aborted_streaming result', () => {
+      // Receipt for a deliberately interrupted turn (Esc or priority-'now' steer);
+      // the user already saw the interruption, no bubble output is wanted.
+      const message = msg({
+        type: 'result',
+        subtype: 'error_during_execution',
+        errors: ['Operation aborted'],
+        terminal_reason: 'aborted_streaming',
+      });
+
+      const results = [...transformSDKMessage(message)];
+
+      expect(results.filter(result => result.type === 'error' || result.type === 'notice')).toEqual([]);
+    });
+
+    it('stays silent for an aborted_tools result', () => {
+      const message = msg({
+        type: 'result',
+        subtype: 'error_during_execution',
+        errors: ['Operation aborted'],
+        terminal_reason: 'aborted_tools',
+      });
+
+      const results = [...transformSDKMessage(message)];
+
+      expect(results.filter(result => result.type === 'error' || result.type === 'notice')).toEqual([]);
+    });
+
+    it('keeps error events for non-abort terminal reasons', () => {
+      const message = msg({
+        type: 'result',
+        subtype: 'error_during_execution',
+        errors: ['Something failed'],
+        terminal_reason: 'something_else',
+      });
+
+      const results = [...transformSDKMessage(message)];
+
+      expect(results).toContainEqual({ type: 'error', content: 'Something failed' });
+    });
+
     it('yields context_window with 1M for [1m] models', () => {
       const message = msg({
         type: 'result',

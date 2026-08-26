@@ -20,8 +20,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   delete actions, and entries drain one per turn end in FIFO order.
 - Steer an in-flight turn from the send queue (Codex-style): while a
   response is streaming, each queued entry without images gains a Steer
-  action that injects it into the running turn at the next step boundary,
-  rendering it as a user message immediately instead of waiting for the
+  action that interrupts the running turn and handles the message
+  immediately, rendering it as a user message instead of waiting for the
   turn to end.
 - Drag notes or folders from the Obsidian file explorer into the chat
   composer: they are inserted as `@note` / `@folder/` context mentions at
@@ -58,6 +58,14 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - The settings language row now updates its own label and description
   immediately when the display language is changed, instead of keeping
   the previous language's text until the settings tab is reopened.
+- Steering an in-flight turn now interrupts it immediately instead of
+  queuing the message as a follow-up turn that only arrives after the
+  running response finishes, and the interrupted turn no longer shows an
+  error receipt.
+- Send failure paths (agent service unavailable or initialization
+  failure) now fully clean up the streaming state and queue indicator,
+  so the composer no longer stays stuck as "streaming" after an early
+  send error.
 
 ## [1.0.5] - 2026-08-18
 

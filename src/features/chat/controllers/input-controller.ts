@@ -332,6 +332,9 @@ export class InputController {
         new Notice('Failed to initialize agent service. Please try again.');
         streamController.hideThinkingIndicator();
         state.isStreaming = false;
+        // Re-render the send queue so steer buttons drop now that the turn
+        // ended before it started (same contract as the normal exit path).
+        this.updateQueueIndicator();
         this.activeStreamingAssistantMessage = null;
         this.resetRuntimeMessageBoundaryState();
         return;
@@ -341,6 +344,9 @@ export class InputController {
     const agentService = this.getAgentService();
     if (!agentService) {
       new Notice('Agent service not available. Please reload the plugin.');
+      streamController.hideThinkingIndicator();
+      state.isStreaming = false;
+      this.updateQueueIndicator();
       this.activeStreamingAssistantMessage = null;
       this.resetRuntimeMessageBoundaryState();
       return;
@@ -553,8 +559,9 @@ export class InputController {
 
   /**
    * Codex-style steering: inject a queued turn into the in-flight turn. The
-   * CLI applies it at the next step boundary. Returns false when steering is
-   * not possible right now; the message should stay queued then.
+   * CLI interrupts the active turn and handles the text immediately
+   * (`priority: 'now'`). Returns false when steering is not possible right
+   * now; the message should stay queued then.
    */
   steerQueuedTurn(turn: QueuedChatTurn): boolean {
     if (!this.canSteerQueuedTurn()) return false;

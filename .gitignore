@@ -47,3 +47,4 @@ coverage/
 # Temporary screenshots from automated UI verification
 /.cu_crop_*.png
 /.verify-shots/
+/.cu_tmp/

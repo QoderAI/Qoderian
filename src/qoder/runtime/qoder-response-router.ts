@@ -3,7 +3,7 @@ import { Notice } from 'obsidian';
 
 import type { AutoTurnCallback } from '../../core/runtime/types';
 import type { StreamChunk } from '../../core/types';
-import { transformSDKMessage } from '../stream/transform-qoder-message';
+import { isAbortedResult,transformSDKMessage } from '../stream/transform-qoder-message';
 import { isContextWindowEvent, isSessionInitEvent, isStreamChunk } from '../stream/type-guards';
 import type { SessionInitEvent } from '../stream/types';
 import { TOOL_ENTER_PLAN_MODE } from '../tools/tool-names';
@@ -160,7 +160,13 @@ export class QoderResponseRouter {
     if (handler) {
       handler.resetStreamText();
       handler.resetStreamThinking();
-      handler.onDone();
+      // A deliberately aborted turn (Esc or priority-'now' steer) is followed
+      // by its successor turn or by consumer teardown — never by session
+      // idle with the handler still waiting. Keep the handler alive so the
+      // successor's chunks keep streaming into the same turn generator.
+      if (!isAbortedResult(message)) {
+        handler.onDone();
+      }
     } else {
       await this.flushAutoTurnBuffer();
     }

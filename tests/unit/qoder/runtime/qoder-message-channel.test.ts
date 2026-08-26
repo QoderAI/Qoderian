@@ -418,4 +418,52 @@ describe('QoderMessageChannel', () => {
       expect(channel.isTurnActive()).toBe(false);
     });
   });
+
+  describe('steer', () => {
+    it('delivers the text with priority now so the CLI interrupts the active turn', async () => {
+      const iterator = channel[Symbol.asyncIterator]();
+      const firstPromise = iterator.next();
+      channel.enqueue(createTextUserMessage('original'));
+      await firstPromise;
+
+      // The consumer waits for the next message while the turn is active.
+      const secondPromise = iterator.next();
+      await Promise.resolve();
+
+      expect(channel.steer('steered text')).toBe(true);
+
+      const steered = await secondPromise;
+      expect(steered.done).toBe(false);
+      expect(steered.value.type).toBe('user');
+      expect(steered.value.message.content).toBe('steered text');
+      // Without 'now' the CLI defaults to 'next' and defers the text as a
+      // follow-up turn instead of interrupting the in-flight one.
+      expect(steered.value.priority).toBe('now');
+    });
+
+    it('returns false when no turn is active', async () => {
+      const iterator = channel[Symbol.asyncIterator]();
+      const pending = iterator.next();
+      await Promise.resolve();
+
+      expect(channel.steer('ignored')).toBe(false);
+
+      // The rejected steer left the consumer waiting; a normal enqueue
+      // delivers without any priority stamp.
+      channel.enqueue(createTextUserMessage('follow-up'));
+      const result = await pending;
+      expect(result.value.message.content).toBe('follow-up');
+      expect(result.value.priority).toBeUndefined();
+    });
+
+    it('returns false when no consumer is waiting', async () => {
+      const iterator = channel[Symbol.asyncIterator]();
+      const firstPromise = iterator.next();
+      channel.enqueue(createTextUserMessage('original'));
+      await firstPromise;
+
+      // Turn is active but the consumer has not requested the next message.
+      expect(channel.steer('ignored')).toBe(false);
+    });
+  });
 });
