@@ -43,7 +43,18 @@
 }
 
 .qoderian-turn-changes-modal {
-  width: min(900px, 90vw);
+  width: min(1080px, calc(100vw - 48px));
+  height: min(840px, calc(100vh - 64px));
+  max-width: none;
+  max-height: none;
+}
+
+.qoderian-turn-changes-modal .modal-content {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .qoderian-turn-changes-header h2 {
@@ -60,7 +71,8 @@
 .qoderian-turn-changes-body {
   display: grid;
   grid-template-columns: minmax(150px, 220px) minmax(0, 1fr);
-  min-height: 420px;
+  min-height: 0;
+  flex: 1;
   margin-top: 16px;
   overflow: hidden;
   border: 1px solid var(--background-modifier-border);
@@ -108,6 +120,7 @@
 .qoderian-turn-changes-detail {
   display: flex;
   min-width: 0;
+  min-height: 0;
   flex-direction: column;
 }
 
@@ -127,6 +140,7 @@
 
 .qoderian-turn-changes-diffs {
   overflow: auto;
+  min-height: 0;
   flex: 1;
   padding: 8px 10px;
   font-family: var(--font-monospace);
@@ -144,6 +158,11 @@
 }
 
 @media (max-width: 640px) {
+  .qoderian-turn-changes-modal {
+    width: calc(100vw - 24px);
+    height: calc(100vh - 32px);
+  }
+
   .qoderian-turn-changes-body {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr);
