@@ -115,6 +115,14 @@
     "activity": {
       "steps": "執行步驟（{count}）"
     },
+    "changes": {
+      "title": "本輪檔案變更",
+      "button": "查看變更 · {count} 個檔案",
+      "files": "已修改 {count} 個檔案",
+      "openFile": "開啟檔案",
+      "edit": "第 {count} 次修改",
+      "fileUnavailable": "目前倉庫中找不到這個檔案。"
+    },
     "drop": {
       "context": "拖曳筆記、資料夾或圖片到此處，新增為上下文",
       "ignored": "已忽略 {count} 個不支援的檔案，僅支援拖入筆記、資料夾與圖片"

@@ -25,9 +25,12 @@ import {
 import { replaceMentionTokensWithHtml } from '../../../shared/markdown/mention-chip';
 import type { ReferenceChipKind } from '../../../shared/mention/types';
 import { openReferenceChip } from '../../../shared/obsidian/compat';
+import { TurnChangesModal } from '../changes/turn-changes-modal';
+import { collectTurnChanges } from '../changes/turn-file-changes';
 import { formatConversationDirectoryTitle } from '../utils/conversation-directory-title';
 import { findRewindContext } from '../utils/rewind';
 import { setupCollapsible } from './collapsible';
+import { renderDiffStats } from './diff-renderer';
 import {
   renderStoredAsyncSubagent,
   renderStoredSubagent,
@@ -425,6 +428,7 @@ export class MessageRenderer {
       this.appendResponseFooter(contentEl, msg);
     }
 
+    this.updateTurnChangesButton(msg, contentEl);
     this.collapseCompletedTurn(msg, contentEl);
   }
 
@@ -540,6 +544,26 @@ export class MessageRenderer {
     }
 
     return false;
+  }
+
+  /** Add or refresh the aggregate file-change entry for a stored or live turn. */
+  updateTurnChangesButton(msg: ChatMessage, contentEl: HTMLElement): void {
+    contentEl.querySelector('.qoderian-turn-changes-trigger')?.remove();
+    if (msg.role !== 'assistant') return;
+
+    const changes = collectTurnChanges(msg.toolCalls);
+    if (changes.files.length === 0) return;
+
+    const button = contentEl.createEl('button', {
+      cls: 'qoderian-turn-changes-trigger',
+      attr: { type: 'button' },
+    });
+    const icon = button.createSpan({ cls: 'qoderian-turn-changes-trigger-icon' });
+    setIcon(icon, 'files');
+    button.createSpan({ text: t('chat.changes.button', { count: changes.files.length }) });
+    const stats = button.createSpan({ cls: 'qoderian-turn-changes-trigger-stats' });
+    renderDiffStats(stats, changes.stats);
+    button.addEventListener('click', () => new TurnChangesModal(this.app, changes).open());
   }
 
   /** Rebuilds the active assistant content after a streamed block is upgraded. */

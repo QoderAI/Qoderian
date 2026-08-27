@@ -115,6 +115,14 @@
     "activity": {
       "steps": "执行步骤（{count}）"
     },
+    "changes": {
+      "title": "本轮文件改动",
+      "button": "查看改动 · {count} 个文件",
+      "files": "已修改 {count} 个文件",
+      "openFile": "打开文件",
+      "edit": "第 {count} 次修改",
+      "fileUnavailable": "当前仓库中找不到这个文件。"
+    },
     "drop": {
       "context": "拖拽笔记、文件夹或图片到此处，添加为上下文",
       "ignored": "已忽略 {count} 个不支持的文件，仅支持拖入笔记、文件夹和图片"

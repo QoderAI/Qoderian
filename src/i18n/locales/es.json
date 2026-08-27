@@ -115,6 +115,14 @@
     "activity": {
       "steps": "Pasos de ejecución ({count})"
     },
+    "changes": {
+      "title": "Cambios de este turno",
+      "button": "Ver cambios · {count} archivos",
+      "files": "{count} archivos modificados",
+      "openFile": "Abrir archivo",
+      "edit": "Edición {count}",
+      "fileUnavailable": "Este archivo no está disponible en el almacén actual."
+    },
     "drop": {
       "context": "Arrastra notas, carpetas o imágenes aquí para añadirlas como contexto",
       "ignored": "Se ignoraron {count} archivos no compatibles; solo se pueden soltar notas, carpetas e imágenes"

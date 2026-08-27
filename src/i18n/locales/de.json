@@ -115,6 +115,14 @@
     "activity": {
       "steps": "Ausführungsschritte ({count})"
     },
+    "changes": {
+      "title": "Änderungen dieser Runde",
+      "button": "Änderungen anzeigen · {count} Dateien",
+      "files": "{count} Dateien geändert",
+      "openFile": "Datei öffnen",
+      "edit": "Bearbeitung {count}",
+      "fileUnavailable": "Diese Datei ist im aktuellen Vault nicht verfügbar."
+    },
     "drop": {
       "context": "Notizen, Ordner oder Bilder hier ablegen, um sie als Kontext hinzuzufügen",
       "ignored": "{count} nicht unterstützte Dateien ignoriert; es können nur Notizen, Ordner und Bilder abgelegt werden"

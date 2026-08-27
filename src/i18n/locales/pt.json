@@ -115,6 +115,14 @@
     "activity": {
       "steps": "Etapas da execução ({count})"
     },
+    "changes": {
+      "title": "Alterações desta rodada",
+      "button": "Ver alterações · {count} arquivos",
+      "files": "{count} arquivos alterados",
+      "openFile": "Abrir arquivo",
+      "edit": "Edição {count}",
+      "fileUnavailable": "Este arquivo não está disponível no cofre atual."
+    },
     "drop": {
       "context": "Solte notas, pastas ou imagens aqui para adicioná-las como contexto",
       "ignored": "{count} arquivos não suportados foram ignorados; apenas notas, pastas e imagens podem ser soltas"

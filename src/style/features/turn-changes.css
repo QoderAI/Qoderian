@@ -1,0 +1,163 @@
+.qoderian-turn-changes-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin-top: 8px;
+  padding: 5px 9px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--background-secondary);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+}
+
+.qoderian-turn-changes-trigger:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qoderian-turn-changes-trigger-icon,
+.qoderian-turn-changes-trigger-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.qoderian-turn-changes-trigger-stats,
+.qoderian-turn-changes-summary,
+.qoderian-turn-changes-file-stats {
+  font-family: var(--font-monospace);
+}
+
+.qoderian-turn-changes-trigger-stats .added,
+.qoderian-turn-changes-summary .added,
+.qoderian-turn-changes-file-stats .added {
+  color: var(--color-green);
+}
+
+.qoderian-turn-changes-trigger-stats .removed,
+.qoderian-turn-changes-summary .removed,
+.qoderian-turn-changes-file-stats .removed {
+  color: var(--color-red);
+}
+
+.qoderian-turn-changes-modal {
+  width: min(900px, 90vw);
+}
+
+.qoderian-turn-changes-header h2 {
+  margin-bottom: 4px;
+}
+
+.qoderian-turn-changes-summary {
+  display: flex;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.qoderian-turn-changes-body {
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) minmax(0, 1fr);
+  min-height: 420px;
+  margin-top: 16px;
+  overflow: hidden;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+}
+
+.qoderian-turn-changes-files {
+  overflow-y: auto;
+  padding: 6px;
+  border-right: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+}
+
+.qoderian-turn-changes-file {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+.qoderian-turn-changes-file:hover,
+.qoderian-turn-changes-file.is-selected {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qoderian-turn-changes-file-name,
+.qoderian-turn-changes-path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qoderian-turn-changes-file-stats {
+  flex-shrink: 0;
+  font-size: 11px;
+}
+
+.qoderian-turn-changes-detail {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.qoderian-turn-changes-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.qoderian-turn-changes-path {
+  font-family: var(--font-monospace);
+  font-size: 12px;
+}
+
+.qoderian-turn-changes-diffs {
+  overflow: auto;
+  flex: 1;
+  padding: 8px 10px;
+  font-family: var(--font-monospace);
+  font-size: 12px;
+}
+
+.qoderian-turn-changes-diffs .qoderian-diff-line {
+  cursor: pointer;
+}
+
+.qoderian-turn-changes-edit-label {
+  margin: 8px 0 4px;
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+@media (max-width: 640px) {
+  .qoderian-turn-changes-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .qoderian-turn-changes-files {
+    display: flex;
+    max-height: 110px;
+    border-right: 0;
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+
+  .qoderian-turn-changes-file {
+    width: auto;
+    min-width: 130px;
+  }
+}

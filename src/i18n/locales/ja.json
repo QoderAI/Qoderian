@@ -115,6 +115,14 @@
     "activity": {
       "steps": "実行ステップ（{count}）"
     },
+    "changes": {
+      "title": "このターンの変更",
+      "button": "変更を表示 · {count} ファイル",
+      "files": "{count} ファイルを変更",
+      "openFile": "ファイルを開く",
+      "edit": "編集 {count}",
+      "fileUnavailable": "現在の保管庫ではこのファイルを利用できません。"
+    },
     "drop": {
       "context": "ノート、フォルダ、画像をここにドロップしてコンテキストに追加",
       "ignored": "サポートされていない {count} 件のファイルを無視しました。ノート、フォルダ、画像のみドロップできます"

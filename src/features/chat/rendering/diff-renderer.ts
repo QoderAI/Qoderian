@@ -88,6 +88,7 @@ export function renderDiffContent(
     const hunkEl = containerEl.createDiv({ cls: 'qoderian-diff-hunk' });
     for (const line of diffLines.slice(0, NEW_FILE_DISPLAY_CAP)) {
       const lineEl = hunkEl.createDiv({ cls: 'qoderian-diff-line qoderian-diff-insert' });
+      setDiffLineData(lineEl, line);
       const prefixEl = lineEl.createSpan({ cls: 'qoderian-diff-prefix' });
       prefixEl.setText('+');
       const contentEl = lineEl.createSpan({ cls: 'qoderian-diff-text' });
@@ -120,6 +121,7 @@ export function renderDiffContent(
 
     for (const line of hunk.lines) {
       const lineEl = hunkEl.createDiv({ cls: `qoderian-diff-line qoderian-diff-${line.type}` });
+      setDiffLineData(lineEl, line);
 
       // Line prefix
       const prefix = line.type === 'insert' ? '+' : line.type === 'delete' ? '-' : ' ';
@@ -131,4 +133,9 @@ export function renderDiffContent(
       contentEl.setText(line.text || ' '); // Show space for empty lines
     }
   });
+}
+
+function setDiffLineData(lineEl: HTMLElement, line: DiffLine): void {
+  if (line.oldLineNum !== undefined) lineEl.dataset.oldLine = String(line.oldLineNum);
+  if (line.newLineNum !== undefined) lineEl.dataset.newLine = String(line.newLineNum);
 }

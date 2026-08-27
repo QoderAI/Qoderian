@@ -115,6 +115,14 @@
     "activity": {
       "steps": "Execution steps ({count})"
     },
+    "changes": {
+      "title": "Turn changes",
+      "button": "View changes · {count} files",
+      "files": "{count} files changed",
+      "openFile": "Open file",
+      "edit": "Edit {count}",
+      "fileUnavailable": "This file is not available in the current vault."
+    },
     "drop": {
       "context": "Drop notes, folders, or images here to add as context",
       "ignored": "Ignored {count} unsupported file(s); only notes, folders, and images can be dropped"

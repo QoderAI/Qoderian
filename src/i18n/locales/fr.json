@@ -115,6 +115,14 @@
     "activity": {
       "steps": "Étapes d’exécution ({count})"
     },
+    "changes": {
+      "title": "Modifications de ce tour",
+      "button": "Voir les modifications · {count} fichiers",
+      "files": "{count} fichiers modifiés",
+      "openFile": "Ouvrir le fichier",
+      "edit": "Modification {count}",
+      "fileUnavailable": "Ce fichier n'est pas disponible dans le coffre actuel."
+    },
     "drop": {
       "context": "Déposez des notes, des dossiers ou des images ici pour les ajouter comme contexte",
       "ignored": "{count} fichiers non pris en charge ignorés ; seules les notes, dossiers et images peuvent être déposés"
