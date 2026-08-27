@@ -155,6 +155,13 @@ export class QoderResponseRouter {
     if (isAbortedResult(message)) {
       handler?.resetStreamText();
       handler?.resetStreamThinking();
+      if (this.deps.getMessageChannel()?.consumeSteerAbort()) return;
+
+      // A plain user interrupt has no successor. Complete the active handler
+      // so the UI leaves streaming state and a paused queue can be resumed.
+      this.deps.getMessageChannel()?.onTurnComplete();
+      if (handler) handler.onDone();
+      else await this.flushAutoTurnBuffer();
       return;
     }
 

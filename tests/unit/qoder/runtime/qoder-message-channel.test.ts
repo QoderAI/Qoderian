@@ -439,6 +439,29 @@ describe('QoderMessageChannel', () => {
       // Without 'now' the CLI defaults to 'next' and defers the text as a
       // follow-up turn instead of interrupting the in-flight one.
       expect(steered.value.priority).toBe('now');
+      expect(channel.consumeSteerAbort()).toBe(true);
+      expect(channel.consumeSteerAbort()).toBe(false);
+    });
+
+    it('tracks multiple abort receipts independently', async () => {
+      const iterator = channel[Symbol.asyncIterator]();
+      const firstPromise = iterator.next();
+      channel.enqueue(createTextUserMessage('original'));
+      await firstPromise;
+
+      const secondPromise = iterator.next();
+      await Promise.resolve();
+      expect(channel.steer('first steer')).toBe(true);
+      await secondPromise;
+
+      const thirdPromise = iterator.next();
+      await Promise.resolve();
+      expect(channel.steer('second steer')).toBe(true);
+      await thirdPromise;
+
+      expect(channel.consumeSteerAbort()).toBe(true);
+      expect(channel.consumeSteerAbort()).toBe(true);
+      expect(channel.consumeSteerAbort()).toBe(false);
     });
 
     it('returns false when no turn is active', async () => {
