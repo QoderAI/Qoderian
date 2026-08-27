@@ -99,10 +99,19 @@
   text-align: left;
 }
 
-.qoderian-turn-changes-file:hover,
-.qoderian-turn-changes-file.is-selected {
+.qoderian-turn-changes-file:hover {
   background: var(--background-modifier-hover);
   color: var(--text-normal);
+}
+
+.qoderian-turn-changes-file.is-selected {
+  background: color-mix(in srgb, var(--interactive-accent) 14%, transparent);
+  box-shadow: inset 3px 0 0 var(--interactive-accent);
+  color: var(--text-normal);
+}
+
+.qoderian-turn-changes-file.is-selected .qoderian-turn-changes-file-name {
+  font-weight: 600;
 }
 
 .qoderian-turn-changes-file-name,
