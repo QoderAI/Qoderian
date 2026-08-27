@@ -7,10 +7,11 @@ import { createResponseHandler } from '@/qoder/runtime/types';
 
 function createRouterHarness() {
   const onTurnComplete = jest.fn();
+  const fetchContextUsage = jest.fn().mockResolvedValue(null);
   const deps = {
     turnTracker: {
       getTransformOptions: () => ({}),
-      fetchContextUsage: async () => null,
+      fetchContextUsage,
       bufferUsage: (chunk: StreamChunk) => chunk,
       updateContextWindow: () => null,
       record: jest.fn(),
@@ -35,7 +36,7 @@ function createRouterHarness() {
   });
   router.register(handler);
 
-  return { router, handler, chunks, events, onTurnComplete };
+  return { router, handler, chunks, events, fetchContextUsage, onTurnComplete };
 }
 
 function buildAbortResult(): SDKResultError {
@@ -54,18 +55,27 @@ describe('QoderResponseRouter', () => {
 
       await router.route(buildAbortResult());
 
-      expect(onTurnComplete).toHaveBeenCalledTimes(1);
+      expect(onTurnComplete).not.toHaveBeenCalled();
       expect(events.onDone).not.toHaveBeenCalled();
     });
 
+    it('does not block successor streaming on a context-usage request', async () => {
+      const { router, fetchContextUsage } = createRouterHarness();
+
+      await router.route(buildAbortResult());
+
+      expect(fetchContextUsage).not.toHaveBeenCalled();
+    });
+
     it('completes the handler on the successor turn result', async () => {
-      const { router, events } = createRouterHarness();
+      const { router, events, onTurnComplete } = createRouterHarness();
 
       await router.route(buildAbortResult());
       expect(events.onDone).not.toHaveBeenCalled();
 
       await router.route(buildSDKMessage({ type: 'result', subtype: 'success' }));
       expect(events.onDone).toHaveBeenCalledTimes(1);
+      expect(onTurnComplete).toHaveBeenCalledTimes(1);
     });
 
     it('routes nothing to the handler for an abort receipt', async () => {

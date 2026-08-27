@@ -145,6 +145,19 @@ export class QoderResponseRouter {
 
     if (!isTurnCompleteMessage(message)) return;
 
+    // A priority-'now' steer emits an aborted result for the interrupted
+    // turn, but the persistent Query is already running its successor turn.
+    // Do not ask the Query for context usage here: that control request waits
+    // for the successor to become idle, which blocks this sole response
+    // consumer and batches every successor delta until the turn finishes.
+    // The message channel must also remain active so another steer can be
+    // accepted while the successor is running.
+    if (isAbortedResult(message)) {
+      handler?.resetStreamText();
+      handler?.resetStreamThinking();
+      return;
+    }
+
     const contextUsageChunk = await this.deps.turnTracker.fetchContextUsage({
       query: this.deps.getCurrentQuery(),
       isCurrentQuery: query => this.deps.getCurrentQuery() === query,
@@ -160,13 +173,7 @@ export class QoderResponseRouter {
     if (handler) {
       handler.resetStreamText();
       handler.resetStreamThinking();
-      // A deliberately aborted turn (Esc or priority-'now' steer) is followed
-      // by its successor turn or by consumer teardown — never by session
-      // idle with the handler still waiting. Keep the handler alive so the
-      // successor's chunks keep streaming into the same turn generator.
-      if (!isAbortedResult(message)) {
-        handler.onDone();
-      }
+      handler.onDone();
     } else {
       await this.flushAutoTurnBuffer();
     }
