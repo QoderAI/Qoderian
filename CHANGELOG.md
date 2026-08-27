@@ -11,6 +11,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-08-27
+
 ### Added
 
 - Multi-message send queue in the chat composer: while a response is
