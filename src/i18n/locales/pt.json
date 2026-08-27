@@ -121,7 +121,9 @@
       "files": "{count} arquivos alterados",
       "openFile": "Abrir arquivo",
       "edit": "Edição {count}",
-      "fileUnavailable": "Este arquivo não está disponível no cofre atual."
+      "fileUnavailable": "Este arquivo não está disponível no cofre atual.",
+      "deleted": "Arquivo excluído",
+      "renamed": "Renomeado para {path}"
     },
     "drop": {
       "context": "Solte notas, pastas ou imagens aqui para adicioná-las como contexto",

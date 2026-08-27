@@ -121,7 +121,9 @@
       "files": "已修改 {count} 個檔案",
       "openFile": "開啟檔案",
       "edit": "第 {count} 次修改",
-      "fileUnavailable": "目前倉庫中找不到這個檔案。"
+      "fileUnavailable": "目前倉庫中找不到這個檔案。",
+      "deleted": "檔案已刪除",
+      "renamed": "已重新命名為 {path}"
     },
     "drop": {
       "context": "拖曳筆記、資料夾或圖片到此處，新增為上下文",

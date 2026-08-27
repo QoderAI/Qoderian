@@ -121,7 +121,9 @@
       "files": "{count} Dateien geändert",
       "openFile": "Datei öffnen",
       "edit": "Bearbeitung {count}",
-      "fileUnavailable": "Diese Datei ist im aktuellen Vault nicht verfügbar."
+      "fileUnavailable": "Diese Datei ist im aktuellen Vault nicht verfügbar.",
+      "deleted": "Datei gelöscht",
+      "renamed": "Umbenannt in {path}"
     },
     "drop": {
       "context": "Notizen, Ordner oder Bilder hier ablegen, um sie als Kontext hinzuzufügen",

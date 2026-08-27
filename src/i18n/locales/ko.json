@@ -121,7 +121,9 @@
       "files": "파일 {count}개 변경됨",
       "openFile": "파일 열기",
       "edit": "편집 {count}",
-      "fileUnavailable": "현재 보관소에서 이 파일을 사용할 수 없습니다."
+      "fileUnavailable": "현재 보관소에서 이 파일을 사용할 수 없습니다.",
+      "deleted": "파일 삭제됨",
+      "renamed": "{path}(으)로 이름 변경됨"
     },
     "drop": {
       "context": "노트, 폴더, 이미지를 여기에 끌어다 놓아 컨텍스트로 추가",

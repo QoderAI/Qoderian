@@ -1,5 +1,6 @@
 import type { ToolCallInfo } from '@/core/types/tools';
 import { collectTurnChanges } from '@/features/chat/changes/turn-file-changes';
+import { extractDiffData } from '@/qoder/tools/diff';
 
 function call(overrides: Partial<ToolCallInfo>): ToolCallInfo {
   return { id: 'tool', name: 'Edit', input: {}, status: 'completed', ...overrides };
@@ -51,5 +52,58 @@ describe('collectTurnChanges', () => {
 
   it('ignores failed edits', () => {
     expect(collectTurnChanges([call({ status: 'error' })]).files).toEqual([]);
+  });
+
+  it('keeps deleted files even when no textual diff is available', () => {
+    const changes = collectTurnChanges([
+      call({
+        name: 'apply_patch',
+        input: { patch: '*** Begin Patch\n*** Delete File: old.md\n*** End Patch' },
+      }),
+    ]);
+
+    expect(changes.files).toHaveLength(1);
+    expect(changes.files[0].diffs[0]).toMatchObject({
+      filePath: 'old.md',
+      operation: 'delete',
+    });
+    expect(changes.stats).toEqual({ added: 0, removed: 0 });
+  });
+
+  it('keeps a pure rename and exposes its destination', () => {
+    const changes = collectTurnChanges([
+      call({
+        name: 'apply_patch',
+        input: {
+          patch: '*** Begin Patch\n*** Update File: old.md\n*** Move to: new.md\n*** End Patch',
+        },
+      }),
+    ]);
+
+    expect(changes.files[0].diffs[0]).toMatchObject({
+      filePath: 'old.md',
+      movedTo: 'new.md',
+    });
+  });
+
+  it('marks only source-backed line numbers as safe for navigation', () => {
+    const edit = call({
+      input: { file_path: 'a.md', old_string: 'old', new_string: 'new' },
+    });
+    const fallback = extractDiffData(undefined, edit);
+    const structured = extractDiffData({
+      filePath: 'a.md',
+      structuredPatch: [{
+        oldStart: 20,
+        oldLines: 1,
+        newStart: 20,
+        newLines: 1,
+        lines: ['-old', '+new'],
+      }],
+    }, edit);
+
+    expect(fallback?.hasAbsoluteLineNumbers).not.toBe(true);
+    expect(structured?.hasAbsoluteLineNumbers).toBe(true);
+    expect(structured?.diffLines[0].oldLineNum).toBe(20);
   });
 });

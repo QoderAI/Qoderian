@@ -139,7 +139,7 @@ export function extractDiffData(toolUseResult: unknown, toolCall: ToolCallInfo):
       const hunks = result.structuredPatch as StructuredPatchHunk[];
       const diffLines = structuredPatchToDiffLines(hunks);
       const stats = countLineChanges(diffLines);
-      return { filePath: resultFilePath, diffLines, stats };
+      return { filePath: resultFilePath, diffLines, stats, hasAbsoluteLineNumbers: true };
     }
 
     const unifiedDiff = getUnifiedDiffText(result);
@@ -149,7 +149,12 @@ export function extractDiffData(toolUseResult: unknown, toolCall: ToolCallInfo):
         const resultFilePath = (typeof result.filePath === 'string' ? result.filePath : null)
           || (typeof result.path === 'string' ? result.path : null)
           || filePath;
-        return { filePath: resultFilePath, diffLines, stats: countLineChanges(diffLines) };
+        return {
+          filePath: resultFilePath,
+          diffLines,
+          stats: countLineChanges(diffLines),
+          hasAbsoluteLineNumbers: hasUnifiedDiffLineNumbers(unifiedDiff),
+        };
       }
     }
   }
@@ -203,6 +208,10 @@ function getUnifiedDiffText(result: Record<string, unknown>): string | null {
   }
 
   return null;
+}
+
+function hasUnifiedDiffLineNumbers(diffText: string): boolean {
+  return /^@@\s+-\d+(?:,\d+)?\s+\+\d+(?:,\d+)?\s+@@/m.test(diffText);
 }
 
 interface ReplacementPair {
@@ -319,6 +328,7 @@ function parseFileUpdateChangeDiff(change: unknown): ApplyPatchFileDiff | null {
     ...(kindInfo.movedTo ? { movedTo: kindInfo.movedTo } : {}),
     diffLines,
     stats: countLineChanges(diffLines),
+    hasAbsoluteLineNumbers: hasUnifiedDiffLineNumbers(diff),
   };
 }
 

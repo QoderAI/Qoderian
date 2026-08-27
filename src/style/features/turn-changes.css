@@ -147,7 +147,7 @@
   font-size: 12px;
 }
 
-.qoderian-turn-changes-diffs .qoderian-diff-line {
+.qoderian-turn-changes-diffs .qoderian-diff-content.is-navigable .qoderian-diff-line {
   cursor: pointer;
 }
 

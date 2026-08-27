@@ -3,7 +3,7 @@ import { FileSystemAdapter, MarkdownView, Modal, normalizePath, Notice, setIcon,
 
 import { t } from '../../../i18n/i18n';
 import { renderDiffContent, renderDiffStats } from '../rendering/diff-renderer';
-import type { TurnChangesSummary, TurnFileChange } from './turn-file-changes';
+import type { TurnChangesSummary, TurnFileChange, TurnFileDiff } from './turn-file-changes';
 
 export class TurnChangesModal extends Modal {
   private selectedFile: TurnFileChange;
@@ -36,9 +36,12 @@ export class TurnChangesModal extends Modal {
     for (const file of this.changes.files) {
       const button = fileList.createEl('button', {
         cls: `qoderian-turn-changes-file${file === this.selectedFile ? ' is-selected' : ''}`,
-        attr: { type: 'button' },
+        attr: {
+          'aria-current': file === this.selectedFile ? 'true' : 'false',
+          type: 'button',
+        },
       });
-      button.createSpan({ cls: 'qoderian-turn-changes-file-name', text: fileNameOnly(file.filePath) });
+      button.createSpan({ cls: 'qoderian-turn-changes-file-name', text: this.fileLabel(file) });
       const stats = button.createSpan({ cls: 'qoderian-turn-changes-file-stats' });
       renderDiffStats(stats, file.stats);
       button.addEventListener('click', () => {
@@ -49,17 +52,19 @@ export class TurnChangesModal extends Modal {
 
     const detail = body.createDiv({ cls: 'qoderian-turn-changes-detail' });
     const detailHeader = detail.createDiv({ cls: 'qoderian-turn-changes-detail-header' });
-    detailHeader.createSpan({ cls: 'qoderian-turn-changes-path', text: this.selectedFile.filePath });
-    const openButton = detailHeader.createEl('button', {
-      cls: 'clickable-icon',
-      attr: {
-        'aria-label': t('chat.changes.openFile'),
-        title: t('chat.changes.openFile'),
-        type: 'button',
-      },
-    });
-    setIcon(openButton, 'external-link');
-    openButton.addEventListener('click', () => void this.openFile(this.selectedFile.filePath));
+    detailHeader.createSpan({ cls: 'qoderian-turn-changes-path', text: this.fileDisplayPath(this.selectedFile) });
+    if (!isDeletedFile(this.selectedFile)) {
+      const openButton = detailHeader.createEl('button', {
+        cls: 'clickable-icon',
+        attr: {
+          'aria-label': t('chat.changes.openFile'),
+          title: t('chat.changes.openFile'),
+          type: 'button',
+        },
+      });
+      setIcon(openButton, 'external-link');
+      openButton.addEventListener('click', () => void this.openFile(this.openablePath(this.selectedFile)));
+    }
 
     const diffList = detail.createDiv({ cls: 'qoderian-turn-changes-diffs' });
     this.selectedFile.diffs.forEach((diff, index) => {
@@ -70,14 +75,32 @@ export class TurnChangesModal extends Modal {
         });
       }
       const diffEl = diffList.createDiv({ cls: 'qoderian-diff-content' });
-      renderDiffContent(diffEl, diff.diffLines, 3);
-      diffEl.addEventListener('click', event => {
-        const lineEl = (event.target as HTMLElement).closest<HTMLElement>('.qoderian-diff-line');
-        if (!lineEl) return;
-        const line = Number(lineEl.dataset.newLine ?? lineEl.dataset.oldLine);
-        if (Number.isFinite(line)) void this.openFile(this.selectedFile.filePath, line);
-      });
+      this.renderFileDiff(diffEl, diff);
+      if (diff.hasAbsoluteLineNumbers) {
+        diffEl.addClass('is-navigable');
+        diffEl.addEventListener('click', event => {
+          const lineEl = (event.target as HTMLElement).closest<HTMLElement>('.qoderian-diff-line');
+          if (!lineEl) return;
+          const line = Number(lineEl.dataset.newLine ?? lineEl.dataset.oldLine);
+          if (Number.isFinite(line)) void this.openFile(this.openablePath(this.selectedFile), line);
+        });
+      }
     });
+  }
+
+  private renderFileDiff(diffEl: HTMLElement, diff: TurnFileDiff): void {
+    if (diff.operation === 'delete' && diff.diffLines.length === 0) {
+      diffEl.createDiv({ cls: 'qoderian-diff-no-changes', text: t('chat.changes.deleted') });
+      return;
+    }
+    if (diff.movedTo && diff.diffLines.length === 0) {
+      diffEl.createDiv({
+        cls: 'qoderian-diff-no-changes',
+        text: t('chat.changes.renamed', { path: this.displayPath(diff.movedTo) }),
+      });
+      return;
+    }
+    renderDiffContent(diffEl, diff.diffLines, 3);
   }
 
   private async openFile(filePath: string, line?: number): Promise<void> {
@@ -108,8 +131,44 @@ export class TurnChangesModal extends Modal {
       ? normalized.slice(basePath.length + 1)
       : normalized;
   }
+
+  private displayPath(filePath: string): string {
+    const relativePath = this.toVaultRelativePath(filePath);
+    return isAbsolutePath(relativePath) ? fileNameOnly(relativePath) : relativePath;
+  }
+
+  private fileLabel(file: TurnFileChange): string {
+    const movedTo = latestMoveTarget(file);
+    return movedTo
+      ? `${fileNameOnly(file.filePath)} → ${fileNameOnly(movedTo)}`
+      : fileNameOnly(file.filePath);
+  }
+
+  private fileDisplayPath(file: TurnFileChange): string {
+    const movedTo = latestMoveTarget(file);
+    return movedTo
+      ? `${this.displayPath(file.filePath)} → ${this.displayPath(movedTo)}`
+      : this.displayPath(file.filePath);
+  }
+
+  private openablePath(file: TurnFileChange): string {
+    return latestMoveTarget(file) ?? file.filePath;
+  }
 }
 
 function fileNameOnly(filePath: string): string {
   return filePath.split(/[/\\]/).pop() || filePath;
+}
+
+function latestMoveTarget(file: TurnFileChange): string | undefined {
+  return [...file.diffs].reverse().find(diff => diff.movedTo)?.movedTo;
+}
+
+function isDeletedFile(file: TurnFileChange): boolean {
+  const latestDiff = file.diffs[file.diffs.length - 1];
+  return latestDiff?.operation === 'delete' && !latestDiff.movedTo;
+}
+
+function isAbsolutePath(filePath: string): boolean {
+  return filePath.startsWith('/') || /^[A-Za-z]:\//.test(filePath);
 }

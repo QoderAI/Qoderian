@@ -140,6 +140,8 @@ export type TranslationKey =
   | 'chat.changes.openFile'
   | 'chat.changes.edit'
   | 'chat.changes.fileUnavailable'
+  | 'chat.changes.deleted'
+  | 'chat.changes.renamed'
 
   // Vault drag & drop into composer
   | 'chat.drop.context'

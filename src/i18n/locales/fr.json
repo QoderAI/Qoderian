@@ -121,7 +121,9 @@
       "files": "{count} fichiers modifiés",
       "openFile": "Ouvrir le fichier",
       "edit": "Modification {count}",
-      "fileUnavailable": "Ce fichier n'est pas disponible dans le coffre actuel."
+      "fileUnavailable": "Ce fichier n'est pas disponible dans le coffre actuel.",
+      "deleted": "Fichier supprimé",
+      "renamed": "Renommé en {path}"
     },
     "drop": {
       "context": "Déposez des notes, des dossiers ou des images ici pour les ajouter comme contexte",

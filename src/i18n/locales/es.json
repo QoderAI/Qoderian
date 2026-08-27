@@ -121,7 +121,9 @@
       "files": "{count} archivos modificados",
       "openFile": "Abrir archivo",
       "edit": "Edición {count}",
-      "fileUnavailable": "Este archivo no está disponible en el almacén actual."
+      "fileUnavailable": "Este archivo no está disponible en el almacén actual.",
+      "deleted": "Archivo eliminado",
+      "renamed": "Renombrado a {path}"
     },
     "drop": {
       "context": "Arrastra notas, carpetas o imágenes aquí para añadirlas como contexto",

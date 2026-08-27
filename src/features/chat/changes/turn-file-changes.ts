@@ -7,9 +7,14 @@ import {
 } from '../../../qoder/tools/diff';
 import { TOOL_APPLY_PATCH } from '../../../qoder/tools/tool-names';
 
+export interface TurnFileDiff extends ToolDiffData {
+  operation?: 'add' | 'update' | 'delete';
+  movedTo?: string;
+}
+
 export interface TurnFileChange {
   filePath: string;
-  diffs: ToolDiffData[];
+  diffs: TurnFileDiff[];
   stats: DiffStats;
 }
 
@@ -23,8 +28,11 @@ export function collectTurnChanges(toolCalls?: ToolCallInfo[]): TurnChangesSumma
   const byFile = new Map<string, TurnFileChange>();
   const visitedCalls = new Set<ToolCallInfo>();
 
-  const addDiff = (diff: ToolDiffData): void => {
-    if (!diff.filePath || (diff.stats.added === 0 && diff.stats.removed === 0)) return;
+  const addDiff = (diff: TurnFileDiff): void => {
+    const hasFileOperation = diff.operation === 'delete' || Boolean(diff.movedTo);
+    if (!diff.filePath || (!hasFileOperation && diff.stats.added === 0 && diff.stats.removed === 0)) {
+      return;
+    }
 
     const existing = byFile.get(diff.filePath) ?? {
       filePath: diff.filePath,
