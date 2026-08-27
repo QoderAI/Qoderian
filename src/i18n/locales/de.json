@@ -119,9 +119,7 @@
       "title": "Änderungen dieser Runde",
       "button": "Änderungen anzeigen · {count} Dateien",
       "files": "{count} Dateien geändert",
-      "openFile": "Datei öffnen",
       "edit": "Bearbeitung {count}",
-      "fileUnavailable": "Diese Datei ist im aktuellen Vault nicht verfügbar.",
       "deleted": "Datei gelöscht",
       "renamed": "Umbenannt in {path}"
     },

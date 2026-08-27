@@ -119,9 +119,7 @@
       "title": "Modifications de ce tour",
       "button": "Voir les modifications · {count} fichiers",
       "files": "{count} fichiers modifiés",
-      "openFile": "Ouvrir le fichier",
       "edit": "Modification {count}",
-      "fileUnavailable": "Ce fichier n'est pas disponible dans le coffre actuel.",
       "deleted": "Fichier supprimé",
       "renamed": "Renommé en {path}"
     },

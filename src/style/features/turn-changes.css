@@ -147,10 +147,6 @@
   font-size: 12px;
 }
 
-.qoderian-turn-changes-diffs .qoderian-diff-content.is-navigable .qoderian-diff-line {
-  cursor: pointer;
-}
-
 .qoderian-turn-changes-edit-label {
   margin: 8px 0 4px;
   color: var(--text-faint);

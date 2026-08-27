@@ -1,5 +1,5 @@
 import type { App } from 'obsidian';
-import { FileSystemAdapter, MarkdownView, Modal, normalizePath, Notice, setIcon, TFile } from 'obsidian';
+import { FileSystemAdapter, Modal, normalizePath } from 'obsidian';
 
 import { t } from '../../../i18n/i18n';
 import { renderDiffContent, renderDiffStats } from '../rendering/diff-renderer';
@@ -15,6 +15,8 @@ export class TurnChangesModal extends Modal {
 
   onOpen(): void {
     this.modalEl.addClass('qoderian-turn-changes-modal');
+    this.preventBackgroundClose();
+    this.scope.register([], 'Escape', () => false);
     this.render();
   }
 
@@ -53,18 +55,6 @@ export class TurnChangesModal extends Modal {
     const detail = body.createDiv({ cls: 'qoderian-turn-changes-detail' });
     const detailHeader = detail.createDiv({ cls: 'qoderian-turn-changes-detail-header' });
     detailHeader.createSpan({ cls: 'qoderian-turn-changes-path', text: this.fileDisplayPath(this.selectedFile) });
-    if (!isDeletedFile(this.selectedFile)) {
-      const openButton = detailHeader.createEl('button', {
-        cls: 'clickable-icon',
-        attr: {
-          'aria-label': t('chat.changes.openFile'),
-          title: t('chat.changes.openFile'),
-          type: 'button',
-        },
-      });
-      setIcon(openButton, 'external-link');
-      openButton.addEventListener('click', () => void this.openFile(this.openablePath(this.selectedFile)));
-    }
 
     const diffList = detail.createDiv({ cls: 'qoderian-turn-changes-diffs' });
     this.selectedFile.diffs.forEach((diff, index) => {
@@ -76,16 +66,20 @@ export class TurnChangesModal extends Modal {
       }
       const diffEl = diffList.createDiv({ cls: 'qoderian-diff-content' });
       this.renderFileDiff(diffEl, diff);
-      if (diff.hasAbsoluteLineNumbers) {
-        diffEl.addClass('is-navigable');
-        diffEl.addEventListener('click', event => {
-          const lineEl = (event.target as HTMLElement).closest<HTMLElement>('.qoderian-diff-line');
-          if (!lineEl) return;
-          const line = Number(lineEl.dataset.newLine ?? lineEl.dataset.oldLine);
-          if (Number.isFinite(line)) void this.openFile(this.openablePath(this.selectedFile), line);
-        });
-      }
     });
+  }
+
+  private preventBackgroundClose(): void {
+    const consumeOutsidePointer = (event: Event): void => {
+      const target = event.target;
+      if (target && !this.modalEl.contains(target as Node)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    };
+    this.containerEl.addEventListener('pointerdown', consumeOutsidePointer, true);
+    this.containerEl.addEventListener('mousedown', consumeOutsidePointer, true);
+    this.containerEl.addEventListener('click', consumeOutsidePointer, true);
   }
 
   private renderFileDiff(diffEl: HTMLElement, diff: TurnFileDiff): void {
@@ -101,24 +95,6 @@ export class TurnChangesModal extends Modal {
       return;
     }
     renderDiffContent(diffEl, diff.diffLines, 3);
-  }
-
-  private async openFile(filePath: string, line?: number): Promise<void> {
-    const relativePath = this.toVaultRelativePath(filePath);
-    const file = this.app.vault.getAbstractFileByPath(relativePath);
-    if (!(file instanceof TFile)) {
-      new Notice(t('chat.changes.fileUnavailable'));
-      return;
-    }
-
-    const leaf = this.app.workspace.getLeaf(false);
-    await leaf.openFile(file);
-    if (line !== undefined && leaf.view instanceof MarkdownView) {
-      const position = { line: Math.max(0, line - 1), ch: 0 };
-      leaf.view.editor.setCursor(position);
-      leaf.view.editor.scrollIntoView({ from: position, to: position }, true);
-    }
-    this.close();
   }
 
   private toVaultRelativePath(filePath: string): string {
@@ -151,9 +127,6 @@ export class TurnChangesModal extends Modal {
       : this.displayPath(file.filePath);
   }
 
-  private openablePath(file: TurnFileChange): string {
-    return latestMoveTarget(file) ?? file.filePath;
-  }
 }
 
 function fileNameOnly(filePath: string): string {
@@ -162,11 +135,6 @@ function fileNameOnly(filePath: string): string {
 
 function latestMoveTarget(file: TurnFileChange): string | undefined {
   return [...file.diffs].reverse().find(diff => diff.movedTo)?.movedTo;
-}
-
-function isDeletedFile(file: TurnFileChange): boolean {
-  const latestDiff = file.diffs[file.diffs.length - 1];
-  return latestDiff?.operation === 'delete' && !latestDiff.movedTo;
 }
 
 function isAbsolutePath(filePath: string): boolean {

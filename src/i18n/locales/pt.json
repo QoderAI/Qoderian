@@ -119,9 +119,7 @@
       "title": "Alterações desta rodada",
       "button": "Ver alterações · {count} arquivos",
       "files": "{count} arquivos alterados",
-      "openFile": "Abrir arquivo",
       "edit": "Edição {count}",
-      "fileUnavailable": "Este arquivo não está disponível no cofre atual.",
       "deleted": "Arquivo excluído",
       "renamed": "Renomeado para {path}"
     },

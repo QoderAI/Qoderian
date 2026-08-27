@@ -119,9 +119,7 @@
       "title": "Turn changes",
       "button": "View changes · {count} files",
       "files": "{count} files changed",
-      "openFile": "Open file",
       "edit": "Edit {count}",
-      "fileUnavailable": "This file is not available in the current vault.",
       "deleted": "File deleted",
       "renamed": "Renamed to {path}"
     },

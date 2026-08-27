@@ -5,8 +5,6 @@ export interface ToolDiffData {
   filePath: string;
   diffLines: DiffLine[];
   stats: DiffStats;
-  /** True only when line numbers map to absolute positions in the current file. */
-  hasAbsoluteLineNumbers?: boolean;
 }
 
 /** Parsed option for AskUserQuestion tool. */

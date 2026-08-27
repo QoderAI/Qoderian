@@ -119,9 +119,7 @@
       "title": "이번 턴의 변경 사항",
       "button": "변경 사항 보기 · 파일 {count}개",
       "files": "파일 {count}개 변경됨",
-      "openFile": "파일 열기",
       "edit": "편집 {count}",
-      "fileUnavailable": "현재 보관소에서 이 파일을 사용할 수 없습니다.",
       "deleted": "파일 삭제됨",
       "renamed": "{path}(으)로 이름 변경됨"
     },

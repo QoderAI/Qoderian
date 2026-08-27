@@ -1,6 +1,5 @@
 import type { ToolCallInfo } from '@/core/types/tools';
 import { collectTurnChanges } from '@/features/chat/changes/turn-file-changes';
-import { extractDiffData } from '@/qoder/tools/diff';
 
 function call(overrides: Partial<ToolCallInfo>): ToolCallInfo {
   return { id: 'tool', name: 'Edit', input: {}, status: 'completed', ...overrides };
@@ -86,24 +85,4 @@ describe('collectTurnChanges', () => {
     });
   });
 
-  it('marks only source-backed line numbers as safe for navigation', () => {
-    const edit = call({
-      input: { file_path: 'a.md', old_string: 'old', new_string: 'new' },
-    });
-    const fallback = extractDiffData(undefined, edit);
-    const structured = extractDiffData({
-      filePath: 'a.md',
-      structuredPatch: [{
-        oldStart: 20,
-        oldLines: 1,
-        newStart: 20,
-        newLines: 1,
-        lines: ['-old', '+new'],
-      }],
-    }, edit);
-
-    expect(fallback?.hasAbsoluteLineNumbers).not.toBe(true);
-    expect(structured?.hasAbsoluteLineNumbers).toBe(true);
-    expect(structured?.diffLines[0].oldLineNum).toBe(20);
-  });
 });

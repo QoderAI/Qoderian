@@ -119,9 +119,7 @@
       "title": "このターンの変更",
       "button": "変更を表示 · {count} ファイル",
       "files": "{count} ファイルを変更",
-      "openFile": "ファイルを開く",
       "edit": "編集 {count}",
-      "fileUnavailable": "現在の保管庫ではこのファイルを利用できません。",
       "deleted": "ファイルを削除しました",
       "renamed": "{path} に名前を変更しました"
     },
