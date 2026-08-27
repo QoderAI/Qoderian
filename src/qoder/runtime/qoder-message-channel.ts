@@ -28,6 +28,7 @@ export class QoderMessageChannel implements AsyncIterable<SDKUserMessage> {
   private closed = false;
   private resolveNext: ((value: IteratorResult<SDKUserMessage>) => void) | null = null;
   private currentSessionId: string | null = null;
+  private pendingSteerAborts = 0;
   private onWarning: (message: string) => void;
 
   constructor(onWarning: (message: string) => void = () => {}) {
@@ -123,6 +124,7 @@ export class QoderMessageChannel implements AsyncIterable<SDKUserMessage> {
 
   onTurnComplete(): void {
     this.turnActive = false;
+    this.pendingSteerAborts = 0;
 
     if (this.queue.length > 0 && this.resolveNext) {
       const pending = this.queue.shift()!;
@@ -146,13 +148,22 @@ export class QoderMessageChannel implements AsyncIterable<SDKUserMessage> {
     const resolve = this.resolveNext;
     this.resolveNext = null;
     const message = this.pendingToMessage({ type: 'text', content: text });
+    this.pendingSteerAborts += 1;
     resolve({ value: { ...message, priority: 'now' }, done: false });
+    return true;
+  }
+
+  /** Consume one abort receipt expected from a priority-'now' steer. */
+  consumeSteerAbort(): boolean {
+    if (this.pendingSteerAborts === 0) return false;
+    this.pendingSteerAborts -= 1;
     return true;
   }
 
   close(): void {
     this.closed = true;
     this.queue = [];
+    this.pendingSteerAborts = 0;
     if (this.resolveNext) {
       const resolve = this.resolveNext;
       this.resolveNext = null;
@@ -165,6 +176,7 @@ export class QoderMessageChannel implements AsyncIterable<SDKUserMessage> {
     this.turnActive = false;
     this.closed = false;
     this.resolveNext = null;
+    this.pendingSteerAborts = 0;
   }
 
   getQueueLength(): number {

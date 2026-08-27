@@ -72,6 +72,10 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - The steered reply streams incrementally again: the interrupted turn's
   receipt no longer triggers a context-usage request that stalled the
   response consumer, which made the whole reply appear only at the end.
+- Stopping a streaming turn (Stop or Esc) completes it again: the chat
+  leaves the streaming state and the paused send queue can be resumed,
+  instead of staying stuck until the next message. Steered turns keep
+  their live hand-off and are unaffected.
 
 ## [1.0.5] - 2026-08-18
 

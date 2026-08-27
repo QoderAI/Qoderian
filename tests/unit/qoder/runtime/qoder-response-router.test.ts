@@ -5,8 +5,9 @@ import type { StreamChunk } from '@/core/types';
 import { QoderResponseRouter } from '@/qoder/runtime/qoder-response-router';
 import { createResponseHandler } from '@/qoder/runtime/types';
 
-function createRouterHarness() {
+function createRouterHarness(options: { pendingSteerAbort?: boolean } = {}) {
   const onTurnComplete = jest.fn();
+  const consumeSteerAbort = jest.fn().mockReturnValue(options.pendingSteerAbort ?? true);
   const fetchContextUsage = jest.fn().mockResolvedValue(null);
   const deps = {
     turnTracker: {
@@ -17,7 +18,7 @@ function createRouterHarness() {
       record: jest.fn(),
     },
     getCurrentQuery: () => null,
-    getMessageChannel: () => ({ onTurnComplete }),
+    getMessageChannel: () => ({ consumeSteerAbort, onTurnComplete }),
     getConfiguredModel: () => 'qoder-sonnet-4-5',
     getConfiguredContextWindow: () => undefined,
     getSessionId: () => null,
@@ -36,7 +37,7 @@ function createRouterHarness() {
   });
   router.register(handler);
 
-  return { router, handler, chunks, events, fetchContextUsage, onTurnComplete };
+  return { router, handler, chunks, consumeSteerAbort, events, fetchContextUsage, onTurnComplete };
 }
 
 function buildAbortResult(): SDKResultError {
@@ -65,6 +66,18 @@ describe('QoderResponseRouter', () => {
       await router.route(buildAbortResult());
 
       expect(fetchContextUsage).not.toHaveBeenCalled();
+    });
+
+    it('completes the handler for a plain user interrupt with no successor', async () => {
+      const { router, events, fetchContextUsage, onTurnComplete } = createRouterHarness({
+        pendingSteerAbort: false,
+      });
+
+      await router.route(buildAbortResult());
+
+      expect(fetchContextUsage).not.toHaveBeenCalled();
+      expect(onTurnComplete).toHaveBeenCalledTimes(1);
+      expect(events.onDone).toHaveBeenCalledTimes(1);
     });
 
     it('completes the handler on the successor turn result', async () => {
