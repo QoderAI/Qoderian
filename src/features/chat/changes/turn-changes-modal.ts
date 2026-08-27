@@ -1,9 +1,10 @@
 import type { App } from 'obsidian';
-import { FileSystemAdapter, Modal, normalizePath } from 'obsidian';
+import { Modal } from 'obsidian';
 
 import { t } from '../../../i18n/i18n';
 import { renderDiffContent, renderDiffStats } from '../rendering/diff-renderer';
 import type { TurnChangesSummary, TurnFileChange, TurnFileDiff } from './turn-file-changes';
+import { filePathName, turnFileDisplayPath, turnFileName } from './turn-file-path';
 
 export class TurnChangesModal extends Modal {
   private selectedFile: TurnFileChange;
@@ -43,7 +44,7 @@ export class TurnChangesModal extends Modal {
           type: 'button',
         },
       });
-      button.createSpan({ cls: 'qoderian-turn-changes-file-name', text: this.fileLabel(file) });
+      button.createSpan({ cls: 'qoderian-turn-changes-file-name', text: turnFileName(file) });
       const stats = button.createSpan({ cls: 'qoderian-turn-changes-file-stats' });
       renderDiffStats(stats, file.stats);
       button.addEventListener('click', () => {
@@ -54,7 +55,10 @@ export class TurnChangesModal extends Modal {
 
     const detail = body.createDiv({ cls: 'qoderian-turn-changes-detail' });
     const detailHeader = detail.createDiv({ cls: 'qoderian-turn-changes-detail-header' });
-    detailHeader.createSpan({ cls: 'qoderian-turn-changes-path', text: this.fileDisplayPath(this.selectedFile) });
+    detailHeader.createSpan({
+      cls: 'qoderian-turn-changes-path',
+      text: turnFileDisplayPath(this.app, this.selectedFile),
+    });
 
     const diffList = detail.createDiv({ cls: 'qoderian-turn-changes-diffs' });
     this.selectedFile.diffs.forEach((diff, index) => {
@@ -90,53 +94,11 @@ export class TurnChangesModal extends Modal {
     if (diff.movedTo && diff.diffLines.length === 0) {
       diffEl.createDiv({
         cls: 'qoderian-diff-no-changes',
-        text: t('chat.changes.renamed', { path: this.displayPath(diff.movedTo) }),
+        text: t('chat.changes.renamed', { path: filePathName(diff.movedTo) }),
       });
       return;
     }
     renderDiffContent(diffEl, diff.diffLines, 3);
   }
 
-  private toVaultRelativePath(filePath: string): string {
-    const normalized = normalizePath(filePath);
-    const adapter = this.app.vault.adapter;
-    if (!(adapter instanceof FileSystemAdapter)) return normalized;
-
-    const basePath = normalizePath(adapter.getBasePath());
-    return normalized.startsWith(`${basePath}/`)
-      ? normalized.slice(basePath.length + 1)
-      : normalized;
-  }
-
-  private displayPath(filePath: string): string {
-    const relativePath = this.toVaultRelativePath(filePath);
-    return isAbsolutePath(relativePath) ? fileNameOnly(relativePath) : relativePath;
-  }
-
-  private fileLabel(file: TurnFileChange): string {
-    const movedTo = latestMoveTarget(file);
-    return movedTo
-      ? `${fileNameOnly(file.filePath)} → ${fileNameOnly(movedTo)}`
-      : fileNameOnly(file.filePath);
-  }
-
-  private fileDisplayPath(file: TurnFileChange): string {
-    const movedTo = latestMoveTarget(file);
-    return movedTo
-      ? `${this.displayPath(file.filePath)} → ${this.displayPath(movedTo)}`
-      : this.displayPath(file.filePath);
-  }
-
-}
-
-function fileNameOnly(filePath: string): string {
-  return filePath.split(/[/\\]/).pop() || filePath;
-}
-
-function latestMoveTarget(file: TurnFileChange): string | undefined {
-  return [...file.diffs].reverse().find(diff => diff.movedTo)?.movedTo;
-}
-
-function isAbsolutePath(filePath: string): boolean {
-  return filePath.startsWith('/') || /^[A-Za-z]:\//.test(filePath);
 }

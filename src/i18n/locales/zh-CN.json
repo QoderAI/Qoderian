@@ -118,10 +118,13 @@
     "changes": {
       "title": "本轮文件改动",
       "button": "查看改动 · {count} 个文件",
+      "edited": "已编辑 {count} 个文件",
       "files": "已修改 {count} 个文件",
       "edit": "第 {count} 次修改",
       "deleted": "文件已删除",
-      "renamed": "已重命名为 {path}"
+      "renamed": "已重命名为 {path}",
+      "changed": "已改动",
+      "moreFiles": "再显示 {count} 个文件"
     },
     "drop": {
       "context": "拖拽笔记、文件夹或图片到此处，添加为上下文",

@@ -118,10 +118,13 @@
     "changes": {
       "title": "本輪檔案變更",
       "button": "查看變更 · {count} 個檔案",
+      "edited": "已編輯 {count} 個檔案",
       "files": "已修改 {count} 個檔案",
       "edit": "第 {count} 次修改",
       "deleted": "檔案已刪除",
-      "renamed": "已重新命名為 {path}"
+      "renamed": "已重新命名為 {path}",
+      "changed": "已變更",
+      "moreFiles": "再顯示 {count} 個檔案"
     },
     "drop": {
       "context": "拖曳筆記、資料夾或圖片到此處，新增為上下文",

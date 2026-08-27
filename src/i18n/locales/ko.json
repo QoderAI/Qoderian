@@ -118,10 +118,13 @@
     "changes": {
       "title": "이번 턴의 변경 사항",
       "button": "변경 사항 보기 · 파일 {count}개",
+      "edited": "파일 {count}개 편집됨",
       "files": "파일 {count}개 변경됨",
       "edit": "편집 {count}",
       "deleted": "파일 삭제됨",
-      "renamed": "{path}(으)로 이름 변경됨"
+      "renamed": "{path}(으)로 이름 변경됨",
+      "changed": "변경됨",
+      "moreFiles": "파일 {count}개 더 보기"
     },
     "drop": {
       "context": "노트, 폴더, 이미지를 여기에 끌어다 놓아 컨텍스트로 추가",

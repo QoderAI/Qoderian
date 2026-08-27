@@ -118,10 +118,13 @@
     "changes": {
       "title": "Turn changes",
       "button": "View changes · {count} files",
+      "edited": "Edited {count} files",
       "files": "{count} files changed",
       "edit": "Edit {count}",
       "deleted": "File deleted",
-      "renamed": "Renamed to {path}"
+      "renamed": "Renamed to {path}",
+      "changed": "Changed",
+      "moreFiles": "Show {count} more files"
     },
     "drop": {
       "context": "Drop notes, folders, or images here to add as context",

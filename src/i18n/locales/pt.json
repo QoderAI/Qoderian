@@ -118,10 +118,13 @@
     "changes": {
       "title": "Alterações desta rodada",
       "button": "Ver alterações · {count} arquivos",
+      "edited": "{count} arquivos editados",
       "files": "{count} arquivos alterados",
       "edit": "Edição {count}",
       "deleted": "Arquivo excluído",
-      "renamed": "Renomeado para {path}"
+      "renamed": "Renomeado para {path}",
+      "changed": "Alterado",
+      "moreFiles": "Mostrar mais {count} arquivos"
     },
     "drop": {
       "context": "Solte notas, pastas ou imagens aqui para adicioná-las como contexto",
