@@ -60,7 +60,7 @@ const policyContext = {
 } as ModelPolicyContext;
 
 describe('QueryOptionsBuilder permissions', () => {
-  it.each(['default', 'acceptEdits', 'auto', 'plan'] as const)(
+  it.each(['default', 'auto', 'plan'] as const)(
     'maps %s directly without enabling dangerous permission bypass',
     (permissionMode) => {
       const options = QueryOptionsBuilder.buildPersistentQueryOptions(
@@ -96,7 +96,7 @@ describe('QueryOptionsBuilder permissions', () => {
 
   it('restarts when entering or leaving YOLO, but not between non-bypass modes', () => {
     const safeConfig = QueryOptionsBuilder.buildPersistentQueryConfig(
-      createContext('acceptEdits'),
+      createContext('auto'),
     );
     const otherSafeConfig = QueryOptionsBuilder.buildPersistentQueryConfig(
       createContext('default'),

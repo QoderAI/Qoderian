@@ -1,6 +1,8 @@
 import { createMockEl } from '@test/helpers/mock-element';
 
+import type { PermissionMode } from '@/core/types/settings';
 import { ModelSelector, PermissionToggle } from '@/features/chat/ui/input-toolbar';
+import { getLocale, setLocale } from '@/i18n/i18n';
 
 jest.mock('@/shared/icons', () => ({
   QODER_ICON: {},
@@ -17,7 +19,7 @@ describe('ModelSelector', () => {
       onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
       getSettings: jest.fn().mockReturnValue({
         model: 'auto',
-        permissionMode: 'acceptEdits',
+        permissionMode: 'auto',
       }),
       getEnvironmentVariables: jest.fn().mockReturnValue(''),
       getModelConfig: jest.fn().mockReturnValue({
@@ -45,7 +47,7 @@ describe('ModelSelector', () => {
       onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
       getSettings: jest.fn().mockReturnValue({
         model: 'qmodel',
-        permissionMode: 'acceptEdits',
+        permissionMode: 'auto',
       }),
       getEnvironmentVariables: jest.fn().mockReturnValue(''),
       getModelConfig: jest.fn().mockReturnValue({
@@ -74,7 +76,7 @@ describe('ModelSelector', () => {
       onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
       getSettings: jest.fn().mockReturnValue({
         model: 'auto',
-        permissionMode: 'acceptEdits',
+        permissionMode: 'auto',
       }),
       getEnvironmentVariables: jest.fn().mockReturnValue(''),
       getModelConfig: jest.fn().mockReturnValue({
@@ -111,7 +113,7 @@ describe('ModelSelector', () => {
       onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
       getSettings: jest.fn().mockReturnValue({
         model: 'auto',
-        permissionMode: 'acceptEdits',
+        permissionMode: 'auto',
       }),
       getModelConfig: jest.fn().mockReturnValue({
         getModelOptions: jest.fn().mockReturnValue([]),
@@ -142,7 +144,7 @@ describe('ModelSelector', () => {
       onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
       getSettings: jest.fn().mockReturnValue({
         model: 'auto',
-        permissionMode: 'acceptEdits',
+        permissionMode: 'auto',
       }),
       getModelConfig: jest.fn().mockReturnValue({
         getModelOptions: jest.fn().mockReturnValue([
@@ -181,7 +183,7 @@ describe('ModelSelector', () => {
     ) {
       const settings = {
         model: 'qmodel',
-        permissionMode: 'acceptEdits',
+        permissionMode: 'auto',
         qoder: { modelOverrides: overrides },
       };
       return {
@@ -302,7 +304,7 @@ describe('ModelSelector', () => {
         onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
         getSettings: jest.fn().mockReturnValue({
           model: 'qmodel',
-          permissionMode: 'acceptEdits',
+          permissionMode: 'auto',
           qoder: { modelOverrides: { qmodel: { thinkingEnabled: false } } },
         }),
       });
@@ -493,7 +495,7 @@ describe('ModelSelector', () => {
 });
 
 describe('PermissionToggle', () => {
-  it('renders all SDK permission levels and applies the selected level', async () => {
+  it('renders the three selectable tiers and applies the chosen tier', async () => {
     const parentEl = createMockEl();
     const settings = {
       model: 'auto',
@@ -511,10 +513,10 @@ describe('PermissionToggle', () => {
 
     new PermissionToggle(parentEl, callbacks);
 
-    expect(parentEl.querySelector('.qoderian-permission-label')?.textContent).toBe('Ask');
+    expect(parentEl.querySelector('.qoderian-permission-label')?.textContent).toBe('Ask approval');
     expect(parentEl.querySelectorAll('.qoderian-permission-option').map((option: ReturnType<typeof createMockEl>) =>
       option.querySelector('.qoderian-permission-option-label')?.textContent
-    )).toEqual(['Ask', 'Allow edits', 'Auto', 'Plan', 'YOLO']);
+    )).toEqual(['Ask approval', 'Auto approval', 'Full access']);
 
     parentEl.querySelector('.qoderian-permission-button')?.click();
     expect(parentEl.querySelector('.qoderian-permission-toggle')
@@ -524,7 +526,78 @@ describe('PermissionToggle', () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(onPermissionModeChange).toHaveBeenCalledWith('acceptEdits');
-    expect(parentEl.querySelector('.qoderian-permission-label')?.textContent).toBe('Allow edits');
+    expect(onPermissionModeChange).toHaveBeenCalledWith('auto');
+    expect(parentEl.querySelector('.qoderian-permission-label')?.textContent).toBe('Auto approval');
+  });
+
+  it('still labels plan mode when the SDK switches into it', () => {
+    const parentEl = createMockEl();
+    const callbacks = {
+      onModelChange: jest.fn().mockResolvedValue(undefined),
+      onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
+      getSettings: jest.fn(() => ({ model: 'auto', permissionMode: 'plan' as const })),
+      getModelConfig: jest.fn(),
+    };
+
+    new PermissionToggle(parentEl, callbacks);
+
+    expect(parentEl.querySelector('.qoderian-permission-label')?.textContent).toBe('Plan');
+    expect(parentEl.querySelectorAll('.qoderian-permission-option').length).toBe(3);
+  });
+
+  it('moves the option highlight when the mode changes outside the dropdown', () => {
+    const parentEl = createMockEl();
+    const settings = { model: 'auto', permissionMode: 'default' as PermissionMode };
+    const toggle = new PermissionToggle(parentEl, {
+      onModelChange: jest.fn().mockResolvedValue(undefined),
+      onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
+      getSettings: jest.fn(() => settings),
+      getModelConfig: jest.fn(),
+    });
+
+    const selectedLabels = () => parentEl.querySelectorAll('.qoderian-permission-option')
+      .filter((option: ReturnType<typeof createMockEl>) => option.hasClass('selected'))
+      .map((option: ReturnType<typeof createMockEl>) =>
+        option.querySelector('.qoderian-permission-option-label')?.textContent);
+
+    expect(selectedLabels()).toEqual(['Ask approval']);
+
+    settings.permissionMode = 'yolo';
+    toggle.updateDisplay();
+
+    expect(parentEl.querySelector('.qoderian-permission-label')?.textContent).toBe('Full access');
+    expect(selectedLabels()).toEqual(['Full access']);
+  });
+
+  it('resolves the tier copy from the active locale', () => {
+    const previousLocale = getLocale();
+    setLocale('zh-CN');
+
+    try {
+      const parentEl = createMockEl();
+      const callbacks = {
+        onModelChange: jest.fn().mockResolvedValue(undefined),
+        onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
+        getSettings: jest.fn(() => ({ model: 'auto', permissionMode: 'auto' as const })),
+        getModelConfig: jest.fn(),
+      };
+
+      new PermissionToggle(parentEl, callbacks);
+
+      expect(parentEl.querySelector('.qoderian-permission-label')?.textContent).toBe('自动审批');
+      expect(parentEl.querySelectorAll('.qoderian-permission-option').map(
+        (option: ReturnType<typeof createMockEl>) =>
+          option.querySelector('.qoderian-permission-option-label')?.textContent,
+      )).toEqual(['询问审批', '自动审批', '完全访问']);
+      expect(parentEl.querySelectorAll('.qoderian-permission-option-description').map(
+        (description: ReturnType<typeof createMockEl>) => description.textContent,
+      )).toEqual([
+        '执行命令、修改库外文件或访问网络前，始终询问',
+        '仅在检测到潜在风险时询问',
+        '不再询问，可自由访问你的文件、终端和网络',
+      ]);
+    } finally {
+      setLocale(previousLocale);
+    }
   });
 });

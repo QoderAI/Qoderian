@@ -115,6 +115,25 @@
     "drop": {
       "context": "Notizen, Ordner oder Bilder hier ablegen, um sie als Kontext hinzuzufügen",
       "ignored": "{count} nicht unterstützte Dateien ignoriert; es können nur Notizen, Ordner und Bilder abgelegt werden"
+    },
+    "permissionMode": {
+      "default": {
+        "label": "Nachfragen",
+        "desc": "Immer fragen, bevor Befehle ausgeführt, Dateien außerhalb des Vaults geändert oder Netzwerkzugriffe durchgeführt werden"
+      },
+      "auto": {
+        "label": "Automatisch genehmigen",
+        "desc": "Nur fragen, wenn ein mögliches Risiko erkannt wird"
+      },
+      "yolo": {
+        "label": "Vollzugriff",
+        "desc": "Fragt nie; greift frei auf deine Dateien, das Terminal und das Netzwerk zu"
+      },
+      "plan": {
+        "label": "Planmodus",
+        "desc": "Erkunden und einen Plan entwerfen, ohne Änderungen vorzunehmen"
+      },
+      "changeFailed": "Berechtigungsmodus konnte nicht geändert werden"
     }
   },
   "settings": {

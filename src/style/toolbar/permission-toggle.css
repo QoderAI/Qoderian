@@ -45,15 +45,12 @@
 }
 
 .qoderian-permission-button--default { color: var(--text-success); }
-.qoderian-permission-button--acceptEdits { color: var(--text-warning); }
 .qoderian-permission-button--auto { color: rgb(222, 139, 66); }
 .qoderian-permission-button--plan { color: rgb(92, 148, 140); }
 .qoderian-permission-button--yolo { color: var(--text-error); }
 
 .qoderian-permission-button--default .qoderian-permission-dot,
 .qoderian-permission-option--default .qoderian-permission-dot { background: var(--text-success); }
-.qoderian-permission-button--acceptEdits .qoderian-permission-dot,
-.qoderian-permission-option--acceptEdits .qoderian-permission-dot { background: var(--text-warning); }
 .qoderian-permission-button--auto .qoderian-permission-dot,
 .qoderian-permission-option--auto .qoderian-permission-dot { background: rgb(222, 139, 66); }
 .qoderian-permission-button--plan .qoderian-permission-dot,

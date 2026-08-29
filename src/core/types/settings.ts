@@ -57,8 +57,11 @@ export interface InstructionRefineResult {
   error?: string;               // Error message (if failed)
 }
 
-/** Permission mode for tool execution, mapped directly to Qoder SDK policies. */
-export type PermissionMode = 'default' | 'acceptEdits' | 'auto' | 'plan' | 'yolo';
+/**
+ * Permission mode for tool execution, mapped directly to Qoder SDK policies.
+ * Only default/auto/yolo are user-selectable; plan can arrive from the SDK.
+ */
+export type PermissionMode = 'default' | 'auto' | 'plan' | 'yolo';
 
 /** Opaque device-keyed CLI paths for per-device configuration. */
 export type HostnameCliPaths = Record<string, string>;

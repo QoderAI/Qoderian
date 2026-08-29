@@ -20,7 +20,7 @@ export type StoredQoderianSettings = QoderianSettings;
 export const DEFAULT_QODERIAN_SETTINGS: QoderianSettings = {
   userName: '',
 
-  permissionMode: 'acceptEdits',
+  permissionMode: 'auto',
 
   model: 'auto',
   enableAutoTitleGeneration: true,
@@ -67,7 +67,6 @@ function normalizeChatViewPlacement(value: unknown): ChatViewPlacement {
 
 const PERMISSION_MODES = new Set<PermissionMode>([
   'default',
-  'acceptEdits',
   'auto',
   'plan',
   'yolo',
@@ -81,11 +80,19 @@ function normalizePermissionMode(
     return value as PermissionMode;
   }
 
-  // Before the explicit five-level selector, "normal" delegated to qoder.safeMode.
+  // The three-tier selector dropped accept-edits; auto is its closest tier.
+  if (value === 'acceptEdits') {
+    return 'auto';
+  }
+
+  // Before the explicit multi-level selector, "normal" delegated to qoder.safeMode.
   if (value === 'normal' && storedQoder && typeof storedQoder === 'object') {
     const safeMode = (storedQoder as { safeMode?: unknown }).safeMode;
-    if (safeMode === 'default' || safeMode === 'acceptEdits' || safeMode === 'auto') {
+    if (safeMode === 'default' || safeMode === 'auto') {
       return safeMode;
+    }
+    if (safeMode === 'acceptEdits') {
+      return 'auto';
     }
   }
 

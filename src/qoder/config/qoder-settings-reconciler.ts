@@ -79,12 +79,13 @@ export function normalizeQoderSettings(settings: Record<string, unknown>): boole
     const qoder = settings.qoder && typeof settings.qoder === 'object'
       ? settings.qoder as Record<string, unknown>
       : {};
-    settings.permissionMode = ['default', 'acceptEdits', 'auto'].includes(String(qoder.safeMode))
+    settings.permissionMode = ['default', 'auto'].includes(String(qoder.safeMode))
       ? qoder.safeMode
-      : 'acceptEdits';
+      : 'auto';
     changed = true;
-  } else if (!['default', 'acceptEdits', 'auto', 'yolo', 'plan'].includes(String(settings.permissionMode))) {
-    settings.permissionMode = 'acceptEdits';
+  } else if (!['default', 'auto', 'yolo', 'plan'].includes(String(settings.permissionMode))) {
+    // Covers the removed accept-edits tier alongside genuinely invalid values.
+    settings.permissionMode = 'auto';
     changed = true;
   }
 

@@ -3,6 +3,7 @@ import { Notice } from 'obsidian';
 import type { QoderRuntimeStatus } from '../../../../core/types/services';
 import type { PermissionMode, QoderModelOverride } from '../../../../core/types/settings';
 import { t } from '../../../../i18n/i18n';
+import type { TranslationKey } from '../../../../i18n/types';
 import { getActiveQoderCliEdition, getQoderCliLoginCommand } from '../../../../qoder/config/cli-edition';
 import { getQoderModelOverride } from '../../../../qoder/config/settings';
 import type { QoderModelConfig } from '../../../../qoder/models/qoder-model-config';
@@ -506,7 +507,6 @@ export class PermissionToggle {
     this.buttonEl = this.container.createDiv({ cls: 'qoderian-permission-button' });
     this.dropdownEl = this.container.createDiv({ cls: 'qoderian-permission-dropdown' });
     this.updateDisplay();
-    this.renderOptions();
     this.popover = new ClickPopover(
       this.container,
       this.buttonEl,
@@ -525,14 +525,17 @@ export class PermissionToggle {
 
     this.container.removeClass('qoderian-hidden');
     const mode = this.callbacks.getSettings().permissionMode;
-    const option = PERMISSION_MODE_OPTIONS.find(candidate => candidate.value === mode)
-      ?? PERMISSION_MODE_OPTIONS[0];
-    this.buttonEl.className = `qoderian-permission-button qoderian-permission-button--${option.value}`;
+    const descriptor = PERMISSION_MODE_DESCRIPTORS.find(candidate => candidate.value === mode)
+      ?? PERMISSION_MODE_DESCRIPTORS[0];
+    this.buttonEl.className = `qoderian-permission-button qoderian-permission-button--${descriptor.value}`;
     this.buttonEl.empty();
     this.buttonEl.createSpan({ cls: 'qoderian-permission-dot' });
-    this.buttonEl.createSpan({ cls: 'qoderian-permission-label', text: option.label });
+    this.buttonEl.createSpan({ cls: 'qoderian-permission-label', text: t(descriptor.labelKey) });
     this.buttonEl.createSpan({ cls: 'qoderian-permission-chevron', text: '⌄' });
-    this.buttonEl.setAttribute('title', option.description);
+    this.buttonEl.setAttribute('title', t(descriptor.descriptionKey));
+    // Tab switches and SDK-driven changes only reach updateDisplay, so the
+    // option highlight has to follow the button or the two drift apart.
+    this.renderOptions();
   }
 
   private renderOptions(): void {
@@ -540,7 +543,8 @@ export class PermissionToggle {
     this.dropdownEl.empty();
     const current = this.callbacks.getSettings().permissionMode;
 
-    for (const mode of PERMISSION_MODE_OPTIONS) {
+    for (const mode of PERMISSION_MODE_DESCRIPTORS) {
+      if (!mode.selectable) continue;
       const option = this.dropdownEl.createDiv({
         cls: `qoderian-permission-option qoderian-permission-option--${mode.value}`,
       });
@@ -549,8 +553,11 @@ export class PermissionToggle {
       if (mode.value === current) option.addClass('selected');
       option.createSpan({ cls: 'qoderian-permission-dot' });
       const copy = option.createDiv({ cls: 'qoderian-permission-option-copy' });
-      copy.createDiv({ cls: 'qoderian-permission-option-label', text: mode.label });
-      copy.createDiv({ cls: 'qoderian-permission-option-description', text: mode.description });
+      copy.createDiv({ cls: 'qoderian-permission-option-label', text: t(mode.labelKey) });
+      copy.createDiv({
+        cls: 'qoderian-permission-option-description',
+        text: t(mode.descriptionKey),
+      });
 
       option.addEventListener('click', (event) => {
         event.stopPropagation();
@@ -559,21 +566,42 @@ export class PermissionToggle {
         runToolbarAction(async () => {
           await this.callbacks.onPermissionModeChange(mode.value);
           this.updateDisplay();
-          this.renderOptions();
-        }, 'Failed to change permission mode');
+        }, t('chat.permissionMode.changeFailed'));
       });
     }
   }
 }
 
-const PERMISSION_MODE_OPTIONS: ReadonlyArray<{
+const PERMISSION_MODE_DESCRIPTORS: ReadonlyArray<{
   value: PermissionMode;
-  label: string;
-  description: string;
+  labelKey: TranslationKey;
+  descriptionKey: TranslationKey;
+  selectable: boolean;
 }> = [
-  { value: 'default', label: 'Ask', description: 'Ask before sensitive operations' },
-  { value: 'acceptEdits', label: 'Allow edits', description: 'Use the SDK accept-edits policy' },
-  { value: 'auto', label: 'Auto', description: 'Let the SDK decide without prompting' },
-  { value: 'plan', label: 'Plan', description: 'Explore and create a plan without implementing' },
-  { value: 'yolo', label: 'YOLO', description: 'Bypass SDK permission checks' },
+  {
+    value: 'default',
+    labelKey: 'chat.permissionMode.default.label',
+    descriptionKey: 'chat.permissionMode.default.desc',
+    selectable: true,
+  },
+  {
+    value: 'auto',
+    labelKey: 'chat.permissionMode.auto.label',
+    descriptionKey: 'chat.permissionMode.auto.desc',
+    selectable: true,
+  },
+  {
+    value: 'yolo',
+    labelKey: 'chat.permissionMode.yolo.label',
+    descriptionKey: 'chat.permissionMode.yolo.desc',
+    selectable: true,
+  },
+  // Plan is entered through the CLI rather than this picker, but the SDK can
+  // still push it back to us — keep it displayable so the button never lies.
+  {
+    value: 'plan',
+    labelKey: 'chat.permissionMode.plan.label',
+    descriptionKey: 'chat.permissionMode.plan.desc',
+    selectable: false,
+  },
 ];

@@ -23,7 +23,7 @@ describe('QoderianSettingsStorage', () => {
     const storage = new QoderianSettingsStorage(mockAdapter);
     const settings = await storage.load();
 
-    expect(settings.permissionMode).toBe('acceptEdits');
+    expect(settings.permissionMode).toBe('auto');
     expect(settings).toEqual(DEFAULT_QODERIAN_SETTINGS);
     // Must be an owned copy: mutating loaded settings must not poison the
     // module-level defaults.
@@ -60,7 +60,7 @@ describe('QoderianSettingsStorage', () => {
 
     expect(settings.model).toBe('performance');
     expect(settings.maxTabs).toBe(2);
-    expect(settings.permissionMode).toBe('acceptEdits');
+    expect(settings.permissionMode).toBe('auto');
     expect(settings).not.toHaveProperty('customContextLimits');
     expect(settings).not.toHaveProperty('sharedEnvironmentVariables');
     expect(settings).not.toHaveProperty('envSnippets');
@@ -84,6 +84,18 @@ describe('QoderianSettingsStorage', () => {
 
     expect(settings.permissionMode).toBe('default');
     expect(settings.qoder).not.toHaveProperty('safeMode');
+  });
+
+  it('folds the removed accept-edits tier into auto', async () => {
+    mockAdapter.exists.mockResolvedValue(true);
+    mockAdapter.read.mockResolvedValue(JSON.stringify({
+      permissionMode: 'acceptEdits',
+    }));
+
+    const storage = new QoderianSettingsStorage(mockAdapter);
+    const settings = await storage.load();
+
+    expect(settings.permissionMode).toBe('auto');
   });
 
   it('backs up malformed JSON before loading defaults', async () => {

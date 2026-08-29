@@ -115,6 +115,25 @@
     "drop": {
       "context": "Drop notes, folders, or images here to add as context",
       "ignored": "Ignored {count} unsupported file(s); only notes, folders, and images can be dropped"
+    },
+    "permissionMode": {
+      "default": {
+        "label": "Ask approval",
+        "desc": "Always ask before running commands, editing files outside the vault, or accessing the network"
+      },
+      "auto": {
+        "label": "Auto approval",
+        "desc": "Only ask when a potential risk is detected"
+      },
+      "yolo": {
+        "label": "Full access",
+        "desc": "Never asks; freely accesses your files, terminal, and network"
+      },
+      "plan": {
+        "label": "Plan",
+        "desc": "Explore and draft a plan without making changes"
+      },
+      "changeFailed": "Failed to change permission mode"
     }
   },
   "settings": {
