@@ -115,6 +115,25 @@
     "drop": {
       "context": "Solte notas, pastas ou imagens aqui para adicioná-las como contexto",
       "ignored": "{count} arquivos não suportados foram ignorados; apenas notas, pastas e imagens podem ser soltas"
+    },
+    "permissionMode": {
+      "default": {
+        "label": "Pedir aprovação",
+        "desc": "Perguntar sempre antes de executar comandos, editar arquivos fora do cofre ou acessar a rede"
+      },
+      "auto": {
+        "label": "Aprovação automática",
+        "desc": "Perguntar apenas quando um risco potencial for detectado"
+      },
+      "yolo": {
+        "label": "Acesso total",
+        "desc": "Não pergunta mais; acessa livremente seus arquivos, terminal e rede"
+      },
+      "plan": {
+        "label": "Modo de plano",
+        "desc": "Explorar e redigir um plano sem fazer alterações"
+      },
+      "changeFailed": "Falha ao alterar o modo de permissão"
     }
   },
   "settings": {

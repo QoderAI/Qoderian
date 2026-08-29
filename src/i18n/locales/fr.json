@@ -115,6 +115,25 @@
     "drop": {
       "context": "Déposez des notes, des dossiers ou des images ici pour les ajouter comme contexte",
       "ignored": "{count} fichiers non pris en charge ignorés ; seules les notes, dossiers et images peuvent être déposés"
+    },
+    "permissionMode": {
+      "default": {
+        "label": "Demander l'approbation",
+        "desc": "Toujours demander avant d'exécuter des commandes, de modifier des fichiers hors du coffre ou d'accéder au réseau"
+      },
+      "auto": {
+        "label": "Approbation automatique",
+        "desc": "Demander uniquement lorsqu’un risque potentiel est détecté"
+      },
+      "yolo": {
+        "label": "Accès complet",
+        "desc": "Ne demande plus ; accède librement à vos fichiers, votre terminal et le réseau"
+      },
+      "plan": {
+        "label": "Mode plan",
+        "desc": "Explorer et rédiger un plan sans rien modifier"
+      },
+      "changeFailed": "Échec du changement de mode d'autorisation"
     }
   },
   "settings": {

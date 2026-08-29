@@ -81,6 +81,15 @@ const localizedKeys = [
   'settings.qoderSafeMode.modes.acceptEdits',
   'settings.qoderSafeMode.modes.auto',
   'settings.qoderSafeMode.modes.default',
+  'chat.permissionMode.default.label',
+  'chat.permissionMode.default.desc',
+  'chat.permissionMode.auto.label',
+  'chat.permissionMode.auto.desc',
+  'chat.permissionMode.yolo.label',
+  'chat.permissionMode.yolo.desc',
+  'chat.permissionMode.plan.label',
+  'chat.permissionMode.plan.desc',
+  'chat.permissionMode.changeFailed',
 ] as const;
 
 const staleBangBashDesc =

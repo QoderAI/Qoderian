@@ -115,6 +115,25 @@
     "drop": {
       "context": "Arrastra notas, carpetas o imágenes aquí para añadirlas como contexto",
       "ignored": "Se ignoraron {count} archivos no compatibles; solo se pueden soltar notas, carpetas e imágenes"
+    },
+    "permissionMode": {
+      "default": {
+        "label": "Pedir aprobación",
+        "desc": "Preguntar siempre antes de ejecutar comandos, editar archivos fuera del baúl o acceder a la red"
+      },
+      "auto": {
+        "label": "Aprobación automática",
+        "desc": "Preguntar solo cuando se detecte un riesgo potencial"
+      },
+      "yolo": {
+        "label": "Acceso completo",
+        "desc": "No vuelve a preguntar; accede libremente a tus archivos, terminal y red"
+      },
+      "plan": {
+        "label": "Modo plan",
+        "desc": "Explorar y redactar un plan sin realizar cambios"
+      },
+      "changeFailed": "No se pudo cambiar el modo de permisos"
     }
   },
   "settings": {

@@ -46,7 +46,10 @@ export function setupServiceCallbacks(tab: TabData, plugin: QoderianPlugin): voi
   tab.service.setPermissionModeSyncCallback((sdkMode) => {
     const mode = sdkMode === 'bypassPermissions' || sdkMode === 'yolo'
       ? 'yolo'
-      : ['default', 'acceptEdits', 'auto', 'plan'].includes(sdkMode)
+      // Accept-edits was folded into auto when the picker became three-tier.
+      : sdkMode === 'acceptEdits'
+      ? 'auto'
+      : ['default', 'auto', 'plan'].includes(sdkMode)
       ? sdkMode as QoderianSettings['permissionMode']
       : 'default';
     const currentMode = getTabPermissionMode(tab, plugin);

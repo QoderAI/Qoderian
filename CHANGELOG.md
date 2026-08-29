@@ -11,6 +11,27 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Changed
+
+- The composer permission picker now mirrors New Qoder's three tiers —
+  Ask approval, Auto approval, and Full access — and its labels and
+  descriptions are localized across all ten supported locales instead of
+  being hardcoded English. Plan mode is no longer offered in the picker,
+  but the button still reports it when the CLI switches into planning.
+
+### Removed
+
+- The `Allow edits` permission tier. Existing settings that selected it are
+  migrated to `Auto approval`, which is also the new default for fresh
+  installations.
+
+### Fixed
+
+- The permission dropdown highlighted a stale tier after the mode changed
+  outside the dropdown (switching chat tabs, or the CLI reporting a
+  different mode), leaving the button and the highlighted entry
+  disagreeing.
+
 ## [1.0.6] - 2026-08-27
 
 ### Added
