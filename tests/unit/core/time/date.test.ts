@@ -1,4 +1,8 @@
-import { formatDurationMmSs, getTodayDate } from '../../../../src/core/time/date';
+import {
+  formatDurationMmSs,
+  formatMessageTimestamp,
+  getTodayDate,
+} from '../../../../src/core/time/date';
 
 describe('getTodayDate', () => {
   it('returns readable date with ISO suffix', () => {
@@ -76,5 +80,24 @@ describe('formatDurationMmSs', () => {
       expect(formatDurationMmSs(Infinity)).toBe('0s');
       expect(formatDurationMmSs(-Infinity)).toBe('0s');
     });
+  });
+});
+
+describe('formatMessageTimestamp', () => {
+  it('formats a timestamp as local YYYY-MM-DD HH:mm', () => {
+    const local = new Date(2026, 7, 29, 17, 50).getTime();
+    expect(formatMessageTimestamp(local)).toBe('2026-08-29 17:50');
+  });
+
+  it('pads month, day, hour and minute', () => {
+    const local = new Date(2026, 0, 5, 9, 7).getTime();
+    expect(formatMessageTimestamp(local)).toBe('2026-01-05 09:07');
+  });
+
+  it('returns an empty string for unusable values so callers skip rendering', () => {
+    expect(formatMessageTimestamp(0)).toBe('');
+    expect(formatMessageTimestamp(-1)).toBe('');
+    expect(formatMessageTimestamp(NaN)).toBe('');
+    expect(formatMessageTimestamp(Infinity)).toBe('');
   });
 });

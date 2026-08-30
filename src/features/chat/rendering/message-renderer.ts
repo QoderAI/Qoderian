@@ -3,7 +3,7 @@ import { MarkdownRenderer, Menu, Notice, setIcon } from 'obsidian';
 
 import { hasErrorContentBlock } from '../../../core/chat/error-blocks';
 import type { ChatRewindMode } from '../../../core/runtime/types';
-import { formatDurationMmSs } from '../../../core/time/date';
+import { formatDurationMmSs, formatMessageTimestamp } from '../../../core/time/date';
 import type { ChatMessage, ImageAttachment, SubagentInfo, ToolCallInfo } from '../../../core/types';
 import { t } from '../../../i18n/i18n';
 import type QoderianPlugin from '../../../main';
@@ -142,6 +142,7 @@ export class MessageRenderer {
         const textEl = contentEl.createDiv({ cls: 'qoderian-text-block' });
         void this.renderContent(textEl, textToShow, { userReferenceChips: true });
         this.addUserCopyButton(msgEl, textToShow);
+        this.addUserTimestamp(msgEl, msg.timestamp);
         this.applyTocTitle(msgEl, textToShow);
       }
       if (this.rewindCallback || this.forkCallback) {
@@ -187,6 +188,7 @@ export class MessageRenderer {
 
     if (textToShow) {
       this.addUserCopyButton(msgEl, textToShow);
+      this.addUserTimestamp(msgEl, msg.timestamp);
     }
   }
 
@@ -277,6 +279,7 @@ export class MessageRenderer {
         const textEl = contentEl.createDiv({ cls: 'qoderian-text-block' });
         void this.renderContent(textEl, textToShow, { userReferenceChips: true });
         this.addUserCopyButton(msgEl, textToShow);
+        this.addUserTimestamp(msgEl, msg.timestamp);
         this.applyTocTitle(msgEl, textToShow);
       }
       if (msg.userMessageId) {
@@ -345,7 +348,11 @@ export class MessageRenderer {
   /**
    * Renders assistant message content (content blocks or fallback).
    */
-  private renderAssistantContent(msg: ChatMessage, contentEl: HTMLElement): void {
+  private renderAssistantContent(
+    msg: ChatMessage,
+    contentEl: HTMLElement,
+    includeFooter = true,
+  ): void {
     if (msg.contentBlocks && msg.contentBlocks.length > 0) {
       const renderedToolIds = new Set<string>();
       for (const block of msg.contentBlocks) {
@@ -413,27 +420,47 @@ export class MessageRenderer {
       }
     }
 
-    // Failed turns do not get a normal-completion flavor footer.
+    if (includeFooter) {
+      this.appendResponseFooter(contentEl, msg);
+    }
+  }
+
+  /**
+   * Renders the footer under a whole assistant reply: the completion flavor
+   * line when the turn finished normally, plus the reply's timestamp.
+   * Shared with the streaming path so both renders stay identical.
+   */
+  appendResponseFooter(contentEl: HTMLElement, msg: ChatMessage): void {
+    const timeText = formatMessageTimestamp(msg.timestamp);
+    // Failed turns do not get a normal-completion flavor line.
     const hasCompactBoundary = msg.contentBlocks?.some(b => b.type === 'context_compacted');
-    if (
+    const showDuration = Boolean(
       msg.durationSeconds
       && msg.durationSeconds > 0
       && !hasCompactBoundary
       && !hasErrorContentBlock(msg)
-    ) {
+    );
+    if (!timeText && !showDuration) {
+      return;
+    }
+
+    const footerEl = contentEl.createDiv({ cls: 'qoderian-response-footer' });
+    if (showDuration) {
       const flavorWord = msg.durationFlavorWord || 'Baked';
-      const footerEl = contentEl.createDiv({ cls: 'qoderian-response-footer' });
       footerEl.createSpan({
-        text: `* ${flavorWord} for ${formatDurationMmSs(msg.durationSeconds)}`,
+        text: `* ${flavorWord} for ${formatDurationMmSs(msg.durationSeconds as number)}`,
         cls: 'qoderian-baked-duration',
       });
+    }
+    if (timeText) {
+      footerEl.createSpan({ cls: 'qoderian-message-time', text: timeText });
     }
   }
 
   /** Rebuilds the active assistant content after a streamed block is upgraded. */
   rerenderAssistantContent(msg: ChatMessage, contentEl: HTMLElement): void {
     contentEl.empty();
-    this.renderAssistantContent(msg, contentEl);
+    this.renderAssistantContent(msg, contentEl, false);
   }
 
   /**
@@ -826,6 +853,22 @@ export class MessageRenderer {
     const existing = msgEl.querySelector<HTMLElement>('.qoderian-user-msg-actions');
     if (existing) return existing;
     return msgEl.createDiv({ cls: 'qoderian-user-msg-actions' });
+  }
+
+  /**
+   * Shows when the message was sent. Rewind/fork buttons prepend themselves to
+   * the toolbar, so the leading position is pinned in CSS rather than by DOM order.
+   */
+  private addUserTimestamp(msgEl: HTMLElement, timestamp: number): void {
+    const timeText = formatMessageTimestamp(timestamp);
+    if (!timeText) return;
+    const toolbar = this.getOrCreateActionsToolbar(msgEl);
+    const existing = toolbar.querySelector<HTMLElement>('.qoderian-message-time');
+    if (existing) {
+      existing.setText(timeText);
+      return;
+    }
+    toolbar.createSpan({ cls: 'qoderian-message-time', text: timeText });
   }
 
   private addUserCopyButton(msgEl: HTMLElement, content: string): void {
