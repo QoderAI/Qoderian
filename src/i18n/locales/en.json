@@ -134,6 +134,9 @@
         "desc": "Explore and draft a plan without making changes"
       },
       "changeFailed": "Failed to change permission mode"
+    },
+    "slashCommand": {
+      "requiresInteractiveTerminal": "This command needs an interactive Qoder terminal and cannot run inside Obsidian."
     }
   },
   "settings": {

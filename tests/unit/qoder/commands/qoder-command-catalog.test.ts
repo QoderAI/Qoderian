@@ -50,7 +50,7 @@ describe('QoderCommandCatalog', () => {
 
       const sdkCommands: SlashCommand[] = [
         { id: 'sdk:commit', name: 'commit', description: 'Create git commit', content: '', source: 'sdk' },
-        { id: 'sdk:review', name: 'review', description: 'Review code', content: '', source: 'sdk' },
+        { id: 'sdk:compact', name: 'compact', description: 'Compact context', content: '', source: 'sdk' },
       ];
       catalog.setRuntimeCommands(sdkCommands);
 
@@ -90,16 +90,42 @@ describe('QoderCommandCatalog', () => {
         { id: 'sdk:init', name: 'init', description: 'Init', content: '', source: 'sdk' },
         { id: 'sdk:debug', name: 'debug', description: 'Debug', content: '', source: 'sdk' },
         { id: 'sdk:cost', name: 'cost', description: 'Cost', content: '', source: 'sdk' },
-        { id: 'sdk:review', name: 'review', description: 'Review', content: '', source: 'sdk' },
+        { id: 'sdk:compact', name: 'compact', description: 'Compact', content: '', source: 'sdk' },
       ]);
 
       const entries = await catalog.listDropdownEntries({ includeBuiltIns: false });
 
       const names = entries.map(e => e.name);
-      expect(names).toEqual(['commit', 'review']);
+      expect(names).toEqual(['commit', 'compact']);
       expect(names).not.toContain('init');
       expect(names).not.toContain('debug');
       expect(names).not.toContain('cost');
+    });
+
+    it('hides commands the CLI cannot run non-interactively, and keeps the rest', async () => {
+      const adapter = createMockAdapter({});
+      const catalog = new QoderCommandCatalog(
+        new SlashCommandStorage(adapter),
+        new SkillStorage(adapter),
+      );
+
+      catalog.setRuntimeCommands([
+        { id: 'sdk:model', name: 'model', description: 'Set model', content: '', source: 'sdk' },
+        { id: 'sdk:usage', name: 'usage', description: 'Usage', content: '', source: 'sdk' },
+        { id: 'sdk:about', name: 'about', description: 'About', content: '', source: 'sdk' },
+        // Needs an unconfigured external service, so hidden.
+        { id: 'sdk:kanban', name: 'kanban', description: 'Kanban', content: '', source: 'sdk' },
+        // Works, but the per-message copy buttons already provide it, so hidden.
+        { id: 'sdk:copy', name: 'copy', description: 'Copy', content: '', source: 'sdk' },
+        // Bare it looks harmless, but with a question it hits the same guard.
+        { id: 'sdk:btw', name: 'btw', description: 'Side question', content: '', source: 'sdk' },
+        // A genuinely useful prompt-expansion command, stays visible.
+        { id: 'sdk:compact', name: 'compact', description: 'Compact', content: '', source: 'sdk' },
+      ]);
+
+      const entries = await catalog.listDropdownEntries({ includeBuiltIns: false });
+
+      expect(entries.map(entry => entry.name)).toEqual(['compact']);
     });
 
     it('responds immediately and probes the SDK in the background on cold start', async () => {
@@ -127,7 +153,7 @@ describe('QoderCommandCatalog', () => {
       expect(refreshed[0].scope).toBe('runtime');
     });
 
-    it('falls back to vault commands and skills when SDK discovery is empty', async () => {
+    it('falls back to vault commands only (no skill layer) when SDK discovery is empty', async () => {
       const adapter = createMockAdapter({
         '.qoder/commands/review.md': `---
 description: Review code
@@ -146,9 +172,15 @@ Deploy the app`,
       const entries = await catalog.listDropdownEntries({ includeBuiltIns: false });
 
       expect(probe).toHaveBeenCalledTimes(1);
-      expect(entries).toHaveLength(2);
-      expect(entries.map(entry => entry.name).sort()).toEqual(['deploy', 'review']);
+      // Skills ride the SDK list in normal use; the offline dropdown fallback
+      // offers the user's own commands only.
+      expect(entries).toHaveLength(1);
+      expect(entries.map(entry => entry.name)).toEqual(['review']);
       expect(entries.every(entry => entry.scope === 'vault')).toBe(true);
+
+      // Settings still sees both commands and skills.
+      const vaultEntries = await catalog.listVaultEntries();
+      expect(vaultEntries.map(entry => entry.name).sort()).toEqual(['deploy', 'review']);
     });
 
     it('does not probe when runtime commands are cached', async () => {
@@ -268,7 +300,7 @@ Deploy the app`,
 
       // Runtime provides fresh data while probe is in-flight
       catalog.setRuntimeCommands([
-        { id: 'sdk:review', name: 'review', description: 'Review', content: '', source: 'sdk' },
+        { id: 'sdk:compact', name: 'compact', description: 'Compact', content: '', source: 'sdk' },
       ]);
 
       // Probe returns stale data
@@ -281,7 +313,7 @@ Deploy the app`,
 
       // Runtime data wins — probe result is discarded
       expect(entries).toHaveLength(1);
-      expect(entries[0].name).toBe('review');
+      expect(entries[0].name).toBe('compact');
     });
 
     it('does not overwrite an authoritative empty runtime catalog with a stale probe', async () => {

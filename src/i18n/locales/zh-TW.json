@@ -134,6 +134,9 @@
         "desc": "探索並產生方案，不做任何變更"
       },
       "changeFailed": "切換權限模式失敗"
+    },
+    "slashCommand": {
+      "requiresInteractiveTerminal": "該命令需要 Qoder 互動式終端機，無法在 Obsidian 內執行，請在終端機中使用。"
     }
   },
   "settings": {

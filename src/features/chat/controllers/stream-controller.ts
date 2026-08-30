@@ -7,6 +7,7 @@ import type { ChatMessage, StreamChunk, SubagentInfo, ToolCallInfo } from '../..
 import type { ToolUseResult } from '../../../core/types/diff';
 import type QoderianPlugin from '../../../main';
 import { QODER_PLAN_PATH_PREFIX } from '../../../qoder/config/paths';
+import { describeSlashCommandError } from '../../../qoder/stream/slash-command-error-notice';
 import { extractDiffData } from '../../../qoder/tools/diff';
 import {
   extractResolvedAnswers,
@@ -501,12 +502,19 @@ export class StreamController {
     }
     await this.finalizeCurrentTextBlock(msg);
 
+    // Rewrite before the accumulator records it, so the readable wording is what
+    // persists and what a reloaded conversation shows.
+    const errorChunk: typeof chunk = {
+      ...chunk,
+      content: describeSlashCommandError(chunk.content),
+    };
+
     let accumulator = this.turnErrorAccumulators.get(msg.id);
     if (!accumulator) {
       accumulator = new TurnErrorAccumulator(msg);
       this.turnErrorAccumulators.set(msg.id, accumulator);
     }
-    const result = accumulator.reconcile(msg, chunk);
+    const result = accumulator.reconcile(msg, errorChunk);
     if (!result.changed) return;
 
     msg.durationSeconds = undefined;

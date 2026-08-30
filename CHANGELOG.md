@@ -32,12 +32,40 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   migrated to `Auto approval`, which is also the new default for fresh
   installations.
 
+- Slash commands that cannot run inside Obsidian are no longer offered in the
+  command popover. Each interactive-only one used to burn a turn and come back
+  with a CLI-internal error: `about`, `agents`, `btw`, `commands`, `continue`,
+  `crontab`, `diff`, `editor`, `effort`, `export`, `fast`, `help`, `hooks`, `mcp`,
+  `memory`, `model`, `plan`, `plugins`, `privacy`, `release-notes`, `remote-env`,
+  `security-settings`, `settings`, `skills`, `status`, `theme` and `usage`.
+  Commands that act on the CLI process or session itself — `login`, `logout`,
+  `quit`, `remote-control`, `setup-github` and `upgrade` — are hidden too, since
+  running one from the plugin would tear down the runtime the plugin depends on.
+  So are the terminal-UI-only ones — `shortcuts`, `statusline`, `vim` and
+  `voice` — which run fine in the CLI but only affect a terminal Obsidian does
+  not have, and the ones a Qoderian surface already provides — `copy`,
+  `permissions`, `rewind`, `context-window`, `branch`, `tools` and `rename`
+  (per-message copy and rewind buttons, the permission picker, the model editor's
+  context tier, fork, the MCP server selector, and the history rename button;
+  `rename` only retitles the CLI session, which Qoderian never displays) — plus
+  `goal`, `docs`, `claim`, `kanban`, `workflows`, `feedback`, `review`, `profile`,
+  `subtask` and `tasks`, which the Qoderian chat workflow does not need (kanban
+  additionally requires an unconfigured external service, workflows is terminal
+  automation, feedback is a terminal flow), and `add-dir`, which the
+  external-context selector already provides.
+
 ### Fixed
 
 - The permission dropdown highlighted a stale tier after the mode changed
   outside the dropdown (switching chat tabs, or the CLI reporting a
   different mode), leaving the button and the highlighted entry
   disagreeing.
+
+- A slash command that the CLI refuses because it needs an interactive
+  terminal now reports that in plain, localized language instead of
+  surfacing `Exiting due to command result that is not supported in
+  non-interactive mode.` This also covers commands not yet filtered out of
+  the popover.
 
 ## [1.0.6] - 2026-08-27
 

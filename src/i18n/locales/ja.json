@@ -134,6 +134,9 @@
         "desc": "変更を加えずに調査して計画を作成します"
       },
       "changeFailed": "権限モードの変更に失敗しました"
+    },
+    "slashCommand": {
+      "requiresInteractiveTerminal": "このコマンドには Qoder の対話型ターミナルが必要で、Obsidian 内では実行できません。ターミナルでご利用ください。"
     }
   },
   "settings": {

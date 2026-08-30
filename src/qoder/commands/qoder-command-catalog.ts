@@ -1,6 +1,7 @@
 import type { SlashCommand } from '../../core/types';
 import type { SkillStorage } from '../storage/skill-storage';
 import type { SlashCommandStorage } from '../storage/slash-command-storage';
+import { isHiddenCommand } from './command-visibility-policy';
 import type {
   QoderCommandCatalogContract,
   QoderCommandDropdownConfig,
@@ -51,12 +52,6 @@ function entryToSlashCommand(entry: QoderCommandEntry): SlashCommand {
     kind: entry.kind,
   };
 }
-
-// SDK built-in skills that have no meaning inside Qoderian
-const BUILTIN_HIDDEN_COMMANDS = new Set([
-  'context', 'cost', 'debug', 'extra-usage', 'heapdump', 'init',
-  'insights', 'loop', 'schedule', 'security-review', 'simplify', 'update-config',
-]);
 
 export type CommandProbe = () => Promise<SlashCommand[]>;
 
@@ -113,12 +108,15 @@ export class QoderCommandCatalog implements QoderCommandCatalogContract {
       void this.ensureProbed();
     }
     const runtimeEntries = this.sdkCommands
-      .filter(cmd => !BUILTIN_HIDDEN_COMMANDS.has(cmd.name.toLowerCase()))
+      .filter(cmd => !isHiddenCommand(cmd.name))
       .map(slashCommandToEntry);
     if (runtimeEntries.length > 0) {
       return runtimeEntries;
     }
-    return this.listVaultEntries();
+    // No separate skill layer: skills arrive through the SDK list above and are
+    // governed by the same blacklist. The offline fallback offers the user's own
+    // vault commands only.
+    return this.listVaultCommandEntries();
   }
 
   /** Probe the SDK for commands. Deduplicates concurrent calls. */
@@ -157,6 +155,12 @@ export class QoderCommandCatalog implements QoderCommandCatalogContract {
     const commands = await this.commandStorage.loadAll();
     const skills = await this.skillStorage.loadAll();
     return [...commands, ...skills].map(slashCommandToEntry);
+  }
+
+  /** Dropdown offline fallback: the user's own vault commands, without skills. */
+  private async listVaultCommandEntries(): Promise<QoderCommandEntry[]> {
+    const commands = await this.commandStorage.loadAll();
+    return commands.map(slashCommandToEntry);
   }
 
   async saveVaultEntry(entry: QoderCommandEntry): Promise<void> {

@@ -134,6 +134,9 @@
         "desc": "변경 없이 탐색하고 계획을 작성합니다"
       },
       "changeFailed": "권한 모드를 변경하지 못했습니다"
+    },
+    "slashCommand": {
+      "requiresInteractiveTerminal": "이 명령은 Qoder 대화식 터미널이 필요하므로 Obsidian 내부에서 실행할 수 없습니다. 터미널에서 사용하세요."
     }
   },
   "settings": {

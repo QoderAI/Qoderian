@@ -9,6 +9,7 @@ import type { ChatMessage, Conversation, QoderState } from '../../../core/types'
 import type { QoderModelOverride } from '../../../core/types/settings';
 import { t } from '../../../i18n/i18n';
 import type QoderianPlugin from '../../../main';
+import { isHiddenCommand } from '../../../qoder/commands/command-visibility-policy';
 import { getQoderSettings, updateQoderSettings } from '../../../qoder/config/settings';
 import {
   SlashCommandDropdown,
@@ -329,7 +330,9 @@ function initializeSlashCommands(
       onHide: () => {},
     },
     {
-      staticEntries: toSlashCommandDropdownEntries(getBuiltInCommandsForDropdown()),
+      staticEntries: toSlashCommandDropdownEntries(
+        getBuiltInCommandsForDropdown().filter(cmd => !isHiddenCommand(cmd.name)),
+      ),
       catalogConfig: catalogInfo?.config,
       getEntries: catalogInfo?.getEntries,
       subscribeCatalogChanges: catalogInfo?.subscribe,

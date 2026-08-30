@@ -145,6 +145,9 @@ export type TranslationKey =
   | 'chat.permissionMode.plan.desc'
   | 'chat.permissionMode.changeFailed'
 
+  // Slash command the CLI can only run interactively
+  | 'chat.slashCommand.requiresInteractiveTerminal'
+
   // Settings - Section Headings
   | 'settings.title'
   | 'settings.display'

@@ -134,6 +134,9 @@
         "desc": "Explorar y redactar un plan sin realizar cambios"
       },
       "changeFailed": "No se pudo cambiar el modo de permisos"
+    },
+    "slashCommand": {
+      "requiresInteractiveTerminal": "Este comando necesita una terminal interactiva de Qoder y no puede ejecutarse dentro de Obsidian. Úsalo en la terminal."
     }
   },
   "settings": {

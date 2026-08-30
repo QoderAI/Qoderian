@@ -134,6 +134,9 @@
         "desc": "Explorar e redigir um plano sem fazer alterações"
       },
       "changeFailed": "Falha ao alterar o modo de permissão"
+    },
+    "slashCommand": {
+      "requiresInteractiveTerminal": "Este comando precisa de um terminal interativo do Qoder e não pode ser executado no Obsidian. Use o terminal."
     }
   },
   "settings": {
