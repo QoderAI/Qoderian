@@ -134,6 +134,9 @@
         "desc": "探索并生成方案，不做任何改动"
       },
       "changeFailed": "切换权限模式失败"
+    },
+    "slashCommand": {
+      "requiresInteractiveTerminal": "该命令需要 Qoder 交互式终端，无法在 Obsidian 内运行，请在终端中使用。"
     }
   },
   "settings": {

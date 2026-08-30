@@ -134,6 +134,9 @@
         "desc": "Erkunden und einen Plan entwerfen, ohne Änderungen vorzunehmen"
       },
       "changeFailed": "Berechtigungsmodus konnte nicht geändert werden"
+    },
+    "slashCommand": {
+      "requiresInteractiveTerminal": "Dieser Befehl benötigt ein interaktives Qoder-Terminal und kann nicht in Obsidian ausgeführt werden. Bitte nutze das Terminal."
     }
   },
   "settings": {
