@@ -6,7 +6,6 @@ import type { BrowserSelectionContext, CanvasSelectionContext } from '../../../c
 import type { EditorSelectionContext } from '../../../core/editor/editor-context';
 import type { ChatRuntime } from '../../../core/runtime/chat-runtime';
 import type { ApprovalCallbackOptions, ChatTurnRequest } from '../../../core/runtime/types';
-import { formatDurationMmSs } from '../../../core/time/date';
 import type { ApprovalDecision, ChatMessage, ExitPlanModeDecision, StreamChunk } from '../../../core/types';
 import {
   type InstructionRefineService,
@@ -447,22 +446,18 @@ export class InputController {
             ? Math.floor((performance.now() - state.responseStartTime) / 1000)
             : 0;
           if (durationSeconds > 0) {
-            const flavorWord =
-              COMPLETION_FLAVOR_WORDS[Math.floor(Math.random() * COMPLETION_FLAVOR_WORDS.length)];
             finalAssistantMsg.durationSeconds = durationSeconds;
-            finalAssistantMsg.durationFlavorWord = flavorWord;
-            // Add footer to live message in DOM
-            if (state.currentContentEl) {
-              const footerEl = state.currentContentEl.createDiv({ cls: 'qoderian-response-footer' });
-              footerEl.createSpan({
-                text: `* ${flavorWord} for ${formatDurationMmSs(durationSeconds)}`,
-                cls: 'qoderian-baked-duration',
-              });
-            }
+            finalAssistantMsg.durationFlavorWord =
+              COMPLETION_FLAVOR_WORDS[Math.floor(Math.random() * COMPLETION_FLAVOR_WORDS.length)];
           }
         } else if (hasError) {
           finalAssistantMsg.durationSeconds = undefined;
           finalAssistantMsg.durationFlavorWord = undefined;
+        }
+
+        // Shared with the stored-message path so live and reloaded turns match.
+        if (state.currentContentEl) {
+          renderer.appendResponseFooter(state.currentContentEl, finalAssistantMsg);
         }
 
         state.currentContentEl = null;

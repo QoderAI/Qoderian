@@ -29,3 +29,23 @@ export function formatDurationMmSs(seconds: number): string {
   }
   return `${mins}m ${secs}s`;
 }
+
+function padTwo(value: number): string {
+  return String(value).padStart(2, '0');
+}
+
+/**
+ * Formats a message timestamp as local "YYYY-MM-DD HH:mm".
+ * Returns an empty string for unusable values so callers can skip rendering.
+ */
+export function formatMessageTimestamp(timestamp: number): string {
+  if (!Number.isFinite(timestamp) || timestamp <= 0) {
+    return '';
+  }
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+  const day = `${date.getFullYear()}-${padTwo(date.getMonth() + 1)}-${padTwo(date.getDate())}`;
+  return `${day} ${padTwo(date.getHours())}:${padTwo(date.getMinutes())}`;
+}

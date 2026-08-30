@@ -11,6 +11,13 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Added
+
+- Message timestamps, matching New Qoder: each user bubble shows when it was
+  sent, and each assistant reply shows one time under the whole response next
+  to the completion line. Both reveal on hover so idle conversations stay
+  uncluttered, and replies that were interrupted or errored are timed too.
+
 ### Changed
 
 - The composer permission picker now mirrors New Qoder's three tiers —

@@ -209,8 +209,12 @@
   background: var(--background-modifier-border-hover);
 }
 
-/* Response duration footer - styled as another line of content */
+/* Response footer - the completion line plus the reply timestamp, on one line */
 .qoderian-response-footer {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 8px;
 }
 
@@ -221,12 +225,31 @@
   font-style: italic;
 }
 
+/* Message timestamp, shared by user bubbles and assistant replies */
+.qoderian-message-time {
+  color: var(--text-faint);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* Revealed on hover like the user bubble's. Toggled via opacity so the
+   duration line beside it never shifts. */
+.qoderian-response-footer .qoderian-message-time {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.qoderian-message-assistant:hover .qoderian-response-footer .qoderian-message-time {
+  opacity: 1;
+}
+
 /* Action buttons toolbar below user messages */
 .qoderian-user-msg-actions {
   position: absolute;
   bottom: -20px;
   right: 0;
   display: flex;
+  align-items: center;
   gap: 12px;
   opacity: 0;
   transition: opacity 0.15s;
@@ -246,6 +269,12 @@
   transition: color 0.15s;
 }
 
+/* Rewind/fork buttons prepend themselves, so pin the time ahead of them here. */
+.qoderian-user-msg-actions .qoderian-message-time {
+  order: -1;
+  cursor: default;
+}
+
 .qoderian-user-msg-actions span svg {
   width: 16px;
   height: 16px;
@@ -253,6 +282,10 @@
 
 .qoderian-user-msg-actions span:hover {
   color: var(--text-normal);
+}
+
+.qoderian-user-msg-actions .qoderian-message-time:hover {
+  color: var(--text-faint);
 }
 
 .qoderian-user-msg-actions span.copied {
