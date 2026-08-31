@@ -16,11 +16,11 @@
 
 **Slash Commands & Skills** — 输入 `/` 使用内置和项目级命令。Skills、agents、hooks 读取自同一套 Qoder CLI 项目文件，终端里能用的这里也能用。
 
-**Permission Modes** — 在聊天工具栏直接选择 Ask、Allow edits、Auto、Plan 或 YOLO。`Ask` 对每个敏感操作逐一确认；`Allow edits` 自动批准文件编辑；`Auto` 由 SDK 自行决定、不弹确认；`Plan` 把智能体限制为只读探索；`YOLO` 跳过逐次确认。这些模式直接映射到 Qoder SDK 的权限策略，没有插件自造的命令规则。
+**Permission Modes** — 在聊天工具栏直接选择询问审批、自动审批或完全访问。`询问审批` 对每个敏感操作逐一确认；`自动审批` 仅在检测到潜在风险时询问；`完全访问` 不再询问。只读的 `计划模式` 状态会在 CLI 或 SDK 进入 plan 时显示，但不能从选择器中主动选择。这些模式直接映射到 Qoder SDK 的权限策略，没有插件自造的命令规则。
 
 **Instruction Mode（`#`）** — 空输入框中按 `#` 编写自定义指令，指令会先经过润色再应用。
 
-**Bash Mode（`!`）** — 空输入框中按 `!` 可直接在仓库目录运行 shell 命令。
+**Bash Mode（`!`）** — 空输入框中按 `!` 可直接在仓库目录运行 shell 命令。默认关闭，需在设置 → 实验性功能中启用。
 
 **模型与强度控制** — 在输入框下方选择模型，并在按模型划分的编辑器中调节推理强度，还可以查看 Qoder Agent SDK 上报的上下文用量。
 
@@ -29,6 +29,10 @@
 **多标签与会话** — 多个聊天标签，各自保有历史，另支持续接（resume）、分叉（fork）与回退（rewind）。
 
 **Subagents** — 嵌套的智能体运行会分组内联渲染，方便跟进每个子智能体做了什么。
+
+**折叠执行步骤** — 回复一旦得出最终结果，导向该结果的思考、评论与工具调用行会折叠成一行可展开的「执行步骤」，长回合保持紧凑，同时结果始终可见。
+
+**轮次改动摘要** — 回复结束后，它编辑过的文件会折叠成响应下方的一张卡片，显示文件数、+/- 统计和前几个路径；点击后打开只读弹窗，展示逐文件 diff。
 
 ### 模型
 
@@ -56,7 +60,7 @@ qodercli --version
 
 ## 安装
 
-### 从 Obsidian 社区插件安装（上架后推荐）
+### 从 Obsidian 社区插件安装（推荐）
 
 1. 打开 Obsidian → 设置 → 第三方插件 → 浏览
 2. 搜索 "Qoderian" 并点击安装
@@ -121,10 +125,16 @@ QODER_CLI_PATH=/absolute/path/to/qodercli npm run smoke:qoder
 
 打开 **设置 → Qoderian**：
 
-| 设置项 | 说明 |
-|---------|-------------|
-| **CLI path** | `qodercli` 可执行文件路径（默认自动探测） |
-| **MCP servers** | 外部 MCP 工具服务器（stdio / SSE / HTTP） |
+| 分组 | 内容 |
+|-------|----------|
+| **Setup** | Qoder CLI 版本与 `qodercli` 可执行文件路径（默认自动探测） |
+| **Display** | 语言、聊天视图位置、最大标签数、自动滚动、流式渲染选项 |
+| **Conversations** | 自动生成标题及生成标题所用模型 |
+| **Content** | 用户名、自定义系统提示词、排除标签、媒体文件夹 |
+| **Input** | 发送键行为与 vim 风格导航映射 |
+| **Safety** | 用户 Qoder 设置加载与安全模式权限 |
+| **Commands & Skills / Subagents / MCP Servers / Qoder Plugins** | 查看并编辑存放在 `.qoder/` 下的 Qoder CLI 项目配置 |
+| **Experimental** | Bash 模式（`!`）开关 |
 
 ## 隐私与数据使用
 

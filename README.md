@@ -16,11 +16,11 @@ Open the chat sidebar from the ribbon icon or the command palette (`Open Qoderia
 
 **Slash Commands & Skills** — Type `/` for built-in and project-level commands. Skills, agents, and hooks are read from the same Qoder CLI project files, so what works in the terminal works here.
 
-**Permission Modes** — Choose Ask, Allow edits, Auto, Plan, or YOLO directly from the chat toolbar. `Ask` confirms each sensitive operation, `Allow edits` auto-approves file edits, `Auto` lets the SDK decide without prompting, `Plan` restricts the agent to read-only exploration, and `YOLO` skips per-call confirmation. The modes map to Qoder SDK permission policies without plugin-specific command rules.
+**Permission Modes** — Choose Ask approval, Auto approval, or Full access directly from the chat toolbar. `Ask approval` confirms each sensitive operation, `Auto approval` only asks when a potential risk is detected, and `Full access` never asks. A display-only `Plan` state appears when the CLI or SDK enters plan mode; it is not selectable from the picker. The modes map to Qoder SDK permission policies without plugin-specific command rules.
 
 **Instruction Mode (`#`)** — Press `#` in an empty input to write a custom instruction, which is refined before being applied.
 
-**Bash Mode (`!`)** — Press `!` in an empty input to run a shell command in the vault directory directly.
+**Bash Mode (`!`)** — Press `!` in an empty input to run a shell command in the vault directory directly. It is disabled by default; enable it under Settings → Experimental.
 
 **Model & Effort Controls** — Pick a model below the input and tune its reasoning effort in the per-model editor, and watch context usage reported by the Qoder Agent SDK.
 
@@ -29,6 +29,10 @@ Open the chat sidebar from the ribbon icon or the command palette (`Open Qoderia
 **Multi-Tab & Conversations** — Multiple chat tabs, each with its own history, plus resume, fork, and rewind.
 
 **Subagents** — Nested agent runs are grouped and rendered inline so you can follow what each one did.
+
+**Collapsed Execution Steps** — Once a reply reaches its final result, the thinking, commentary, and tool-call rows that led there fold into a single expandable "Execution steps" line, keeping long turns compact while the result stays in view.
+
+**Turn Change Summaries** — After a reply finishes, the files it edited collapse into a card under the response with file count, +/- stats and the first few paths; clicking it opens a read-only modal with the per-file diffs.
 
 ### Models
 
@@ -56,7 +60,7 @@ qodercli --version
 
 ## Installation
 
-### From Obsidian Community Plugins (recommended once published)
+### From Obsidian Community Plugins (recommended)
 
 1. Open Obsidian → Settings → Community plugins → Browse
 2. Search for "Qoderian" and click Install
@@ -123,10 +127,16 @@ the Query without sending a user turn.
 
 Open **Settings → Qoderian**:
 
-| Setting | Description |
-|---------|-------------|
-| **CLI path** | Path to the `qodercli` executable (auto-detected by default) |
-| **MCP servers** | External MCP tool servers (stdio / SSE / HTTP) |
+| Group | Contents |
+|-------|----------|
+| **Setup** | Qoder CLI edition and path to the `qodercli` executable (auto-detected by default) |
+| **Display** | Language, chat view placement, maximum tabs, auto-scroll, streaming render options |
+| **Conversations** | Auto-generated titles and the model that writes them |
+| **Content** | User name, custom system prompt, excluded tags, media folder |
+| **Input** | Send-key behavior and vim-style navigation mappings |
+| **Safety** | User Qoder settings loading and safe-mode permissions |
+| **Commands & Skills / Subagents / MCP Servers / Qoder Plugins** | Inspect and edit the Qoder CLI project configuration stored in `.qoder/` |
+| **Experimental** | Bash mode (`!`) toggle |
 
 ## Privacy & Data Use
 
