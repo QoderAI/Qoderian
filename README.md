@@ -27,13 +27,33 @@ Qoderian is desktop-only (macOS, Linux, Windows) and needs Obsidian v1.7.2+ plus
 
 ### 1. Install and sign in to Qoder CLI
 
-Install the CLI with the native installer from [qoder.com](https://qoder.com), or through npm:
+Install with the official script (recommended):
+
+**macOS / Linux**
+
+```bash
+curl -fsSL https://qoder.com/install | bash
+```
+
+**Windows — PowerShell** (Windows Terminal recommended)
+
+```powershell
+irm https://qoder.com/install.ps1 | iex
+```
+
+**Windows — CMD**
+
+```cmd
+curl -fsSL https://qoder.com/install.cmd -o install.cmd && install.cmd
+```
+
+Or through npm (requires Node.js ≥ 20):
 
 ```bash
 npm install -g @qoder-ai/qodercli
 ```
 
-Then sign in from a terminal:
+The installer puts `qodercli` on your PATH; Windows on arm64 is not supported. Then sign in from a terminal:
 
 ```bash
 qodercli login

@@ -27,13 +27,33 @@ Qoderian 仅支持桌面端（macOS、Linux、Windows），需要 Obsidian v1.7.
 
 ### 1. 安装并登录 Qoder CLI
 
-使用 [qoder.com](https://qoder.com) 的原生安装程序，或通过 npm 安装：
+使用官方脚本安装（推荐）：
+
+**macOS / Linux**
+
+```bash
+curl -fsSL https://qoder.com/install | bash
+```
+
+**Windows — PowerShell**（推荐使用 Windows Terminal）
+
+```powershell
+irm https://qoder.com/install.ps1 | iex
+```
+
+**Windows — CMD**
+
+```cmd
+curl -fsSL https://qoder.com/install.cmd -o install.cmd && install.cmd
+```
+
+或通过 npm 安装（需要 Node.js ≥ 20）：
 
 ```bash
 npm install -g @qoder-ai/qodercli
 ```
 
-然后在终端登录：
+安装程序会把 `qodercli` 加入 PATH；暂不支持 Windows arm64。然后在终端登录：
 
 ```bash
 qodercli login
