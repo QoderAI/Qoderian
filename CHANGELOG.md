@@ -33,6 +33,11 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ### Changed
 
+- Startup with many saved sessions is now much faster: session metadata is
+  read in parallel and legacy edition history files are probed once per
+  startup instead of repeatedly blocking the interface, so vaults with
+  hundreds of sessions no longer stall while Qoderian loads.
+
 - The composer permission picker now mirrors New Qoder's three tiers —
   Ask approval, Auto approval, and Full access — and its labels and
   descriptions are localized across all ten supported locales instead of
