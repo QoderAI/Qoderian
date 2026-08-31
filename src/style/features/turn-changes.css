@@ -234,6 +234,9 @@
   gap: 8px;
   padding: 8px 10px;
   border-bottom: 1px solid var(--background-modifier-border);
+  /* Obsidian disables text selection in app UI; opt in so paths are copyable. */
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .qoderian-turn-changes-path {
@@ -248,6 +251,8 @@
   padding: 8px 10px;
   font-family: var(--font-monospace);
   font-size: 12px;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .qoderian-turn-changes-edit-label {
