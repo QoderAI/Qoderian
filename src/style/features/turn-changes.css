@@ -1,0 +1,287 @@
+.qoderian-message-content button.qoderian-turn-changes-trigger {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  margin-top: 10px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--background-secondary);
+  box-shadow: none;
+  color: var(--text-normal);
+  font: inherit;
+  line-height: normal;
+  text-align: left;
+  white-space: normal;
+  cursor: pointer;
+}
+
+.qoderian-message-content button.qoderian-turn-changes-trigger:hover {
+  border-color: var(--background-modifier-border-hover);
+  background: var(--background-secondary);
+}
+
+.qoderian-turn-changes-trigger-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.qoderian-turn-changes-trigger-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-s);
+  background: var(--background-primary);
+  color: var(--interactive-accent);
+}
+
+.qoderian-turn-changes-trigger-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.qoderian-turn-changes-trigger-summary {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.qoderian-turn-changes-trigger-title {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.qoderian-turn-changes-trigger-stats,
+.qoderian-turn-changes-trigger-file-stats,
+.qoderian-turn-changes-summary,
+.qoderian-turn-changes-file-stats {
+  font-family: var(--font-monospace);
+}
+
+.qoderian-turn-changes-trigger-stats .added,
+.qoderian-turn-changes-trigger-file-stats .added,
+.qoderian-turn-changes-summary .added,
+.qoderian-turn-changes-file-stats .added {
+  color: var(--color-green);
+}
+
+.qoderian-turn-changes-trigger-stats .removed,
+.qoderian-turn-changes-trigger-file-stats .removed,
+.qoderian-turn-changes-summary .removed,
+.qoderian-turn-changes-file-stats .removed {
+  color: var(--color-red);
+}
+
+.qoderian-turn-changes-trigger-files {
+  display: block;
+  padding: 5px 0;
+  border-top: 1px solid var(--background-modifier-border);
+  background: var(--background-primary-alt);
+}
+
+.qoderian-turn-changes-trigger-file {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 12px;
+}
+
+.qoderian-turn-changes-trigger-path {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-family: var(--font-monospace);
+  font-size: var(--font-ui-smaller);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qoderian-turn-changes-trigger-file-stats {
+  flex: 0 0 auto;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+}
+
+.qoderian-turn-changes-trigger-more {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-top: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.qoderian-turn-changes-trigger-more-icon,
+.qoderian-turn-changes-trigger-more-icon svg {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+}
+
+.qoderian-turn-changes-modal {
+  width: min(1080px, calc(100vw - 48px));
+  height: min(840px, calc(100vh - 64px));
+  max-width: none;
+  max-height: none;
+}
+
+.qoderian-turn-changes-modal .modal-content {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.qoderian-turn-changes-header h2 {
+  margin-bottom: 4px;
+}
+
+.qoderian-turn-changes-summary {
+  display: flex;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.qoderian-turn-changes-body {
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) minmax(0, 1fr);
+  min-height: 0;
+  flex: 1;
+  margin-top: 16px;
+  overflow: hidden;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+}
+
+.qoderian-turn-changes-files {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  padding: 6px;
+  border-right: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+}
+
+.qoderian-turn-changes-files button.qoderian-turn-changes-file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: auto;
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+.qoderian-turn-changes-files button.qoderian-turn-changes-file:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qoderian-turn-changes-files button.qoderian-turn-changes-file.is-selected {
+  background: color-mix(in srgb, var(--interactive-accent) 14%, transparent);
+  box-shadow: inset 3px 0 0 var(--interactive-accent);
+  color: var(--text-normal);
+}
+
+.qoderian-turn-changes-file.is-selected .qoderian-turn-changes-file-name {
+  font-weight: 600;
+}
+
+.qoderian-turn-changes-file-name,
+.qoderian-turn-changes-path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qoderian-turn-changes-file-stats {
+  flex-shrink: 0;
+  font-size: 11px;
+}
+
+.qoderian-turn-changes-detail {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.qoderian-turn-changes-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  /* Obsidian disables text selection in app UI; opt in so paths are copyable. */
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.qoderian-turn-changes-path {
+  font-family: var(--font-monospace);
+  font-size: 12px;
+}
+
+.qoderian-turn-changes-diffs {
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+  padding: 8px 10px;
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.qoderian-turn-changes-edit-label {
+  margin: 8px 0 4px;
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+@media (max-width: 640px) {
+  .qoderian-turn-changes-modal {
+    width: calc(100vw - 24px);
+    height: calc(100vh - 32px);
+  }
+
+  .qoderian-turn-changes-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .qoderian-turn-changes-files {
+    display: flex;
+    flex-direction: row;
+    max-height: 110px;
+    border-right: 0;
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+
+  .qoderian-turn-changes-files button.qoderian-turn-changes-file {
+    width: auto;
+    min-width: 130px;
+  }
+}

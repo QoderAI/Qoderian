@@ -459,6 +459,7 @@ export class InputController {
         const completedContentEl = state.currentContentEl;
         if (completedContentEl) {
           renderer.appendResponseFooter(completedContentEl, finalAssistantMsg);
+          renderer.updateTurnChangesButton(finalAssistantMsg, completedContentEl);
         }
 
         await streamController.finalizeCurrentThinkingBlock(finalAssistantMsg);

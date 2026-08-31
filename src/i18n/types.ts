@@ -133,6 +133,17 @@ export type TranslationKey =
   // Collapsed assistant turn activity
   | 'chat.activity.steps'
 
+  // Aggregate file changes for an assistant turn
+  | 'chat.changes.title'
+  | 'chat.changes.button'
+  | 'chat.changes.edited'
+  | 'chat.changes.files'
+  | 'chat.changes.edit'
+  | 'chat.changes.deleted'
+  | 'chat.changes.renamed'
+  | 'chat.changes.changed'
+  | 'chat.changes.moreFiles'
+
   // Vault drag & drop into composer
   | 'chat.drop.context'
   | 'chat.drop.ignored'

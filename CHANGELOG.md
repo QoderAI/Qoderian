@@ -25,6 +25,12 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   while a turn is running, turns that end on a tool call stay expanded, and
   saved conversations reopen with the same collapsed state.
 
+- Turn change summaries: after a reply finishes, the files it edited collapse
+  into a single card under the response — file count, +/- stats and the first
+  few paths — instead of scattering across the tool call log. Clicking the
+  card opens a read-only modal with the per-file diffs, and saved
+  conversations show the same card when reopened.
+
 ### Changed
 
 - The composer permission picker now mirrors New Qoder's three tiers —

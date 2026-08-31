@@ -115,6 +115,17 @@
     "activity": {
       "steps": "Étapes d’exécution ({count})"
     },
+    "changes": {
+      "title": "Modifications de ce tour",
+      "button": "Voir les modifications · {count} fichiers",
+      "edited": "{count} fichiers modifiés",
+      "files": "{count} fichiers modifiés",
+      "edit": "Modification {count}",
+      "deleted": "Fichier supprimé",
+      "renamed": "Renommé en {path}",
+      "changed": "Modifié",
+      "moreFiles": "Afficher {count} fichiers de plus"
+    },
     "drop": {
       "context": "Déposez des notes, des dossiers ou des images ici pour les ajouter comme contexte",
       "ignored": "{count} fichiers non pris en charge ignorés ; seules les notes, dossiers et images peuvent être déposés"

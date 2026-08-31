@@ -25,9 +25,13 @@ import {
 import { replaceMentionTokensWithHtml } from '../../../shared/markdown/mention-chip';
 import type { ReferenceChipKind } from '../../../shared/mention/types';
 import { openReferenceChip } from '../../../shared/obsidian/compat';
+import { TurnChangesModal } from '../changes/turn-changes-modal';
+import { collectTurnChanges } from '../changes/turn-file-changes';
+import { turnFileDisplayPath } from '../changes/turn-file-path';
 import { formatConversationDirectoryTitle } from '../utils/conversation-directory-title';
 import { findRewindContext } from '../utils/rewind';
 import { setupCollapsible } from './collapsible';
+import { renderDiffStats } from './diff-renderer';
 import {
   renderStoredAsyncSubagent,
   renderStoredSubagent,
@@ -425,6 +429,7 @@ export class MessageRenderer {
       this.appendResponseFooter(contentEl, msg);
     }
 
+    this.updateTurnChangesButton(msg, contentEl);
     this.collapseCompletedTurn(msg, contentEl);
   }
 
@@ -540,6 +545,60 @@ export class MessageRenderer {
     }
 
     return false;
+  }
+
+  /** Add or refresh the aggregate file-change entry for a stored or live turn. */
+  updateTurnChangesButton(msg: ChatMessage, contentEl: HTMLElement): void {
+    contentEl.querySelector('.qoderian-turn-changes-trigger')?.remove();
+    if (msg.role !== 'assistant') return;
+
+    const changes = collectTurnChanges(msg.toolCalls);
+    if (changes.files.length === 0) return;
+
+    const button = contentEl.createEl('button', {
+      cls: 'qoderian-turn-changes-trigger',
+      attr: {
+        'aria-label': t('chat.changes.button', { count: changes.files.length }),
+        type: 'button',
+      },
+    });
+
+    const header = button.createSpan({ cls: 'qoderian-turn-changes-trigger-header' });
+    const icon = header.createSpan({ cls: 'qoderian-turn-changes-trigger-icon' });
+    setIcon(icon, 'files');
+    const summary = header.createSpan({ cls: 'qoderian-turn-changes-trigger-summary' });
+    summary.createSpan({
+      cls: 'qoderian-turn-changes-trigger-title',
+      text: t('chat.changes.edited', { count: changes.files.length }),
+    });
+    const stats = summary.createSpan({ cls: 'qoderian-turn-changes-trigger-stats' });
+    renderDiffStats(stats, changes.stats);
+
+    const visibleFiles = changes.files.slice(0, 3);
+    const fileList = button.createSpan({ cls: 'qoderian-turn-changes-trigger-files' });
+    for (const file of visibleFiles) {
+      const row = fileList.createSpan({ cls: 'qoderian-turn-changes-trigger-file' });
+      row.createSpan({
+        cls: 'qoderian-turn-changes-trigger-path',
+        text: turnFileDisplayPath(this.app, file),
+      });
+      const fileStats = row.createSpan({ cls: 'qoderian-turn-changes-trigger-file-stats' });
+      renderDiffStats(fileStats, file.stats);
+      if (file.stats.added === 0 && file.stats.removed === 0) {
+        fileStats.setText(file.diffs.some(diff => diff.operation === 'delete')
+          ? t('chat.changes.deleted')
+          : t('chat.changes.changed'));
+      }
+    }
+
+    const remaining = changes.files.length - visibleFiles.length;
+    if (remaining > 0) {
+      const more = button.createSpan({ cls: 'qoderian-turn-changes-trigger-more' });
+      more.createSpan({ text: t('chat.changes.moreFiles', { count: remaining }) });
+      const chevron = more.createSpan({ cls: 'qoderian-turn-changes-trigger-more-icon' });
+      setIcon(chevron, 'chevron-down');
+    }
+    button.addEventListener('click', () => new TurnChangesModal(this.app, changes).open());
   }
 
   /** Rebuilds the active assistant content after a streamed block is upgraded. */

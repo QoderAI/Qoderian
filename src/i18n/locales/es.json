@@ -115,6 +115,17 @@
     "activity": {
       "steps": "Pasos de ejecución ({count})"
     },
+    "changes": {
+      "title": "Cambios de este turno",
+      "button": "Ver cambios · {count} archivos",
+      "edited": "{count} archivos editados",
+      "files": "{count} archivos modificados",
+      "edit": "Edición {count}",
+      "deleted": "Archivo eliminado",
+      "renamed": "Renombrado a {path}",
+      "changed": "Modificado",
+      "moreFiles": "Mostrar {count} archivos más"
+    },
     "drop": {
       "context": "Arrastra notas, carpetas o imágenes aquí para añadirlas como contexto",
       "ignored": "Se ignoraron {count} archivos no compatibles; solo se pueden soltar notas, carpetas e imágenes"
