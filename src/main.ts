@@ -6,6 +6,7 @@ import type { Editor, WorkspaceLeaf } from 'obsidian';
 import { addIcon, MarkdownView, Notice, Plugin } from 'obsidian';
 
 import { QoderianStorage } from './app/storage/app-storage';
+import { measureAsync } from './core/diagnostics/performance';
 import { beginRestoreReport, reportRestoreIssue } from './core/diagnostics/restore-report';
 import { buildCursorContext } from './core/editor/editor-context';
 import { getVaultPath } from './core/fs/path';
@@ -417,9 +418,18 @@ export default class QoderianPlugin extends Plugin {
     }
     const didNormalizeModelVariants = this.normalizeModelVariantSettings();
 
-    const allMetadata = await this.storage.sessions.listMetadata();
-    await this.migrateLegacySessionEditions(allMetadata);
-    this.conversations = await this.buildConversationIndex(allMetadata);
+    const allMetadata = await measureAsync(
+      'startup.listMetadata',
+      () => this.storage.sessions.listMetadata(),
+    );
+    await measureAsync(
+      'startup.migrateLegacyEditions',
+      () => this.migrateLegacySessionEditions(allMetadata),
+    );
+    this.conversations = await measureAsync(
+      'startup.buildConversationIndex',
+      () => this.buildConversationIndex(allMetadata),
+    );
     setLocale(this.settings.locale as Locale);
 
     if (didNormalizeModelVariants) {
@@ -563,9 +573,12 @@ export default class QoderianPlugin extends Plugin {
       return;
     }
 
-    await historyService.hydrateConversationHistory(
-      conversation,
-      getVaultPath(this.app),
+    await measureAsync(
+      'history.hydrateConversation',
+      () => historyService.hydrateConversationHistory(
+        conversation,
+        getVaultPath(this.app),
+      ),
     );
   }
 
