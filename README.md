@@ -1,66 +1,75 @@
 # Qoderian
 
+[English](README.md) | [中文](README.zh-CN.md)
+
 An Obsidian plugin that embeds [Qoder CLI](https://qoder.com) (`qodercli`) in your vault. Your vault becomes the agent's working directory — file read/write, search, bash, and multi-step workflows all work out of the box.
 
 ![Qoderian in an agentic Obsidian workspace](assets/preview.png)
 
-## Features & Usage
+## Features
 
-Open the chat sidebar from the ribbon icon or the command palette (`Open Qoderian`). Type a message and press **Enter**; qodercli streams its response back into the panel. Everything works like the qodercli you already know — it reads, writes, edits, and searches files in your vault.
+- **Agentic chat** — qodercli streams responses into the sidebar and reads, writes, edits, and searches files in your vault.
+- **`@` mentions** — Bring vault notes, the current selection, or external directories into context as removable chips.
+- **Inline Edit** — Rewrite selected note text in place, with a diff preview before you accept.
+- **Slash Commands & Skills** — `/` opens built-in and project-level commands; skills, agents, and hooks come from the same Qoder CLI project files as the terminal.
+- **Permission Modes** — Ask approval, Auto approval, or Full access from the chat toolbar.
+- **`#` Instruction Mode** — Write a custom instruction on an empty input; it is refined before being applied.
+- **`!` Bash Mode** — Run a shell command in the vault directory; opt-in under Settings → Experimental.
+- **Models & Effort** — Model picker with per-model reasoning effort and context usage reported by the Qoder Agent SDK.
+- **MCP Servers** — Connect external tools over the Model Context Protocol (stdio, SSE, HTTP), configured in-app.
+- **Tabs & History** — Multiple chat tabs with their own histories, plus resume, fork, and rewind.
+- **Subagents** — Nested agent runs grouped and rendered inline.
+- **Turn summaries** — Finished turns fold their working steps into an expandable "Execution steps" line, and edited files collapse into a card that opens a read-only per-file diff modal.
 
-**`@mention`** — Type `@` to bring vault notes, the current selection, or external directories into context. Attached files appear as removable chips above the input.
+## Installation & Usage
 
-**Inline Edit** — Select text in a note and run the inline-edit command to rewrite it in place, with a diff preview before you accept.
+Qoderian is desktop-only (macOS, Linux, Windows) and needs Obsidian v1.7.2+ plus a signed-in [Qoder CLI](https://qoder.com).
 
-**Slash Commands & Skills** — Type `/` for built-in and project-level commands. Skills, agents, and hooks are read from the same Qoder CLI project files, so what works in the terminal works here.
+### 1. Install and sign in to Qoder CLI
 
-**Permission Modes** — Choose Ask, Allow edits, Auto, Plan, or YOLO directly from the chat toolbar. `Ask` confirms each sensitive operation, `Allow edits` auto-approves file edits, `Auto` lets the SDK decide without prompting, `Plan` restricts the agent to read-only exploration, and `YOLO` skips per-call confirmation. The modes map to Qoder SDK permission policies without plugin-specific command rules.
+Install with the official script (recommended):
 
-**Instruction Mode (`#`)** — Press `#` in an empty input to write a custom instruction, which is refined before being applied.
-
-**Bash Mode (`!`)** — Press `!` in an empty input to run a shell command in the vault directory directly.
-
-**Model & Effort Controls** — Pick a model below the input and tune its reasoning effort in the per-model editor, and watch context usage reported by the Qoder Agent SDK.
-
-**MCP Servers** — Connect external tools over the Model Context Protocol (stdio, SSE, HTTP), configured in-app.
-
-**Multi-Tab & Conversations** — Multiple chat tabs, each with its own history, plus resume, fork, and rewind.
-
-**Subagents** — Nested agent runs are grouped and rendered inline so you can follow what each one did.
-
-### Models
-
-| Model | Description |
-|-------|-------------|
-| `auto` | Model auto-selected (default) |
-| `ultimate` | Highest capability |
-| `performance` | Balanced performance |
-| `efficient` | Fast and cost-effective |
-| `lite` | Lightweight and fast |
-
-Adaptive thinking models accept an effort level of `Low`, `Med`, `High`, `XHigh`, or `Max`, configured per model through the editor in the model selector. The selector consumes the runtime catalog returned by the Qoder Agent SDK, including models configured in qodercli.
-
-## Requirements
-
-- [Qoder CLI](https://qoder.com) (`qodercli`) installed, signed in, and available on your PATH
-- Obsidian v1.7.2+
-- Desktop only (macOS, Linux, Windows)
-
-Verify the CLI is reachable:
+**macOS / Linux**
 
 ```bash
-qodercli --version
+curl -fsSL https://qoder.com/install | bash
 ```
 
-## Installation
+**Windows — PowerShell** (Windows Terminal recommended)
 
-### From Obsidian Community Plugins (recommended once published)
+```powershell
+irm https://qoder.com/install.ps1 | iex
+```
+
+**Windows — CMD**
+
+```cmd
+curl -fsSL https://qoder.com/install.cmd -o install.cmd && install.cmd
+```
+
+Or through npm (requires Node.js ≥ 20):
+
+```bash
+npm install -g @qoder-ai/qodercli
+```
+
+The installer puts `qodercli` on your PATH; Windows on arm64 is not supported. Then sign in from a terminal:
+
+```bash
+qodercli login
+```
+
+Sign-in is managed entirely by your local CLI; Qoderian never asks for an API key.
+
+### 2. Install the plugin
+
+**From Obsidian Community Plugins (recommended)**
 
 1. Open Obsidian → Settings → Community plugins → Browse
 2. Search for "Qoderian" and click Install
 3. Enable the plugin
 
-### From GitHub Release
+**From GitHub Release**
 
 1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](../../releases/latest)
 2. Create a folder called `qoderian` in your vault's plugins folder:
@@ -70,7 +79,7 @@ qodercli --version
 3. Copy the downloaded files into that folder
 4. Enable the plugin in Obsidian: Settings → Community plugins → turn off Restricted mode → enable "Qoderian"
 
-### From source
+**From source**
 
 1. Clone the repository into your vault's plugins folder:
    ```bash
@@ -85,6 +94,10 @@ qodercli --version
    ```
    This writes `main.js` and `styles.css` next to `manifest.json`, which is where Obsidian loads them from.
 3. Enable the plugin in Obsidian
+
+### 3. Start using
+
+Open the chat sidebar from the ribbon icon or the command palette (`Open Qoderian`). Type a message and press **Enter**; qodercli streams its response back into the panel and works on your vault files just like the terminal CLI.
 
 ### Development
 
@@ -121,10 +134,16 @@ the Query without sending a user turn.
 
 Open **Settings → Qoderian**:
 
-| Setting | Description |
-|---------|-------------|
-| **CLI path** | Path to the `qodercli` executable (auto-detected by default) |
-| **MCP servers** | External MCP tool servers (stdio / SSE / HTTP) |
+| Group | Contents |
+|-------|----------|
+| **Setup** | Qoder CLI edition and path to the `qodercli` executable (auto-detected by default) |
+| **Display** | Chat view placement, maximum tabs, auto-scroll, deferred math rendering during streaming, and default expansion of file edits (the language selector sits above this group) |
+| **Conversations** | Auto-generated titles and the model that writes them |
+| **Content** | User name, custom system prompt, excluded tags, media folder |
+| **Input** | Send-key behavior and vim-style navigation mappings |
+| **Safety** | User Qoder settings loading and safe-mode permissions |
+| **Commands & Skills / Subagents / MCP Servers / Qoder Plugins** | Inspect and edit the Qoder CLI project configuration stored in `.qoder/` |
+| **Experimental** | Bash mode (`!`) toggle |
 
 ## Privacy & Data Use
 
