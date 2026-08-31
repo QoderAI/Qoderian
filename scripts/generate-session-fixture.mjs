@@ -116,13 +116,12 @@ removed += removeFixtures(projectsDir(otherEdition, vault), '.jsonl');
 fs.mkdirSync(metaDir, { recursive: true });
 fs.mkdirSync(projectsDir(args.edition, vault), { recursive: true });
 
-const randomSuffix = () => Math.random().toString(16).slice(2, 10);
 let stampedCount = 0;
 let legacyWithFileCount = 0;
 let missingCount = 0;
 
 for (let index = 0; index < args.total; index += 1) {
-  const id = `${FIXTURE_PREFIX}${index}-${randomSuffix()}`;
+  const id = `${FIXTURE_PREFIX}${index}`;
   const isLegacy = index >= args.total - args.legacy;
   const isMissing = isLegacy && index >= args.total - args.missing;
 
