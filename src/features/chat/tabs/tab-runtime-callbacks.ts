@@ -146,6 +146,9 @@ async function renderAutoTriggeredTurn(tab: TabData, result: AutoTurnResult): Pr
     if (hasVisibleContent) {
       await tab.controllers.streamController?.finalizeCurrentThinkingBlock(assistantMsg);
       await tab.controllers.streamController?.finalizeCurrentTextBlock(assistantMsg);
+      if (tab.state.currentContentEl) {
+        tab.renderer?.collapseCompletedTurn?.(assistantMsg, tab.state.currentContentEl);
+      }
     }
   } finally {
     if (hasVisibleContent) {

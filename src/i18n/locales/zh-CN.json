@@ -112,6 +112,9 @@
       "steer": "引导",
       "steerUnavailable": "当前无法引导，消息仍保留在队列中。"
     },
+    "activity": {
+      "steps": "执行步骤（{count}）"
+    },
     "drop": {
       "context": "拖拽笔记、文件夹或图片到此处，添加为上下文",
       "ignored": "已忽略 {count} 个不支持的文件，仅支持拖入笔记、文件夹和图片"

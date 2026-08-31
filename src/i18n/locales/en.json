@@ -112,6 +112,9 @@
       "steer": "Steer",
       "steerUnavailable": "Can't steer right now. The message stays in the queue."
     },
+    "activity": {
+      "steps": "Execution steps ({count})"
+    },
     "drop": {
       "context": "Drop notes, folders, or images here to add as context",
       "ignored": "Ignored {count} unsupported file(s); only notes, folders, and images can be dropped"

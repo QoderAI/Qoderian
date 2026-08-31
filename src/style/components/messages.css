@@ -147,6 +147,69 @@
   font-family: var(--font-monospace);
 }
 
+/* Completed assistant turns keep the final result visible and tuck prior work away. */
+.qoderian-turn-activity {
+  margin: 0 0 10px;
+}
+
+.qoderian-turn-activity-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 3px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.qoderian-turn-activity-header:hover,
+.qoderian-turn-activity-header:focus-visible {
+  color: var(--text-normal);
+}
+
+.qoderian-turn-activity-header:focus-visible {
+  outline: 1px solid var(--background-modifier-border-focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.qoderian-turn-activity-chevron {
+  display: inline-flex;
+  flex: 0 0 auto;
+  transition: transform 0.15s ease;
+}
+
+.qoderian-turn-activity-chevron svg {
+  width: 13px;
+  height: 13px;
+}
+
+.qoderian-turn-activity.expanded .qoderian-turn-activity-chevron {
+  transform: rotate(90deg);
+}
+
+.qoderian-turn-activity-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qoderian-turn-activity-content {
+  margin: 4px 0 10px 6px;
+  padding-inline-start: 12px;
+  border-inline-start: 1px solid var(--background-modifier-border);
+}
+
+.qoderian-turn-activity-content > :first-child {
+  margin-top: 0;
+}
+
+.qoderian-turn-activity-content > :last-child {
+  margin-bottom: 0;
+}
+
 .qoderian-text-block+.qoderian-tool-call {
   margin-top: 8px;
 }

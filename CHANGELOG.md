@@ -18,6 +18,13 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   to the completion line. Both reveal on hover so idle conversations stay
   uncluttered, and replies that were interrupted or errored are timed too.
 
+- Collapsed activity for finished turns: once a reply reaches its final
+  result, the thinking, commentary, and tool-call rows that led there fold
+  into a single expandable "Execution steps" line above the answer, so long
+  turns stay compact while the result stays in view. The stream stays flat
+  while a turn is running, turns that end on a tool call stay expanded, and
+  saved conversations reopen with the same collapsed state.
+
 ### Changed
 
 - The composer permission picker now mirrors New Qoder's three tiers —

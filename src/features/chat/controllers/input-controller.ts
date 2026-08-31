@@ -456,17 +456,14 @@ export class InputController {
         }
 
         // Shared with the stored-message path so live and reloaded turns match.
-        if (state.currentContentEl) {
-          renderer.appendResponseFooter(state.currentContentEl, finalAssistantMsg);
+        const completedContentEl = state.currentContentEl;
+        if (completedContentEl) {
+          renderer.appendResponseFooter(completedContentEl, finalAssistantMsg);
         }
-
-        state.currentContentEl = null;
 
         await streamController.finalizeCurrentThinkingBlock(finalAssistantMsg);
         await streamController.finalizeCurrentTextBlock(finalAssistantMsg);
         this.deps.getSubagentManager().resetStreamingState();
-
-        this.syncScrollToBottomAfterRenderUpdates();
 
         // approve-new-session: the tool_result chunk is dropped because cancelRequested
         // was set before the stream loop could process it — manually set the result so
@@ -480,6 +477,13 @@ export class InputController {
             }
           }
         }
+
+        if (completedContentEl) {
+          renderer.collapseCompletedTurn(finalAssistantMsg, completedContentEl);
+        }
+        state.currentContentEl = null;
+
+        this.syncScrollToBottomAfterRenderUpdates();
 
         // Show plan approval and await a decision before save/auto-send.
         let planAutoSendContent: string | null = null;
@@ -758,6 +762,12 @@ export class InputController {
       } else {
         await this.deps.streamController.finalizeCurrentThinkingBlock(previousAssistant);
         await this.deps.streamController.finalizeCurrentTextBlock(previousAssistant);
+        if (this.deps.state.currentContentEl) {
+          this.deps.renderer.collapseCompletedTurn(
+            previousAssistant,
+            this.deps.state.currentContentEl,
+          );
+        }
       }
     }
     this.deps.streamController.hideThinkingIndicator();
@@ -804,6 +814,12 @@ export class InputController {
     if (previousAssistant) {
       await this.deps.streamController.finalizeCurrentThinkingBlock(previousAssistant);
       await this.deps.streamController.finalizeCurrentTextBlock(previousAssistant);
+      if (this.deps.state.currentContentEl) {
+        this.deps.renderer.collapseCompletedTurn(
+          previousAssistant,
+          this.deps.state.currentContentEl,
+        );
+      }
     }
 
     const assistantMessage: ChatMessage = {
