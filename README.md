@@ -12,7 +12,7 @@ An Obsidian plugin that embeds [Qoder CLI](https://qoder.com) (`qodercli`) in yo
 - **`@` mentions** — Bring vault notes, the current selection, or external directories into context as removable chips.
 - **Inline Edit** — Rewrite selected note text in place, with a diff preview before you accept.
 - **Slash Commands & Skills** — `/` opens built-in and project-level commands; skills, agents, and hooks come from the same Qoder CLI project files as the terminal.
-- **Permission Modes** — Ask approval, Auto approval, or Full access from the chat toolbar; a display-only `Plan` state appears when the CLI or SDK enters plan mode.
+- **Permission Modes** — Ask approval, Auto approval, or Full access from the chat toolbar.
 - **`#` Instruction Mode** — Write a custom instruction on an empty input; it is refined before being applied.
 - **`!` Bash Mode** — Run a shell command in the vault directory; opt-in under Settings → Experimental.
 - **Models & Effort** — Model picker with per-model reasoning effort and context usage reported by the Qoder Agent SDK.
