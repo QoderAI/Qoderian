@@ -6,67 +6,50 @@
 
 ![Qoderian 在智能体化的 Obsidian 工作区中](assets/preview.png)
 
-## 功能与用法
+## 功能
 
-从左侧功能区图标或命令面板（`Open Qoderian`）打开聊天侧栏。输入消息后按 **Enter**，qodercli 会以流式方式把回复送回面板。一切和你熟悉的 qodercli 一样——它可以读取、写入、编辑、搜索仓库中的文件。
+- **智能体聊天** — qodercli 以流式方式把回复送回侧栏，并读取、写入、编辑、搜索仓库中的文件。
+- **`@` 引用** — 把仓库笔记、当前选区或外部目录加入上下文，显示为可移除标签。
+- **Inline Edit** — 就地改写选中的笔记文字，接受前先给出 diff 预览。
+- **Slash Commands & Skills** — `/` 打开内置与项目级命令；skills、agents、hooks 与终端共用同一套 Qoder CLI 项目文件。
+- **Permission Modes** — 在聊天工具栏选择询问审批、自动审批或完全访问；CLI 或 SDK 进入 plan 时显示只读的 `计划模式`。
+- **`#` 指令模式** — 空输入框中编写自定义指令，先润色再应用。
+- **`!` Bash 模式** — 在仓库目录运行 shell 命令；需在设置 → 实验性功能中启用。
+- **模型与强度** — 模型选择器按模型调节推理强度，并显示 Qoder Agent SDK 上报的上下文用量。
+- **MCP Servers** — 通过 Model Context Protocol（stdio、SSE、HTTP）连接外部工具，应用内配置。
+- **标签与历史** — 多个聊天标签各自保有历史，支持续接、分叉、回退。
+- **Subagents** — 嵌套的智能体运行分组内联渲染。
+- **回合摘要** — 完成的回合把执行过程折叠成可展开的「执行步骤」行；编辑过的文件折叠成卡片，点击打开只读的逐文件 diff 弹窗。
 
-**`@mention`** — 输入 `@` 可把仓库笔记、当前选区或外部目录加入上下文。附件会以可移除的标签形式显示在输入框上方。
+## 安装与使用
 
-**Inline Edit** — 在笔记中选中文字并运行内联编辑命令，可就地改写，接受前先给出 diff 预览。
+Qoderian 仅支持桌面端（macOS、Linux、Windows），需要 Obsidian v1.7.2+ 以及已登录的 [Qoder CLI](https://qoder.com)。
 
-**Slash Commands & Skills** — 输入 `/` 使用内置和项目级命令。Skills、agents、hooks 读取自同一套 Qoder CLI 项目文件，终端里能用的这里也能用。
+### 1. 安装并登录 Qoder CLI
 
-**Permission Modes** — 在聊天工具栏直接选择询问审批、自动审批或完全访问。`询问审批` 对每个敏感操作逐一确认；`自动审批` 仅在检测到潜在风险时询问；`完全访问` 不再询问。只读的 `计划模式` 状态会在 CLI 或 SDK 进入 plan 时显示，但不能从选择器中主动选择。这些模式直接映射到 Qoder SDK 的权限策略，没有插件自造的命令规则。
-
-**Instruction Mode（`#`）** — 空输入框中按 `#` 编写自定义指令，指令会先经过润色再应用。
-
-**Bash Mode（`!`）** — 空输入框中按 `!` 可直接在仓库目录运行 shell 命令。默认关闭，需在设置 → 实验性功能中启用。
-
-**模型与强度控制** — 在输入框下方选择模型，并在按模型划分的编辑器中调节推理强度，还可以查看 Qoder Agent SDK 上报的上下文用量。
-
-**MCP Servers** — 通过 Model Context Protocol（stdio、SSE、HTTP）连接外部工具，在应用内配置。
-
-**多标签与会话** — 多个聊天标签，各自保有历史，另支持续接（resume）、分叉（fork）与回退（rewind）。
-
-**Subagents** — 嵌套的智能体运行会分组内联渲染，方便跟进每个子智能体做了什么。
-
-**折叠执行步骤** — 回复一旦得出最终结果，导向该结果的思考、评论与工具调用行会折叠成一行可展开的「执行步骤」，长回合保持紧凑，同时结果始终可见。
-
-**轮次改动摘要** — 回复结束后，它编辑过的文件会折叠成响应下方的一张卡片，显示文件数、+/- 统计和前几个路径；点击后打开只读弹窗，展示逐文件 diff。
-
-### 模型
-
-| 模型 | 说明 |
-|-------|-------------|
-| `auto` | 自动选择模型（默认） |
-| `ultimate` | 最强能力 |
-| `performance` | 性能均衡 |
-| `efficient` | 快速且性价比高 |
-| `lite` | 轻量快速 |
-
-自适应思考模型接受 `Low`、`Med`、`High`、`XHigh`、`Max` 五档强度，通过模型选择器内的编辑器按模型配置。选择器消费 Qoder Agent SDK 返回的运行时目录，包括在 qodercli 中配置的模型。
-
-## 运行要求
-
-- 已安装 [Qoder CLI](https://qoder.com)（`qodercli`），已登录，且在 PATH 中可用
-- Obsidian v1.7.2+
-- 仅桌面端（macOS、Linux、Windows）
-
-验证 CLI 可达：
+使用 [qoder.com](https://qoder.com) 的原生安装程序，或通过 npm 安装：
 
 ```bash
-qodercli --version
+npm install -g @qoder-ai/qodercli
 ```
 
-## 安装
+然后在终端登录：
 
-### 从 Obsidian 社区插件安装（推荐）
+```bash
+qodercli login
+```
+
+登录完全由本地 CLI 管理；Qoderian 不会索要 API key。
+
+### 2. 安装插件
+
+**从 Obsidian 社区插件安装（推荐）**
 
 1. 打开 Obsidian → 设置 → 第三方插件 → 浏览
 2. 搜索 "Qoderian" 并点击安装
 3. 启用插件
 
-### 从 GitHub Release 安装
+**从 GitHub Release 安装**
 
 1. 从 [latest release](../../releases/latest) 下载 `main.js`、`manifest.json`、`styles.css`
 2. 在仓库的插件目录下创建 `qoderian` 文件夹：
@@ -76,7 +59,7 @@ qodercli --version
 3. 把下载的文件复制进该文件夹
 4. 在 Obsidian 中启用插件：设置 → 第三方插件 → 关闭受限模式 → 启用 "Qoderian"
 
-### 从源码安装
+**从源码安装**
 
 1. 把仓库克隆到仓库的插件目录：
    ```bash
@@ -91,6 +74,10 @@ qodercli --version
    ```
    这会在 `manifest.json` 旁边生成 `main.js` 和 `styles.css`，Obsidian 正是从那里加载它们。
 3. 在 Obsidian 中启用插件
+
+### 3. 开始使用
+
+从左侧功能区图标或命令面板（`Open Qoderian`）打开聊天侧栏。输入消息后按 **Enter**，qodercli 会以流式方式把回复送回面板，并像终端里的 CLI 一样操作仓库文件。
 
 ### 开发
 
