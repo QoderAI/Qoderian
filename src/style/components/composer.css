@@ -6,10 +6,13 @@
   display: none;
 }
 
+/* No min-height override here: the host must keep the flex content-based
+   minimum so the editor's min/max-height bounds propagate to the wrapper.
+   min-height: 0 collapsed the host to the wrapper's base height and let the
+   editor paint outside the input box on large pastes. */
 .qoderian-input-wrapper .qoderian-live-composer-host {
   display: flex;
   flex: 1 1 0;
-  min-height: 0;
   min-width: 0;
 }
 

@@ -67,6 +67,11 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   non-interactive mode.` This also covers commands not yet filtered out of
   the popover.
 
+- Pasting a large block of text into the composer painted it outside the
+  input box, spilling over the toolbar and past the bottom of the sidebar.
+  The input box now grows with the pasted text up to its usual height cap,
+  scrolls internally beyond that, and shrinks back when the text is cleared.
+
 ## [1.0.6] - 2026-08-27
 
 ### Added
