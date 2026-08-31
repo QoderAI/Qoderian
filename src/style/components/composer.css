@@ -20,7 +20,7 @@
    height bounds) so the wrapper layout stays identical. */
 .qoderian-input-wrapper .qoderian-live-composer.cm-editor {
   flex: 1 1 auto;
-  min-height: var(--qoderian-textarea-min-height, 60px);
+  min-height: 60px;
   max-height: var(--qoderian-textarea-max-height, none);
   background: transparent;
   color: var(--text-normal);

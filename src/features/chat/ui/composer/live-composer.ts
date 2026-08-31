@@ -13,11 +13,7 @@ import {
 } from '@codemirror/view';
 import { setIcon } from 'obsidian';
 
-import {
-  calculateTextareaMaxHeight,
-  calculateTextareaMinHeight,
-  TEXTAREA_BASE_MIN_HEIGHT,
-} from '../textarea-resize';
+import { calculateTextareaMaxHeight } from '../textarea-resize';
 import {
   type ComposerReference,
   type ComposerReferenceRange,
@@ -273,27 +269,16 @@ export class LiveComposer {
   }
 
   /**
-   * Mirrors the textarea auto-resize contract: grows with content, capped at
-   * a share of the view height. Metrics come from the CodeMirror scroller.
+   * Caps the editor at a share of the view height. The editor's own height
+   * tracks its content and the host's content-based flex minimum propagates
+   * it to the wrapper, so only the cap needs writing here.
    */
   private updateHeight(): void {
     const viewHeight = this.view.dom.closest('.qoderian-container')?.clientHeight
       ?? this.view.dom.ownerDocument.defaultView?.innerHeight
       ?? 0;
-    const maxHeight = calculateTextareaMaxHeight(viewHeight);
-
-    const scroller = this.view.dom.querySelector<HTMLElement>('.cm-scroller');
-    const contentHeight = scroller
-      ? Math.min(scroller.scrollHeight, maxHeight)
-      : TEXTAREA_BASE_MIN_HEIGHT;
-    const minHeight = calculateTextareaMinHeight({
-      contentHeight,
-      flexAllocatedHeight: this.view.dom.offsetHeight,
-    });
-
     this.view.dom.setCssProps({
-      '--qoderian-textarea-min-height': `${minHeight}px`,
-      '--qoderian-textarea-max-height': `${maxHeight}px`,
+      '--qoderian-textarea-max-height': `${calculateTextareaMaxHeight(viewHeight)}px`,
     });
   }
 }
