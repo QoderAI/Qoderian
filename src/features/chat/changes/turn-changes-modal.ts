@@ -16,8 +16,6 @@ export class TurnChangesModal extends Modal {
 
   onOpen(): void {
     this.modalEl.addClass('qoderian-turn-changes-modal');
-    this.preventBackgroundClose();
-    this.scope.register([], 'Escape', () => false);
     this.render();
   }
 
@@ -71,19 +69,6 @@ export class TurnChangesModal extends Modal {
       const diffEl = diffList.createDiv({ cls: 'qoderian-diff-content' });
       this.renderFileDiff(diffEl, diff);
     });
-  }
-
-  private preventBackgroundClose(): void {
-    const consumeOutsidePointer = (event: Event): void => {
-      const target = event.target;
-      if (target && !this.modalEl.contains(target as Node)) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      }
-    };
-    this.containerEl.addEventListener('pointerdown', consumeOutsidePointer, true);
-    this.containerEl.addEventListener('mousedown', consumeOutsidePointer, true);
-    this.containerEl.addEventListener('click', consumeOutsidePointer, true);
   }
 
   private renderFileDiff(diffEl: HTMLElement, diff: TurnFileDiff): void {
