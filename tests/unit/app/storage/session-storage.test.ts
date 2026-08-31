@@ -79,4 +79,56 @@ describe('SessionStorage restore diagnostics', () => {
       detail: expect.stringContaining('bad.meta.json'),
     });
   });
+
+  it('reads metadata files concurrently with a bounded number in flight', async () => {
+    const fileNames = Array.from({ length: 24 }, (_, index) => `s-${index}.meta.json`);
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const read = jest.fn(async (filePath: string) => {
+      inFlight += 1;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      inFlight -= 1;
+      return JSON.stringify({ id: filePath });
+    });
+    const listFiles = jest.fn(async () => fileNames);
+    const storage = makeStorage(read, listFiles);
+
+    beginRestoreReport();
+    const metas = await storage.listMetadata();
+
+    expect(metas).toHaveLength(24);
+    expect(maxInFlight).toBeGreaterThan(1);
+    expect(maxInFlight).toBeLessThanOrEqual(8);
+    expect(finishRestoreReport()).toEqual([]);
+  });
+
+  it('keeps listing results in file order and does not block on a slow read', async () => {
+    let completed = 0;
+    const read = jest.fn(async (filePath: string) => {
+      if (filePath === 'slow.meta.json') {
+        await new Promise((resolve) => setTimeout(resolve, 120));
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      }
+      completed += 1;
+      return JSON.stringify({ id: filePath });
+    });
+    const listFiles = jest.fn(async () => ['slow.meta.json', 'a.meta.json', 'b.meta.json', 'c.meta.json']);
+    const storage = makeStorage(read, listFiles);
+
+    beginRestoreReport();
+    const listing = storage.listMetadata();
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    // The slow read is still in flight; the other three must not wait for it.
+    expect(completed).toBe(3);
+
+    const metas = await listing;
+    expect(metas.map((meta) => meta.id)).toEqual([
+      'slow.meta.json',
+      'a.meta.json',
+      'b.meta.json',
+      'c.meta.json',
+    ]);
+  });
 });
