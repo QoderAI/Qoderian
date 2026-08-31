@@ -127,14 +127,14 @@ QODER_CLI_PATH=/absolute/path/to/qodercli npm run smoke:qoder
 
 | 分组 | 内容 |
 |-------|----------|
-| **Setup** | Qoder CLI 版本与 `qodercli` 可执行文件路径（默认自动探测） |
-| **Display** | 语言、聊天视图位置、最大标签数、自动滚动、流式渲染选项 |
-| **Conversations** | 自动生成标题及生成标题所用模型 |
-| **Content** | 用户名、自定义系统提示词、排除标签、媒体文件夹 |
-| **Input** | 发送键行为与 vim 风格导航映射 |
-| **Safety** | 用户 Qoder 设置加载与安全模式权限 |
-| **Commands & Skills / Subagents / MCP Servers / Qoder Plugins** | 查看并编辑存放在 `.qoder/` 下的 Qoder CLI 项目配置 |
-| **Experimental** | Bash 模式（`!`）开关 |
+| **设置** | Qoder CLI 版本与 `qodercli` 可执行文件路径（默认自动探测） |
+| **显示** | Qoderian 打开位置、最大聊天标签数、流式传输时自动滚动、流式传输时延迟渲染数学公式、默认展开文件编辑（语言选择器在该组上方） |
+| **对话** | 自动生成对话标题与标题生成模型 |
+| **内容** | 用户名、自定义系统提示词、排除的标签、媒体文件夹 |
+| **输入** | 需要 Command/Ctrl+Enter 发送与 Vim 风格导航映射 |
+| **安全** | 加载用户 Qoder 设置与安全模式权限 |
+| **命令与技能 / 子代理 / MCP 服务器 / Qoder CLI 插件** | 查看并编辑存放在 `.qoder/` 下的 Qoder CLI 项目配置 |
+| **实验性功能** | Bash 模式（`!`）开关 |
 
 ## 隐私与数据使用
 
