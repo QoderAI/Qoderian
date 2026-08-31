@@ -6,6 +6,7 @@ import type { Editor, WorkspaceLeaf } from 'obsidian';
 import { addIcon, MarkdownView, Notice, Plugin } from 'obsidian';
 
 import { QoderianStorage } from './app/storage/app-storage';
+import { measureAsync } from './core/diagnostics/performance';
 import { beginRestoreReport, reportRestoreIssue } from './core/diagnostics/restore-report';
 import { buildCursorContext } from './core/editor/editor-context';
 import { getVaultPath } from './core/fs/path';
@@ -28,8 +29,8 @@ import type { Locale } from './i18n/types';
 import { getActiveQoderCliEdition, setActiveQoderCliEdition } from './qoder/config/cli-edition';
 import { normalizeQoderSettings } from './qoder/config/qoder-settings-reconciler';
 import { getQoderSettings } from './qoder/config/settings';
-import { sdkSessionExistsForEdition } from './qoder/history/sdk-session-paths';
-import { resolveLegacySessionEdition, selectMetadataForEdition } from './qoder/history/session-edition-filter';
+import { resolveLegacySessionEdition, selectMetadataForEdition, type SessionEditionLocation } from './qoder/history/session-edition-filter';
+import { probeLegacySessionLocations, SessionEditionProbe } from './qoder/history/session-edition-probe';
 import { extractUserDisplayContent } from './qoder/prompt/context/prompt-context';
 import {
   createQoderServices,
@@ -417,9 +418,22 @@ export default class QoderianPlugin extends Plugin {
     }
     const didNormalizeModelVariants = this.normalizeModelVariantSettings();
 
-    const allMetadata = await this.storage.sessions.listMetadata();
-    await this.migrateLegacySessionEditions(allMetadata);
-    this.conversations = await this.buildConversationIndex(allMetadata);
+    const allMetadata = await measureAsync(
+      'startup.listMetadata',
+      () => this.storage.sessions.listMetadata(),
+    );
+    const legacyLocations = await measureAsync(
+      'startup.probeLegacyEditions',
+      () => this.probeLegacyEditionLocations(allMetadata),
+    );
+    await measureAsync(
+      'startup.migrateLegacyEditions',
+      () => this.migrateLegacySessionEditions(allMetadata, legacyLocations),
+    );
+    this.conversations = await measureAsync(
+      'startup.buildConversationIndex',
+      () => this.buildConversationIndex(allMetadata, legacyLocations),
+    );
     setLocale(this.settings.locale as Locale);
 
     if (didNormalizeModelVariants) {
@@ -443,17 +457,18 @@ export default class QoderianPlugin extends Plugin {
 
   /**
    * Builds the in-memory conversation index from session metadata, keeping
-   * only the sessions owned by the active CLI edition.
+   * only the sessions owned by the active CLI edition. Legacy locations come
+   * from the transaction's probe so no filesystem access happens here.
    */
-  private async buildConversationIndex(allMetadata: SessionMetadata[]): Promise<Conversation[]> {
+  private async buildConversationIndex(
+    allMetadata: SessionMetadata[],
+    legacyLocations: Map<string, SessionEditionLocation>,
+  ): Promise<Conversation[]> {
     const edition = getActiveQoderCliEdition();
-    const otherEdition = edition === 'cn' ? 'global' : 'cn';
-    const vaultPath = getVaultPath(this.app);
     const visible = selectMetadataForEdition(
       allMetadata,
       edition,
-      (sessionId) => vaultPath !== null
-        && sdkSessionExistsForEdition(vaultPath, sessionId, otherEdition),
+      sessionId => (legacyLocations.get(sessionId) ?? 'unknown') === 'other',
     );
 
     return visible.map(meta => {
@@ -484,7 +499,24 @@ export default class QoderianPlugin extends Plugin {
   /** Rebuilds the conversation index after the CLI edition changes. */
   async reloadConversationIndex(): Promise<void> {
     const allMetadata = await this.storage.sessions.listMetadata();
-    this.conversations = await this.buildConversationIndex(allMetadata);
+    const legacyLocations = await this.probeLegacyEditionLocations(allMetadata);
+    this.conversations = await this.buildConversationIndex(allMetadata, legacyLocations);
+  }
+
+  /**
+   * Probes legacy session history files once per load transaction; the
+   * resulting locations are shared by the migration and index stages so each
+   * file is accessed at most once.
+   */
+  private async probeLegacyEditionLocations(
+    allMetadata: SessionMetadata[],
+  ): Promise<Map<string, SessionEditionLocation>> {
+    const vaultPath = getVaultPath(this.app);
+    if (vaultPath === null) {
+      return new Map();
+    }
+    const probe = new SessionEditionProbe(vaultPath);
+    return probeLegacySessionLocations(allMetadata, getActiveQoderCliEdition(), probe);
   }
 
   /**
@@ -493,26 +525,21 @@ export default class QoderianPlugin extends Plugin {
    * history file, so future loads no longer depend on filesystem probing.
    * Sessions whose files are missing everywhere stay unstamped.
    */
-  private async migrateLegacySessionEditions(allMetadata: SessionMetadata[]): Promise<void> {
+  private async migrateLegacySessionEditions(
+    allMetadata: SessionMetadata[],
+    legacyLocations: Map<string, SessionEditionLocation>,
+  ): Promise<void> {
     const edition = getActiveQoderCliEdition();
-    const otherEdition = edition === 'cn' ? 'global' : 'cn';
-    const vaultPath = getVaultPath(this.app);
-    if (vaultPath === null) {
-      return;
-    }
 
     for (const meta of allMetadata) {
       if (meta.edition !== undefined) {
         continue;
       }
-      const resolved = resolveLegacySessionEdition(meta, edition, (sessionId) => {
-        if (sdkSessionExistsForEdition(vaultPath, sessionId, edition)) {
-          return 'active';
-        }
-        return sdkSessionExistsForEdition(vaultPath, sessionId, otherEdition)
-          ? 'other'
-          : 'unknown';
-      });
+      const resolved = resolveLegacySessionEdition(
+        meta,
+        edition,
+        sessionId => legacyLocations.get(sessionId) ?? 'unknown',
+      );
       if (resolved === undefined) {
         continue;
       }
@@ -563,9 +590,12 @@ export default class QoderianPlugin extends Plugin {
       return;
     }
 
-    await historyService.hydrateConversationHistory(
-      conversation,
-      getVaultPath(this.app),
+    await measureAsync(
+      'history.hydrateConversation',
+      () => historyService.hydrateConversationHistory(
+        conversation,
+        getVaultPath(this.app),
+      ),
     );
   }
 

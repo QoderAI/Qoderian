@@ -1,5 +1,6 @@
 import { Notice } from 'obsidian';
 
+import { measureAsync } from '../../../core/diagnostics/performance';
 import { reportRestoreIssue } from '../../../core/diagnostics/restore-report';
 import type { ChatRuntime } from '../../../core/runtime/chat-runtime';
 import { t } from '../../../i18n/i18n';
@@ -529,6 +530,10 @@ export class TabManager implements TabManagerInterface {
 
   /** Restores state from persisted data. */
   async restoreState(state: PersistedTabManagerState): Promise<void> {
+    await measureAsync('startup.restoreTabs', () => this.restoreStateInner(state));
+  }
+
+  private async restoreStateInner(state: PersistedTabManagerState): Promise<void> {
     this.isRestoringState = true;
     try {
       // Create tabs from persisted state with error handling.
