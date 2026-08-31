@@ -2,7 +2,7 @@ import type { SessionMetadata } from '../../core/types';
 import type { QoderCliEdition } from '../../core/types/settings';
 
 /** Resume session id mirroring the plugin's load-time fallback (`sessionId ?? id`). */
-function resumeSessionId(meta: SessionMetadata): string | null {
+export function resumeSessionId(meta: SessionMetadata): string | null {
   return meta.sessionId !== undefined ? meta.sessionId : meta.id;
 }
 

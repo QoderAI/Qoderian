@@ -54,13 +54,15 @@ export function getSDKSessionPath(vaultPath: string, sessionId: string): string 
   return getSDKSessionPathForEdition(vaultPath, sessionId, getActiveQoderCliEdition());
 }
 
-export function sdkSessionExistsForEdition(
+/** Async existence probe; keeps the renderer event loop free during startup. */
+export async function sdkSessionExistsForEditionAsync(
   vaultPath: string,
   sessionId: string,
   edition: QoderCliEdition,
-): boolean {
+): Promise<boolean> {
   try {
-    return existsSync(getSDKSessionPathForEdition(vaultPath, sessionId, edition));
+    await fs.access(getSDKSessionPathForEdition(vaultPath, sessionId, edition));
+    return true;
   } catch {
     return false;
   }
