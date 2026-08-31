@@ -130,6 +130,9 @@ export type TranslationKey =
   | 'chat.queue.steer'
   | 'chat.queue.steerUnavailable'
 
+  // Collapsed assistant turn activity
+  | 'chat.activity.steps'
+
   // Vault drag & drop into composer
   | 'chat.drop.context'
   | 'chat.drop.ignored'

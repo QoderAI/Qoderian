@@ -112,6 +112,9 @@
       "steer": "Redirecionar",
       "steerUnavailable": "Não é possível redirecionar agora. A mensagem permanece na fila."
     },
+    "activity": {
+      "steps": "Etapas da execução ({count})"
+    },
     "drop": {
       "context": "Solte notas, pastas ou imagens aqui para adicioná-las como contexto",
       "ignored": "{count} arquivos não suportados foram ignorados; apenas notas, pastas e imagens podem ser soltas"

@@ -112,6 +112,9 @@
       "steer": "引導",
       "steerUnavailable": "目前無法引導，訊息仍保留在佇列中。"
     },
+    "activity": {
+      "steps": "執行步驟（{count}）"
+    },
     "drop": {
       "context": "拖曳筆記、資料夾或圖片到此處，新增為上下文",
       "ignored": "已忽略 {count} 個不支援的檔案，僅支援拖入筆記、資料夾與圖片"

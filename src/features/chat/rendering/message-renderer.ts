@@ -27,6 +27,7 @@ import type { ReferenceChipKind } from '../../../shared/mention/types';
 import { openReferenceChip } from '../../../shared/obsidian/compat';
 import { formatConversationDirectoryTitle } from '../utils/conversation-directory-title';
 import { findRewindContext } from '../utils/rewind';
+import { setupCollapsible } from './collapsible';
 import {
   renderStoredAsyncSubagent,
   renderStoredSubagent,
@@ -423,6 +424,8 @@ export class MessageRenderer {
     if (includeFooter) {
       this.appendResponseFooter(contentEl, msg);
     }
+
+    this.collapseCompletedTurn(msg, contentEl);
   }
 
   /**
@@ -455,6 +458,88 @@ export class MessageRenderer {
     if (timeText) {
       footerEl.createSpan({ cls: 'qoderian-message-time', text: timeText });
     }
+  }
+
+  /**
+   * Collapse commentary, thinking, and tool activity after a turn receives a
+   * final result. The live stream stays flat until completion so progress is
+   * still visible while the assistant is working.
+   */
+  collapseCompletedTurn(msg: ChatMessage, contentEl: HTMLElement): void {
+    if (!this.hasFinalResult(msg)) return;
+    const children = Array.from(contentEl.children) as HTMLElement[];
+    if (children.some(child => child.classList.contains('qoderian-turn-activity'))) return;
+
+    let finalResultEl: HTMLElement | undefined;
+    for (let i = children.length - 1; i >= 0; i--) {
+      const child = children[i];
+      if (
+        child.classList.contains('qoderian-text-block')
+        || child.classList.contains('qoderian-error-block')
+      ) {
+        finalResultEl = child;
+        break;
+      }
+    }
+    if (!finalResultEl) return;
+
+    const activityEls = children.filter(child => (
+      child !== finalResultEl
+      && !child.classList.contains('qoderian-response-footer')
+      && !child.classList.contains('qoderian-turn-changes-trigger')
+    ));
+    if (activityEls.length === 0) return;
+
+    const wrapperEl = contentEl.createDiv({ cls: 'qoderian-turn-activity' });
+    contentEl.insertBefore(wrapperEl, finalResultEl);
+
+    const headerEl = wrapperEl.createDiv({ cls: 'qoderian-turn-activity-header' });
+    headerEl.setAttribute('tabindex', '0');
+    headerEl.setAttribute('role', 'button');
+
+    const chevronEl = headerEl.createSpan({ cls: 'qoderian-turn-activity-chevron' });
+    setIcon(chevronEl, 'chevron-right');
+    const label = t('chat.activity.steps', { count: activityEls.length });
+    headerEl.createSpan({ cls: 'qoderian-turn-activity-label', text: label });
+
+    const activityContentEl = wrapperEl.createDiv({ cls: 'qoderian-turn-activity-content' });
+    for (const activityEl of activityEls) {
+      activityContentEl.appendChild(activityEl);
+    }
+
+    setupCollapsible(wrapperEl, headerEl, activityContentEl, { isExpanded: false }, {
+      baseAriaLabel: label,
+    });
+  }
+
+  private hasFinalResult(msg: ChatMessage): boolean {
+    if (!msg.contentBlocks || msg.contentBlocks.length === 0) {
+      return msg.content.trim().length > 0;
+    }
+
+    for (let i = msg.contentBlocks.length - 1; i >= 0; i--) {
+      const block = msg.contentBlocks[i];
+      if (block.type === 'text' || block.type === 'error') {
+        if (!block.content.trim()) continue;
+        return true;
+      }
+      if (block.type === 'thinking') {
+        if (!block.content.trim()) continue;
+        return false;
+      }
+      if (block.type === 'context_compacted') return false;
+      if (block.type === 'subagent') {
+        const toolCall = msg.toolCalls?.find(tc => tc.id === block.subagentId);
+        if (toolCall && this.shouldRenderToolCall(toolCall)) return false;
+        continue;
+      }
+      if (block.type === 'tool_use') {
+        const toolCall = msg.toolCalls?.find(tc => tc.id === block.toolId);
+        if (toolCall && this.shouldRenderToolCall(toolCall)) return false;
+      }
+    }
+
+    return false;
   }
 
   /** Rebuilds the active assistant content after a streamed block is upgraded. */
