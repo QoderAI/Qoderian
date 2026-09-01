@@ -1,3 +1,4 @@
+import { measureAsync } from '../../core/diagnostics/performance';
 import type {
   TitleGenerationCallback,
   TitleGenerationResult,
@@ -36,7 +37,7 @@ export class QoderTitleGenerationService {
     const prompt = `User's request:\n"""\n${truncatedUser}\n"""\n\nGenerate a title for this conversation:`;
 
     try {
-      const result = await runColdStartQuery({
+      const result = await measureAsync('title.coldStartQuery', () => runColdStartQuery({
         plugin: this.plugin,
         systemPrompt: TITLE_GENERATION_SYSTEM_PROMPT,
         tools: [],
@@ -44,7 +45,7 @@ export class QoderTitleGenerationService {
         thinking: { disabled: true },
         persistSession: false,
         abortController,
-      }, prompt);
+      }, prompt));
 
       const title = this.parseTitle(result.text);
       if (title) {

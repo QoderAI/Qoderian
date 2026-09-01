@@ -38,6 +38,12 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   startup instead of repeatedly blocking the interface, so vaults with
   hundreds of sessions no longer stall while Qoderian loads.
 
+- First-message latency diagnostics: sending the first message of a new tab
+  now logs per-stage timings to the developer console (filter by
+  `qoderian perf`), covering tab creation, title generation, runtime startup,
+  CLI cold-start, and the wait for the first response chunk — safe to paste
+  into bug reports about slow first replies.
+
 - The composer permission picker now mirrors New Qoder's three tiers —
   Ask approval, Auto approval, and Full access — and its labels and
   descriptions are localized across all ten supported locales instead of

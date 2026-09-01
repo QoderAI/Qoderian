@@ -3,6 +3,11 @@ import { Notice } from 'obsidian';
 import { hasErrorContentBlock } from '../../../core/chat/error-blocks';
 import { detectBuiltInCommand } from '../../../core/commands/built-in-commands';
 import type { BrowserSelectionContext, CanvasSelectionContext } from '../../../core/context/types';
+import {
+  logElapsed,
+  measure,
+  measureAsync,
+} from '../../../core/diagnostics/performance';
 import type { EditorSelectionContext } from '../../../core/editor/editor-context';
 import type { ChatRuntime } from '../../../core/runtime/chat-runtime';
 import type { ApprovalCallbackOptions, ChatTurnRequest } from '../../../core/runtime/types';
@@ -277,13 +282,13 @@ export class InputController {
         displayContent: content,
         turnRequest: cloneChatTurnRequest(options.turnRequestOverride),
       }
-      : await this.buildTurnSubmission({
+      : await measureAsync('turn.buildSubmission', () => this.buildTurnSubmission({
         content,
         images: imagesForMessage,
         editorContextOverride: options?.editorContextOverride,
         browserContextOverride: options?.browserContextOverride,
         canvasContextOverride: options?.canvasContextOverride,
-      });
+      }));
     const { displayContent, turnRequest } = turnSubmission;
 
     fileContextManager?.markCurrentNoteSent();
@@ -300,7 +305,7 @@ export class InputController {
     state.hasPendingConversationSave = true;
     renderer.addMessage(userMsg);
 
-    await this.triggerTitleGeneration();
+    await measureAsync('turn.titleGeneration', () => this.triggerTitleGeneration());
 
     const assistantMsg: ChatMessage = {
       id: this.deps.generateId(),
@@ -325,6 +330,9 @@ export class InputController {
       isCompact ? 'qoderian-thinking--compact' : undefined,
     );
     state.responseStartTime = performance.now();
+    // Turn-level timing origin for the [qoderian perf] turn.* diagnostics.
+    const turnStartedAt = state.responseStartTime;
+    let sawFirstRuntimeChunk = false;
 
     let wasInterrupted = false;
     let wasInvalidated = false;
@@ -333,7 +341,7 @@ export class InputController {
 
     // Lazy initialization: ensure service is ready before first query
     if (this.deps.ensureServiceInitialized) {
-      const ready = await this.deps.ensureServiceInitialized();
+      const ready = await measureAsync('turn.serviceInit', () => this.deps.ensureServiceInitialized!());
       if (!ready) {
         new Notice('Failed to initialize agent service. Please try again.');
         streamController.hideThinkingIndicator();
@@ -376,7 +384,7 @@ export class InputController {
     }
 
     try {
-      const preparedTurn = agentService.prepareTurn(turnRequest);
+      const preparedTurn = measure('turn.prepareTurn', () => agentService.prepareTurn(turnRequest));
       userMsg.content = preparedTurn.persistedContent;
       userMsg.currentNote = preparedTurn.isCompact
         ? undefined
@@ -386,6 +394,10 @@ export class InputController {
       // This prevents duplication when rebuilding context for new sessions
       const previousMessages = state.messages.slice(0, -2);
       for await (const chunk of agentService.query(preparedTurn, previousMessages)) {
+        if (!sawFirstRuntimeChunk) {
+          sawFirstRuntimeChunk = true;
+          logElapsed('turn.firstChunk', turnStartedAt);
+        }
         if (state.streamGeneration !== streamGeneration) {
           wasInvalidated = true;
           break;
@@ -416,6 +428,7 @@ export class InputController {
         this.activeStreamingAssistantMessage ?? assistantMsg,
       );
     } finally {
+      logElapsed('turn.total', turnStartedAt);
       const finalAssistantMsg = this.activeStreamingAssistantMessage ?? assistantMsg;
       const turnMetadata = agentService.consumeTurnMetadata();
       userMsg.userMessageId = turnMetadata.userMessageId ?? userMsg.userMessageId;
