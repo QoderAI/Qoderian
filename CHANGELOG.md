@@ -13,6 +13,13 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ### Added
 
+- In-app sign-in when the Qoder CLI is not authenticated: the model selector
+  now shows a sign-in panel that runs the CLI device flow inside Obsidian —
+  the authorization page opens once per attempt, with open-link, copy-link and
+  cancel controls, localized status and error messages in all ten locales, and
+  an automatic model-catalog refresh once sign-in succeeds — so signing in no
+  longer requires a terminal.
+
 - Message timestamps, matching New Qoder: each user bubble shows when it was
   sent, and each assistant reply shows one time under the whole response next
   to the completion line. Both reveal on hover so idle conversations stay

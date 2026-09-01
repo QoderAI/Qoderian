@@ -90,6 +90,21 @@
       "running": "Running...",
       "copyFailed": "Failed to copy to clipboard"
     },
+    "signIn": {
+      "button": "Sign in",
+      "retry": "Sign in again",
+      "starting": "Starting sign-in…",
+      "waiting": "Waiting for browser authorization…",
+      "verifying": "Signed in. Checking status…",
+      "openLink": "Open link",
+      "copyLink": "Copy link",
+      "copied": "Link copied",
+      "copyFailed": "Could not copy the link",
+      "errorCliMissing": "Qoder CLI was not found. Install it or set its path in settings.",
+      "errorNodeMissing": "Qoder CLI requires Node.js, but Node.js was not found.",
+      "errorStartFailed": "Could not start the sign-in process.",
+      "errorProcessFailed": "Sign-in failed. Check the details and try again."
+    },
     "view": {
       "openQoderian": "Open Qoderian",
       "moveBlockedStreaming": "Wait for the current response to finish before moving the Qoderian view.",

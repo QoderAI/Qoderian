@@ -90,6 +90,21 @@
       "running": "실행 중...",
       "copyFailed": "클립보드에 복사하지 못했습니다"
     },
+    "signIn": {
+      "button": "로그인",
+      "retry": "다시 로그인",
+      "starting": "로그인 시작 중…",
+      "waiting": "브라우저 승인 대기 중…",
+      "verifying": "로그인됨. 확인 중…",
+      "openLink": "링크 열기",
+      "copyLink": "링크 복사",
+      "copied": "링크가 복사되었습니다",
+      "copyFailed": "링크를 복사할 수 없습니다",
+      "errorCliMissing": "Qoder CLI를 찾을 수 없습니다. 설치하거나 설정에서 경로를 지정하세요.",
+      "errorNodeMissing": "Qoder CLI에는 Node.js가 필요하지만 찾을 수 없습니다.",
+      "errorStartFailed": "로그인 프로세스를 시작할 수 없습니다.",
+      "errorProcessFailed": "로그인에 실패했습니다. 세부 정보를 확인하고 다시 시도하세요."
+    },
     "view": {
       "openQoderian": "Qoderian 열기",
       "moveBlockedStreaming": "현재 응답이 완료될 때까지 기다린 후 Qoderian 뷰를 이동하세요.",

@@ -8,7 +8,6 @@ import type { QoderRuntimeStatus } from '../../core/types/services';
 import {
   getActiveQoderCliEdition,
   getQoderCliBinaryBaseName,
-  getQoderCliLoginCommand,
 } from '../config/cli-edition';
 import {
   getQoderSettings,
@@ -19,6 +18,8 @@ import {
 import { sortThinkingEfforts } from '../models/model-catalog';
 import type { QoderHostContext } from '../qoder-host-context';
 import { createCustomSpawnFunction } from '../runtime/custom-spawn';
+
+const STDERR_TAIL_LIMIT = 4_000;
 
 function mapSdkCommands(sdkCommands: SDKSlashCommand[]): SlashCommand[] {
   return sdkCommands.map((cmd) => ({
@@ -221,8 +222,16 @@ function getErrorDetails(error: unknown): string {
   }
 }
 
-export function classifyQoderProbeError(error: unknown, timedOut = false): QoderRuntimeStatus {
-  const details = getErrorDetails(error).trim() || 'Unknown Qoder CLI initialization error';
+export function classifyQoderProbeError(
+  error: unknown,
+  timedOut = false,
+  stderrTail?: string,
+): QoderRuntimeStatus {
+  const rawDetails = getErrorDetails(error).trim() || 'Unknown Qoder CLI initialization error';
+  const tail = stderrTail?.trim();
+  const details = tail && !rawDetails.includes(tail)
+    ? `${rawDetails}\n${tail}`
+    : rawDetails;
 
   if (timedOut || /abort(?:ed|error)|timed?\s*out/i.test(details)) {
     return {
@@ -231,10 +240,10 @@ export function classifyQoderProbeError(error: unknown, timedOut = false): Qoder
       details,
     };
   }
-  if (/not logged in|login required|please (?:log|sign) in|please run \/?login|sign[- ]?in required|unauthori[sz]ed|authentication required|invalid (?:api key|credential|token)|expired.*(?:credential|token)|credentials? (?:not found|missing)|\b401\b/i.test(details)) {
+  if (/not logged in|login required|please (?:log|sign) in|please run \/?login|sign[- ]?in required|unauthori[sz]ed|authentication required|invalid (?:api key|credential|token)|expired.*(?:credential|token)|credentials? (?:not found|missing)|no qodercli\w* login found|login not found|run "?qodercli\w* login"?|\b401\b/i.test(details)) {
     return {
       kind: 'authRequired',
-      message: `Qoder CLI is not signed in. Run \`${getQoderCliLoginCommand(getActiveQoderCliEdition())}\` in a terminal, then retry.`,
+      message: 'Qoder CLI is not signed in. Sign in to your Qoder account, then retry.',
       details,
     };
   }
@@ -311,9 +320,56 @@ export async function probeRuntimeCatalog(
     timedOut = true;
     abortController.abort();
   }, options?.timeoutMs ?? 20_000);
+  const probeOptions = buildProbeOptions(plugin, vaultPath, cliPath, abortController);
+  // When the CLI fails before the SDK handshake (e.g. not logged in, exit 41),
+  // the SDK only reports "Transport closed". The real reason is written to
+  // stdout in the result message's `errors` array, plus diagnostics on stderr.
+  // Tap both streams so classification can recognize auth/setup wordings.
+  let diagnosticsBuffer = '';
+  const appendDiagnostic = (text: string): void => {
+    if (!text.trim() || diagnosticsBuffer.includes(text.trim())) return;
+    diagnosticsBuffer += `${diagnosticsBuffer ? '\n' : ''}${text.trim()}`;
+    if (diagnosticsBuffer.length > STDERR_TAIL_LIMIT) {
+      diagnosticsBuffer = diagnosticsBuffer.slice(-STDERR_TAIL_LIMIT);
+    }
+  };
+  const baseSpawn = probeOptions.spawnQoderCLIProcess;
+  if (baseSpawn) {
+    probeOptions.spawnQoderCLIProcess = (spawnOptions) => {
+      const child = baseSpawn(spawnOptions);
+      const streams = child as {
+        stdout?: NodeJS.EventEmitter;
+        stderr?: NodeJS.EventEmitter;
+      };
+      let stdoutRemainder = '';
+      streams.stdout?.on('data', (chunk: Buffer) => {
+        stdoutRemainder += chunk.toString('utf8');
+        const lines = stdoutRemainder.split('\n');
+        stdoutRemainder = lines.pop() ?? '';
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('{')) continue;
+          try {
+            const message = JSON.parse(trimmed) as { errors?: unknown };
+            if (Array.isArray(message.errors)) {
+              for (const entry of message.errors) {
+                if (typeof entry === 'string') appendDiagnostic(entry);
+              }
+            }
+          } catch {
+            // Non-JSON protocol lines are ignored.
+          }
+        }
+      });
+      streams.stderr?.on('data', (chunk: Buffer) => {
+        appendDiagnostic(chunk.toString('utf8'));
+      });
+      return child;
+    };
+  }
   const conversation = agentQuery({
     prompt: input,
-    options: buildProbeOptions(plugin, vaultPath, cliPath, abortController),
+    options: probeOptions,
   });
   try {
     const initialization = await conversation.initializationResult();
@@ -350,7 +406,7 @@ export async function probeRuntimeCatalog(
 
     return { commands, agents, models, ...(usageInfo ? { usageInfo } : {}) };
   } catch (error) {
-    return { error: classifyQoderProbeError(error, timedOut) };
+    return { error: classifyQoderProbeError(error, timedOut, diagnosticsBuffer) };
   } finally {
     window.clearTimeout(timeout);
     input.end();

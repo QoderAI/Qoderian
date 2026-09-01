@@ -90,6 +90,21 @@
       "running": "Wird ausgeführt...",
       "copyFailed": "Kopieren in die Zwischenablage fehlgeschlagen"
     },
+    "signIn": {
+      "button": "Anmelden",
+      "retry": "Erneut anmelden",
+      "starting": "Anmeldung wird gestartet…",
+      "waiting": "Warten auf Browser-Autorisierung…",
+      "verifying": "Angemeldet. Wird überprüft…",
+      "openLink": "Link öffnen",
+      "copyLink": "Link kopieren",
+      "copied": "Link kopiert",
+      "copyFailed": "Link konnte nicht kopiert werden",
+      "errorCliMissing": "Qoder CLI wurde nicht gefunden. Installieren Sie es oder legen Sie den Pfad in den Einstellungen fest.",
+      "errorNodeMissing": "Qoder CLI erfordert Node.js, aber Node.js wurde nicht gefunden.",
+      "errorStartFailed": "Der Anmeldevorgang konnte nicht gestartet werden.",
+      "errorProcessFailed": "Anmeldung fehlgeschlagen. Überprüfen Sie die Details und versuchen Sie es erneut."
+    },
     "view": {
       "openQoderian": "Qoderian öffnen",
       "moveBlockedStreaming": "Warte, bis die aktuelle Antwort abgeschlossen ist, bevor du die Qoderian-Ansicht verschiebst.",

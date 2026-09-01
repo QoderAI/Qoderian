@@ -155,7 +155,14 @@ describe('probeRuntimeCatalog', () => {
 
   it('classifies sign-in and compatibility failures with actionable guidance', () => {
     expect(classifyQoderProbeError(new Error('Authentication required: please login')))
-      .toMatchObject({ kind: 'authRequired', message: expect.stringContaining('qodercli login') });
+      .toMatchObject({ kind: 'authRequired', message: expect.stringContaining('Sign in') });
+    expect(classifyQoderProbeError(new Error('No qodercli login found. Run "qodercli login" first.')))
+      .toMatchObject({ kind: 'authRequired', message: expect.stringContaining('Sign in') });
+    expect(classifyQoderProbeError(
+      new Error('Transport closed'),
+      false,
+      'No qodercli login found. Run "qodercli login" first.',
+    )).toMatchObject({ kind: 'authRequired', message: expect.stringContaining('Sign in') });
     expect(classifyQoderProbeError(new Error('Protocol version mismatch')))
       .toMatchObject({ kind: 'incompatible', message: expect.stringContaining('Update qodercli') });
   });
