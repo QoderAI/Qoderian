@@ -1,7 +1,7 @@
 {
   "id": "qoderian",
   "name": "Qoderian",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "minAppVersion": "1.7.2",
   "description": "Embeds Qoder CLI as an AI collaborator in your vault. Your vault becomes the working directory, giving qodercli capabilities for file reads and writes, search, bash commands, and multi-step workflows.",
   "author": "Qoder",
