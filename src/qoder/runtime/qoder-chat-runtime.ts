@@ -23,10 +23,6 @@ import type {
 import { query as agentQuery } from '@qoder-ai/qoder-agent-sdk';
 import { Notice } from 'obsidian';
 
-import {
-  logElapsed,
-  measureAsync,
-} from '../../core/diagnostics/performance';
 import { getEnhancedPath, getMissingNodeError } from '../../core/env/environment';
 import { getVaultPath } from '../../core/fs/path';
 import type { ChatRuntime } from '../../core/runtime/chat-runtime';
@@ -149,8 +145,6 @@ export class QoderChatRuntime implements ChatRuntime {
   private persistentQuery: Query | null = null;
   private messageChannel: QoderMessageChannel | null = null;
   private queryAbortController: AbortController | null = null;
-  /** Set when the persistent Query is created; used to time CLI cold-start. */
-  private persistentQueryCreatedAt: number | null = null;
   private readonly responseRouter: QoderResponseRouter;
   private responseConsumerRunning = false;
   private responseConsumerPromise: Promise<void> | null = null;
@@ -425,13 +419,10 @@ export class QoderChatRuntime implements ChatRuntime {
       externalContextPaths
     );
 
-    const spawnStartedAt = performance.now();
     this.persistentQuery = agentQuery({
       prompt: this.messageChannel,
       options,
     });
-    logElapsed('runtime.spawnPersistentQuery', spawnStartedAt);
-    this.persistentQueryCreatedAt = performance.now();
 
     if (this.pendingResumeAt === resumeAtMessageId) {
       this.pendingResumeAt = undefined;
@@ -490,7 +481,6 @@ export class QoderChatRuntime implements ChatRuntime {
     this.persistentQuery = null;
     this.messageChannel = null;
     this.queryAbortController = null;
-    this.persistentQueryCreatedAt = null;
     this.responseConsumerRunning = false;
     this.responseConsumerPromise = null;
     this.currentConfig = null;
@@ -638,15 +628,7 @@ export class QoderChatRuntime implements ChatRuntime {
       if (!this.persistentQuery) return;
 
       try {
-        let sawFirstMessage = false;
         for await (const message of this.persistentQuery) {
-          if (!sawFirstMessage) {
-            sawFirstMessage = true;
-            if (this.persistentQueryCreatedAt !== null) {
-              // CLI cold-start: from Query creation to the first runtime message.
-              logElapsed('runtime.cliFirstMessage', this.persistentQueryCreatedAt);
-            }
-          }
           if (this.shuttingDown) break;
 
           await this.responseRouter.route(message);
@@ -964,7 +946,7 @@ export class QoderChatRuntime implements ChatRuntime {
     const savedPreapprovedTools = this.currentPreapprovedTools;
 
     // Apply dynamic updates before sending (Phase 1.6)
-    await measureAsync('runtime.applyDynamicUpdates', () => this.applyDynamicUpdates(queryOptions));
+    await this.applyDynamicUpdates(queryOptions);
 
     // Restore turn pre-approvals in case a dynamic update restarted the Query.
     this.currentPreapprovedTools = savedPreapprovedTools;

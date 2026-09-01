@@ -1,6 +1,5 @@
 import type { SDKUserMessage } from '@qoder-ai/qoder-agent-sdk';
 
-import { logElapsed } from '../../core/diagnostics/performance';
 import type { StreamChunk } from '../../core/types';
 import type { QoderMessageChannel } from './qoder-message-channel';
 import { isSessionExpiredError } from './session-context';
@@ -27,16 +26,9 @@ export async function* streamPersistentTurn(
     error: null as Error | null,
   };
   const handlerId = `handler-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const enqueuedAt = performance.now();
-  let sawFirstChunk = false;
   const handler = createResponseHandler({
     id: handlerId,
     onChunk: chunk => {
-      if (!sawFirstChunk) {
-        sawFirstChunk = true;
-        // Covers CLI cold-start when the persistent Query was just spawned.
-        logElapsed('turn.enqueueToFirstChunk', enqueuedAt);
-      }
       handler.markChunkSeen();
       if (state.resolveChunk) {
         state.resolveChunk(chunk);

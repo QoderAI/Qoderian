@@ -1,6 +1,5 @@
 import { Notice } from 'obsidian';
 
-import { measureAsync } from '../../../core/diagnostics/performance';
 import { reportRestoreIssue } from '../../../core/diagnostics/restore-report';
 import type { ChatRuntime } from '../../../core/runtime/chat-runtime';
 import { t } from '../../../i18n/i18n';
@@ -95,10 +94,7 @@ export class TabManager implements TabManagerInterface {
     tabId?: TabId,
     options: CreateTabOptions = {},
   ): Promise<TabData | null> {
-    return measureAsync(
-      this.isRestoringState ? 'tab.restore' : 'tab.create',
-      () => this.createTabInner(conversationId, tabId, options),
-    );
+    return this.createTabInner(conversationId, tabId, options);
   }
 
   private async createTabInner(
@@ -171,7 +167,7 @@ export class TabManager implements TabManagerInterface {
    * @param tabId The tab to switch to.
    */
   async switchToTab(tabId: TabId): Promise<void> {
-    return measureAsync('tab.switchTo', () => this.switchToTabInner(tabId));
+    return this.switchToTabInner(tabId);
   }
 
   private async switchToTabInner(tabId: TabId): Promise<void> {
@@ -545,7 +541,7 @@ export class TabManager implements TabManagerInterface {
 
   /** Restores state from persisted data. */
   async restoreState(state: PersistedTabManagerState): Promise<void> {
-    await measureAsync('startup.restoreTabs', () => this.restoreStateInner(state));
+    await this.restoreStateInner(state);
   }
 
   private async restoreStateInner(state: PersistedTabManagerState): Promise<void> {

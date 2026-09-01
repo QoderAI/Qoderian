@@ -6,7 +6,6 @@ import type { Editor, WorkspaceLeaf } from 'obsidian';
 import { addIcon, MarkdownView, Notice, Plugin } from 'obsidian';
 
 import { QoderianStorage } from './app/storage/app-storage';
-import { measureAsync } from './core/diagnostics/performance';
 import { beginRestoreReport, reportRestoreIssue } from './core/diagnostics/restore-report';
 import { buildCursorContext } from './core/editor/editor-context';
 import { getVaultPath } from './core/fs/path';
@@ -418,22 +417,10 @@ export default class QoderianPlugin extends Plugin {
     }
     const didNormalizeModelVariants = this.normalizeModelVariantSettings();
 
-    const allMetadata = await measureAsync(
-      'startup.listMetadata',
-      () => this.storage.sessions.listMetadata(),
-    );
-    const legacyLocations = await measureAsync(
-      'startup.probeLegacyEditions',
-      () => this.probeLegacyEditionLocations(allMetadata),
-    );
-    await measureAsync(
-      'startup.migrateLegacyEditions',
-      () => this.migrateLegacySessionEditions(allMetadata, legacyLocations),
-    );
-    this.conversations = await measureAsync(
-      'startup.buildConversationIndex',
-      () => this.buildConversationIndex(allMetadata, legacyLocations),
-    );
+    const allMetadata = await this.storage.sessions.listMetadata();
+    const legacyLocations = await this.probeLegacyEditionLocations(allMetadata);
+    await this.migrateLegacySessionEditions(allMetadata, legacyLocations);
+    this.conversations = await this.buildConversationIndex(allMetadata, legacyLocations);
     setLocale(this.settings.locale as Locale);
 
     if (didNormalizeModelVariants) {
@@ -590,12 +577,9 @@ export default class QoderianPlugin extends Plugin {
       return;
     }
 
-    await measureAsync(
-      'history.hydrateConversation',
-      () => historyService.hydrateConversationHistory(
-        conversation,
-        getVaultPath(this.app),
-      ),
+    await historyService.hydrateConversationHistory(
+      conversation,
+      getVaultPath(this.app),
     );
   }
 

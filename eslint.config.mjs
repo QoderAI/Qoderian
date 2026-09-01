@@ -131,7 +131,13 @@ export default defineConfig([
     plugins: {
       obsidianmd,
     },
-    rules: stagedObsidianRules,
+    rules: {
+      ...stagedObsidianRules,
+      // Mirrored from the type-aware review that runs on GitHub, so the
+      // matching disable directives stay meaningful in local lint too.
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
+    },
   },
   // Layer boundaries. Arrows point inward to core: core depends on nobody,
   // qoder implements the core contracts. features may call into qoder

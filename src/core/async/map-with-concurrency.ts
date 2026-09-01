@@ -12,7 +12,7 @@ export async function mapWithConcurrency<T, R>(
   limit: number,
   mapper: (item: T, index: number) => Promise<R>,
 ): Promise<R[]> {
-  const results: R[] = new Array(items.length);
+  const results = new Array<R>(items.length);
   let nextIndex = 0;
 
   async function runWorker(): Promise<void> {
