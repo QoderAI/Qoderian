@@ -137,6 +137,111 @@ describe('ModelSelector', () => {
     expect(retryRuntimeCatalog).toHaveBeenCalledTimes(1);
   });
 
+  describe('in-app sign-in flow', () => {
+    function buildAuthCallbacks(loginState: {
+      phase: string;
+      authUrl: string | null;
+      failure: { kind: string; details?: string } | null;
+    }) {
+      const loginService = {
+        getState: jest.fn().mockReturnValue(loginState),
+        subscribe: jest.fn(() => () => {}),
+        isRunning: jest.fn().mockReturnValue(loginState.phase === 'starting' || loginState.phase === 'waiting'),
+        start: jest.fn(),
+        cancel: jest.fn(),
+        openAuthUrl: jest.fn(),
+        reset: jest.fn(),
+      };
+      const callbacks = {
+        onModelChange: jest.fn().mockResolvedValue(undefined),
+        onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
+        getSettings: jest.fn().mockReturnValue({ model: 'auto', permissionMode: 'auto' }),
+        getModelConfig: jest.fn().mockReturnValue({
+          getModelOptions: jest.fn().mockReturnValue([]),
+        }),
+        getRuntimeStatus: jest.fn().mockReturnValue({
+          kind: 'authRequired',
+          message: 'Qoder CLI is not signed in. Sign in to your Qoder account, then retry.',
+        }),
+        retryRuntimeCatalog: jest.fn().mockResolvedValue(undefined),
+        loginService,
+      };
+      return { callbacks, loginService };
+    }
+
+    it('renders a Sign in button that starts the login service', () => {
+      const parentEl = createMockEl();
+      const { callbacks, loginService } = buildAuthCallbacks({
+        phase: 'idle', authUrl: null, failure: null,
+      });
+
+      new ModelSelector(parentEl, callbacks);
+
+      expect(parentEl.querySelector('.qoderian-model-runtime-command')).toBeNull();
+      const signInButton = parentEl.querySelector('.qoderian-signin-button');
+      expect(signInButton?.textContent).toBe('Sign in');
+
+      signInButton?.click();
+      expect(loginService.start).toHaveBeenCalledTimes(1);
+      // The sign-in flow owns auth recovery; no redundant Retry button.
+      expect(parentEl.querySelector('.qoderian-model-runtime-retry')).toBeNull();
+    });
+
+    it('shows the auth link with copy and cancel actions while waiting', () => {
+      const parentEl = createMockEl();
+      const { callbacks, loginService } = buildAuthCallbacks({
+        phase: 'waiting',
+        authUrl: 'https://qoder.com/device/selectAccounts?challenge=abc',
+        failure: null,
+      });
+
+      new ModelSelector(parentEl, callbacks);
+
+      const openButton = parentEl.querySelector('.qoderian-signin-open');
+      expect(openButton).toBeTruthy();
+      expect(parentEl.querySelector('.qoderian-signin-waiting')?.textContent)
+        .toBe('Waiting for browser authorization…');
+      // Descriptive text renders above the action row.
+      const statusKids = (parentEl.querySelector('.qoderian-model-runtime-status') as any)
+        ._children as Array<{ hasClass: (cls: string) => boolean }>;
+      const waitingIdx = statusKids.findIndex(kid => kid.hasClass('qoderian-signin-waiting'));
+      const actionsIdx = statusKids.findIndex(kid => kid.hasClass('qoderian-signin-actions'));
+      expect(waitingIdx).toBeGreaterThanOrEqual(0);
+      expect(actionsIdx).toBeGreaterThan(waitingIdx);
+      expect(parentEl.querySelector('.qoderian-signin-copy')).toBeTruthy();
+
+      // Retry is hidden while the sign-in flow owns the panel.
+      expect(parentEl.querySelector('.qoderian-model-runtime-retry')).toBeNull();
+
+      openButton?.click();
+      expect(loginService.openAuthUrl).toHaveBeenCalledTimes(1);
+
+      parentEl.querySelector('.qoderian-signin-cancel')?.click();
+      expect(loginService.cancel).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders the failure reason and offers signing in again', () => {
+      const parentEl = createMockEl();
+      const { callbacks, loginService } = buildAuthCallbacks({
+        phase: 'failed',
+        authUrl: null,
+        failure: { kind: 'process', details: 'Device flow poll failed' },
+      });
+
+      new ModelSelector(parentEl, callbacks);
+
+      expect(parentEl.querySelector('.qoderian-signin-error')?.textContent)
+        .toBe('Sign-in failed. Check the details and try again.');
+      expect(parentEl.querySelector('.qoderian-signin-error')?.getAttribute('title'))
+        .toBe('Device flow poll failed');
+
+      const retryButton = parentEl.querySelector('.qoderian-signin-button');
+      expect(retryButton?.textContent).toBe('Sign in again');
+      retryButton?.click();
+      expect(loginService.start).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('keeps a cached model visible while a background refresh is running', () => {
     const parentEl = createMockEl();
     const callbacks = {

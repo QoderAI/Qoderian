@@ -90,6 +90,21 @@
       "running": "執行中...",
       "copyFailed": "複製到剪貼簿失敗"
     },
+    "signIn": {
+      "button": "登入",
+      "retry": "重新登入",
+      "starting": "正在啟動登入…",
+      "waiting": "等待瀏覽器授權…",
+      "verifying": "登入成功，正在驗證…",
+      "openLink": "開啟連結",
+      "copyLink": "複製連結",
+      "copied": "連結已複製",
+      "copyFailed": "無法複製連結",
+      "errorCliMissing": "未找到 Qoder CLI，請安裝或在設定中設定路徑。",
+      "errorNodeMissing": "Qoder CLI 需要 Node.js，但未找到。",
+      "errorStartFailed": "無法啟動登入流程。",
+      "errorProcessFailed": "登入失敗，請查看詳情後重試。"
+    },
     "view": {
       "openQoderian": "開啟 Qoderian",
       "moveBlockedStreaming": "請等待目前回應完成後再移動 Qoderian 視圖。",

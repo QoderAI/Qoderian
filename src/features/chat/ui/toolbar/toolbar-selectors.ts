@@ -7,6 +7,10 @@ import type { TranslationKey } from '../../../../i18n/types';
 import { getActiveQoderCliEdition, getQoderCliLoginCommand } from '../../../../qoder/config/cli-edition';
 import { getQoderModelOverride } from '../../../../qoder/config/settings';
 import type { QoderModelConfig } from '../../../../qoder/models/qoder-model-config';
+import type {
+  QoderLoginController,
+  QoderLoginFailure,
+} from '../../../../qoder/services/qoder-login-service';
 import {
   CHECK_ICON,
   CHEVRON_LEFT_ICON,
@@ -43,6 +47,7 @@ export interface ToolbarCallbacks {
   getRuntimeStatus?: () => QoderRuntimeStatus;
   retryRuntimeCatalog?: () => Promise<void>;
   subscribeRuntimeStatus?: (listener: (status: QoderRuntimeStatus) => void) => () => void;
+  loginService?: QoderLoginController;
 }
 
 const DEFAULT_RUNTIME_STATUS: QoderRuntimeStatus = {
@@ -68,6 +73,15 @@ function canUseCachedModels(status: QoderRuntimeStatus): boolean {
   return status.kind === 'checking' || status.kind === 'offline' || status.kind === 'failed';
 }
 
+function getSignInFailureMessage(failure: QoderLoginFailure): string {
+  switch (failure.kind) {
+    case 'cliMissing': return t('chat.signIn.errorCliMissing');
+    case 'nodeMissing': return t('chat.signIn.errorNodeMissing');
+    case 'spawn': return t('chat.signIn.errorStartFailed');
+    case 'process': return t('chat.signIn.errorProcessFailed');
+  }
+}
+
 export class ModelSelector {
   private readonly container: HTMLElement;
   private buttonEl: HTMLElement | null = null;
@@ -77,12 +91,16 @@ export class ModelSelector {
   private popover: ClickPopover | null = null;
   private editingModel: string | null = null;
   private unsubscribeRuntimeStatus: (() => void) | null = null;
+  private unsubscribeLoginState: (() => void) | null = null;
 
   constructor(parentEl: HTMLElement, private readonly callbacks: ToolbarCallbacks) {
     this.container = parentEl.createDiv({ cls: 'qoderian-model-selector' });
     this.render();
     this.unsubscribeRuntimeStatus = callbacks.subscribeRuntimeStatus?.(() => {
       this.updateDisplay();
+      this.renderOptions();
+    }) ?? null;
+    this.unsubscribeLoginState = callbacks.loginService?.subscribe(() => {
       this.renderOptions();
     }) ?? null;
   }
@@ -92,6 +110,8 @@ export class ModelSelector {
     this.popover = null;
     this.unsubscribeRuntimeStatus?.();
     this.unsubscribeRuntimeStatus = null;
+    this.unsubscribeLoginState?.();
+    this.unsubscribeLoginState = null;
   }
 
   private getAvailableModels() {
@@ -177,15 +197,19 @@ export class ModelSelector {
       statusEl.createDiv({ cls: 'qoderian-model-runtime-title', text: getRuntimeStatusLabel(status) });
       statusEl.createDiv({ cls: 'qoderian-model-runtime-message', text: status.message });
       if (status.kind === 'authRequired') {
-        statusEl.createEl('code', {
-          cls: 'qoderian-model-runtime-command',
-          text: getQoderCliLoginCommand(getActiveQoderCliEdition()),
-        });
+        this.renderSignInFlow(statusEl);
       }
       if (status.details) {
         statusEl.setAttribute('title', status.details);
       }
-      if (this.callbacks.retryRuntimeCatalog) {
+      const loginRunning = status.kind === 'authRequired'
+        && (this.callbacks.loginService?.isRunning() ?? false);
+      // When the in-app sign-in flow is available it owns authRequired
+      // recovery (a successful sign-in refreshes the catalog), so the generic
+      // Retry button would only add a redundant, misaligned second action.
+      const signInOwnsAuth = status.kind === 'authRequired'
+        && this.callbacks.loginService !== undefined;
+      if (this.callbacks.retryRuntimeCatalog && !loginRunning && !signInOwnsAuth) {
         const retryButton = statusEl.createEl('button', {
           cls: 'qoderian-model-runtime-retry',
           text: status.kind === 'checking' ? 'Checking…' : 'Retry',
@@ -293,6 +317,94 @@ export class ModelSelector {
     }
     listPaneEl.scrollTop = previousScrollTop;
     this.updateDropdownPlacement();
+  }
+
+  private renderSignInFlow(statusEl: HTMLElement): void {
+    const loginService = this.callbacks.loginService;
+    if (!loginService) {
+      statusEl.createEl('code', {
+        cls: 'qoderian-model-runtime-command',
+        text: getQoderCliLoginCommand(getActiveQoderCliEdition()),
+      });
+      return;
+    }
+
+    const state = loginService.getState();
+
+    if (state.phase === 'waiting') {
+      statusEl.createDiv({
+        cls: 'qoderian-signin-waiting',
+        text: t('chat.signIn.waiting'),
+      });
+    } else if (state.phase === 'succeeded') {
+      statusEl.createDiv({
+        cls: 'qoderian-signin-waiting',
+        text: t('chat.signIn.verifying'),
+      });
+      return;
+    } else if (state.phase === 'failed' && state.failure) {
+      const errorEl = statusEl.createDiv({
+        cls: 'qoderian-signin-error',
+        text: getSignInFailureMessage(state.failure),
+      });
+      if (state.failure.details) {
+        errorEl.setAttribute('title', state.failure.details);
+      }
+    }
+
+    const actionsEl = statusEl.createDiv({ cls: 'qoderian-signin-actions' });
+
+    if (state.phase === 'waiting') {
+      if (state.authUrl) {
+        const openButton = actionsEl.createEl('button', {
+          cls: 'qoderian-signin-open mod-cta',
+          text: t('chat.signIn.openLink'),
+        });
+        openButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          loginService.openAuthUrl();
+        });
+        const copyButton = actionsEl.createEl('button', {
+          cls: 'qoderian-signin-copy',
+          text: t('chat.signIn.copyLink'),
+        });
+        copyButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          void this.copyAuthUrl(state.authUrl as string);
+        });
+      }
+      const cancelButton = actionsEl.createEl('button', {
+        cls: 'qoderian-signin-cancel',
+        text: t('common.cancel'),
+      });
+      cancelButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        loginService.cancel();
+      });
+      return;
+    }
+
+    const signInButton = actionsEl.createEl('button', {
+      cls: 'qoderian-signin-button mod-cta',
+      text: state.phase === 'failed' ? t('chat.signIn.retry') : t('chat.signIn.button'),
+    });
+    if (state.phase === 'starting') {
+      signInButton.setAttribute('disabled', 'true');
+      signInButton.setText(t('chat.signIn.starting'));
+    }
+    signInButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      loginService.start();
+    });
+  }
+
+  private async copyAuthUrl(authUrl: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(authUrl);
+      new Notice(t('chat.signIn.copied'));
+    } catch {
+      new Notice(t('chat.signIn.copyFailed'));
+    }
   }
 
   /**

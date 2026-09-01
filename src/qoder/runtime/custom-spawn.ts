@@ -37,7 +37,10 @@ export function createCustomSpawnFunction(
     const child = spawn(resolvedSpawnSpec.command, resolvedSpawnSpec.args, {
       cwd,
       env,
-      stdio: ['pipe', 'pipe', shouldPipeStderr ? 'pipe' : 'ignore'],
+      // stderr is always piped so host code (e.g. the runtime probe) can read
+      // CLI diagnostics such as "No qodercli login found". A drain listener is
+      // attached below to avoid pipe backpressure when nobody else listens.
+      stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true,
       ...(resolvedSpawnSpec.windowsVerbatimArguments
         ? { windowsVerbatimArguments: true }
@@ -56,8 +59,12 @@ export function createCustomSpawnFunction(
       }
     }
 
-    if (shouldPipeStderr && child.stderr && typeof child.stderr.on === 'function') {
-      child.stderr.on('data', () => {});
+    if (child.stderr && typeof child.stderr.on === 'function') {
+      child.stderr.on('data', (chunk: Buffer) => {
+        if (shouldPipeStderr) {
+          console.error(chunk.toString());
+        }
+      });
     }
 
     if (!child.stdin || !child.stdout) {

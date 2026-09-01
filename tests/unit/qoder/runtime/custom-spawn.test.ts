@@ -108,42 +108,60 @@ describe('createCustomSpawnFunction', () => {
     );
   });
 
-  it('pipes stderr only when DEBUG_QODER_AGENT_SDK is set', () => {
+  it('always pipes stderr so host code can read CLI diagnostics', () => {
     const mockProcess = createMockProcess();
     spawnMock.mockReturnValue(mockProcess as unknown as ReturnType<typeof spawn>);
 
     const spawnFn = createCustomSpawnFunction('/enhanced/path');
-    const signal = new AbortController().signal;
-    spawnFn({
-      command: 'node',
-      args: ['cli.js'],
-      cwd: '/tmp',
-      env: { DEBUG_QODER_AGENT_SDK: '1' },
-      signal,
-    });
-
-    const spawnOptions = spawnMock.mock.calls[0][2];
-    expect(spawnOptions.stdio).toEqual(['pipe', 'pipe', 'pipe']);
-    expect(mockProcess.stderr?.on).toHaveBeenCalledWith('data', expect.any(Function));
-  });
-
-  it('ignores stderr when DEBUG_QODER_AGENT_SDK is not set', () => {
-    const mockProcess = createMockProcess();
-    spawnMock.mockReturnValue(mockProcess as unknown as ReturnType<typeof spawn>);
-
-    const spawnFn = createCustomSpawnFunction('/enhanced/path');
-    const signal = new AbortController().signal;
     spawnFn({
       command: 'node',
       args: ['cli.js'],
       cwd: '/tmp',
       env: {},
-      signal,
+      signal: new AbortController().signal,
     });
 
     const spawnOptions = spawnMock.mock.calls[0][2];
-    expect(spawnOptions.stdio).toEqual(['pipe', 'pipe', 'ignore']);
-    expect(mockProcess.stderr?.on).not.toHaveBeenCalled();
+    expect(spawnOptions.stdio).toEqual(['pipe', 'pipe', 'pipe']);
+    // A drain listener is always attached to avoid pipe backpressure.
+    expect(mockProcess.stderr?.on).toHaveBeenCalledWith('data', expect.any(Function));
+  });
+
+  it('logs stderr to the console only when DEBUG_QODER_AGENT_SDK is set', () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const mockProcess = createMockProcess();
+    spawnMock.mockReturnValue(mockProcess as unknown as ReturnType<typeof spawn>);
+
+    const spawnFn = createCustomSpawnFunction('/enhanced/path');
+    spawnFn({
+      command: 'node',
+      args: ['cli.js'],
+      cwd: '/tmp',
+      env: { DEBUG_QODER_AGENT_SDK: '1' },
+      signal: new AbortController().signal,
+    });
+
+    const onData = (mockProcess.stderr?.on as jest.Mock).mock.calls
+      .filter(([event]: [string]) => event === 'data')
+      .map(([, listener]: [string, (chunk: Buffer) => void]) => listener)[0];
+    onData(Buffer.from('cli diagnostic'));
+    expect(consoleError).toHaveBeenCalledWith('cli diagnostic');
+
+    consoleError.mockClear();
+    const quietProcess = createMockProcess();
+    spawnMock.mockReturnValue(quietProcess as unknown as ReturnType<typeof spawn>);
+    spawnFn({
+      command: 'node',
+      args: ['cli.js'],
+      cwd: '/tmp',
+      env: {},
+      signal: new AbortController().signal,
+    });
+    const quietOnData = (quietProcess.stderr?.on as jest.Mock).mock.calls
+      .filter(([event]: [string]) => event === 'data')
+      .map(([, listener]: [string, (chunk: Buffer) => void]) => listener)[0];
+    quietOnData(Buffer.from('cli diagnostic'));
+    expect(consoleError).not.toHaveBeenCalled();
   });
 
   it('throws when process streams are missing', () => {

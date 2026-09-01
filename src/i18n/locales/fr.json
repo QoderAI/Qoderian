@@ -90,6 +90,21 @@
       "running": "Exécution...",
       "copyFailed": "Échec de la copie dans le presse-papiers"
     },
+    "signIn": {
+      "button": "Se connecter",
+      "retry": "Se connecter à nouveau",
+      "starting": "Démarrage de la connexion…",
+      "waiting": "En attente d'autorisation du navigateur…",
+      "verifying": "Connecté. Vérification…",
+      "openLink": "Ouvrir le lien",
+      "copyLink": "Copier le lien",
+      "copied": "Lien copié",
+      "copyFailed": "Impossible de copier le lien",
+      "errorCliMissing": "Qoder CLI introuvable. Installez-le ou configurez son chemin dans les paramètres.",
+      "errorNodeMissing": "Qoder CLI nécessite Node.js, mais Node.js est introuvable.",
+      "errorStartFailed": "Impossible de démarrer le processus de connexion.",
+      "errorProcessFailed": "Échec de la connexion. Vérifiez les détails et réessayez."
+    },
     "view": {
       "openQoderian": "Ouvrir Qoderian",
       "moveBlockedStreaming": "Attendez la fin de la réponse actuelle avant de déplacer la vue Qoderian.",

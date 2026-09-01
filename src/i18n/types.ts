@@ -69,6 +69,21 @@ export type TranslationKey =
   | 'chat.bangBash.running'
   | 'chat.bangBash.copyFailed'
 
+  // Chat - In-app sign-in
+  | 'chat.signIn.button'
+  | 'chat.signIn.retry'
+  | 'chat.signIn.starting'
+  | 'chat.signIn.waiting'
+  | 'chat.signIn.verifying'
+  | 'chat.signIn.openLink'
+  | 'chat.signIn.copyLink'
+  | 'chat.signIn.copied'
+  | 'chat.signIn.copyFailed'
+  | 'chat.signIn.errorCliMissing'
+  | 'chat.signIn.errorNodeMissing'
+  | 'chat.signIn.errorStartFailed'
+  | 'chat.signIn.errorProcessFailed'
+
   // Chat - View
   | 'chat.view.openQoderian'
   | 'chat.view.moveBlockedStreaming'

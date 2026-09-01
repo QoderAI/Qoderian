@@ -153,6 +153,38 @@
   font-size: 11px;
 }
 
+.qoderian-signin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.qoderian-signin-button {
+  padding: 3px 12px;
+  font-size: 11px;
+}
+
+.qoderian-signin-waiting {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-normal);
+}
+
+.qoderian-signin-open,
+.qoderian-signin-copy,
+.qoderian-signin-cancel {
+  padding: 3px 9px;
+  font-size: 11px;
+}
+
+.qoderian-signin-error {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-error);
+}
+
 .qoderian-model-selector--open .qoderian-model-dropdown {
   opacity: 1;
   visibility: visible;

@@ -90,6 +90,21 @@
       "running": "実行中...",
       "copyFailed": "クリップボードへのコピーに失敗しました"
     },
+    "signIn": {
+      "button": "サインイン",
+      "retry": "もう一度サインイン",
+      "starting": "サインインを開始しています…",
+      "waiting": "ブラウザでの認証を待っています…",
+      "verifying": "サインインしました。確認中…",
+      "openLink": "リンクを開く",
+      "copyLink": "リンクをコピー",
+      "copied": "リンクをコピーしました",
+      "copyFailed": "リンクをコピーできませんでした",
+      "errorCliMissing": "Qoder CLI が見つかりません。インストールするか、設定でパスを指定してください。",
+      "errorNodeMissing": "Qoder CLI には Node.js が必要ですが、見つかりませんでした。",
+      "errorStartFailed": "サインイン プロセスを開始できませんでした。",
+      "errorProcessFailed": "サインインに失敗しました。詳細を確認して再試行してください。"
+    },
     "view": {
       "openQoderian": "Qoderian を開く",
       "moveBlockedStreaming": "現在の応答が完了するまで Qoderian ビューを移動しないでください。",

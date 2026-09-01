@@ -24,6 +24,7 @@ import { QoderCliResolver } from './runtime/qoder-cli-resolver';
 import { QoderTaskResultInterpreter } from './runtime/qoder-task-result-interpreter';
 import { QoderInlineEditService } from './services/qoder-inline-edit-service';
 import { QoderInstructionRefineService } from './services/qoder-instruction-refine-service';
+import { QoderLoginService } from './services/qoder-login-service';
 import { QoderTitleGenerationService } from './services/qoder-title-generation-service';
 import { QoderStorage } from './storage/qoder-storage';
 
@@ -45,6 +46,7 @@ export interface QoderServices {
   modelConfig: typeof qoderModelConfig;
   historyService: QoderConversationHistoryService;
   taskResultInterpreter: QoderTaskResultInterpreter;
+  loginService: QoderLoginService;
   dispose(): void;
   createRuntime(): ChatRuntime;
   createTitleGenerationService(): QoderTitleGenerationService;
@@ -109,6 +111,15 @@ export async function createQoderServices(
 
   const historyService = new QoderConversationHistoryService();
   const taskResultInterpreter = new QoderTaskResultInterpreter();
+  const loginService = new QoderLoginService(plugin, () => {
+    if (disposed) return;
+    // Always return to idle once the post-login refresh settles; keeping
+    // 'succeeded' would render a stale "checking status" panel if the runtime
+    // later becomes authRequired again in this session.
+    void agentCatalog.refresh().then(() => {
+      if (!disposed) loginService.reset();
+    });
+  });
 
   return {
     qoderStorage,
@@ -122,8 +133,10 @@ export async function createQoderServices(
     modelConfig: qoderModelConfig,
     historyService,
     taskResultInterpreter,
+    loginService,
     dispose: () => {
       disposed = true;
+      loginService.dispose();
       if (startupRetryTimer !== null) {
         window.clearTimeout(startupRetryTimer);
         startupRetryTimer = null;

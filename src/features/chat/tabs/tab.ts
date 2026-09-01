@@ -423,6 +423,7 @@ function initializeInputToolbar(
     retryRuntimeCatalog: async () => {
       await plugin.qoderServices.agentCatalog.refresh();
     },
+    loginService: plugin.qoderServices.loginService,
     onModelChange: async (model: string) => {
       // Blank tabs keep their model choice until the first message binds them.
       if (tab.lifecycleState === 'blank') {
