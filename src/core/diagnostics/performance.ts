@@ -32,5 +32,6 @@ export function measure<T>(label: string, fn: () => T): T {
 /** Logs the elapsed time since `startedAt` under a stable perf label. */
 export function logElapsed(label: string, startedAt: number): void {
   const elapsedMs = Math.round((performance.now() - startedAt) * 10) / 10;
+  // eslint-disable-next-line no-console -- the first-turn timing diagnostics are meant to be read from the developer console.
   console.info(`[qoderian perf] ${label}: ${elapsedMs}ms`);
 }

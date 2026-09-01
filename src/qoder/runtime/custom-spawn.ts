@@ -71,6 +71,7 @@ export function createCustomSpawnFunction(
       throw new Error('Failed to create process streams');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- ChildProcess streams are nullable while SpawnedProcess requires them; the double assertion is the bridge TS cannot infer.
     return child as unknown as SpawnedProcess;
   };
 }
