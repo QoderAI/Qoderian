@@ -43,9 +43,9 @@ export interface QoderLoginController {
   reset(): void;
 }
 
-// eslint-disable-next-line no-control-regex
+// eslint-disable-next-line no-control-regex -- ANSI escapes start with the ESC control character, which the pattern must match to strip them.
 const ANSI_ESCAPE_PATTERN = /\u001b\[[0-9;]*[A-Za-z]/g;
-// eslint-disable-next-line no-control-regex
+// eslint-disable-next-line no-control-regex -- the URL match must stop at ESC so escape sequences never leak into the opened link.
 const AUTH_URL_PATTERN = /https?:\/\/[^\s\u001b]+/;
 const OUTPUT_TAIL_LIMIT = 2_000;
 const INITIAL_STATE: QoderLoginState = { phase: 'idle', authUrl: null, failure: null };
