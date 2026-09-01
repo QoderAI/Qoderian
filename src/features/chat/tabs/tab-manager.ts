@@ -95,6 +95,17 @@ export class TabManager implements TabManagerInterface {
     tabId?: TabId,
     options: CreateTabOptions = {},
   ): Promise<TabData | null> {
+    return measureAsync(
+      this.isRestoringState ? 'tab.restore' : 'tab.create',
+      () => this.createTabInner(conversationId, tabId, options),
+    );
+  }
+
+  private async createTabInner(
+    conversationId?: string | null,
+    tabId?: TabId,
+    options: CreateTabOptions = {},
+  ): Promise<TabData | null> {
     const maxTabs = this.getMaxTabs();
     if (this.tabs.size >= maxTabs) {
       return null;
@@ -160,6 +171,10 @@ export class TabManager implements TabManagerInterface {
    * @param tabId The tab to switch to.
    */
   async switchToTab(tabId: TabId): Promise<void> {
+    return measureAsync('tab.switchTo', () => this.switchToTabInner(tabId));
+  }
+
+  private async switchToTabInner(tabId: TabId): Promise<void> {
     const tab = this.tabs.get(tabId);
     if (!tab) {
       return;
