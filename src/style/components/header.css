@@ -3,25 +3,88 @@
   position: relative;
   display: flex;
   align-items: center;
-  padding: 0 12px 12px 12px;
+  gap: 8px;
+  padding: 6px 10px 16px;
 }
 
 .qoderian-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   flex: 1;
   min-width: 0;
 }
 
 .qoderian-title-text {
   margin: 0;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .qoderian-logo {
   display: flex;
   align-items: center;
   color: var(--qoderian-brand);
+}
+
+.qoderian-logo .qoderian-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.qoderian-update-badge {
+  flex: none;
+  min-height: 22px;
+  padding: 2px 7px;
+  border: 1px solid rgba(var(--qoderian-brand-rgb), 0.32);
+  border-radius: 999px;
+  background: rgba(var(--qoderian-brand-rgb), 0.1);
+  box-shadow: none;
+  color: var(--qoderian-brand);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.qoderian-update-badge:hover,
+.qoderian-update-badge:focus-visible {
+  border-color: rgba(var(--qoderian-brand-rgb), 0.55);
+  background: rgba(var(--qoderian-brand-rgb), 0.16);
+  box-shadow: none;
+  outline: none;
+}
+
+.qoderian-header-actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+
+.qoderian-header-actions .qoderian-header-action,
+.qoderian-header-actions .qoderian-credits-btn {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--text-muted);
+}
+
+.qoderian-header-actions .qoderian-input-nav-btn svg {
+  display: block;
+  overflow: visible;
+}
+
+.qoderian-header-actions .qoderian-header-action:hover,
+.qoderian-header-actions .qoderian-header-action:focus-visible,
+.qoderian-header-actions .qoderian-credits-btn:hover,
+.qoderian-header-actions .qoderian-credits-btn:focus-visible {
+  color: var(--text-normal);
+  background: var(--background-modifier-hover);
+  outline: none;
 }

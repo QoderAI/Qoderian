@@ -2,18 +2,21 @@
 .qoderian-permission-toggle {
   display: flex;
   align-items: center;
+  flex: 0 1 auto;
+  min-width: 0;
   margin-left: auto;
-  padding-left: 12px;
-  padding-right: 8px;
+  padding-left: 6px;
+  padding-right: 4px;
 }
 
 .qoderian-permission-button {
   display: flex;
   align-items: center;
   gap: 5px;
+  min-width: 0;
   min-height: 26px;
   padding: 3px 7px;
-  border-radius: 5px;
+  border-radius: var(--qoderian-radius-control);
   color: var(--text-muted);
   cursor: pointer;
   font-size: 11px;
@@ -26,14 +29,23 @@
 }
 
 .qoderian-permission-label {
+  min-width: 0;
+  max-width: 76px;
   font-weight: 600;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .qoderian-permission-chevron {
+  display: inline-flex;
+  align-items: center;
   color: var(--text-faint);
-  font-size: 10px;
-  line-height: 1;
+}
+
+.qoderian-permission-chevron svg {
+  width: 13px;
+  height: 13px;
 }
 
 .qoderian-permission-dot {
@@ -44,10 +56,10 @@
   flex-shrink: 0;
 }
 
-.qoderian-permission-button--default { color: var(--text-success); }
-.qoderian-permission-button--auto { color: rgb(222, 139, 66); }
-.qoderian-permission-button--plan { color: rgb(92, 148, 140); }
-.qoderian-permission-button--yolo { color: var(--text-error); }
+.qoderian-permission-button--default,
+.qoderian-permission-button--auto,
+.qoderian-permission-button--plan,
+.qoderian-permission-button--yolo { color: var(--text-muted); }
 
 .qoderian-permission-button--default .qoderian-permission-dot,
 .qoderian-permission-option--default .qoderian-permission-dot { background: var(--text-success); }
@@ -69,9 +81,9 @@
   margin-bottom: 4px;
   padding: 4px;
   border: 1px solid var(--background-modifier-border);
-  border-radius: 6px;
-  background: var(--background-secondary);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: var(--qoderian-radius-panel);
+  background: var(--qoderian-surface-raised);
+  box-shadow: var(--qoderian-shadow-raised);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.15s ease, visibility 0.15s ease;

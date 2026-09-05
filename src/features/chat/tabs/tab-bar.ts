@@ -1,3 +1,6 @@
+import { Menu, setIcon } from 'obsidian';
+
+import { t } from '../../../i18n/i18n';
 import { scheduleAnimationFrame } from '../../../shared/dom/animation-frame';
 import { setButtonTooltip } from '../../../shared/dom/tooltip';
 import type { TabBarItem, TabId } from './types';
@@ -77,14 +80,43 @@ export class TabBar {
       cls: [
         'qoderian-tab-badge',
         stateClass,
+        item.canClose ? 'qoderian-tab-badge-closable' : '',
         isTitleExpanded ? 'qoderian-tab-badge-expanded' : '',
       ].filter(Boolean).join(' '),
+    });
+    const labelEl = badgeEl.createSpan({
+      cls: 'qoderian-tab-badge-label',
       text: this.getBadgeLabel(item),
     });
 
     // Obsidian uses aria-label for hover tooltips here; adding title causes duplicate tooltip text.
     setButtonTooltip(badgeEl, item.title);
     badgeEl.setAttribute('data-title-expanded', isTitleExpanded ? 'true' : 'false');
+
+    if (item.canClose) {
+      const menuEl = badgeEl.createSpan({ cls: 'qoderian-tab-badge-menu' });
+      menuEl.setAttribute('role', 'button');
+      menuEl.setAttribute('tabindex', '0');
+      menuEl.setAttribute('aria-haspopup', 'menu');
+      setIcon(menuEl, 'ellipsis');
+      setButtonTooltip(menuEl, t('commands.tabActions'));
+
+      const openMenu = (event: Event): void => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.showTabMenu(item, menuEl);
+      };
+      menuEl.addEventListener('click', openMenu);
+      menuEl.addEventListener('dblclick', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      menuEl.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          openMenu(event);
+        }
+      });
+    }
 
     // Click handler to switch tab
     badgeEl.addEventListener('click', () => {
@@ -95,16 +127,29 @@ export class TabBar {
     badgeEl.addEventListener('dblclick', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      this.toggleBadgeTitle(item, badgeEl);
+      this.toggleBadgeTitle(item, badgeEl, labelEl);
     });
 
-    // Right-click to close (if allowed)
+    // Right-click opens the same menu instead of deleting immediately.
     if (item.canClose) {
       badgeEl.addEventListener('contextmenu', (e) => {
         e.preventDefault();
-        this.callbacks.onTabClose(item.id);
+        e.stopPropagation();
+        this.showTabMenu(item, badgeEl);
       });
     }
+  }
+
+  private showTabMenu(item: TabBarItem, anchorEl: HTMLElement): void {
+    const menu = new Menu().setUseNativeMenu(false);
+    menu.addItem(menuItem => menuItem
+      .setTitle(t('commands.closeTab'))
+      .setIcon('x')
+      .setWarning(true)
+      .onClick(() => this.callbacks.onTabClose(item.id)));
+
+    const rect = anchorEl.getBoundingClientRect();
+    menu.showAtPosition({ x: rect.right, y: rect.bottom }, anchorEl.ownerDocument);
   }
 
   /** Destroys the tab bar. */
@@ -147,7 +192,11 @@ export class TabBar {
     }
   }
 
-  private toggleBadgeTitle(item: TabBarItem, badgeEl: HTMLElement): void {
+  private toggleBadgeTitle(
+    item: TabBarItem,
+    badgeEl: HTMLElement,
+    labelEl: HTMLElement,
+  ): void {
     if (this.expandedTitleTabIds.has(item.id)) {
       this.expandedTitleTabIds.delete(item.id);
     } else {
@@ -155,7 +204,7 @@ export class TabBar {
     }
 
     const isTitleExpanded = this.expandedTitleTabIds.has(item.id);
-    badgeEl.textContent = this.getBadgeLabel(item);
+    labelEl.textContent = this.getBadgeLabel(item);
     badgeEl.toggleClass('qoderian-tab-badge-expanded', isTitleExpanded);
     badgeEl.setAttribute('data-title-expanded', isTitleExpanded ? 'true' : 'false');
   }

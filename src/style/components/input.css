@@ -24,9 +24,65 @@
   flex-direction: column;
   min-height: 140px;
   border: 1px solid var(--qoderian-input-wrapper-border-color);
-  border-radius: 6px;
-  background: var(--background-primary);
+  border-radius: var(--qoderian-radius-composer);
+  background: var(--qoderian-surface-subtle);
   box-shadow: var(--qoderian-input-wrapper-box-shadow);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.qoderian-input-wrapper:focus-within {
+  --qoderian-input-wrapper-border-color: var(--text-faint);
+  --qoderian-input-wrapper-box-shadow: 0 0 0 1px color-mix(in srgb, var(--text-faint) 24%, transparent), 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.qoderian-input-wrapper--resized {
+  height: var(--qoderian-input-wrapper-height);
+}
+
+/* Dragging this top-edge grip grows the bottom-anchored composer upward. */
+.qoderian-composer-resize-handle {
+  position: absolute;
+  z-index: 4;
+  inset-block-start: -6px;
+  inset-inline: 0;
+  height: 12px;
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.qoderian-composer-resize-handle::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--background-modifier-border);
+  opacity: 0;
+  transition: opacity 0.12s ease, background 0.12s ease;
+}
+
+.qoderian-input-wrapper:hover > .qoderian-composer-resize-handle::after,
+.qoderian-composer-resize-handle:hover::after,
+.qoderian-composer-resize-handle:focus-visible::after,
+.qoderian-composer-resizing .qoderian-composer-resize-handle::after {
+  opacity: 1;
+}
+
+.qoderian-composer-resize-handle:hover::after,
+.qoderian-composer-resize-handle:focus-visible::after,
+.qoderian-composer-resizing .qoderian-composer-resize-handle::after {
+  background: var(--interactive-accent);
+}
+
+.qoderian-composer-resize-handle:focus-visible {
+  outline: none;
+}
+
+body.qoderian-composer-resizing,
+body.qoderian-composer-resizing * {
+  cursor: ns-resize;
+  user-select: none;
 }
 
 /* Context row (context chips: files, images, selections) - inside input wrapper at top */
@@ -106,17 +162,10 @@
 .qoderian-input-nav-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 4px;
   width: 100%;
   min-width: 0;
-}
-
-.qoderian-input-nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-  margin-inline-start: auto;
 }
 
 .qoderian-input-nav-btn {
@@ -137,9 +186,32 @@
   height: 16px;
 }
 
+.qoderian-input-nav-content button.qoderian-new-tab-btn {
+  display: inline-flex;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+}
+
+.qoderian-input-nav-content button.qoderian-new-tab-btn:hover,
+.qoderian-input-nav-content button.qoderian-new-tab-btn:focus-visible {
+  border: 0;
+  background: var(--background-modifier-hover);
+  box-shadow: none;
+  color: var(--text-normal);
+  outline: none;
+}
+
 .qoderian-new-tab-btn svg {
-  width: 16.8px;
-  height: 16.8px;
+  width: 18px;
+  height: 18px;
 }
 
 /* Selection chips (editor / browser / canvas selection context) */
@@ -175,7 +247,7 @@
   resize: none;
   padding: 8px 10px 10px 10px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--qoderian-radius-composer);
   background: transparent;
   color: var(--text-normal);
   font-family: inherit;
@@ -205,10 +277,12 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  flex-wrap: wrap;
-  row-gap: 2px;
+  flex-wrap: nowrap;
+  gap: 2px;
   flex-shrink: 0;
-  padding: 4px 6px 6px 6px;
+  min-height: 42px;
+  padding: 6px 8px 8px;
+  overflow: visible;
 }
 
 /* File indicator (attached files) */
@@ -473,19 +547,19 @@
   height: 14px;
 }
 
-/* Send/stop action button - IDE-style green rounded square with dark icon */
+/* Codex-style send/stop action: high-contrast circular control. */
 .qoderian-composer-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: none;
-  border-radius: 8px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: filter 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
 /* Obsidian's native button defaults (interactive-normal gray) out-specify a
@@ -493,8 +567,8 @@
 .qoderian-input-wrapper .qoderian-input-toolbar button.qoderian-composer-action-btn {
   border: none;
   box-shadow: none;
-  background: var(--qoderian-brand);
-  color: rgba(0, 0, 0, 0.7);
+  background: var(--text-normal);
+  color: var(--background-primary);
 }
 
 /* When the permission toggle is hidden the button inherits the row's
@@ -504,12 +578,13 @@
 }
 
 .qoderian-composer-action-btn:hover:not(:disabled) {
-  filter: brightness(1.08);
+  transform: translateY(-1px);
 }
 
 .qoderian-composer-action-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
+  stroke-width: 2.2;
 }
 
 /* Stop mode: filled square icon, slightly emphasized */
@@ -522,7 +597,9 @@
 /* Idle with empty composer: dimmed, not clickable */
 .qoderian-composer-action-btn.is-disabled,
 .qoderian-composer-action-btn:disabled {
-  opacity: 0.4;
+  background: var(--background-modifier-border);
+  color: var(--text-faint);
+  opacity: 1;
   cursor: default;
 }
 

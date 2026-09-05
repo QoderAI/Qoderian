@@ -17,6 +17,7 @@ import type { ChatState } from '../state/chat-state';
 import type { BangBashModeManager } from '../ui/bang-bash-mode-manager';
 import type { ComposerBridge } from '../ui/composer/composer-bridge';
 import type { ComposerActionButton } from '../ui/composer-action-button';
+import type { ComposerResizeController } from '../ui/composer-resize';
 import type { FileContextManager } from '../ui/file-context/file-context-manager';
 import type { ImageContextManager } from '../ui/image-context';
 import type {
@@ -34,12 +35,12 @@ import type { VaultDropController } from '../ui/vault-drop';
 /**
  * Default number of tabs allowed.
  *
- * Set to 3 to balance usability with resource usage:
+ * Fresh installations allow the full supported range by default:
  * - Each tab has its own chat runtime and persistent query
  * - More tabs = more memory and potential SDK processes
- * - 3 tabs allows multi-tasking without excessive overhead
+ * - Users can lower this limit in settings when needed
  */
-export const DEFAULT_MAX_TABS = 3;
+export const DEFAULT_MAX_TABS = 10;
 
 /**
  * Minimum number of tabs allowed (settings floor).
@@ -118,6 +119,7 @@ export interface TabServices {
 export interface TabUIComponents {
   /** Bridges the legacy textarea with the CodeMirror live composer. */
   composerBridge: ComposerBridge | null;
+  composerResize: ComposerResizeController | null;
   fileContextManager: FileContextManager | null;
   imageContextManager: ImageContextManager | null;
   vaultDropController: VaultDropController | null;
@@ -150,6 +152,7 @@ export interface TabDOMElements {
   inputContainerEl: HTMLElement;
   queueIndicatorEl: HTMLElement;
   inputWrapper: HTMLElement;
+  composerResizeHandleEl: HTMLElement;
   inputEl: HTMLTextAreaElement;
 
   /** Nav row for tab badges and header icons (above input wrapper). */

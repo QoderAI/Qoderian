@@ -1,9 +1,10 @@
 /* External Context Selector */
 .qoderian-external-context-selector {
-  position: relative;
+  position: static;
   display: flex;
   align-items: center;
-  margin-left: 8px;
+  margin-left: 2px;
+  flex: 0 0 auto;
 }
 
 .qoderian-external-context-icon-wrapper {
@@ -12,14 +13,20 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  overflow: visible;
+  border-radius: var(--qoderian-radius-control);
+}
+
+.qoderian-external-context-icon-wrapper:hover {
+  background: var(--background-modifier-hover);
 }
 
 .qoderian-external-context-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   color: var(--text-faint);
   transition: color 0.15s ease;
 }
@@ -30,12 +37,13 @@
 
 .qoderian-external-context-icon.active {
   color: var(--qoderian-brand);
-  animation: external-context-glow 2s ease-in-out infinite;
 }
 
 .qoderian-external-context-icon svg {
-  width: 16px;
-  height: 16px;
+  display: block;
+  width: 18px;
+  height: 18px;
+  overflow: visible;
 }
 
 .qoderian-external-context-badge {
@@ -56,16 +64,17 @@
 
 .qoderian-external-context-dropdown {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  inset-inline: 6px;
   bottom: 100%;
   margin-bottom: 4px;
-  min-width: 260px;
-  max-width: 320px;
-  background: var(--background-secondary);
+  min-width: 0;
+  width: auto;
+  max-width: none;
+  box-sizing: border-box;
+  background: var(--qoderian-surface-raised);
   border: 1px solid var(--background-modifier-border);
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  border-radius: var(--qoderian-radius-panel);
+  box-shadow: var(--qoderian-shadow-raised);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.15s ease, visibility 0.15s ease;

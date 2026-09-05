@@ -23,7 +23,8 @@
   },
   "composer": {
     "send": "Send message",
-    "stop": "Stop generation"
+    "stop": "Stop generation",
+    "resize": "Drag to resize the message input; double-click to reset"
   },
   "restore": {
     "failed": "Some of your previous tabs or conversations could not be restored ({count} issue(s)). Details are in the developer console."
@@ -35,13 +36,19 @@
     "inserted": "Inserted",
     "editApplied": "Edit applied",
     "newTab": "New tab",
-    "newSession": "New session (in current tab)",
+    "newSession": "Start new conversation in current tab",
+    "closeTab": "Close tab",
+    "tabActions": "Tab actions",
     "closeCurrentTab": "Close current tab"
   },
   "nav": {
     "newConversation": "New conversation",
     "chatHistory": "Chat history",
     "newChat": "New Chat"
+  },
+  "updates": {
+    "available": "Update {version}",
+    "openRelease": "Open Qoderian release {version}"
   },
   "chat": {
     "rewind": {
@@ -352,7 +359,8 @@
     },
     "language": {
       "name": "Language",
-      "desc": "Change the display language of the plugin interface"
+      "desc": "Change the display language of the plugin interface",
+      "followObsidian": "Follow Obsidian"
     }
   },
   "credits": {

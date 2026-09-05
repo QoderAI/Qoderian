@@ -6,20 +6,22 @@ import { VIEW_TYPE_QODERIAN } from '../../core/types';
 import { t } from '../../i18n/i18n';
 import type QoderianPlugin from '../../main';
 import { fetchCreditsUsage } from '../../qoder/services/credits-usage';
+import { openExternalBrowserUrl } from '../../qoder/services/qoder-login-service';
 import {
   cancelScheduledAnimationFrame,
   scheduleAnimationFrame,
   type ScheduledAnimationFrame,
 } from '../../shared/dom/animation-frame';
 import { setButtonTooltip } from '../../shared/dom/tooltip';
-import { createIconSvg, QODER_ICON,QODERIAN_ICON_ID } from '../../shared/icons';
+import { createIconSvg, QODER_ICON, QODERIAN_ICON_ID } from '../../shared/icons';
+import { QoderianSettingsModal } from '../settings/settings-modal';
 import type { HistoryConversationStatus } from './controllers/conversation-controller';
 import {
   sendTabInputMessageFromExplicitEnterShortcut,
 } from './tabs/tab';
 import { TabBar } from './tabs/tab-bar';
 import { TabManager } from './tabs/tab-manager';
-import type { TabData, TabId } from './tabs/types';
+import { DEFAULT_MAX_TABS, type TabData, type TabId } from './tabs/types';
 import { CreditsUsageButton } from './ui/credits-usage-button';
 
 type LoadableView = {
@@ -44,9 +46,10 @@ export class QoderianView extends ItemView {
   // DOM Elements
   private viewContainerEl: HTMLElement | null = null;
   private logoEl: HTMLElement | null = null;
+  private updateBadgeEl: HTMLElement | null = null;
   private newTabButtonEl: HTMLElement | null = null;
-  private newConversationButtonEl: HTMLElement | null = null;
   private historyButtonEl: HTMLElement | null = null;
+  private settingsButtonEl: HTMLElement | null = null;
 
   // Header elements
   private historyDropdown: HTMLElement | null = null;
@@ -223,6 +226,69 @@ export class QoderianView extends ItemView {
     this.syncHeaderLogo();
 
     titleEl.createEl('h4', { text: 'Qoder', cls: 'qoderian-title-text' });
+
+    this.updateBadgeEl = titleEl.createEl('button', {
+      cls: 'qoderian-update-badge qoderian-hidden',
+      attr: { type: 'button' },
+    });
+    void this.refreshUpdateBadge();
+
+    const actionsEl = header.createDiv({ cls: 'qoderian-header-actions' });
+
+    // History belongs to the view-level chrome rather than the active tab's
+    // composer, so it stays reachable while the input is tall or scrolled.
+    const historyContainer = actionsEl.createDiv({ cls: 'qoderian-history-container' });
+    const historyBtn = historyContainer.createDiv({
+      cls: 'qoderian-input-nav-btn qoderian-header-action qoderian-history-btn',
+    });
+    setIcon(historyBtn, 'history');
+    setButtonTooltip(historyBtn, t('nav.chatHistory'));
+    historyBtn.setAttribute('role', 'button');
+    historyBtn.setAttribute('tabindex', '0');
+    historyBtn.setAttribute('aria-haspopup', 'listbox');
+    historyBtn.setAttribute('aria-expanded', 'false');
+    this.historyButtonEl = historyBtn;
+
+    this.historyDropdown = historyContainer.createDiv({ cls: 'qoderian-history-menu' });
+    this.historyDropdown.setAttribute('role', 'listbox');
+
+    const toggleHistory = (event: Event): void => {
+      event.preventDefault();
+      event.stopPropagation();
+      this.toggleHistoryDropdown();
+    };
+    historyBtn.addEventListener('click', toggleHistory);
+    historyBtn.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') toggleHistory(event);
+    });
+
+    // Credits usage is account-level, so it sits beside history in the fixed
+    // header instead of moving with the active tab's composer.
+    const agentCatalog = this.plugin.qoderServices.agentCatalog;
+    this.creditsUsageButton = new CreditsUsageButton(actionsEl, {
+      getCachedUsage: () => agentCatalog.getUsageInfo(),
+      fetchUsage: () => fetchCreditsUsage(this.plugin),
+      subscribeRuntimeStatus: (listener) => agentCatalog.subscribeRuntimeStatus(listener),
+    });
+
+    const settingsBtn = actionsEl.createDiv({
+      cls: 'qoderian-input-nav-btn qoderian-header-action qoderian-settings-btn',
+    });
+    setIcon(settingsBtn, 'settings');
+    setButtonTooltip(settingsBtn, t('common.settings'));
+    settingsBtn.setAttribute('role', 'button');
+    settingsBtn.setAttribute('tabindex', '0');
+    this.settingsButtonEl = settingsBtn;
+
+    const openSettings = (event: Event): void => {
+      event.preventDefault();
+      event.stopPropagation();
+      this.openSettings();
+    };
+    settingsBtn.addEventListener('click', openSettings);
+    settingsBtn.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') openSettings(event);
+    });
   }
 
   /**
@@ -243,46 +309,14 @@ export class QoderianView extends ItemView {
       },
     });
 
-    const navActionsEl = wrapper.createDiv({ cls: 'qoderian-input-nav-actions' });
-
-    this.newTabButtonEl = navActionsEl.createDiv({ cls: 'qoderian-input-nav-btn qoderian-new-tab-btn' });
-    setIcon(this.newTabButtonEl, 'square-plus');
+    this.newTabButtonEl = wrapper.createEl('button', {
+      cls: 'qoderian-input-nav-btn qoderian-new-tab-btn',
+      attr: { type: 'button' },
+    });
+    setIcon(this.newTabButtonEl, 'plus');
     setButtonTooltip(this.newTabButtonEl, t('commands.newTab'));
     this.newTabButtonEl.addEventListener('click', () => {
       void this.createNewTab().catch(() => new Notice('Failed to create tab'));
-    });
-
-    const newBtn = navActionsEl.createDiv({ cls: 'qoderian-input-nav-btn' });
-    setIcon(newBtn, 'square-pen');
-    setButtonTooltip(newBtn, t('nav.newConversation'));
-    this.newConversationButtonEl = newBtn;
-    newBtn.addEventListener('click', () => {
-      void (async () => {
-        await this.tabManager?.createNewConversation();
-        this.updateHistoryDropdown();
-      })().catch(() => new Notice('Failed to create conversation'));
-    });
-
-    // History dropdown
-    const historyContainer = navActionsEl.createDiv({ cls: 'qoderian-history-container' });
-    const historyBtn = historyContainer.createDiv({ cls: 'qoderian-input-nav-btn' });
-    setIcon(historyBtn, 'history');
-    setButtonTooltip(historyBtn, t('nav.chatHistory'));
-    this.historyButtonEl = historyBtn;
-
-    this.historyDropdown = historyContainer.createDiv({ cls: 'qoderian-history-menu' });
-
-    historyBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.toggleHistoryDropdown();
-    });
-
-    // Credits usage popover (account-level, shared across tabs)
-    const agentCatalog = this.plugin.qoderServices.agentCatalog;
-    this.creditsUsageButton = new CreditsUsageButton(navActionsEl, {
-      getCachedUsage: () => agentCatalog.getUsageInfo(),
-      fetchUsage: () => fetchCreditsUsage(this.plugin),
-      subscribeRuntimeStatus: (listener) => agentCatalog.subscribeRuntimeStatus(listener),
     });
 
     return wrapper;
@@ -354,12 +388,34 @@ export class QoderianView extends ItemView {
   /** Re-applies locale-dependent static text after a language change. */
   refreshLocalizedChrome(): void {
     if (this.newTabButtonEl) setButtonTooltip(this.newTabButtonEl, t('commands.newTab'));
-    if (this.newConversationButtonEl) {
-      setButtonTooltip(this.newConversationButtonEl, t('nav.newConversation'));
-    }
     if (this.historyButtonEl) setButtonTooltip(this.historyButtonEl, t('nav.chatHistory'));
+    if (this.settingsButtonEl) setButtonTooltip(this.settingsButtonEl, t('common.settings'));
+    if (this.updateBadgeEl?.dataset.version) {
+      this.updateBadgeEl.setText(t('updates.available', { version: this.updateBadgeEl.dataset.version }));
+      this.updateBadgeEl.setAttribute(
+        'aria-label',
+        t('updates.openRelease', { version: this.updateBadgeEl.dataset.version }),
+      );
+    }
     this.creditsUsageButton?.refreshLocale();
+    for (const tab of this.tabManager?.getAllTabs() ?? []) {
+      tab.ui.composerResize?.refreshLocale();
+    }
     this.updateTabBar();
+  }
+
+  private async refreshUpdateBadge(): Promise<void> {
+    const badge = this.updateBadgeEl;
+    if (!badge) return;
+
+    const update = await this.plugin.getAvailableUpdate();
+    if (!update || this.updateBadgeEl !== badge) return;
+
+    badge.dataset.version = update.version;
+    badge.setText(t('updates.available', { version: update.version }));
+    badge.setAttribute('aria-label', t('updates.openRelease', { version: update.version }));
+    badge.removeClass('qoderian-hidden');
+    badge.addEventListener('click', () => openExternalBrowserUrl(update.url), { once: true });
   }
 
   // ============================================
@@ -388,7 +444,7 @@ export class QoderianView extends ItemView {
   async createNewTab(): Promise<void> {
     const tab = await this.tabManager?.createTab();
     if (!tab) {
-      const maxTabs = this.plugin.settings.maxTabs ?? 3;
+      const maxTabs = this.plugin.settings.maxTabs ?? DEFAULT_MAX_TABS;
       new Notice(`Maximum ${maxTabs} tabs allowed`);
       this.updateTabBarVisibility();
       return;
@@ -464,10 +520,16 @@ export class QoderianView extends ItemView {
     const isVisible = this.historyDropdown.hasClass('visible');
     if (isVisible) {
       this.historyDropdown.removeClass('visible');
+      this.historyButtonEl?.setAttribute('aria-expanded', 'false');
     } else {
       this.updateHistoryDropdown();
       this.historyDropdown.addClass('visible');
+      this.historyButtonEl?.setAttribute('aria-expanded', 'true');
     }
+  }
+
+  private openSettings(): void {
+    new QoderianSettingsModal(this.plugin).open();
   }
 
   private updateHistoryDropdown(): void {
@@ -490,6 +552,7 @@ export class QoderianView extends ItemView {
   private async openHistoryConversation(conversationId: string): Promise<void> {
     await this.tabManager?.openConversation(conversationId);
     this.historyDropdown?.removeClass('visible');
+    this.historyButtonEl?.setAttribute('aria-expanded', 'false');
   }
 
   private async openHistoryConversationInNewTab(
@@ -501,6 +564,7 @@ export class QoderianView extends ItemView {
       activate,
     });
     this.historyDropdown?.removeClass('visible');
+    this.historyButtonEl?.setAttribute('aria-expanded', 'false');
   }
 
   private getHistoryConversationStatus(conversationId: string): HistoryConversationStatus {
@@ -561,6 +625,7 @@ export class QoderianView extends ItemView {
     // Document-level click to close dropdowns
     this.registerDomEvent(activeDocument, 'click', () => {
       this.historyDropdown?.removeClass('visible');
+      this.historyButtonEl?.setAttribute('aria-expanded', 'false');
     });
 
     // View scopes are the Obsidian-owned boundary for main-area tab hotkeys.

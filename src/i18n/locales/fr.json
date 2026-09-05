@@ -23,7 +23,8 @@
   },
   "composer": {
     "send": "Envoyer le message",
-    "stop": "Arrêter la génération"
+    "stop": "Arrêter la génération",
+    "resize": "Faites glisser pour redimensionner la saisie ; double-cliquez pour réinitialiser"
   },
   "restore": {
     "failed": "Certains onglets ou conversations n'ont pas pu être restaurés ({count} problème(s)). Détails dans la console développeur."
@@ -35,13 +36,19 @@
     "inserted": "Inséré",
     "editApplied": "Modification appliquée",
     "newTab": "Nouvel onglet",
-    "newSession": "Nouvelle session (dans l'onglet actuel)",
+    "newSession": "Démarrer une nouvelle conversation dans l'onglet actuel",
+    "closeTab": "Fermer l'onglet",
+    "tabActions": "Actions de l'onglet",
     "closeCurrentTab": "Fermer l'onglet actuel"
   },
   "nav": {
     "newConversation": "Nouvelle conversation",
     "chatHistory": "Historique du chat",
     "newChat": "Nouveau chat"
+  },
+  "updates": {
+    "available": "Mise à jour {version}",
+    "openRelease": "Ouvrir la version {version} de Qoderian"
   },
   "chat": {
     "rewind": {
@@ -352,7 +359,8 @@
     },
     "language": {
       "name": "Langue",
-      "desc": "Changer la langue d'affichage de l'interface du plugin"
+      "desc": "Changer la langue d'affichage de l'interface du plugin",
+      "followObsidian": "Suivre Obsidian"
     }
   },
   "credits": {

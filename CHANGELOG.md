@@ -11,6 +11,43 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Added
+
+- Compact tabs are now wide enough to keep their label easy to click, with
+  closing moved into a hover-revealed actions menu to prevent accidental
+  removal.
+- The message composer can be resized by dragging its top edge or using the
+  Up/Down arrow keys on the resize handle; double-click or Home restores
+  automatic content-based sizing.
+- History, credits usage, and a standalone Qoderian settings window are now
+  always available together in the top-right view header.
+- A non-blocking update badge now appears beside the Qoderian mark when GitHub
+  has a newer stable release.
+
+### Changed
+
+- Fresh installations follow Obsidian's interface language and allow the
+  maximum supported number of chat tabs by default.
+- The core chat chrome now uses calmer rounded controls, a layered composer,
+  and consistent Lucide-style icons.
+- The Codex-inspired visual pass now includes neutral active tabs, adjacent
+  borderless new-tab action, sans-serif welcome typography, compact tool
+  rows, a high-contrast circular send button, and a complete context ring.
+
+### Removed
+
+- The redundant restart-current-conversation icon from the composer toolbar;
+  the command-palette action remains available for existing keyboard workflows.
+
+### Fixed
+
+- Long composer input no longer shifts its wrapping width when the vertical
+  scrollbar appears, preventing the input height from flickering at its cap.
+- The composer resize indicator now spans the complete top edge of the input.
+- Composer popovers now stay within the Qoderian pane in narrow sidebars.
+- The context-window meter now renders as a complete circular progress ring,
+  and the external-context action uses an unclipped paperclip icon.
+
 ## [1.0.7] - 2026-09-02
 
 ### Added

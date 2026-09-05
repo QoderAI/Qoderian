@@ -1,4 +1,16 @@
 /* Settings page - remove separator lines from setting items */
+.qoderian-settings-modal {
+  width: min(920px, calc(100vw - 48px));
+  max-width: 920px;
+  height: min(86vh, 900px);
+}
+
+.qoderian-settings-modal-content {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-inline-end: 8px;
+}
+
 .qoderian-settings .setting-item {
   border-top: none;
 }

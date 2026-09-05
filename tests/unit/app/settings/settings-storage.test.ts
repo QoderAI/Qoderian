@@ -24,6 +24,8 @@ describe('QoderianSettingsStorage', () => {
     const settings = await storage.load();
 
     expect(settings.permissionMode).toBe('auto');
+    expect(settings.locale).toBe('auto');
+    expect(settings.maxTabs).toBe(10);
     expect(settings).toEqual(DEFAULT_QODERIAN_SETTINGS);
     // Must be an owned copy: mutating loaded settings must not poison the
     // module-level defaults.

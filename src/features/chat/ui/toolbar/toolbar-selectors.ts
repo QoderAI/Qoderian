@@ -1,4 +1,4 @@
-import { Notice } from 'obsidian';
+import { Notice, setIcon } from 'obsidian';
 
 import type { QoderRuntimeStatus } from '../../../../core/types/services';
 import type { PermissionMode, QoderModelOverride } from '../../../../core/types/settings';
@@ -419,6 +419,7 @@ export class ModelSelector {
     const view = this.container.ownerDocument.defaultView;
     if (!view) return;
     const anchor = (dropdownEl.offsetParent ?? this.container).getBoundingClientRect();
+    dropdownEl.toggleClass('qoderian-model-dropdown--narrow', anchor.width < 600);
     dropdownEl.toggleClass(
       'qoderian-model-dropdown--flip',
       shouldFlipModelDropdown(anchor, dropdownEl.offsetWidth, view.innerWidth),
@@ -643,7 +644,8 @@ export class PermissionToggle {
     this.buttonEl.empty();
     this.buttonEl.createSpan({ cls: 'qoderian-permission-dot' });
     this.buttonEl.createSpan({ cls: 'qoderian-permission-label', text: t(descriptor.labelKey) });
-    this.buttonEl.createSpan({ cls: 'qoderian-permission-chevron', text: '⌄' });
+    const chevronEl = this.buttonEl.createSpan({ cls: 'qoderian-permission-chevron' });
+    setIcon(chevronEl, 'chevron-down');
     this.buttonEl.setAttribute('title', t(descriptor.descriptionKey));
     // Tab switches and SDK-driven changes only reach updateDisplay, so the
     // option highlight has to follow the button or the two drift apart.

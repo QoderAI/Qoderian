@@ -23,7 +23,8 @@
   },
   "composer": {
     "send": "메시지 보내기",
-    "stop": "생성 중지"
+    "stop": "생성 중지",
+    "resize": "드래그하여 입력 높이 조절; 두 번 클릭하여 자동 높이로 재설정"
   },
   "restore": {
     "failed": "이전 탭 또는 대화를 완전히 복원하지 못했습니다(문제 {count}건). 자세한 내용은 개발자 콘솔을 확인하세요."
@@ -35,13 +36,19 @@
     "inserted": "삽입됨",
     "editApplied": "편집 적용됨",
     "newTab": "새 탭",
-    "newSession": "새 세션 (현재 탭)",
+    "newSession": "현재 탭에서 새 대화 시작",
+    "closeTab": "탭 닫기",
+    "tabActions": "탭 작업",
     "closeCurrentTab": "현재 탭 닫기"
   },
   "nav": {
     "newConversation": "새 대화",
     "chatHistory": "대화 기록",
     "newChat": "새 채팅"
+  },
+  "updates": {
+    "available": "업데이트 {version}",
+    "openRelease": "Qoderian {version} 릴리스 열기"
   },
   "chat": {
     "rewind": {
@@ -352,7 +359,8 @@
     },
     "language": {
       "name": "언어",
-      "desc": "플러그인 인터페이스의 표시 언어 변경"
+      "desc": "플러그인 인터페이스의 표시 언어 변경",
+      "followObsidian": "Obsidian 언어 따르기"
     }
   },
   "credits": {

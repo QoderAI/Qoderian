@@ -2,6 +2,7 @@ import {
   getAvailableLocales,
   getLocale,
   getLocaleDisplayName,
+  resolveLocalePreference,
   setLocale,
   t,
 } from '@/i18n/i18n';
@@ -101,6 +102,22 @@ describe('i18n', () => {
 
       expect(result).toBe(false);
       expect(getLocale()).toBe('de'); // Should remain unchanged
+    });
+  });
+
+  describe('resolveLocalePreference', () => {
+    it('follows the Obsidian language for the auto preference', () => {
+      expect(resolveLocalePreference('auto', 'zh')).toBe('zh-CN');
+      expect(resolveLocalePreference('auto', 'zh-TW')).toBe('zh-TW');
+      expect(resolveLocalePreference('auto', 'pt-BR')).toBe('pt');
+    });
+
+    it('keeps an explicit Qoderian language', () => {
+      expect(resolveLocalePreference('de', 'zh-CN')).toBe('de');
+    });
+
+    it('falls back to English for unsupported Obsidian languages', () => {
+      expect(resolveLocalePreference('auto', 'it')).toBe('en');
     });
   });
 
