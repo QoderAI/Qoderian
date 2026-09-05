@@ -309,10 +309,11 @@ export class QoderianView extends ItemView {
       },
     });
 
-    const navActionsEl = wrapper.createDiv({ cls: 'qoderian-input-nav-actions' });
-
-    this.newTabButtonEl = navActionsEl.createDiv({ cls: 'qoderian-input-nav-btn qoderian-new-tab-btn' });
-    setIcon(this.newTabButtonEl, 'square-plus');
+    this.newTabButtonEl = wrapper.createEl('button', {
+      cls: 'qoderian-input-nav-btn qoderian-new-tab-btn',
+      attr: { type: 'button' },
+    });
+    setIcon(this.newTabButtonEl, 'plus');
     setButtonTooltip(this.newTabButtonEl, t('commands.newTab'));
     this.newTabButtonEl.addEventListener('click', () => {
       void this.createNewTab().catch(() => new Notice('Failed to create tab'));

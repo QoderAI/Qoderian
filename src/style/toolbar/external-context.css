@@ -3,7 +3,8 @@
   position: static;
   display: flex;
   align-items: center;
-  margin-left: 8px;
+  margin-left: 2px;
+  flex: 0 0 auto;
 }
 
 .qoderian-external-context-icon-wrapper {
@@ -12,14 +13,20 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  overflow: visible;
+  border-radius: var(--qoderian-radius-control);
+}
+
+.qoderian-external-context-icon-wrapper:hover {
+  background: var(--background-modifier-hover);
 }
 
 .qoderian-external-context-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   color: var(--text-faint);
   transition: color 0.15s ease;
 }
@@ -30,13 +37,12 @@
 
 .qoderian-external-context-icon.active {
   color: var(--qoderian-brand);
-  animation: external-context-glow 2s ease-in-out infinite;
 }
 
 .qoderian-external-context-icon svg {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   overflow: visible;
 }
 
@@ -65,7 +71,7 @@
   width: auto;
   max-width: none;
   box-sizing: border-box;
-  background: var(--background-secondary);
+  background: var(--qoderian-surface-raised);
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--qoderian-radius-panel);
   box-shadow: var(--qoderian-shadow-raised);

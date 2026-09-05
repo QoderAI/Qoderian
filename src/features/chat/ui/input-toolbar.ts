@@ -223,7 +223,7 @@ export class ExternalContextSelector {
     const iconWrapper = this.container.createDiv({ cls: 'qoderian-external-context-icon-wrapper' });
 
     this.iconEl = iconWrapper.createDiv({ cls: 'qoderian-external-context-icon' });
-    setIcon(this.iconEl, 'folder-plus');
+    setIcon(this.iconEl, 'paperclip');
 
     this.badgeEl = iconWrapper.createDiv({ cls: 'qoderian-external-context-badge' });
 
@@ -301,7 +301,7 @@ export class ExternalContextSelector {
 
     if (this.externalContextPaths.length === 0) {
       const emptyEl = listEl.createDiv({ cls: 'qoderian-external-context-empty' });
-      emptyEl.setText('Click folder icon to add');
+      emptyEl.setText('Click the attachment icon to add context');
     } else {
       for (const pathStr of this.externalContextPaths) {
         const itemEl = listEl.createDiv({ cls: 'qoderian-external-context-item' });
@@ -626,25 +626,12 @@ export class ContextUsageMeter {
   }
 
   private render() {
-    const size = 16;
+    const size = 18;
     const strokeWidth = 2;
-    const radius = (size - strokeWidth) / 2;
+    const radius = (size - strokeWidth * 2) / 2;
     const cx = size / 2;
     const cy = size / 2;
-
-    // 240° arc: from 150° to 390° (upper-left through bottom to upper-right)
-    const startAngle = 150;
-    const endAngle = 390;
-    const arcDegrees = endAngle - startAngle;
-    const arcRadians = (arcDegrees * Math.PI) / 180;
-    this.circumference = radius * arcRadians;
-
-    const startRad = (startAngle * Math.PI) / 180;
-    const endRad = (endAngle * Math.PI) / 180;
-    const x1 = cx + radius * Math.cos(startRad);
-    const y1 = cy + radius * Math.sin(startRad);
-    const x2 = cx + radius * Math.cos(endRad);
-    const y2 = cy + radius * Math.sin(endRad);
+    this.circumference = 2 * Math.PI * radius;
 
     const gaugeEl = this.container.createDiv({ cls: 'qoderian-context-meter-gauge' });
     const svg = gaugeEl.createSvg('svg', {
@@ -655,26 +642,29 @@ export class ContextUsageMeter {
       },
     });
 
-    const pathData = `M ${x1} ${y1} A ${radius} ${radius} 0 1 1 ${x2} ${y2}`;
-    svg.createSvg('path', {
+    svg.createSvg('circle', {
       cls: 'qoderian-meter-bg',
       attr: {
-        d: pathData,
+        cx: String(cx),
+        cy: String(cy),
+        r: String(radius),
         fill: 'none',
         'stroke-width': String(strokeWidth),
-        'stroke-linecap': 'round',
       },
     });
 
-    const fillPath = svg.createSvg('path', {
+    const fillPath = svg.createSvg('circle', {
       cls: 'qoderian-meter-fill',
       attr: {
-        d: pathData,
+        cx: String(cx),
+        cy: String(cy),
+        r: String(radius),
         fill: 'none',
         'stroke-width': String(strokeWidth),
         'stroke-linecap': 'round',
         'stroke-dasharray': String(this.circumference),
         'stroke-dashoffset': String(this.circumference),
+        transform: `rotate(-90 ${cx} ${cy})`,
       },
     });
     this.fillPath = fillPath;

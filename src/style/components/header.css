@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 10px 14px;
+  padding: 6px 10px 16px;
 }
 
 .qoderian-title {
@@ -66,12 +66,12 @@
   margin-inline-start: auto;
 }
 
-.qoderian-header-action,
+.qoderian-header-actions .qoderian-header-action,
 .qoderian-header-actions .qoderian-credits-btn {
-  width: 28px;
-  height: 28px;
-  border: 1px solid transparent;
-  border-radius: var(--qoderian-radius-control);
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 9px;
   color: var(--text-muted);
 }
 
@@ -80,12 +80,11 @@
   overflow: visible;
 }
 
-.qoderian-header-action:hover,
-.qoderian-header-action:focus-visible,
+.qoderian-header-actions .qoderian-header-action:hover,
+.qoderian-header-actions .qoderian-header-action:focus-visible,
 .qoderian-header-actions .qoderian-credits-btn:hover,
 .qoderian-header-actions .qoderian-credits-btn:focus-visible {
   color: var(--text-normal);
   background: var(--background-modifier-hover);
-  border-color: var(--background-modifier-border);
   outline: none;
 }

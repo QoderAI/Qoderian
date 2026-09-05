@@ -6,3 +6,8 @@
   overflow: hidden;
   font-family: var(--font-text);
 }
+
+/* Codex-like icon rhythm: light, consistent strokes instead of mixed visual weights. */
+.qoderian-container .svg-icon {
+  stroke-width: 1.8;
+}

@@ -1,7 +1,9 @@
 /* Model selector */
 .qoderian-model-selector {
+  flex: 1 1 72px;
   min-width: 0;
   max-width: 100%;
+  overflow: hidden;
 }
 
 .qoderian-model-btn {
@@ -10,11 +12,18 @@
   gap: 4px;
   min-width: 0;
   max-width: 100%;
+  overflow: hidden;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--qoderian-radius-control);
   cursor: pointer;
-  color: var(--qoderian-brand);
+  color: var(--text-muted);
   font-size: 12px;
+}
+
+.qoderian-model-btn:hover,
+.qoderian-model-selector--open .qoderian-model-btn {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
 }
 
 .qoderian-model-btn--warning {
@@ -70,7 +79,7 @@
      popover height convention. */
   max-height: var(--qoderian-model-dropdown-max-height, 420px);
   padding: 4px;
-  background: var(--background-secondary);
+  background: var(--qoderian-surface-raised);
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--qoderian-radius-panel);
   box-shadow: var(--qoderian-shadow-raised);
@@ -88,7 +97,7 @@
   max-width: 100%;
   margin-top: var(--qoderian-model-editor-offset, 0px);
   padding: 4px 8px 8px;
-  background: var(--background-secondary);
+  background: var(--qoderian-surface-raised);
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--qoderian-radius-panel);
   box-shadow: var(--qoderian-shadow-raised);
@@ -229,7 +238,7 @@
   cursor: pointer;
   font-size: 12px;
   color: var(--text-muted);
-  border-radius: 3px;
+  border-radius: var(--qoderian-radius-control);
   transition: background 0.1s ease, color 0.1s ease;
   white-space: nowrap;
 }
@@ -245,8 +254,8 @@
 }
 
 .qoderian-model-option.selected {
-  background: rgba(var(--qoderian-brand-rgb), 0.15);
-  color: var(--qoderian-brand);
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
   font-weight: 500;
 }
 

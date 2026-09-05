@@ -30,6 +30,9 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   maximum supported number of chat tabs by default.
 - The core chat chrome now uses calmer rounded controls, a layered composer,
   and consistent Lucide-style icons.
+- The Codex-inspired visual pass now includes neutral active tabs, adjacent
+  borderless new-tab action, sans-serif welcome typography, compact tool
+  rows, a high-contrast circular send button, and a complete context ring.
 
 ### Removed
 
@@ -41,8 +44,9 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - Long composer input no longer shifts its wrapping width when the vertical
   scrollbar appears, preventing the input height from flickering at its cap.
 - The composer resize indicator now spans the complete top edge of the input.
-- Composer popovers now stay within the Qoderian pane in narrow sidebars, and
-  the external-context action uses an unclipped add-folder icon.
+- Composer popovers now stay within the Qoderian pane in narrow sidebars.
+- The context-window meter now renders as a complete circular progress ring,
+  and the external-context action uses an unclipped paperclip icon.
 
 ## [1.0.7] - 2026-09-02
 

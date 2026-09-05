@@ -6,13 +6,15 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 0;
+  margin-inline: -6px;
+  padding: 6px;
+  border-radius: var(--qoderian-radius-control);
   cursor: pointer;
   overflow: hidden;
 }
 
 .qoderian-tool-header:hover {
-  opacity: 0.85;
+  background: var(--background-modifier-hover);
 }
 
 .qoderian-tool-icon {

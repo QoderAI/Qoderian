@@ -17,7 +17,7 @@
   inset-inline-end: 12px;
   width: min(320px, calc(100% - 24px));
   padding: 12px;
-  background: var(--background-secondary);
+  background: var(--qoderian-surface-raised);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--background-modifier-border);

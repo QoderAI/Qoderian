@@ -5,7 +5,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-inline-start: 8px;
+  margin-inline-start: 4px;
+  flex: 0 0 auto;
   cursor: default;
 }
 
@@ -14,16 +15,18 @@
   content: attr(data-tooltip);
   position: absolute;
   bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   margin-bottom: 6px;
   padding: 4px 8px;
   font-size: 11px;
   color: var(--text-normal);
   background: var(--background-secondary);
   border: 1px solid var(--background-modifier-border);
-  border-radius: 4px;
-  white-space: nowrap;
+  width: max-content;
+  max-width: min(240px, calc(100vw - 24px));
+  border-radius: var(--qoderian-radius-control);
+  white-space: normal;
+  overflow-wrap: anywhere;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.15s ease, visibility 0.15s ease;
@@ -40,13 +43,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
 }
 
 .qoderian-context-meter-gauge svg {
-  width: 16px;
-  height: 16px;
+  display: block;
+  width: 18px;
+  height: 18px;
+  overflow: visible;
 }
 
 .qoderian-meter-bg {
@@ -60,7 +65,7 @@
 
 .qoderian-context-meter-percent {
   font-size: 11px;
-  color: var(--qoderian-brand);
+  color: var(--text-muted);
   min-width: 24px;
   text-align: end;
   transition: color 0.3s ease;
