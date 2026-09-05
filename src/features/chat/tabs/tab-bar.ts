@@ -1,4 +1,4 @@
-import { setIcon } from 'obsidian';
+import { Menu, setIcon } from 'obsidian';
 
 import { t } from '../../../i18n/i18n';
 import { scheduleAnimationFrame } from '../../../shared/dom/animation-frame';
@@ -94,25 +94,26 @@ export class TabBar {
     badgeEl.setAttribute('data-title-expanded', isTitleExpanded ? 'true' : 'false');
 
     if (item.canClose) {
-      const closeEl = badgeEl.createSpan({ cls: 'qoderian-tab-badge-close' });
-      closeEl.setAttribute('role', 'button');
-      closeEl.setAttribute('tabindex', '0');
-      setIcon(closeEl, 'x');
-      setButtonTooltip(closeEl, t('commands.closeTab'));
+      const menuEl = badgeEl.createSpan({ cls: 'qoderian-tab-badge-menu' });
+      menuEl.setAttribute('role', 'button');
+      menuEl.setAttribute('tabindex', '0');
+      menuEl.setAttribute('aria-haspopup', 'menu');
+      setIcon(menuEl, 'ellipsis');
+      setButtonTooltip(menuEl, t('commands.tabActions'));
 
-      const closeTab = (event: Event): void => {
+      const openMenu = (event: Event): void => {
         event.preventDefault();
         event.stopPropagation();
-        this.callbacks.onTabClose(item.id);
+        this.showTabMenu(item, menuEl);
       };
-      closeEl.addEventListener('click', closeTab);
-      closeEl.addEventListener('dblclick', (event) => {
+      menuEl.addEventListener('click', openMenu);
+      menuEl.addEventListener('dblclick', (event) => {
         event.preventDefault();
         event.stopPropagation();
       });
-      closeEl.addEventListener('keydown', (event) => {
+      menuEl.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
-          closeTab(event);
+          openMenu(event);
         }
       });
     }
@@ -129,13 +130,26 @@ export class TabBar {
       this.toggleBadgeTitle(item, badgeEl, labelEl);
     });
 
-    // Right-click to close (if allowed)
+    // Right-click opens the same menu instead of deleting immediately.
     if (item.canClose) {
       badgeEl.addEventListener('contextmenu', (e) => {
         e.preventDefault();
-        this.callbacks.onTabClose(item.id);
+        e.stopPropagation();
+        this.showTabMenu(item, badgeEl);
       });
     }
+  }
+
+  private showTabMenu(item: TabBarItem, anchorEl: HTMLElement): void {
+    const menu = new Menu().setUseNativeMenu(false);
+    menu.addItem(menuItem => menuItem
+      .setTitle(t('commands.closeTab'))
+      .setIcon('x')
+      .setWarning(true)
+      .onClick(() => this.callbacks.onTabClose(item.id)));
+
+    const rect = anchorEl.getBoundingClientRect();
+    menu.showAtPosition({ x: rect.right, y: rect.bottom }, anchorEl.ownerDocument);
   }
 
   /** Destroys the tab bar. */

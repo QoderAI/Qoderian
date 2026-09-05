@@ -38,12 +38,17 @@
     "newTab": "Nouvel onglet",
     "newSession": "Démarrer une nouvelle conversation dans l'onglet actuel",
     "closeTab": "Fermer l'onglet",
+    "tabActions": "Actions de l'onglet",
     "closeCurrentTab": "Fermer l'onglet actuel"
   },
   "nav": {
     "newConversation": "Nouvelle conversation",
     "chatHistory": "Historique du chat",
     "newChat": "Nouveau chat"
+  },
+  "updates": {
+    "available": "Mise à jour {version}",
+    "openRelease": "Ouvrir la version {version} de Qoderian"
   },
   "chat": {
     "rewind": {
@@ -354,7 +359,8 @@
     },
     "language": {
       "name": "Langue",
-      "desc": "Changer la langue d'affichage de l'interface du plugin"
+      "desc": "Changer la langue d'affichage de l'interface du plugin",
+      "followObsidian": "Suivre Obsidian"
     }
   },
   "credits": {

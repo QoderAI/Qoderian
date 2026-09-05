@@ -50,7 +50,7 @@ function isSentinelExpiry(timestamp: number): boolean {
 }
 
 /**
- * Nav-row button showing overall credits usage with a popover panel that
+ * Header button showing overall credits usage with a popover panel that
  * mirrors the Qoder IDE usage view: plan quota, add-on quota and the
  * organization resource package, each with a segmented progress bar.
  */
@@ -68,7 +68,7 @@ export class CreditsUsageButton {
   constructor(parentEl: HTMLElement, private readonly callbacks: CreditsUsageButtonCallbacks) {
     this.container = parentEl.createDiv({ cls: 'qoderian-credits-container' });
     this.buttonEl = this.container.createDiv({ cls: 'qoderian-input-nav-btn qoderian-credits-btn' });
-    setIcon(this.buttonEl, 'gauge');
+    setIcon(this.buttonEl, 'pie-chart');
 
     this.panelEl = this.container.createDiv({ cls: 'qoderian-credits-panel' });
     this.popover = new ClickPopover(
@@ -132,7 +132,7 @@ export class CreditsUsageButton {
   };
 
   private updateButton(): void {
-    // Same tooltip path as the other nav-row buttons (aria-label + 300ms
+    // Same tooltip path as the other header buttons (aria-label + 300ms
     // delay); only the click behavior (popover) differs.
     setButtonTooltip(this.buttonEl, t('credits.trigger'));
   }

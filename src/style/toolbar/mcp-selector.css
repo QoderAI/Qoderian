@@ -1,6 +1,6 @@
 /* MCP Server Selector */
 .qoderian-mcp-selector {
-  position: relative;
+  position: static;
   display: flex;
   align-items: center;
   margin-left: 8px;
@@ -56,16 +56,17 @@
 
 .qoderian-mcp-selector-dropdown {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  inset-inline: 6px;
   bottom: 100%;
   margin-bottom: 4px;
-  min-width: 200px;
-  max-width: 280px;
+  min-width: 0;
+  width: auto;
+  max-width: none;
+  box-sizing: border-box;
   background: var(--background-secondary);
   border: 1px solid var(--background-modifier-border);
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  border-radius: var(--qoderian-radius-panel);
+  box-shadow: var(--qoderian-shadow-raised);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.15s ease, visibility 0.15s ease;

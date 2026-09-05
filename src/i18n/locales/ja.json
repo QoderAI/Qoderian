@@ -38,12 +38,17 @@
     "newTab": "新しいタブ",
     "newSession": "現在のタブで新しい会話を開始",
     "closeTab": "タブを閉じる",
+    "tabActions": "タブ操作",
     "closeCurrentTab": "現在のタブを閉じる"
   },
   "nav": {
     "newConversation": "新しい会話",
     "chatHistory": "チャット履歴",
     "newChat": "新しいチャット"
+  },
+  "updates": {
+    "available": "更新 {version}",
+    "openRelease": "Qoderian {version} リリースを開く"
   },
   "chat": {
     "rewind": {
@@ -354,7 +359,8 @@
     },
     "language": {
       "name": "言語",
-      "desc": "プラグインインターフェースの表示言語を変更"
+      "desc": "プラグインインターフェースの表示言語を変更",
+      "followObsidian": "Obsidian に従う"
     }
   },
   "credits": {

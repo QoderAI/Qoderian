@@ -10,12 +10,17 @@ export type TranslationKey =
   | 'commands.newTab'
   | 'commands.newSession'
   | 'commands.closeTab'
+  | 'commands.tabActions'
   | 'commands.closeCurrentTab'
 
   // Nav row buttons and tab badges
   | 'nav.newConversation'
   | 'nav.chatHistory'
   | 'nav.newChat'
+
+  // Plugin updates
+  | 'updates.available'
+  | 'updates.openRelease'
 
   // Common UI elements
   | 'common.save'
@@ -321,4 +326,5 @@ export type TranslationKey =
 
   // Settings - Language
   | 'settings.language.name'
-  | 'settings.language.desc';
+  | 'settings.language.desc'
+  | 'settings.language.followObsidian';

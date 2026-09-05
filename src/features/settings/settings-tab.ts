@@ -1,9 +1,22 @@
 import type { App, SettingDefinitionItem, SettingGroup } from 'obsidian';
-import { Notice, PluginSettingTab, requireApiVersion, Setting } from 'obsidian';
+import {
+  getLanguage,
+  moment,
+  Notice,
+  PluginSettingTab,
+  requireApiVersion,
+  Setting,
+} from 'obsidian';
 
 import type { ChatViewPlacement } from '../../core/types/settings';
-import { getAvailableLocales, getLocaleDisplayName, setLocale, t } from '../../i18n/i18n';
-import type { Locale } from '../../i18n/types';
+import {
+  FOLLOW_OBSIDIAN_LOCALE,
+  getAvailableLocales,
+  getLocaleDisplayName,
+  resolveLocalePreference,
+  setLocale,
+  t,
+} from '../../i18n/i18n';
 import type QoderianPlugin from '../../main';
 import { getQoderSettings, updateQoderSettings } from '../../qoder/config/settings';
 import { buildNavMappingText, parseNavMappings } from './keyboard-navigation';
@@ -23,6 +36,10 @@ import {
 
 /** Keys whose edits affect the prompt and require a debounced service restart. */
 const PROMPT_SETTING_KEYS = new Set(['userName', 'systemPrompt', 'mediaFolder']);
+
+function getObsidianLanguage(): string {
+  return requireApiVersion('1.8.7') ? getLanguage() : moment.locale();
+}
 
 export class QoderianSettingTab extends PluginSettingTab {
   plugin: QoderianPlugin;
@@ -47,12 +64,14 @@ export class QoderianSettingTab extends PluginSettingTab {
    * minAppVersion.
    */
   getSettingDefinitions(): SettingDefinitionItem[] {
-    setLocale(this.plugin.settings.locale as Locale);
+    setLocale(resolveLocalePreference(this.plugin.settings.locale, getObsidianLanguage()));
 
     const settingsBag = this.plugin.settings as unknown as Record<string, unknown>;
     const qoderSettings = getQoderSettings(settingsBag);
 
-    const localeOptions: Record<string, string> = {};
+    const localeOptions: Record<string, string> = {
+      [FOLLOW_OBSIDIAN_LOCALE]: t('settings.language.followObsidian'),
+    };
     for (const locale of getAvailableLocales()) {
       localeOptions[locale] = getLocaleDisplayName(locale);
     }
@@ -97,7 +116,7 @@ export class QoderianSettingTab extends PluginSettingTab {
           defaultValue: this.plugin.settings.locale,
           validate: (value: string) => {
             const locales: string[] = getAvailableLocales();
-            if (!locales.includes(value)) {
+            if (value !== FOLLOW_OBSIDIAN_LOCALE && !locales.includes(value)) {
               return t('common.error');
             }
           },
@@ -440,7 +459,7 @@ export class QoderianSettingTab extends PluginSettingTab {
       if (key === 'locale') {
         const previousName = t('settings.language.name');
         const previousDesc = t('settings.language.desc');
-        setLocale(this.plugin.settings.locale as Locale);
+        setLocale(resolveLocalePreference(this.plugin.settings.locale, getObsidianLanguage()));
         this.update();
         this.refreshLocalizedLanguageRow(previousName, previousDesc);
         this.refreshViewChrome();
@@ -517,7 +536,7 @@ export class QoderianSettingTab extends PluginSettingTab {
     containerEl.empty();
     containerEl.addClass('qoderian-settings');
 
-    setLocale(this.plugin.settings.locale as Locale);
+    setLocale(resolveLocalePreference(this.plugin.settings.locale, getObsidianLanguage()));
 
     // CLI availability determines whether the rest of the plugin can work, so
     // keep its host-specific path at the very top of the settings page.
@@ -551,18 +570,19 @@ export class QoderianSettingTab extends PluginSettingTab {
       .setDesc(t('settings.language.desc'))
       .addDropdown((dropdown) => {
         const locales = getAvailableLocales();
+        dropdown.addOption(FOLLOW_OBSIDIAN_LOCALE, t('settings.language.followObsidian'));
         for (const locale of locales) {
           dropdown.addOption(locale, getLocaleDisplayName(locale));
         }
         dropdown
           .setValue(this.plugin.settings.locale)
           .onChange(async (value) => {
-            const locale = value as Locale;
-            if (!setLocale(locale)) {
+            if (value !== FOLLOW_OBSIDIAN_LOCALE && !locales.some(locale => locale === value)) {
               dropdown.setValue(this.plugin.settings.locale);
               return;
             }
-            this.plugin.settings.locale = locale;
+            this.plugin.settings.locale = value;
+            setLocale(resolveLocalePreference(value, getObsidianLanguage()));
             await this.plugin.saveSettings();
             this.renderLegacySettings();
             this.refreshViewChrome();
@@ -748,7 +768,7 @@ export class QoderianSettingTab extends PluginSettingTab {
     setting.addSlider((slider) => {
       slider
         .setLimits(3, 10, 1)
-        .setValue(this.plugin.settings.maxTabs ?? 3)
+        .setValue(this.plugin.settings.maxTabs ?? 10)
         .onChange(async (value) => {
           this.plugin.settings.maxTabs = value;
           await this.plugin.saveSettings();
@@ -757,7 +777,7 @@ export class QoderianSettingTab extends PluginSettingTab {
             view.refreshTabControls();
           }
         });
-      updateMaxTabsWarning(this.plugin.settings.maxTabs ?? 3);
+      updateMaxTabsWarning(this.plugin.settings.maxTabs ?? 10);
     });
 
     return maxTabsWarningEl;

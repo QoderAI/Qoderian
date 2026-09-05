@@ -38,12 +38,17 @@
     "newTab": "Nova aba",
     "newSession": "Iniciar nova conversa na aba atual",
     "closeTab": "Fechar aba",
+    "tabActions": "Ações da aba",
     "closeCurrentTab": "Fechar aba atual"
   },
   "nav": {
     "newConversation": "Nova conversa",
     "chatHistory": "Histórico de conversas",
     "newChat": "Novo chat"
+  },
+  "updates": {
+    "available": "Atualizar {version}",
+    "openRelease": "Abrir a versão {version} do Qoderian"
   },
   "chat": {
     "rewind": {
@@ -354,7 +359,8 @@
     },
     "language": {
       "name": "Idioma",
-      "desc": "Alterar o idioma de exibição da interface do plugin"
+      "desc": "Alterar o idioma de exibição da interface do plugin",
+      "followObsidian": "Seguir o Obsidian"
     }
   },
   "credits": {

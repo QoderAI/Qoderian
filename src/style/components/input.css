@@ -24,9 +24,15 @@
   flex-direction: column;
   min-height: 140px;
   border: 1px solid var(--qoderian-input-wrapper-border-color);
-  border-radius: 6px;
-  background: var(--background-primary);
+  border-radius: var(--qoderian-radius-composer);
+  background: var(--background-secondary);
   box-shadow: var(--qoderian-input-wrapper-box-shadow);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.qoderian-input-wrapper:focus-within {
+  --qoderian-input-wrapper-border-color: var(--background-modifier-border-focus);
+  --qoderian-input-wrapper-box-shadow: 0 0 0 2px rgba(var(--qoderian-brand-rgb), 0.1);
 }
 
 .qoderian-input-wrapper--resized {
@@ -38,7 +44,7 @@
   position: absolute;
   z-index: 4;
   inset-block-start: -6px;
-  inset-inline: 18%;
+  inset-inline: 0;
   height: 12px;
   cursor: ns-resize;
   touch-action: none;
@@ -225,7 +231,7 @@ body.qoderian-composer-resizing * {
   resize: none;
   padding: 8px 10px 10px 10px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--qoderian-radius-composer);
   background: transparent;
   color: var(--text-normal);
   font-family: inherit;

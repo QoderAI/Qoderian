@@ -38,12 +38,17 @@
     "newTab": "새 탭",
     "newSession": "현재 탭에서 새 대화 시작",
     "closeTab": "탭 닫기",
+    "tabActions": "탭 작업",
     "closeCurrentTab": "현재 탭 닫기"
   },
   "nav": {
     "newConversation": "새 대화",
     "chatHistory": "대화 기록",
     "newChat": "새 채팅"
+  },
+  "updates": {
+    "available": "업데이트 {version}",
+    "openRelease": "Qoderian {version} 릴리스 열기"
   },
   "chat": {
     "rewind": {
@@ -354,7 +359,8 @@
     },
     "language": {
       "name": "언어",
-      "desc": "플러그인 인터페이스의 표시 언어 변경"
+      "desc": "플러그인 인터페이스의 표시 언어 변경",
+      "followObsidian": "Obsidian 언어 따르기"
     }
   },
   "credits": {

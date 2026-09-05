@@ -35,12 +35,12 @@ import type { VaultDropController } from '../ui/vault-drop';
 /**
  * Default number of tabs allowed.
  *
- * Set to 3 to balance usability with resource usage:
+ * Fresh installations allow the full supported range by default:
  * - Each tab has its own chat runtime and persistent query
  * - More tabs = more memory and potential SDK processes
- * - 3 tabs allows multi-tasking without excessive overhead
+ * - Users can lower this limit in settings when needed
  */
-export const DEFAULT_MAX_TABS = 3;
+export const DEFAULT_MAX_TABS = 10;
 
 /**
  * Minimum number of tabs allowed (settings floor).

@@ -223,7 +223,7 @@ export class ExternalContextSelector {
     const iconWrapper = this.container.createDiv({ cls: 'qoderian-external-context-icon-wrapper' });
 
     this.iconEl = iconWrapper.createDiv({ cls: 'qoderian-external-context-icon' });
-    setIcon(this.iconEl, 'folder');
+    setIcon(this.iconEl, 'folder-plus');
 
     this.badgeEl = iconWrapper.createDiv({ cls: 'qoderian-external-context-badge' });
 

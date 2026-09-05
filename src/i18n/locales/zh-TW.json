@@ -38,12 +38,17 @@
     "newTab": "新增分頁",
     "newSession": "在目前分頁開始新對話",
     "closeTab": "關閉分頁",
+    "tabActions": "分頁操作",
     "closeCurrentTab": "關閉目前分頁"
   },
   "nav": {
     "newConversation": "新建對話",
     "chatHistory": "聊天歷史",
     "newChat": "新對話"
+  },
+  "updates": {
+    "available": "更新 {version}",
+    "openRelease": "檢視 Qoderian {version} 更新"
   },
   "chat": {
     "rewind": {
@@ -354,7 +359,8 @@
     },
     "language": {
       "name": "語言",
-      "desc": "變更外掛程式介面的顯示語言"
+      "desc": "變更外掛程式介面的顯示語言",
+      "followObsidian": "跟隨 Obsidian"
     }
   },
   "credits": {

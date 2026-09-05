@@ -38,12 +38,17 @@
     "newTab": "新建标签页",
     "newSession": "在当前标签页开始新会话",
     "closeTab": "关闭标签页",
+    "tabActions": "标签页操作",
     "closeCurrentTab": "关闭当前标签页"
   },
   "nav": {
     "newConversation": "新建会话",
     "chatHistory": "聊天历史",
     "newChat": "新会话"
+  },
+  "updates": {
+    "available": "更新 {version}",
+    "openRelease": "查看 Qoderian {version} 更新"
   },
   "chat": {
     "rewind": {
@@ -354,7 +359,8 @@
     },
     "language": {
       "name": "语言",
-      "desc": "更改插件界面的显示语言"
+      "desc": "更改插件界面的显示语言",
+      "followObsidian": "跟随 Obsidian"
     }
   },
   "credits": {

@@ -419,6 +419,7 @@ export class ModelSelector {
     const view = this.container.ownerDocument.defaultView;
     if (!view) return;
     const anchor = (dropdownEl.offsetParent ?? this.container).getBoundingClientRect();
+    dropdownEl.toggleClass('qoderian-model-dropdown--narrow', anchor.width < 600);
     dropdownEl.toggleClass(
       'qoderian-model-dropdown--flip',
       shouldFlipModelDropdown(anchor, dropdownEl.offsetWidth, view.innerWidth),

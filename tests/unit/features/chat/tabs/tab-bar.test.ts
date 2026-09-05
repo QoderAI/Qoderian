@@ -1,7 +1,15 @@
 import { createMockEl } from '@test/helpers/mock-element';
+import { Menu } from 'obsidian';
 
 import { TabBar } from '@/features/chat/tabs/tab-bar';
 import type { TabBarItem } from '@/features/chat/tabs/types';
+
+type MockMenuInstance = Menu & {
+  items: Array<{ clickHandler: (() => void) | null }>;
+  showAtPosition: jest.Mock;
+};
+
+const MockMenu = Menu as typeof Menu & { instances: MockMenuInstance[] };
 
 function item(overrides: Partial<TabBarItem> = {}): TabBarItem {
   return {
@@ -17,7 +25,11 @@ function item(overrides: Partial<TabBarItem> = {}): TabBarItem {
 }
 
 describe('TabBar', () => {
-  it('renders a dedicated close control only for closable tabs', () => {
+  beforeEach(() => {
+    MockMenu.instances.length = 0;
+  });
+
+  it('renders a dedicated actions menu only for closable tabs', () => {
     const container = createMockEl();
     const tabBar = new TabBar(container, {
       onTabClick: jest.fn(),
@@ -31,11 +43,11 @@ describe('TabBar', () => {
     ]);
 
     const badges = container.querySelectorAll('.qoderian-tab-badge');
-    expect(badges[0].querySelector('.qoderian-tab-badge-close')).not.toBeNull();
-    expect(badges[1].querySelector('.qoderian-tab-badge-close')).toBeNull();
+    expect(badges[0].querySelector('.qoderian-tab-badge-menu')).not.toBeNull();
+    expect(badges[1].querySelector('.qoderian-tab-badge-menu')).toBeNull();
   });
 
-  it('closes the target tab without activating it', () => {
+  it('opens a menu without activating or immediately closing the tab', () => {
     const container = createMockEl();
     const onTabClick = jest.fn();
     const onTabClose = jest.fn();
@@ -46,21 +58,26 @@ describe('TabBar', () => {
     });
     tabBar.update([item()]);
 
-    const closeEl = container.querySelector('.qoderian-tab-badge-close')!;
+    const menuEl = container.querySelector('.qoderian-tab-badge-menu')!;
     const event = {
       type: 'click',
       preventDefault: jest.fn(),
       stopPropagation: jest.fn(),
     };
-    closeEl.dispatchEvent(event);
+    menuEl.dispatchEvent(event);
 
     expect(event.preventDefault).toHaveBeenCalled();
     expect(event.stopPropagation).toHaveBeenCalled();
-    expect(onTabClose).toHaveBeenCalledWith('tab-1');
+    expect(onTabClose).not.toHaveBeenCalled();
     expect(onTabClick).not.toHaveBeenCalled();
+    expect(MockMenu.instances).toHaveLength(1);
+    expect(MockMenu.instances[0].showAtPosition).toHaveBeenCalledTimes(1);
+
+    MockMenu.instances[0].items[0].clickHandler?.();
+    expect(onTabClose).toHaveBeenCalledWith('tab-1');
   });
 
-  it('keeps the close control when expanding and collapsing a title', () => {
+  it('keeps the actions menu when expanding and collapsing a title', () => {
     const container = createMockEl();
     const tabBar = new TabBar(container, {
       onTabClick: jest.fn(),
@@ -77,7 +94,7 @@ describe('TabBar', () => {
     });
 
     expect(badge.querySelector('.qoderian-tab-badge-label')?.textContent).toBe('Conversation one');
-    expect(badge.querySelector('.qoderian-tab-badge-close')).not.toBeNull();
+    expect(badge.querySelector('.qoderian-tab-badge-menu')).not.toBeNull();
 
     badge.dispatchEvent({
       type: 'dblclick',
@@ -86,6 +103,6 @@ describe('TabBar', () => {
     });
 
     expect(badge.querySelector('.qoderian-tab-badge-label')?.textContent).toBe('1');
-    expect(badge.querySelector('.qoderian-tab-badge-close')).not.toBeNull();
+    expect(badge.querySelector('.qoderian-tab-badge-menu')).not.toBeNull();
   });
 });

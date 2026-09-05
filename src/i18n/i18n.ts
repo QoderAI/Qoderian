@@ -31,7 +31,36 @@ const translations: Record<Locale, typeof en> = {
 };
 
 const DEFAULT_LOCALE: Locale = 'en';
+export const FOLLOW_OBSIDIAN_LOCALE = 'auto';
 let currentLocale: Locale = DEFAULT_LOCALE;
+
+/**
+ * Resolves a stored locale preference to one of Qoderian's supported locales.
+ * Obsidian exposes regional language codes, while Qoderian intentionally uses
+ * a smaller translation set and falls back to the base language where useful.
+ */
+export function resolveLocalePreference(
+  preference: string,
+  obsidianLanguage: string,
+): Locale {
+  if (preference !== FOLLOW_OBSIDIAN_LOCALE && preference in translations) {
+    return preference as Locale;
+  }
+
+  const normalized = obsidianLanguage.trim().replaceAll('_', '-').toLowerCase();
+  if (normalized === 'zh-tw' || normalized === 'zh-hk' || normalized.startsWith('zh-hant')) {
+    return 'zh-TW';
+  }
+  if (normalized === 'zh' || normalized === 'zh-cn' || normalized.startsWith('zh-hans')) {
+    return 'zh-CN';
+  }
+
+  const baseLanguage = normalized.split('-')[0];
+  const matchingLocale = getAvailableLocales().find(
+    locale => locale.toLowerCase() === normalized || locale.toLowerCase() === baseLanguage,
+  );
+  return matchingLocale ?? DEFAULT_LOCALE;
+}
 
 /**
  * Get a translation by key with optional parameters

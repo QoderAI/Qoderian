@@ -1,9 +1,10 @@
 import { createMockEl } from '@test/helpers/mock-element';
-import { Platform, Scope } from 'obsidian';
+import { Modal, Platform, Scope } from 'obsidian';
 
 import { QoderianView } from '@/features/chat/chat-view';
 
 const MockScope = Scope as typeof Scope & { instances: Scope[] };
+const MockModal = Modal as typeof Modal & { instances: Modal[] };
 
 function createViewHarness(options: {
   canCreateTab: boolean;
@@ -173,6 +174,52 @@ describe('QoderianView tab controls', () => {
     view.toggleHistoryDropdown();
 
     expect(historyDropdown.hasClass('visible')).toBe(false);
+  });
+
+  it('opens a standalone Qoderian settings modal instead of Obsidian settings', () => {
+    const view = Object.create(QoderianView.prototype) as any;
+    const openObsidianSettings = jest.fn();
+    MockModal.instances.length = 0;
+
+    view.app = { setting: { open: openObsidianSettings } };
+    view.plugin = { app: view.app };
+
+    view.openSettings();
+
+    expect(MockModal.instances).toHaveLength(1);
+    expect(MockModal.instances[0].open).toHaveBeenCalledTimes(1);
+    expect(openObsidianSettings).not.toHaveBeenCalled();
+  });
+
+  it('shows a localized update badge only when a newer release is available', async () => {
+    const view = Object.create(QoderianView.prototype) as any;
+    const badge = createMockEl('button');
+    badge.addClass('qoderian-hidden');
+    view.updateBadgeEl = badge;
+    view.plugin = {
+      getAvailableUpdate: jest.fn().mockResolvedValue({
+        version: '1.1.0',
+        url: 'https://github.com/QoderAI/Qoderian/releases/tag/1.1.0',
+      }),
+    };
+
+    await view.refreshUpdateBadge();
+
+    expect(badge.hasClass('qoderian-hidden')).toBe(false);
+    expect(badge.textContent).toBe('Update 1.1.0');
+    expect(badge.getAttribute('aria-label')).toBe('Open Qoderian release 1.1.0');
+  });
+
+  it('keeps the update badge hidden when the installed release is current', async () => {
+    const view = Object.create(QoderianView.prototype) as any;
+    const badge = createMockEl('button');
+    badge.addClass('qoderian-hidden');
+    view.updateBadgeEl = badge;
+    view.plugin = { getAvailableUpdate: jest.fn().mockResolvedValue(null) };
+
+    await view.refreshUpdateBadge();
+
+    expect(badge.hasClass('qoderian-hidden')).toBe(true);
   });
 });
 
