@@ -26,6 +26,7 @@
 }
 
 .qoderian-tab-badge {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,12 +49,68 @@
   transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
 
+.qoderian-tab-badge-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: opacity 0.12s ease;
+}
+
+.qoderian-tab-badge-close {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--text-muted);
+  transition: opacity 0.12s ease, color 0.12s ease;
+}
+
+.qoderian-tab-badge-close svg {
+  width: 13px;
+  height: 13px;
+}
+
+.qoderian-tab-badge-closable:hover > .qoderian-tab-badge-label,
+.qoderian-tab-badge-closable:focus-within > .qoderian-tab-badge-label {
+  opacity: 0;
+}
+
+.qoderian-tab-badge-closable:hover > .qoderian-tab-badge-close,
+.qoderian-tab-badge-closable:focus-within > .qoderian-tab-badge-close {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.qoderian-tab-badge-close:hover,
+.qoderian-tab-badge-close:focus-visible {
+  color: var(--text-error);
+  outline: none;
+}
+
 .qoderian-tab-badge-expanded {
   flex: 0 0 auto;
   justify-content: flex-start;
+  gap: 4px;
   width: auto;
   max-width: none;
   padding: 0 8px;
+}
+
+.qoderian-tab-badge-expanded > .qoderian-tab-badge-close {
+  position: static;
+  flex: 0 0 14px;
+  width: 14px;
+  height: 18px;
+}
+
+.qoderian-tab-badge-expanded.qoderian-tab-badge-closable:hover > .qoderian-tab-badge-label,
+.qoderian-tab-badge-expanded.qoderian-tab-badge-closable:focus-within > .qoderian-tab-badge-label {
+  opacity: 1;
 }
 
 .qoderian-tab-badge:hover {

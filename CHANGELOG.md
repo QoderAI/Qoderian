@@ -11,6 +11,25 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Added
+
+- Tabs now reveal a dedicated close button on hover (with keyboard access),
+  making tab removal discoverable without relying on a context-menu gesture.
+- The message composer can be resized by dragging its top edge or using the
+  Up/Down arrow keys on the resize handle; double-click or Home restores
+  automatic content-based sizing.
+
+### Changed
+
+- The ambiguous square-edit action now uses a restart icon and explicitly says
+  that it starts a new conversation in the current tab, distinguishing it from
+  the adjacent action that opens a separate tab.
+
+### Fixed
+
+- Long composer input no longer shifts its wrapping width when the vertical
+  scrollbar appears, preventing the input height from flickering at its cap.
+
 ## [1.0.7] - 2026-09-02
 
 ### Added

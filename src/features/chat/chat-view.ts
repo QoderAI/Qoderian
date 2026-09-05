@@ -253,8 +253,8 @@ export class QoderianView extends ItemView {
     });
 
     const newBtn = navActionsEl.createDiv({ cls: 'qoderian-input-nav-btn' });
-    setIcon(newBtn, 'square-pen');
-    setButtonTooltip(newBtn, t('nav.newConversation'));
+    setIcon(newBtn, 'refresh-cw');
+    setButtonTooltip(newBtn, t('commands.newSession'));
     this.newConversationButtonEl = newBtn;
     newBtn.addEventListener('click', () => {
       void (async () => {
@@ -355,10 +355,13 @@ export class QoderianView extends ItemView {
   refreshLocalizedChrome(): void {
     if (this.newTabButtonEl) setButtonTooltip(this.newTabButtonEl, t('commands.newTab'));
     if (this.newConversationButtonEl) {
-      setButtonTooltip(this.newConversationButtonEl, t('nav.newConversation'));
+      setButtonTooltip(this.newConversationButtonEl, t('commands.newSession'));
     }
     if (this.historyButtonEl) setButtonTooltip(this.historyButtonEl, t('nav.chatHistory'));
     this.creditsUsageButton?.refreshLocale();
+    for (const tab of this.tabManager?.getAllTabs() ?? []) {
+      tab.ui.composerResize?.refreshLocale();
+    }
     this.updateTabBar();
   }
 

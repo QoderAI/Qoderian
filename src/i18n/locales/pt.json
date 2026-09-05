@@ -23,7 +23,8 @@
   },
   "composer": {
     "send": "Enviar mensagem",
-    "stop": "Parar geração"
+    "stop": "Parar geração",
+    "resize": "Arraste para ajustar a altura da entrada; clique duas vezes para redefinir"
   },
   "restore": {
     "failed": "Algumas abas ou conversas não puderam ser restauradas ({count} problema(s)). Detalhes no console do desenvolvedor."
@@ -35,7 +36,8 @@
     "inserted": "Inserido",
     "editApplied": "Edição aplicada",
     "newTab": "Nova aba",
-    "newSession": "Nova sessão (na aba atual)",
+    "newSession": "Iniciar nova conversa na aba atual",
+    "closeTab": "Fechar aba",
     "closeCurrentTab": "Fechar aba atual"
   },
   "nav": {

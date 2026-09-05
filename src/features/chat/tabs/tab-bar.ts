@@ -1,3 +1,6 @@
+import { setIcon } from 'obsidian';
+
+import { t } from '../../../i18n/i18n';
 import { scheduleAnimationFrame } from '../../../shared/dom/animation-frame';
 import { setButtonTooltip } from '../../../shared/dom/tooltip';
 import type { TabBarItem, TabId } from './types';
@@ -77,14 +80,42 @@ export class TabBar {
       cls: [
         'qoderian-tab-badge',
         stateClass,
+        item.canClose ? 'qoderian-tab-badge-closable' : '',
         isTitleExpanded ? 'qoderian-tab-badge-expanded' : '',
       ].filter(Boolean).join(' '),
+    });
+    const labelEl = badgeEl.createSpan({
+      cls: 'qoderian-tab-badge-label',
       text: this.getBadgeLabel(item),
     });
 
     // Obsidian uses aria-label for hover tooltips here; adding title causes duplicate tooltip text.
     setButtonTooltip(badgeEl, item.title);
     badgeEl.setAttribute('data-title-expanded', isTitleExpanded ? 'true' : 'false');
+
+    if (item.canClose) {
+      const closeEl = badgeEl.createSpan({ cls: 'qoderian-tab-badge-close' });
+      closeEl.setAttribute('role', 'button');
+      closeEl.setAttribute('tabindex', '0');
+      setIcon(closeEl, 'x');
+      setButtonTooltip(closeEl, t('commands.closeTab'));
+
+      const closeTab = (event: Event): void => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.callbacks.onTabClose(item.id);
+      };
+      closeEl.addEventListener('click', closeTab);
+      closeEl.addEventListener('dblclick', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      closeEl.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          closeTab(event);
+        }
+      });
+    }
 
     // Click handler to switch tab
     badgeEl.addEventListener('click', () => {
@@ -95,7 +126,7 @@ export class TabBar {
     badgeEl.addEventListener('dblclick', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      this.toggleBadgeTitle(item, badgeEl);
+      this.toggleBadgeTitle(item, badgeEl, labelEl);
     });
 
     // Right-click to close (if allowed)
@@ -147,7 +178,11 @@ export class TabBar {
     }
   }
 
-  private toggleBadgeTitle(item: TabBarItem, badgeEl: HTMLElement): void {
+  private toggleBadgeTitle(
+    item: TabBarItem,
+    badgeEl: HTMLElement,
+    labelEl: HTMLElement,
+  ): void {
     if (this.expandedTitleTabIds.has(item.id)) {
       this.expandedTitleTabIds.delete(item.id);
     } else {
@@ -155,7 +190,7 @@ export class TabBar {
     }
 
     const isTitleExpanded = this.expandedTitleTabIds.has(item.id);
-    badgeEl.textContent = this.getBadgeLabel(item);
+    labelEl.textContent = this.getBadgeLabel(item);
     badgeEl.toggleClass('qoderian-tab-badge-expanded', isTitleExpanded);
     badgeEl.setAttribute('data-title-expanded', isTitleExpanded ? 'true' : 'false');
   }

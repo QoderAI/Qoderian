@@ -23,7 +23,8 @@
   },
   "composer": {
     "send": "Nachricht senden",
-    "stop": "Generierung stoppen"
+    "stop": "Generierung stoppen",
+    "resize": "Ziehen, um die Eingabehöhe anzupassen; doppelklicken zum Zurücksetzen"
   },
   "restore": {
     "failed": "Einige Tabs oder Unterhaltungen konnten nicht wiederhergestellt werden ({count} Problem(e)). Details in der Entwicklerkonsole."
@@ -35,7 +36,8 @@
     "inserted": "Eingefügt",
     "editApplied": "Bearbeitung angewendet",
     "newTab": "Neuer Tab",
-    "newSession": "Neue Sitzung (im aktuellen Tab)",
+    "newSession": "Neue Unterhaltung im aktuellen Tab starten",
+    "closeTab": "Tab schließen",
     "closeCurrentTab": "Aktuellen Tab schließen"
   },
   "nav": {

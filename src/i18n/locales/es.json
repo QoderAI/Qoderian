@@ -23,7 +23,8 @@
   },
   "composer": {
     "send": "Enviar mensaje",
-    "stop": "Detener generación"
+    "stop": "Detener generación",
+    "resize": "Arrastra para ajustar la altura del campo; haz doble clic para restablecer"
   },
   "restore": {
     "failed": "No se pudieron restaurar algunas pestañas o conversaciones ({count} problema(s)). Detalles en la consola de desarrollador."
@@ -35,7 +36,8 @@
     "inserted": "Insertado",
     "editApplied": "Edición aplicada",
     "newTab": "Nueva pestaña",
-    "newSession": "Nueva sesión (en la pestaña actual)",
+    "newSession": "Iniciar una conversación nueva en la pestaña actual",
+    "closeTab": "Cerrar pestaña",
     "closeCurrentTab": "Cerrar pestaña actual"
   },
   "nav": {

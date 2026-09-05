@@ -23,7 +23,8 @@
   },
   "composer": {
     "send": "发送消息",
-    "stop": "停止生成"
+    "stop": "停止生成",
+    "resize": "拖动调整输入框高度；双击恢复自动高度"
   },
   "restore": {
     "failed": "部分标签或会话未能恢复（{count} 个问题）。详情已输出到开发者控制台。"
@@ -35,7 +36,8 @@
     "inserted": "已插入",
     "editApplied": "已应用编辑",
     "newTab": "新建标签页",
-    "newSession": "新建会话（当前标签页）",
+    "newSession": "在当前标签页开始新会话",
+    "closeTab": "关闭标签页",
     "closeCurrentTab": "关闭当前标签页"
   },
   "nav": {

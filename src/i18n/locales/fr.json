@@ -23,7 +23,8 @@
   },
   "composer": {
     "send": "Envoyer le message",
-    "stop": "Arrêter la génération"
+    "stop": "Arrêter la génération",
+    "resize": "Faites glisser pour redimensionner la saisie ; double-cliquez pour réinitialiser"
   },
   "restore": {
     "failed": "Certains onglets ou conversations n'ont pas pu être restaurés ({count} problème(s)). Détails dans la console développeur."
@@ -35,7 +36,8 @@
     "inserted": "Inséré",
     "editApplied": "Modification appliquée",
     "newTab": "Nouvel onglet",
-    "newSession": "Nouvelle session (dans l'onglet actuel)",
+    "newSession": "Démarrer une nouvelle conversation dans l'onglet actuel",
+    "closeTab": "Fermer l'onglet",
     "closeCurrentTab": "Fermer l'onglet actuel"
   },
   "nav": {
