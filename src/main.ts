@@ -3,15 +3,7 @@ import { patchSetMaxListenersForElectron } from './app/electron-compat';
 patchSetMaxListenersForElectron();
 
 import type { Editor, WorkspaceLeaf } from 'obsidian';
-import {
-  addIcon,
-  getLanguage,
-  MarkdownView,
-  moment,
-  Notice,
-  Plugin,
-  requireApiVersion,
-} from 'obsidian';
+import { addIcon, MarkdownView, Notice, Plugin } from 'obsidian';
 
 import { QoderianStorage } from './app/storage/app-storage';
 import { beginRestoreReport, reportRestoreIssue } from './core/diagnostics/restore-report';
@@ -31,11 +23,8 @@ import type { ChatViewPlacement } from './core/types/settings';
 import { QoderianView } from './features/chat/chat-view';
 import { type InlineEditContext, InlineEditModal } from './features/inline-edit/ui/modal';
 import { QoderianSettingTab } from './features/settings/settings-tab';
-import {
-  fetchAvailableQoderianUpdate,
-  type QoderianUpdate,
-} from './features/update/plugin-update-checker';
-import { resolveLocalePreference, setLocale, t } from './i18n/i18n';
+import { setLocale, t } from './i18n/i18n';
+import type { Locale } from './i18n/types';
 import { getActiveQoderCliEdition, setActiveQoderCliEdition } from './qoder/config/cli-edition';
 import { normalizeQoderSettings } from './qoder/config/qoder-settings-reconciler';
 import { getQoderSettings } from './qoder/config/settings';
@@ -55,23 +44,12 @@ function isQoderianView(value: unknown): value is QoderianView {
     && typeof (value as { getTabManager?: unknown }).getTabManager === 'function';
 }
 
-function getObsidianLanguage(): string {
-  return requireApiVersion('1.8.7') ? getLanguage() : moment.locale();
-}
-
 export default class QoderianPlugin extends Plugin {
   settings!: QoderianSettings;
   storage!: QoderianStorage;
   qoderServices!: QoderServices;
   private conversations: Conversation[] = [];
   private lastKnownTabManagerState: AppTabManagerState | null = null;
-  private updateCheckPromise: Promise<QoderianUpdate | null> | null = null;
-
-  /** Checks once per plugin session so reopening the view does not hit GitHub repeatedly. */
-  getAvailableUpdate(): Promise<QoderianUpdate | null> {
-    this.updateCheckPromise ??= fetchAvailableQoderianUpdate(this.manifest.version);
-    return this.updateCheckPromise;
-  }
 
   async onload() {
     await this.loadSettings();
@@ -443,7 +421,7 @@ export default class QoderianPlugin extends Plugin {
     const legacyLocations = await this.probeLegacyEditionLocations(allMetadata);
     await this.migrateLegacySessionEditions(allMetadata, legacyLocations);
     this.conversations = await this.buildConversationIndex(allMetadata, legacyLocations);
-    setLocale(resolveLocalePreference(this.settings.locale, getObsidianLanguage()));
+    setLocale(this.settings.locale as Locale);
 
     if (didNormalizeModelVariants) {
       await this.saveSettings();
@@ -793,7 +771,7 @@ export default class QoderianPlugin extends Plugin {
   }
 
   private getMaxTabsLimit(): number {
-    const maxTabs = this.settings.maxTabs ?? 10;
+    const maxTabs = this.settings.maxTabs ?? 3;
     return Math.max(3, Math.min(10, maxTabs));
   }
 

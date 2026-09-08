@@ -38,11 +38,11 @@ export const DEFAULT_QODERIAN_SETTINGS: QoderianSettings = {
   },
   requireCommandOrControlEnterToSend: false,
 
-  locale: 'auto',
+  locale: 'en',
 
   qoder: { ...DEFAULT_QODER_SETTINGS },
 
-  maxTabs: 10,
+  maxTabs: 3,
   enableAutoScroll: true,
   deferMathRenderingDuringStreaming: true,
   expandFileEditsByDefault: false,

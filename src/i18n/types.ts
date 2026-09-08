@@ -9,18 +9,12 @@ export type TranslationKey =
   | 'commands.editApplied'
   | 'commands.newTab'
   | 'commands.newSession'
-  | 'commands.closeTab'
-  | 'commands.tabActions'
   | 'commands.closeCurrentTab'
 
   // Nav row buttons and tab badges
   | 'nav.newConversation'
   | 'nav.chatHistory'
   | 'nav.newChat'
-
-  // Plugin updates
-  | 'updates.available'
-  | 'updates.openRelease'
 
   // Common UI elements
   | 'common.save'
@@ -47,7 +41,6 @@ export type TranslationKey =
   // Composer - send/stop action button
   | 'composer.send'
   | 'composer.stop'
-  | 'composer.resize'
   | 'restore.failed'
 
   // Chat - Rewind
@@ -326,5 +319,4 @@ export type TranslationKey =
 
   // Settings - Language
   | 'settings.language.name'
-  | 'settings.language.desc'
-  | 'settings.language.followObsidian';
+  | 'settings.language.desc';

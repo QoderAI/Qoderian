@@ -35,26 +35,25 @@
 }
 
 .qoderian-welcome-greeting {
-  font-family: inherit;
-  font-size: 24px;
-  font-weight: 550;
-  color: var(--text-normal);
-  letter-spacing: -0.025em;
+  font-family: 'Copernicus', 'Tiempos Headline', 'Tiempos', Georgia, 'Times New Roman', serif;
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--text-muted);
+  letter-spacing: -0.01em;
 }
 
 .qoderian-message {
   padding: 10px 14px;
-  border-radius: 16px;
+  border-radius: 8px;
   max-width: 95%;
   word-wrap: break-word;
 }
 
 .qoderian-message-user {
   position: relative;
-  background: var(--background-modifier-hover);
-  border: 1px solid var(--background-modifier-border);
+  background: rgba(0, 0, 0, 0.3);
   align-self: flex-end;
-  border-end-end-radius: 6px;
+  border-end-end-radius: 4px;
 }
 
 /* Text selection in user messages - visible highlight */

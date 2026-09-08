@@ -33,7 +33,6 @@ export class PluginSettingTab {
   }
 
   display() {}
-  hide = jest.fn();
 
   // Mirrors the 1.13 declarative base: mutates plugin.settings in place.
   getControlValue(key: string): unknown {
@@ -110,12 +109,6 @@ export const Platform = {
   isMacOS: true,
 };
 
-export const getLanguage = jest.fn(() => 'en');
-
-export const moment = {
-  locale: jest.fn(() => 'en'),
-};
-
 export class App {
   vault: any = {
     adapter: {
@@ -182,8 +175,6 @@ export class TextAreaComponent {
 }
 
 export class Modal {
-  static instances: Modal[] = [];
-
   app: any;
   containerEl: any = {
     createDiv: jest.fn().mockReturnValue({
@@ -220,7 +211,6 @@ export class Modal {
 
   constructor(app: any) {
     this.app = app;
-    Modal.instances.push(this);
   }
 
   open = jest.fn();
@@ -250,8 +240,6 @@ class MockMenuItem {
     return this;
   });
 
-  setWarning = jest.fn().mockReturnThis();
-
   onClick = jest.fn((handler: () => void) => {
     this.clickHandler = handler;
     return this;
@@ -263,8 +251,6 @@ export class Menu {
 
   items: MockMenuItem[] = [];
   showAtMouseEvent = jest.fn();
-  showAtPosition = jest.fn();
-  setUseNativeMenu = jest.fn().mockReturnThis();
 
   constructor() {
     Menu.instances.push(this);
@@ -301,8 +287,6 @@ export function setTooltip(el: HTMLElement, tooltip: string, options?: { delay?:
 // Tests run against the newest API surface, so version gates take the
 // modern branch by default.
 export const requireApiVersion = jest.fn(() => true);
-
-export const requestUrl = jest.fn();
 
 export const addIcon = jest.fn();
 

@@ -2,22 +2,23 @@
   position: static;
 }
 
-/* View-level history menu, anchored under the fixed header. */
+/* History dropup menu (opens upward since it's at bottom of view) */
 .qoderian-history-menu {
   display: none;
   position: absolute;
-  top: calc(100% + 4px);
-  background: var(--qoderian-surface-raised);
+  bottom: 100%;
+  margin-bottom: 4px;
+  background: var(--background-secondary);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--background-modifier-border);
-  border-radius: var(--qoderian-radius-panel);
-  box-shadow: var(--qoderian-shadow-raised);
+  border-radius: 6px;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
   z-index: 1000;
   max-height: 400px;
   overflow: hidden;
-  inset-inline-start: 12px;
-  inset-inline-end: 12px;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
 }
 
 .qoderian-history-menu.visible {

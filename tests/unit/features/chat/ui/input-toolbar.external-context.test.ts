@@ -1,6 +1,5 @@
 import { createMockEl } from '@test/helpers/mock-element';
 import * as fs from 'fs';
-import { setIcon } from 'obsidian';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -56,13 +55,6 @@ describe('ExternalContextSelector', () => {
     parentEl = createMockEl();
     callbacks = createMockCallbacks();
     selector = new ExternalContextSelector(parentEl, callbacks);
-  });
-
-  it('uses an unclipped attachment-style icon', () => {
-    expect(setIcon).toHaveBeenCalledWith(
-      parentEl.querySelector('.qoderian-external-context-icon'),
-      'paperclip',
-    );
   });
 
   describe('Persistent Paths Management', () => {

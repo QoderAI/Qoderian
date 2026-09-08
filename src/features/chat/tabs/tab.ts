@@ -32,7 +32,6 @@ import { ChatState } from '../state/chat-state';
 import { BangBashModeManager as BangBashModeManagerClass } from '../ui/bang-bash-mode-manager';
 import { ComposerBridge } from '../ui/composer/composer-bridge';
 import { ComposerActionButton } from '../ui/composer-action-button';
-import { attachComposerResize } from '../ui/composer-resize';
 import { FileContextManager } from '../ui/file-context/file-context-manager';
 import { ImageContextManager } from '../ui/image-context';
 import { createInputToolbar } from '../ui/input-toolbar';
@@ -152,7 +151,6 @@ export function createTab(options: TabCreateOptions): TabData {
     },
     ui: {
       composerBridge: null,
-      composerResize: null,
       fileContextManager: null,
       imageContextManager: null,
       vaultDropController: null,
@@ -584,12 +582,6 @@ export function initializeTabUI(
   options: InitializeTabUIOptions = {}
 ): void {
   const { dom, state } = tab;
-
-  tab.ui.composerResize = attachComposerResize(
-    dom.inputWrapper,
-    dom.composerResizeHandleEl,
-    () => tab.renderer?.scrollToBottomIfNeeded(),
-  );
 
   // Initialize context managers (file/image)
   initializeContextManagers(tab, plugin);

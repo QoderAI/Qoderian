@@ -23,8 +23,7 @@
   },
   "composer": {
     "send": "傳送訊息",
-    "stop": "停止生成",
-    "resize": "拖曳調整輸入框高度；按兩下恢復自動高度"
+    "stop": "停止生成"
   },
   "restore": {
     "failed": "部分分頁或工作階段未能恢復（{count} 個問題）。詳情已輸出到開發者主控台。"
@@ -36,19 +35,13 @@
     "inserted": "已插入",
     "editApplied": "已套用編輯",
     "newTab": "新增分頁",
-    "newSession": "在目前分頁開始新對話",
-    "closeTab": "關閉分頁",
-    "tabActions": "分頁操作",
+    "newSession": "新增工作階段（目前分頁）",
     "closeCurrentTab": "關閉目前分頁"
   },
   "nav": {
     "newConversation": "新建對話",
     "chatHistory": "聊天歷史",
     "newChat": "新對話"
-  },
-  "updates": {
-    "available": "更新 {version}",
-    "openRelease": "檢視 Qoderian {version} 更新"
   },
   "chat": {
     "rewind": {
@@ -359,8 +352,7 @@
     },
     "language": {
       "name": "語言",
-      "desc": "變更外掛程式介面的顯示語言",
-      "followObsidian": "跟隨 Obsidian"
+      "desc": "變更外掛程式介面的顯示語言"
     }
   },
   "credits": {

@@ -11,7 +11,6 @@ export function buildTabDOM(contentEl: HTMLElement): TabDOMElements {
   const queueIndicatorEl = inputContainerEl.createDiv({ cls: 'qoderian-input-queue-row' });
   const navRowEl = inputContainerEl.createDiv({ cls: 'qoderian-input-nav-row' });
   const inputWrapper = inputContainerEl.createDiv({ cls: 'qoderian-input-wrapper' });
-  const composerResizeHandleEl = inputWrapper.createDiv({ cls: 'qoderian-composer-resize-handle' });
   const contextRowEl = inputWrapper.createDiv({ cls: 'qoderian-context-row' });
   const inputEl = inputWrapper.createEl('textarea', {
     cls: 'qoderian-input',
@@ -31,7 +30,6 @@ export function buildTabDOM(contentEl: HTMLElement): TabDOMElements {
     inputContainerEl,
     queueIndicatorEl,
     inputWrapper,
-    composerResizeHandleEl,
     inputEl,
     navRowEl,
     contextRowEl,
