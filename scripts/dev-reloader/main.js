@@ -19,6 +19,7 @@ const WATCHED_ARTIFACTS = ['main.js', 'manifest.json', 'styles.css'];
 // Long enough for esbuild to finish copying all three artifacts, short enough to
 // still feel immediate.
 const RELOAD_DEBOUNCE_MS = 400;
+const DEBUG_PLUGIN_STORAGE_KEY = 'debug-plugin';
 
 module.exports = class QoderianDevReloader extends Plugin {
   onload() {
@@ -56,12 +57,50 @@ module.exports = class QoderianDevReloader extends Plugin {
     // Respect a manually disabled target instead of force-enabling it.
     if (!plugins.enabledPlugins.has(TARGET_PLUGIN_ID)) return;
 
+    const previousDebugPlugin = window.localStorage.getItem(DEBUG_PLUGIN_STORAGE_KEY);
+    const restoreAdapterRead = this.preserveSourceMapDuringPluginRead();
+
     try {
       await plugins.disablePlugin(TARGET_PLUGIN_ID);
-      await plugins.enablePlugin(TARGET_PLUGIN_ID);
+      window.localStorage.setItem(DEBUG_PLUGIN_STORAGE_KEY, '1');
+
+      try {
+        await plugins.unloadPlugin(TARGET_PLUGIN_ID);
+        await plugins.loadPlugin(TARGET_PLUGIN_ID);
+        await plugins.enablePlugin(TARGET_PLUGIN_ID);
+      } finally {
+        if (previousDebugPlugin === null) {
+          window.localStorage.removeItem(DEBUG_PLUGIN_STORAGE_KEY);
+        } else {
+          window.localStorage.setItem(DEBUG_PLUGIN_STORAGE_KEY, previousDebugPlugin);
+        }
+        restoreAdapterRead();
+      }
+
       new Notice('Qoderian reloaded');
     } catch (error) {
+      restoreAdapterRead();
       new Notice(`Qoderian reload failed: ${error?.message ?? error}`);
     }
+  }
+
+  // Obsidian strips source map directives while loading community plugins.
+  // A trailing marker bypasses that rewrite for the development bundle, so
+  // Chromium receives the inline map that esbuild emitted.
+  preserveSourceMapDuringPluginRead() {
+    const adapter = this.app.vault.adapter;
+    const originalRead = adapter.read;
+    const targetSuffix = `/plugins/${TARGET_PLUGIN_ID}/main.js`;
+
+    const guardedRead = function (filePath, ...args) {
+      const result = originalRead.call(this, filePath, ...args);
+      if (!filePath.endsWith(targetSuffix)) return result;
+      return Promise.resolve(result).then(contents => `${contents}\n/* nosourcemap */`);
+    };
+
+    adapter.read = guardedRead;
+    return () => {
+      if (adapter.read === guardedRead) adapter.read = originalRead;
+    };
   }
 };
