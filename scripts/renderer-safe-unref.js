@@ -95,7 +95,15 @@ function patchRendererUnsafeUnrefSites(contents) {
     if (matchCount === 0) {
       continue;
     }
-    nextContents = nextContents.replace(patch.pattern, patch.replacement);
+    nextContents = nextContents.replace(patch.pattern, (matched, ...args) => {
+      const captures = args.slice(0, -2);
+      const expandedReplacement = patch.replacement.replace(
+        /\$(\d+)/g,
+        (_placeholder, index) => captures[Number(index) - 1] ?? '',
+      );
+
+      return preserveFollowingGeneratedPositions(matched, expandedReplacement);
+    });
     appliedPatches.push({ name: patch.name, count: matchCount });
   }
 
@@ -103,6 +111,20 @@ function patchRendererUnsafeUnrefSites(contents) {
     contents: nextContents,
     appliedPatches,
   };
+}
+
+// These rewrites run after esbuild has generated its source map. Preserve the
+// matched region's newline count and ending column so mappings for all code
+// after an SDK patch (including Qoderian's own sources) remain accurate.
+function preserveFollowingGeneratedPositions(original, replacement) {
+  const newlineCount = (original.match(/\n/g) ?? []).length;
+  if (newlineCount === 0) return replacement.replace(/\s*\n\s*/g, ' ');
+
+  const originalLastLineLength = original.length - original.lastIndexOf('\n') - 1;
+  const singleLineReplacement = replacement.replace(/\s*\n\s*/g, ' ');
+  return singleLineReplacement
+    + '\n'.repeat(newlineCount)
+    + ' '.repeat(originalLastLineLength);
 }
 
 function findUnsafeTimerUnrefSites(contents) {

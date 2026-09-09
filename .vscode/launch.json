@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "pwa-chrome",
+      "request": "attach",
+      "name": "Attach to Obsidian",
+      "address": "127.0.0.1",
+      "port": 9222,
+      "webRoot": "${workspaceFolder}",
+      "urlFilter": "app://obsidian.md/*",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "src/*": "${workspaceFolder}/src/*"
+      },
+      "timeout": 30000
+    }
+  ]
+}

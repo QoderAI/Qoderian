@@ -19,7 +19,8 @@ node_modules/
 
 # Editors
 .idea/
-.vscode/
+.vscode/*
+!.vscode/launch.json
 *.swp
 
 # OS

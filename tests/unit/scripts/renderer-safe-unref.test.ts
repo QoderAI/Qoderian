@@ -27,6 +27,7 @@ describe('rendererSafeUnref helpers', () => {
     expect(result.contents).toContain('forceKillTimer.unref?.();');
     expect(result.contents).toContain('closeTimeout.unref?.();');
     expect(findUnsafeTimerUnrefSites(result.contents)).toEqual([]);
+    expect(result.contents.split('\n')).toHaveLength(input.split('\n').length);
   });
 
   it('patches the current qoder-sdk shape with a block-bodied exit handler', () => {
@@ -51,6 +52,7 @@ describe('rendererSafeUnref helpers', () => {
     expect(result.contents).toContain('forceKillTimer.unref?.();');
     expect(result.contents).toContain('this.processExitHandler');
     expect(findUnsafeTimerUnrefSites(result.contents)).toEqual([]);
+    expect(result.contents.split('\n')).toHaveLength(input.split('\n').length);
   });
 
   it('patches the latest qoder-sdk async close callback shape', () => {
@@ -82,6 +84,7 @@ describe('rendererSafeUnref helpers', () => {
     expect(result.contents).toContain('windowsForceKillTimer.unref?.();');
     expect(result.contents).toContain('forceKillTimer.unref?.();');
     expect(findUnsafeTimerUnrefSites(result.contents)).toEqual([]);
+    expect(result.contents.split('\n')).toHaveLength(input.split('\n').length);
   });
 
   it('reports remaining direct timer .unref() calls but ignores guarded usage', () => {

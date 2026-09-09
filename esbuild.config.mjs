@@ -145,6 +145,47 @@ const patchRendererUnsafeUnref = {
   },
 };
 
+// Obsidian evaluates community plugins and appends its own `sourceURL` comment
+// after the file contents. Chromium only associates a source map when the
+// `sourceMappingURL` directive comes after `sourceURL`, so esbuild's normal
+// inline map becomes invisible to attached debuggers. Keep production output
+// unchanged, but evaluate the development bundle once more with the directives
+// in the order Chromium expects.
+const exposeDevSourceMapToDebugger = {
+  name: 'expose-dev-source-map-to-debugger',
+  setup(build) {
+    build.onEnd(async (result) => {
+      if (result.errors.length > 0 || !existsSync('main.js')) return;
+
+      const bundlePath = path.join(process.cwd(), 'main.js');
+      const contents = await fsPromises.readFile(bundlePath, 'utf8');
+      const sourceMapPattern = /\n\/\/# sourceMappingURL=data:application\/json;base64,[A-Za-z0-9+/=]+\s*$/;
+      const match = sourceMapPattern.exec(contents);
+
+      if (!match) {
+        throw new Error('Development bundle is missing its inline source map.');
+      }
+
+      const sourceMapDirective = match[0].trim();
+      const sourceMapUrl = sourceMapDirective.slice('//# sourceMappingURL='.length);
+      const bundleWithoutMap = contents.slice(0, match.index);
+      const wrapper = [
+        '// Development-only wrapper: exposes the inline source map to Chromium.',
+        // Obsidian strips source-map directives before evaluating community
+        // plugins. Assemble both directives at runtime so its source scanner
+        // cannot remove the map while reading this outer wrapper.
+        `const __qoderianDebugBundle = ${JSON.stringify(bundleWithoutMap)}`,
+        `  + '\\n//# source' + 'URL=plugin:qoderian-debug'`,
+        `  + '\\n//# sourceMapping' + 'URL=' + ${JSON.stringify(sourceMapUrl)} + '\\n';`,
+        'eval(__qoderianDebugBundle);',
+        '',
+      ].join('\n');
+
+      await fsPromises.writeFile(bundlePath, wrapper, 'utf8');
+    });
+  },
+};
+
 // Obsidian plugin folder path (set via OBSIDIAN_VAULT env var or .env.local)
 const OBSIDIAN_VAULT = process.env.OBSIDIAN_VAULT;
 const OBSIDIAN_CONFIG_PATH = OBSIDIAN_VAULT && existsSync(OBSIDIAN_VAULT)
@@ -288,6 +329,7 @@ const context = await esbuild.context({
   plugins: [
     patchSdkImportMeta,
     patchRendererUnsafeUnref,
+    ...(prod ? [] : [exposeDevSourceMapToDebugger]),
     ...(prod ? [] : [copyToObsidian]),
   ],
   external: [
