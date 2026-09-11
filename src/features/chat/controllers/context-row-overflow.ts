@@ -74,10 +74,13 @@ export class ContextRowOverflowController {
   private layout(): void {
     this.applyLayout();
     // Obsidian's class helpers rewrite the class attribute even when the class
-    // does not change, and the observer above reports every such write.
-    // Records still queued here were produced before or during this pass,
-    // which has already read the DOM they describe, so dropping them keeps
-    // layout from rescheduling itself on every frame.
+    // does not change, and the observer above reports every such write, so
+    // applyState checks each class before writing it. Records still queued
+    // here describe DOM this pass has already read; dropping them saves a
+    // second clone-and-measure pass a frame after every real change, so the
+    // row settles in one frame. Either the class checks or this call alone
+    // stops layout rescheduling itself on every frame, and the regression
+    // tests cover only the two together.
     this.mutationObserver.takeRecords();
   }
 
