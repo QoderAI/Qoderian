@@ -11,7 +11,7 @@ export class ContextRowOverflowController {
   private readonly measureEl: HTMLElement;
   private readonly resizeObserver: ResizeObserver;
   private readonly mutationObserver: MutationObserver;
-  private layoutScheduled = false;
+  private layoutFrame: number | null = null;
   private expanded = false;
   private destroyed = false;
 
@@ -53,6 +53,10 @@ export class ContextRowOverflowController {
 
   destroy(): void {
     this.destroyed = true;
+    if (this.layoutFrame !== null) {
+      window.cancelAnimationFrame(this.layoutFrame);
+      this.layoutFrame = null;
+    }
     this.resizeObserver.disconnect();
     this.mutationObserver.disconnect();
     this.pillEl.remove();
@@ -60,12 +64,21 @@ export class ContextRowOverflowController {
   }
 
   private scheduleLayout(): void {
-    if (this.layoutScheduled) return;
-    this.layoutScheduled = true;
-    window.requestAnimationFrame(() => {
-      this.layoutScheduled = false;
+    if (this.layoutFrame !== null) return;
+    this.layoutFrame = window.requestAnimationFrame(() => {
+      this.layoutFrame = null;
       if (!this.destroyed) this.layout();
     });
+  }
+
+  private layout(): void {
+    this.applyLayout();
+    // Obsidian's class helpers rewrite the class attribute even when the class
+    // does not change, and the observer above reports every such write.
+    // Records still queued here were produced before or during this pass,
+    // which has already read the DOM they describe, so dropping them keeps
+    // layout from rescheduling itself on every frame.
+    this.mutationObserver.takeRecords();
   }
 
   /** Content items are row children that are currently meant to be visible. */
@@ -76,7 +89,7 @@ export class ContextRowOverflowController {
     );
   }
 
-  private layout(): void {
+  private applyLayout(): void {
     const items = this.contentItems();
 
     if (items.length === 0 || !this.rowEl.hasClass('has-content')) {
@@ -174,7 +187,9 @@ export class ContextRowOverflowController {
       }
     });
 
-    this.rowEl.toggleClass('qoderian-context-row--expanded', this.expanded);
+    if (this.expanded !== this.rowEl.hasClass('qoderian-context-row--expanded')) {
+      this.rowEl.toggleClass('qoderian-context-row--expanded', this.expanded);
+    }
 
     const hiddenCount = items.length - (this.expanded ? items.length : visibleCount);
     const showPill = this.expanded || hiddenCount > 0;

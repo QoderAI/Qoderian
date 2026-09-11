@@ -46,8 +46,13 @@ function installDomMocks(): void {
     };
   }
   if (!proto.toggleClass) {
+    // Mirrors Obsidian: toggleClass always calls classList.add or remove, which
+    // rewrites the class attribute and queues a MutationObserver record even
+    // when nothing changes. classList.toggle(cls, force) skips that write and
+    // would hide an observer that keeps re-triggering itself.
     proto.toggleClass = function toggleClass(this: HTMLElement, cls: string, force: boolean) {
-      this.classList.toggle(cls, force);
+      if (force) this.classList.add(cls);
+      else this.classList.remove(cls);
       return this;
     };
   }
@@ -369,5 +374,54 @@ describe('ContextRowOverflowController', () => {
     expect(pill.hasClass('qoderian-hidden')).toBe(true);
 
     controller.destroy();
+  });
+
+  it('stops scheduling layout frames once a blank row settles', async () => {
+    // A new tab starts with nothing attached, so its row has no content.
+    const row = createRow();
+    row.removeClass('has-content');
+
+    const controller = new ContextRowOverflowController(row);
+    await settle();
+
+    const requestFrame = jest.spyOn(window, 'requestAnimationFrame');
+    await new Promise(resolve => setTimeout(resolve, 200));
+    expect(requestFrame).not.toHaveBeenCalled();
+
+    requestFrame.mockRestore();
+    controller.destroy();
+  });
+
+  it('stops scheduling layout frames once a collapsed row settles', async () => {
+    const row = createRow();
+    [createChip(100), createChip(100), createChip(100)].forEach(chip => row.appendChild(chip));
+    rowClientWidth = 200;
+
+    const controller = new ContextRowOverflowController(row);
+    await settle();
+    const pill = row.querySelector('.qoderian-context-overflow-pill') as HTMLElement;
+    expect(pill.hasClass('qoderian-hidden')).toBe(false);
+
+    const requestFrame = jest.spyOn(window, 'requestAnimationFrame');
+    await new Promise(resolve => setTimeout(resolve, 200));
+    expect(requestFrame).not.toHaveBeenCalled();
+
+    requestFrame.mockRestore();
+    controller.destroy();
+  });
+
+  it('cancels its pending layout frame on destroy', () => {
+    const row = createRow();
+    const requestFrame = jest.spyOn(window, 'requestAnimationFrame');
+    const cancelFrame = jest.spyOn(window, 'cancelAnimationFrame');
+
+    const controller = new ContextRowOverflowController(row);
+    const pendingFrame = requestFrame.mock.results[0]?.value as number;
+    controller.destroy();
+
+    expect(cancelFrame).toHaveBeenCalledWith(pendingFrame);
+
+    requestFrame.mockRestore();
+    cancelFrame.mockRestore();
   });
 });

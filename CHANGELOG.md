@@ -11,6 +11,14 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Fixed
+
+- Qoderian tabs no longer keep Obsidian's renderer busy while idle. The
+  context row above the composer re-checked its chip layout on every display
+  frame for as long as Obsidian was visible, once per open tab, and each frame
+  did more work when a note was attached. The row now re-measures only when
+  its chips or width change.
+
 ## [1.0.7] - 2026-09-02
 
 ### Added
