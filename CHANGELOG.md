@@ -11,6 +11,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.8] - 2026-09-12
+
 ### Fixed
 
 - Qoderian tabs no longer keep Obsidian's renderer busy while idle. The
