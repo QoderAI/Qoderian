@@ -37,7 +37,29 @@
     "editApplied": "Правка применена",
     "newTab": "Новая вкладка",
     "newSession": "Новая сессия (в текущей вкладке)",
-    "closeCurrentTab": "Закрыть текущую вкладку"
+    "closeCurrentTab": "Закрыть текущую вкладку",
+    "submitFeedback": "Отправить отзыв"
+  },
+  "feedback": {
+    "title": "Отправить отзыв",
+    "placeholder": "Опишите проблему или предложение…",
+    "emailLabel": "Контактный e-mail (необязательно)",
+    "emailPlaceholder": "you@example.com",
+    "emailHint": "Можно оставить пустым, если вы вошли в Qoderian.",
+    "diagnosticsLabel": "Приложить диагностику рабочего пространства",
+    "diagnosticsDesc": "Qoderian соберёт состояние текущего vault и загрузит его вместе с отзывом, чтобы помочь найти проблему.",
+    "sessionHint": "Будет привязано к текущей сессии {sessionId}.",
+    "submit": "Отправить",
+    "submitting": "Отправка…",
+    "signIn": "Войти в Qoderian",
+    "errorCliUnavailable": "Qoder CLI не найден. Укажите путь к нему в настройках Qoderian или установите его, затем повторите попытку.",
+    "errorEmpty": "Опишите проблему перед отправкой.",
+    "errorTooLong": "Отзыв ограничен {limit} символами.",
+    "errorRejected": "qodercli не смог отправить отзыв.",
+    "noticeSuccess": "Отзыв отправлен. Спасибо!",
+    "noticeSuccessWithId": "Отзыв отправлен (запрос {requestId}). Спасибо!",
+    "noticeSuccessCopied": "Отзыв отправлен. Запрос {requestId} скопирован в буфер обмена.",
+    "noticeFailed": "Отзыв не был отправлен."
   },
   "nav": {
     "newConversation": "Новый разговор",

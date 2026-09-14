@@ -37,7 +37,29 @@
     "editApplied": "Modification appliquée",
     "newTab": "Nouvel onglet",
     "newSession": "Nouvelle session (dans l'onglet actuel)",
-    "closeCurrentTab": "Fermer l'onglet actuel"
+    "closeCurrentTab": "Fermer l'onglet actuel",
+    "submitFeedback": "Envoyer un retour"
+  },
+  "feedback": {
+    "title": "Envoyer un retour",
+    "placeholder": "Décrivez le problème ou la suggestion…",
+    "emailLabel": "E-mail de contact (facultatif)",
+    "emailPlaceholder": "you@example.com",
+    "emailHint": "Peut rester vide si vous êtes connecté à Qoderian.",
+    "diagnosticsLabel": "Joindre les diagnostics de l’espace de travail",
+    "diagnosticsDesc": "Qoderian collecte l’état d’exécution du vault actuel et l’envoie avec votre retour pour aider à localiser le problème.",
+    "sessionHint": "Sera lié à la session actuelle {sessionId}.",
+    "submit": "Envoyer",
+    "submitting": "Envoi…",
+    "signIn": "Se connecter à Qoderian",
+    "errorCliUnavailable": "Qoder CLI est introuvable. Configurez son chemin dans les paramètres Qoderian ou installez-le, puis réessayez.",
+    "errorEmpty": "Décrivez le problème avant d’envoyer.",
+    "errorTooLong": "Le retour est limité à {limit} caractères.",
+    "errorRejected": "qodercli n’a pas pu envoyer le retour.",
+    "noticeSuccess": "Retour envoyé. Merci !",
+    "noticeSuccessWithId": "Retour envoyé (requête {requestId}). Merci !",
+    "noticeSuccessCopied": "Retour envoyé. La requête {requestId} a été copiée dans le presse-papiers.",
+    "noticeFailed": "Le retour n’a pas été envoyé."
   },
   "nav": {
     "newConversation": "Nouvelle conversation",

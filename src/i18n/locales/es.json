@@ -37,7 +37,29 @@
     "editApplied": "Edición aplicada",
     "newTab": "Nueva pestaña",
     "newSession": "Nueva sesión (en la pestaña actual)",
-    "closeCurrentTab": "Cerrar pestaña actual"
+    "closeCurrentTab": "Cerrar pestaña actual",
+    "submitFeedback": "Enviar comentarios"
+  },
+  "feedback": {
+    "title": "Enviar comentarios",
+    "placeholder": "Describe el problema o la sugerencia…",
+    "emailLabel": "Correo de contacto (opcional)",
+    "emailPlaceholder": "you@example.com",
+    "emailHint": "Puede dejarse vacío si has iniciado sesión en Qoderian.",
+    "diagnosticsLabel": "Adjuntar diagnóstico del espacio de trabajo",
+    "diagnosticsDesc": "Qoderian recopila el estado de ejecución del vault actual y lo sube con tu comentario para ayudar a localizar el problema.",
+    "sessionHint": "Se vinculará con la sesión actual {sessionId}.",
+    "submit": "Enviar",
+    "submitting": "Enviando…",
+    "signIn": "Iniciar sesión en Qoderian",
+    "errorCliUnavailable": "No se encontró Qoder CLI. Configura su ruta en los ajustes de Qoderian o instálalo y vuelve a intentarlo.",
+    "errorEmpty": "Describe el problema antes de enviar.",
+    "errorTooLong": "Los comentarios están limitados a {limit} caracteres.",
+    "errorRejected": "qodercli no pudo enviar los comentarios.",
+    "noticeSuccess": "Comentarios enviados. ¡Gracias!",
+    "noticeSuccessWithId": "Comentarios enviados (solicitud {requestId}). ¡Gracias!",
+    "noticeSuccessCopied": "Comentarios enviados. La solicitud {requestId} se copió al portapapeles.",
+    "noticeFailed": "Los comentarios no se enviaron."
   },
   "nav": {
     "newConversation": "Nueva conversación",

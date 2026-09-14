@@ -37,7 +37,29 @@
     "editApplied": "Edição aplicada",
     "newTab": "Nova aba",
     "newSession": "Nova sessão (na aba atual)",
-    "closeCurrentTab": "Fechar aba atual"
+    "closeCurrentTab": "Fechar aba atual",
+    "submitFeedback": "Enviar feedback"
+  },
+  "feedback": {
+    "title": "Enviar feedback",
+    "placeholder": "Descreva o problema ou a sugestão…",
+    "emailLabel": "E-mail de contato (opcional)",
+    "emailPlaceholder": "you@example.com",
+    "emailHint": "Pode ficar em branco se você estiver conectado ao Qoderian.",
+    "diagnosticsLabel": "Anexar diagnósticos do espaço de trabalho",
+    "diagnosticsDesc": "O Qoderian coleta o estado de execução do vault atual e o envia junto com seu feedback para ajudar a localizar o problema.",
+    "sessionHint": "Será vinculado à sessão atual {sessionId}.",
+    "submit": "Enviar",
+    "submitting": "Enviando…",
+    "signIn": "Entrar no Qoderian",
+    "errorCliUnavailable": "Qoder CLI não foi encontrado. Configure o caminho nas configurações do Qoderian ou instale-o e tente novamente.",
+    "errorEmpty": "Descreva o problema antes de enviar.",
+    "errorTooLong": "O feedback é limitado a {limit} caracteres.",
+    "errorRejected": "O qodercli não conseguiu enviar o feedback.",
+    "noticeSuccess": "Feedback enviado. Obrigado!",
+    "noticeSuccessWithId": "Feedback enviado (solicitação {requestId}). Obrigado!",
+    "noticeSuccessCopied": "Feedback enviado. A solicitação {requestId} foi copiada para a área de transferência.",
+    "noticeFailed": "O feedback não foi enviado."
   },
   "nav": {
     "newConversation": "Nova conversa",

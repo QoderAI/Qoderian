@@ -13,6 +13,7 @@ import {
 } from '../../shared/dom/animation-frame';
 import { setButtonTooltip } from '../../shared/dom/tooltip';
 import { createIconSvg, QODER_ICON,QODERIAN_ICON_ID } from '../../shared/icons';
+import { openFeedbackModal } from '../feedback/ui/feedback-modal';
 import type { HistoryConversationStatus } from './controllers/conversation-controller';
 import {
   sendTabInputMessageFromExplicitEnterShortcut,
@@ -223,6 +224,12 @@ export class QoderianView extends ItemView {
     this.syncHeaderLogo();
 
     titleEl.createEl('h4', { text: 'Qoder', cls: 'qoderian-title-text' });
+
+    const headerActions = header.createDiv({ cls: 'qoderian-header-actions' });
+    const feedbackBtn = headerActions.createDiv({ cls: 'qoderian-header-btn' });
+    setIcon(feedbackBtn, 'message-circle-question');
+    setButtonTooltip(feedbackBtn, t('commands.submitFeedback'));
+    feedbackBtn.addEventListener('click', () => this.openFeedback());
   }
 
   /**
@@ -286,6 +293,18 @@ export class QoderianView extends ItemView {
     });
 
     return wrapper;
+  }
+
+  private openFeedback(): void {
+    const sessionId = this.tabManager?.getActiveTab()?.service?.getSessionId() ?? undefined;
+    void openFeedbackModal(this.app, {
+      plugin: this.plugin,
+      sessionId,
+      callerVersion: this.plugin.manifest?.version,
+      onRequestSignIn: () => {
+        this.plugin.qoderServices?.loginService.start();
+      },
+    });
   }
 
   private buildInputFooter(): void {

@@ -5,6 +5,7 @@
 .qoderian-thinking-header:focus-visible,
 .qoderian-subagent-header:focus-visible,
 .qoderian-input-nav-btn:focus-visible,
+.qoderian-header-btn:focus-visible,
 .qoderian-model-btn:focus-visible,
 .qoderian-permission-button:focus-visible {
   outline: 2px solid var(--interactive-accent);

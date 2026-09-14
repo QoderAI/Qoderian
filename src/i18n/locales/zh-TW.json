@@ -37,7 +37,29 @@
     "editApplied": "已套用編輯",
     "newTab": "新增分頁",
     "newSession": "新增工作階段（目前分頁）",
-    "closeCurrentTab": "關閉目前分頁"
+    "closeCurrentTab": "關閉目前分頁",
+    "submitFeedback": "提交回饋"
+  },
+  "feedback": {
+    "title": "提交回饋",
+    "placeholder": "描述問題或建議…",
+    "emailLabel": "聯絡信箱（選填）",
+    "emailPlaceholder": "you@example.com",
+    "emailHint": "已登入 Qoderian 時可留空。",
+    "diagnosticsLabel": "附上工作區診斷資訊",
+    "diagnosticsDesc": "Qoderian 會收集目前 vault 的執行狀態，隨回饋一起上傳，用於定位問題。",
+    "sessionHint": "將關聯目前工作階段 {sessionId}。",
+    "submit": "提交回饋",
+    "submitting": "提交中…",
+    "signIn": "登入 Qoderian",
+    "errorCliUnavailable": "找不到 Qoder CLI。請在 Qoderian 設定中設定其路徑或先安裝，然後重試。",
+    "errorEmpty": "請先描述問題再提交。",
+    "errorTooLong": "回饋內容不能超過 {limit} 個字元。",
+    "errorRejected": "qodercli 未能提交回饋。",
+    "noticeSuccess": "回饋已提交，感謝！",
+    "noticeSuccessWithId": "回饋已提交（請求編號 {requestId}），感謝！",
+    "noticeSuccessCopied": "回饋已提交，請求編號 {requestId} 已複製到剪貼簿。",
+    "noticeFailed": "回饋未提交成功。"
   },
   "nav": {
     "newConversation": "新建對話",

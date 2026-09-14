@@ -10,6 +10,28 @@ export type TranslationKey =
   | 'commands.newTab'
   | 'commands.newSession'
   | 'commands.closeCurrentTab'
+  | 'commands.submitFeedback'
+
+  // Feedback submission
+  | 'feedback.title'
+  | 'feedback.placeholder'
+  | 'feedback.emailLabel'
+  | 'feedback.emailPlaceholder'
+  | 'feedback.emailHint'
+  | 'feedback.diagnosticsLabel'
+  | 'feedback.diagnosticsDesc'
+  | 'feedback.sessionHint'
+  | 'feedback.submit'
+  | 'feedback.submitting'
+  | 'feedback.signIn'
+  | 'feedback.errorCliUnavailable'
+  | 'feedback.errorEmpty'
+  | 'feedback.errorTooLong'
+  | 'feedback.errorRejected'
+  | 'feedback.noticeSuccess'
+  | 'feedback.noticeSuccessWithId'
+  | 'feedback.noticeSuccessCopied'
+  | 'feedback.noticeFailed'
 
   // Nav row buttons and tab badges
   | 'nav.newConversation'

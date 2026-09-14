@@ -18,6 +18,13 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   grip also answers ArrowUp/ArrowDown for keyboard users, and double-click
   or Home returns to the automatic content-driven height.
 
+- Feedback submission from inside Obsidian: a question-bubble button in the
+  view header (and a "Submit feedback" command) opens a dialog that sends
+  your note to the Qoder team through `qodercli feedback`, optionally
+  attaching the current vault's runtime diagnostics and the active session
+  id. Submissions are always explicit — nothing is reported automatically —
+  and a successful one copies the server request id to your clipboard.
+
 ## [1.0.8] - 2026-09-12
 
 ### Fixed

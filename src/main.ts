@@ -21,6 +21,7 @@ import {
 import type { AppTabManagerState } from './core/types/services';
 import type { ChatViewPlacement } from './core/types/settings';
 import { QoderianView } from './features/chat/chat-view';
+import { openFeedbackModal } from './features/feedback/ui/feedback-modal';
 import { type InlineEditContext, InlineEditModal } from './features/inline-edit/ui/modal';
 import { QoderianSettingTab } from './features/settings/settings-tab';
 import { setLocale, t } from './i18n/i18n';
@@ -171,6 +172,24 @@ export default class QoderianPlugin extends Plugin {
           }
         }
         return true;
+      },
+    });
+
+    this.addCommand({
+      id: 'submit-feedback',
+      name: t('commands.submitFeedback'),
+      callback: () => {
+        const view = this.getView();
+        const sessionId =
+          view?.getTabManager()?.getActiveTab()?.service?.getSessionId() ?? undefined;
+        void openFeedbackModal(this.app, {
+          plugin: this,
+          sessionId,
+          callerVersion: this.manifest?.version,
+          onRequestSignIn: () => {
+            this.qoderServices?.loginService.start();
+          },
+        });
       },
     });
 

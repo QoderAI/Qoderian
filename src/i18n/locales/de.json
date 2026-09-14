@@ -37,7 +37,29 @@
     "editApplied": "Bearbeitung angewendet",
     "newTab": "Neuer Tab",
     "newSession": "Neue Sitzung (im aktuellen Tab)",
-    "closeCurrentTab": "Aktuellen Tab schließen"
+    "closeCurrentTab": "Aktuellen Tab schließen",
+    "submitFeedback": "Feedback senden"
+  },
+  "feedback": {
+    "title": "Feedback senden",
+    "placeholder": "Problem oder Vorschlag beschreiben …",
+    "emailLabel": "Kontakt-E-Mail (optional)",
+    "emailPlaceholder": "you@example.com",
+    "emailHint": "Kann leer bleiben, wenn Sie bei Qoderian angemeldet sind.",
+    "diagnosticsLabel": "Arbeitsbereich-Diagnosedaten anhängen",
+    "diagnosticsDesc": "Qoderian erfasst den Laufzeitzustand des aktuellen Vaults und lädt ihn mit Ihrem Feedback hoch, um das Problem einzugrenzen.",
+    "sessionHint": "Wird mit der aktuellen Sitzung {sessionId} verknüpft.",
+    "submit": "Senden",
+    "submitting": "Wird gesendet …",
+    "signIn": "Bei Qoderian anmelden",
+    "errorCliUnavailable": "Qoder CLI wurde nicht gefunden. Konfigurieren Sie den Pfad in den Qoderian-Einstellungen oder installieren Sie es, und versuchen Sie es erneut.",
+    "errorEmpty": "Beschreiben Sie das Problem, bevor Sie senden.",
+    "errorTooLong": "Feedback ist auf {limit} Zeichen begrenzt.",
+    "errorRejected": "qodercli konnte das Feedback nicht senden.",
+    "noticeSuccess": "Feedback gesendet. Vielen Dank!",
+    "noticeSuccessWithId": "Feedback gesendet (Anfrage {requestId}). Vielen Dank!",
+    "noticeSuccessCopied": "Feedback gesendet. Anfrage {requestId} wurde in die Zwischenablage kopiert.",
+    "noticeFailed": "Feedback wurde nicht gesendet."
   },
   "nav": {
     "newConversation": "Neue Unterhaltung",
