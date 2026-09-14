@@ -359,6 +359,9 @@ export class QoderianView extends ItemView {
     }
     if (this.historyButtonEl) setButtonTooltip(this.historyButtonEl, t('nav.chatHistory'));
     this.creditsUsageButton?.refreshLocale();
+    for (const tab of this.tabManager?.getAllTabs() ?? []) {
+      tab.ui.composerResize?.refreshLocale();
+    }
     this.updateTabBar();
   }
 

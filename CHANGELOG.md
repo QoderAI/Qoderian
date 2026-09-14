@@ -11,6 +11,13 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Added
+
+- Draggable composer height: grab the thin grip above the message input to
+  grow or shrink it between 140 px and three quarters of the chat view. The
+  grip also answers ArrowUp/ArrowDown for keyboard users, and double-click
+  or Home returns to the automatic content-driven height.
+
 ## [1.0.8] - 2026-09-12
 
 ### Fixed
