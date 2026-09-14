@@ -91,6 +91,7 @@ const localizedKeys = [
   'chat.permissionMode.plan.desc',
   'chat.permissionMode.changeFailed',
   'chat.slashCommand.requiresInteractiveTerminal',
+  'composer.resize',
 ] as const;
 
 const staleBangBashDesc =
