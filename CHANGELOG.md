@@ -11,6 +11,13 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Added
+
+- Drag files and folders from your operating system (e.g. macOS Finder) onto
+  the composer to add them as external context. Dropped folders join the
+  external context as before, dropped images still attach to the message, and
+  a dropped file's content is no longer pasted into the input as plain text.
+
 ### Fixed
 
 - Hover dropdowns no longer lose their leading characters when their icon

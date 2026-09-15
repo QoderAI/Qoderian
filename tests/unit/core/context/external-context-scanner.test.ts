@@ -37,6 +37,18 @@ describe('externalContextScanner', () => {
   });
 
   describe('scanPaths', () => {
+    it('should return the file itself when the context root is a single file', async () => {
+      const filePath = path.join(tempDir, 'file1.txt');
+
+      const files = await externalContextScanner.scanPaths([filePath]);
+
+      expect(files).toHaveLength(1);
+      expect(files[0].path).toBe(filePath);
+      expect(files[0].name).toBe('file1.txt');
+      expect(files[0].relativePath).toBe('file1.txt');
+      expect(files[0].contextRoot).toBe(filePath);
+    });
+
     it('should scan directory and return files', async () => {
       const files = await externalContextScanner.scanPaths([tempDir]);
 

@@ -179,6 +179,18 @@ describe('ExternalContextSelector', () => {
   });
 
   describe('addExternalContext', () => {
+    it('should reject a file path unless allowFile is set', () => {
+      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => false });
+
+      const rejected = selector.addExternalContext('/tmp/some-file.txt');
+      expect(rejected.success).toBe(false);
+      expect(selector.getExternalContexts()).toEqual([]);
+
+      const accepted = selector.addExternalContext('/tmp/some-file.txt', { allowFile: true });
+      expect(accepted.success).toBe(true);
+      expect(selector.getExternalContexts()).toContain('/tmp/some-file.txt');
+    });
+
     it('should reject empty input', () => {
       const onChange = jest.fn();
       selector.setOnChange(onChange);

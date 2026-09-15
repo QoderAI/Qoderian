@@ -165,8 +165,8 @@
       "moreFiles": "Show {count} more files"
     },
     "drop": {
-      "context": "Drop notes, folders, or images here to add as context",
-      "ignored": "Ignored {count} unsupported file(s); only notes, folders, and images can be dropped"
+      "context": "Drop notes, folders, images, or files here to add as context",
+      "ignored": "Ignored {count} unsupported item(s); only notes, folders, images, and files can be dropped"
     },
     "permissionMode": {
       "default": {

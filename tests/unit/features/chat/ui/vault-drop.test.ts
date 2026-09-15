@@ -2,9 +2,15 @@
  * @jest-environment jsdom
  */
 import { createMockEl } from '@test/helpers/mock-element';
+import { statSync } from 'fs';
 import { Notice, TFile, TFolder } from 'obsidian';
 
 import { VaultDropController } from '@/features/chat/ui/vault-drop';
+
+jest.mock('fs', () => {
+  const actual = jest.requireActual('fs');
+  return { ...actual, statSync: jest.fn(actual.statSync) };
+});
 
 function makeFile(path: string): any {
   const file = new (TFile as unknown as new () => Record<string, unknown>)();
@@ -84,6 +90,67 @@ describe('VaultDropController', () => {
       toJSON: () => {},
     });
     inputEl = createInputEl();
+  });
+
+  describe('OS-level (Finder) drags', () => {
+    const osFile = (name: string, type: string, filePath: string) => ({ name, type, path: filePath });
+
+    beforeEach(() => {
+      (statSync as unknown as jest.Mock).mockReset();
+    });
+
+    it('routes a dropped non-image file to external context', () => {
+      (statSync as unknown as jest.Mock).mockReturnValue({ isDirectory: () => false, isFile: () => true });
+      const onAddExternalContext = jest.fn();
+      new VaultDropController(createApp(undefined), wrapper, inputEl, { onAddExternalContext });
+
+      const event = createDropEvent({
+        dataTransfer: { types: ['Files'], files: [osFile('a.txt', 'text/plain', '/tmp/a.txt')] },
+      });
+      wrapper.dispatchEvent('drop', event);
+
+      expect(onAddExternalContext).toHaveBeenCalledWith('/tmp/a.txt', { allowFile: true });
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(event.stopImmediatePropagation).toHaveBeenCalled();
+    });
+
+    it('routes a dropped directory to external context without allowFile', () => {
+      (statSync as unknown as jest.Mock).mockReturnValue({ isDirectory: () => true, isFile: () => false });
+      const onAddExternalContext = jest.fn();
+      new VaultDropController(createApp(undefined), wrapper, inputEl, { onAddExternalContext });
+
+      wrapper.dispatchEvent('drop', createDropEvent({
+        dataTransfer: { types: ['Files'], files: [osFile('dir', '', '/tmp/dir')] },
+      }));
+
+      expect(onAddExternalContext).toHaveBeenCalledWith('/tmp/dir');
+    });
+
+    it('leaves image drops to the image manager', () => {
+      (statSync as unknown as jest.Mock).mockReturnValue({ isDirectory: () => false, isFile: () => true });
+      const onAddExternalContext = jest.fn();
+      new VaultDropController(createApp(undefined), wrapper, inputEl, { onAddExternalContext });
+
+      const event = createDropEvent({
+        dataTransfer: { types: ['Files'], files: [osFile('i.png', 'image/png', '/tmp/i.png')] },
+      });
+      wrapper.dispatchEvent('drop', event);
+
+      expect(onAddExternalContext).not.toHaveBeenCalled();
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(event.stopImmediatePropagation).not.toHaveBeenCalled();
+    });
+
+    it('shows the drop overlay for OS file drags', () => {
+      (statSync as unknown as jest.Mock).mockReturnValue({ isDirectory: () => false, isFile: () => true });
+      new VaultDropController(createApp(undefined), wrapper, inputEl);
+
+      wrapper.dispatchEvent('dragenter', createDragEvent('dragenter', {
+        dataTransfer: { types: ['Files'], files: [osFile('a.txt', 'text/plain', '/tmp/a.txt')] },
+      }));
+
+      expect(findOverlay(wrapper).className).toContain('visible');
+    });
   });
 
   describe('drop handling', () => {

@@ -165,8 +165,8 @@
       "moreFiles": "{count} weitere Dateien anzeigen"
     },
     "drop": {
-      "context": "Notizen, Ordner oder Bilder hier ablegen, um sie als Kontext hinzuzufügen",
-      "ignored": "{count} nicht unterstützte Dateien ignoriert; es können nur Notizen, Ordner und Bilder abgelegt werden"
+      "context": "Notizen, Ordner, Bilder oder Dateien hier ablegen, um sie als Kontext hinzuzufügen",
+      "ignored": "{count} nicht unterstützte Elemente ignoriert; es können nur Notizen, Ordner, Bilder und Dateien abgelegt werden"
     },
     "permissionMode": {
       "default": {

@@ -146,6 +146,32 @@ export function isValidDirectoryPath(p: string): boolean {
   return validateDirectoryPath(p).valid;
 }
 
+export interface ContextPathValidationResult {
+  valid: boolean;
+  error?: string;
+  isDirectory: boolean;
+}
+
+/**
+ * Like validateDirectoryPath but also accepts a single file, so an OS-level
+ * drag of an individual file can become an external context root.
+ */
+export function validateContextPath(p: string): ContextPathValidationResult {
+  try {
+    const stats = fs.statSync(p);
+    return { valid: true, isDirectory: stats.isDirectory() };
+  } catch (err) {
+    const error = err as NodeJS.ErrnoException;
+    if (error.code === 'ENOENT') {
+      return { valid: false, error: 'Path does not exist', isDirectory: false };
+    }
+    if (error.code === 'EACCES') {
+      return { valid: false, error: 'Permission denied', isDirectory: false };
+    }
+    return { valid: false, error: `Cannot access path: ${error.message}`, isDirectory: false };
+  }
+}
+
 export function filterValidPaths(paths: string[]): string[] {
   return paths.filter(isValidDirectoryPath);
 }

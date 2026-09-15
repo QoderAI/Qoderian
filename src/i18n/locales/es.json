@@ -165,8 +165,8 @@
       "moreFiles": "Mostrar {count} archivos más"
     },
     "drop": {
-      "context": "Arrastra notas, carpetas o imágenes aquí para añadirlas como contexto",
-      "ignored": "Se ignoraron {count} archivos no compatibles; solo se pueden soltar notas, carpetas e imágenes"
+      "context": "Arrastra notas, carpetas, imágenes o archivos aquí para añadirlos como contexto",
+      "ignored": "Se ignoraron {count} elementos no compatibles; solo se pueden soltar notas, carpetas, imágenes y archivos"
     },
     "permissionMode": {
       "default": {

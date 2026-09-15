@@ -73,12 +73,7 @@ class ExternalContextScanner {
 
       const invalidationVersion = this.invalidationVersion;
       const pathVersion = this.pathVersions.get(expandedPath) ?? 0;
-      const scan = this.scanDirectory(
-        expandedPath,
-        expandedPath,
-        0,
-        { remaining: MAX_FILES_PER_PATH },
-      ).then(files => {
+      const scan = this.scanPathRoot(expandedPath).then(files => {
         if (
           invalidationVersion === this.invalidationVersion
           && pathVersion === (this.pathVersions.get(expandedPath) ?? 0)
@@ -104,6 +99,20 @@ class ExternalContextScanner {
     contextRoot: string,
   ): ExternalContextFile[] {
     return files.map(file => ({ ...file, contextRoot }));
+  }
+
+  private async scanPathRoot(root: string): Promise<ExternalContextFile[]> {
+    const stat = await fs.promises.stat(root).catch(() => null);
+    if (stat?.isFile()) {
+      return [{
+        path: root,
+        name: path.basename(root),
+        relativePath: path.basename(root),
+        contextRoot: root,
+        mtime: stat.mtimeMs,
+      }];
+    }
+    return this.scanDirectory(root, root, 0, { remaining: MAX_FILES_PER_PATH });
   }
 
   private async scanDirectory(

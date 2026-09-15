@@ -2,7 +2,7 @@ import { Notice, setIcon } from 'obsidian';
 import * as os from 'os';
 import * as path from 'path';
 
-import { filterValidPaths, findConflictingPath, isDuplicatePath, isValidDirectoryPath, validateDirectoryPath } from '../../../core/context/external-context';
+import { filterValidPaths, findConflictingPath, isDuplicatePath, isValidDirectoryPath, validateContextPath, validateDirectoryPath } from '../../../core/context/external-context';
 import { expandHomePath, normalizePathForFilesystem } from '../../../core/fs/path';
 import type {
   ManagedMcpServer,
@@ -202,7 +202,10 @@ export class ExternalContextSelector {
    * @param pathInput - Path string (supports ~/ expansion)
    * @returns Result with success status and normalized path, or error message on failure
    */
-  addExternalContext(pathInput: string): AddExternalContextResult {
+  addExternalContext(
+    pathInput: string,
+    options: { allowFile?: boolean } = {},
+  ): AddExternalContextResult {
     const trimmed = pathInput?.trim();
     if (!trimmed) {
       return { success: false, error: 'No path provided. Usage: /add-dir /absolute/path' };
@@ -223,8 +226,10 @@ export class ExternalContextSelector {
       return { success: false, error: 'Path must be absolute. Usage: /add-dir /absolute/path' };
     }
 
-    // Validate path exists and is a directory with specific error messages
-    const validation = validateDirectoryPath(normalizedPath);
+    // Validate path exists; a single file is only accepted when explicitly allowed
+    const validation: { valid: boolean; error?: string } = options.allowFile
+      ? validateContextPath(normalizedPath)
+      : validateDirectoryPath(normalizedPath);
     if (!validation.valid) {
       return { success: false, error: `${validation.error}: ${pathInput}` };
     }
