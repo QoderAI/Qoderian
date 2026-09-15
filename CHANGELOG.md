@@ -11,6 +11,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.9] - 2026-09-15
+
 ### Added
 
 - Draggable composer height: grab the thin grip above the message input to
