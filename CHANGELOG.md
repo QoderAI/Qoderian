@@ -13,6 +13,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ### Added
 
+- Show the added external context path after dropping a folder or file, surface
+  rejected additions, and show the context count even for a single path.
 - Drag files and folders from your operating system (e.g. macOS Finder) onto
   the composer to add them as external context. Dropped folders join the
   external context as before, dropped images still attach to the message, and

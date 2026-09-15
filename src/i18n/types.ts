@@ -1,6 +1,8 @@
 export type Locale = 'en' | 'zh-CN' | 'zh-TW' | 'ja' | 'ko' | 'de' | 'fr' | 'es' | 'ru' | 'pt';
 
 export type TranslationKey =
+  | 'chat.drop.added'
+  | 'chat.drop.failed'
   // Plugin commands and ribbon
   | 'commands.openView'
   | 'commands.inlineEdit'

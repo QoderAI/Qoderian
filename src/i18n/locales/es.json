@@ -165,6 +165,8 @@
       "moreFiles": "Mostrar {count} archivos más"
     },
     "drop": {
+      "added": "Contexto externo añadido: {path}",
+      "failed": "No se pudo añadir el contexto externo: {error}",
       "context": "Arrastra notas, carpetas, imágenes o archivos aquí para añadirlos como contexto",
       "ignored": "Se ignoraron {count} elementos no compatibles; solo se pueden soltar notas, carpetas, imágenes y archivos"
     },

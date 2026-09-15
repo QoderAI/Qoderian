@@ -165,6 +165,8 @@
       "moreFiles": "Show {count} more files"
     },
     "drop": {
+      "added": "Added external context: {path}",
+      "failed": "Could not add external context: {error}",
       "context": "Drop notes, folders, images, or files here to add as context",
       "ignored": "Ignored {count} unsupported item(s); only notes, folders, images, and files can be dropped"
     },

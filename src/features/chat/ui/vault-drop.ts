@@ -22,6 +22,33 @@ export interface VaultDropOptions {
     path: string,
     options?: { allowFile?: boolean },
   ) => { success: boolean; error?: string };
+  /** Overrides native File -> filesystem path resolution in tests. */
+  resolveNativeFilePath?: (file: File) => string | null;
+}
+
+interface ElectronWebUtils {
+  getPathForFile(file: File): string;
+}
+
+/**
+ * Resolve a browser File back to its native path in Electron.
+ *
+ * Electron 32 removed the non-standard `File.path` property. Obsidian now
+ * exposes the supported replacement through `webUtils.getPathForFile()`.
+ * Keep the legacy property as a fallback for older Obsidian/Electron builds.
+ */
+export function resolveNativeFilePath(file: File): string | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- Available only in Obsidian's Electron renderer.
+    const { webUtils } = require('electron') as { webUtils?: ElectronWebUtils };
+    const nativePath = webUtils?.getPathForFile(file);
+    if (nativePath) return nativePath;
+  } catch {
+    // Unit tests and non-Electron renderers do not provide the electron module.
+  }
+
+  const legacyPath = (file as File & { path?: unknown }).path;
+  return typeof legacyPath === 'string' && legacyPath.length > 0 ? legacyPath : null;
 }
 
 interface DragManagerHost {
@@ -47,6 +74,7 @@ export class VaultDropController {
   private readonly dropOverlayEl: HTMLElement;
   private readonly onInsertReference?: (reference: MentionInsertReference) => void;
   private readonly onAddExternalContext?: VaultDropOptions['onAddExternalContext'];
+  private readonly resolveNativeFilePath: (file: File) => string | null;
   private readonly viewWindow: Window | null;
 
   constructor(
@@ -57,31 +85,46 @@ export class VaultDropController {
   ) {
     this.onInsertReference = options.onInsertReference;
     this.onAddExternalContext = options.onAddExternalContext;
+    this.resolveNativeFilePath = options.resolveNativeFilePath ?? resolveNativeFilePath;
     this.dropOverlayEl = this.createDropOverlay();
     const viewWindow = this.inputWrapperEl.ownerDocument?.defaultView ?? null;
     this.viewWindow = viewWindow && typeof viewWindow.addEventListener === 'function'
       ? viewWindow
       : null;
-    this.inputWrapperEl.addEventListener('dragenter', this.handleDragEnter);
-    this.inputWrapperEl.addEventListener('dragover', this.handleDragOver);
-    this.inputWrapperEl.addEventListener('dragleave', this.handleDragLeave);
-    this.inputWrapperEl.addEventListener('drop', this.handleDrop, true);
-    // Real OS drops can be swallowed by host-level drop interceptors before the
-    // wrapper's capture listener runs; the window capture phase is the earliest
-    // point in the propagation path, so claim them here too.
-    this.viewWindow?.addEventListener('drop', this.handleDrop, true);
+    if (this.viewWindow) {
+      // Real OS drags can be swallowed by Obsidian before wrapper listeners run.
+      // Claim the complete drag lifecycle at the earliest capture point. A real
+      // native drop is only emitted when dragover has first been preventDefaulted.
+      this.viewWindow.addEventListener('dragenter', this.handleDragEnter, true);
+      this.viewWindow.addEventListener('dragover', this.handleDragOver, true);
+      this.viewWindow.addEventListener('dragleave', this.handleDragLeave, true);
+      this.viewWindow.addEventListener('drop', this.handleDrop, true);
+    } else {
+      // Lightweight DOM shims used outside a browser do not expose a Window.
+      this.inputWrapperEl.addEventListener('dragenter', this.handleDragEnter);
+      this.inputWrapperEl.addEventListener('dragover', this.handleDragOver);
+      this.inputWrapperEl.addEventListener('dragleave', this.handleDragLeave);
+      this.inputWrapperEl.addEventListener('drop', this.handleDrop, true);
+    }
   }
 
   destroy(): void {
-    this.inputWrapperEl.removeEventListener('dragenter', this.handleDragEnter);
-    this.inputWrapperEl.removeEventListener('dragover', this.handleDragOver);
-    this.inputWrapperEl.removeEventListener('dragleave', this.handleDragLeave);
-    this.inputWrapperEl.removeEventListener('drop', this.handleDrop, true);
-    this.viewWindow?.removeEventListener('drop', this.handleDrop, true);
+    if (this.viewWindow) {
+      this.viewWindow.removeEventListener('dragenter', this.handleDragEnter, true);
+      this.viewWindow.removeEventListener('dragover', this.handleDragOver, true);
+      this.viewWindow.removeEventListener('dragleave', this.handleDragLeave, true);
+      this.viewWindow.removeEventListener('drop', this.handleDrop, true);
+    } else {
+      this.inputWrapperEl.removeEventListener('dragenter', this.handleDragEnter);
+      this.inputWrapperEl.removeEventListener('dragover', this.handleDragOver);
+      this.inputWrapperEl.removeEventListener('dragleave', this.handleDragLeave);
+      this.inputWrapperEl.removeEventListener('drop', this.handleDrop, true);
+    }
     this.dropOverlayEl.remove();
   }
 
   private readonly handleDragEnter = (event: DragEvent): void => {
+    if (!this.isDropWithinInput(event)) return;
     if (!this.hasClaimableDrag(event)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -89,12 +132,14 @@ export class VaultDropController {
   };
 
   private readonly handleDragOver = (event: DragEvent): void => {
+    if (!this.isDropWithinInput(event)) return;
     if (!this.hasClaimableDrag(event)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
   };
 
   private readonly handleDragLeave = (event: DragEvent): void => {
+    if (!this.isDropWithinInput(event)) return;
     if (!this.hasClaimableDrag(event)) return;
     event.stopImmediatePropagation();
 
@@ -117,7 +162,8 @@ export class VaultDropController {
       references.length > 0 ||
       osDrag.dirs.length > 0 ||
       osDrag.files.length > 0 ||
-      osDrag.images > 0;
+      osDrag.images > 0 ||
+      osDrag.unreadable > 0;
     if (!claimsAnything) return;
 
     event.preventDefault();
@@ -141,10 +187,10 @@ export class VaultDropController {
     }
 
     for (const dir of osDrag.dirs) {
-      this.onAddExternalContext?.(dir);
+      this.addExternalContextWithFeedback(dir);
     }
     for (const file of osDrag.files) {
-      this.onAddExternalContext?.(file, { allowFile: true });
+      this.addExternalContextWithFeedback(file, { allowFile: true });
     }
 
     // Mixed drags are claimed wholesale, so surface the items we dropped.
@@ -154,6 +200,17 @@ export class VaultDropController {
     }
     this.inputEl.focus();
   };
+
+  private addExternalContextWithFeedback(path: string, options?: { allowFile?: boolean }): void {
+    const result = options
+      ? this.onAddExternalContext?.(path, options)
+      : this.onAddExternalContext?.(path);
+    if (result?.success) {
+      new Notice(t('chat.drop.added', { path }));
+    } else if (result?.error) {
+      new Notice(t('chat.drop.failed', { error: result.error }));
+    }
+  }
 
   private hasClaimableDrag(event: DragEvent): boolean {
     if (this.collectDragged().references.length > 0) return true;
@@ -183,7 +240,7 @@ export class VaultDropController {
     droppedFiles.forEach((file, index) => {
       // Some Electron builds expose no File.path on drops; the OS also ships
       // the dragged paths as file:// URLs in text/uri-list, aligned by index.
-      const filePath = (file as File & { path?: string }).path || uriPaths[index];
+      const filePath = this.resolveNativeFilePath(file) || uriPaths[index];
       if (!filePath) {
         result.unreadable += 1;
         return;

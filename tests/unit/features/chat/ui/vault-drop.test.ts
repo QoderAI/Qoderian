@@ -93,7 +93,7 @@ describe('VaultDropController', () => {
   });
 
   describe('OS-level (Finder) drags', () => {
-    const osFile = (name: string, type: string, filePath: string) => ({ name, type, path: filePath });
+    const osFile = (name: string, type: string) => ({ name, type });
 
     beforeEach(() => {
       (statSync as unknown as jest.Mock).mockReset();
@@ -102,13 +102,19 @@ describe('VaultDropController', () => {
     it('routes a dropped non-image file to external context', () => {
       (statSync as unknown as jest.Mock).mockReturnValue({ isDirectory: () => false, isFile: () => true });
       const onAddExternalContext = jest.fn();
-      new VaultDropController(createApp(undefined), wrapper, inputEl, { onAddExternalContext });
+      const resolveNativeFilePath = jest.fn(() => '/tmp/a.txt');
+      new VaultDropController(createApp(undefined), wrapper, inputEl, {
+        onAddExternalContext,
+        resolveNativeFilePath,
+      });
 
+      const droppedFile = osFile('a.txt', 'text/plain');
       const event = createDropEvent({
-        dataTransfer: { types: ['Files'], files: [osFile('a.txt', 'text/plain', '/tmp/a.txt')] },
+        dataTransfer: { types: ['Files'], files: [droppedFile] },
       });
       wrapper.dispatchEvent('drop', event);
 
+      expect(resolveNativeFilePath).toHaveBeenCalledWith(droppedFile);
       expect(onAddExternalContext).toHaveBeenCalledWith('/tmp/a.txt', { allowFile: true });
       expect(event.preventDefault).toHaveBeenCalled();
       expect(event.stopImmediatePropagation).toHaveBeenCalled();
@@ -116,23 +122,42 @@ describe('VaultDropController', () => {
 
     it('routes a dropped directory to external context without allowFile', () => {
       (statSync as unknown as jest.Mock).mockReturnValue({ isDirectory: () => true, isFile: () => false });
-      const onAddExternalContext = jest.fn();
-      new VaultDropController(createApp(undefined), wrapper, inputEl, { onAddExternalContext });
+      const onAddExternalContext = jest.fn(() => ({ success: true }));
+      new VaultDropController(createApp(undefined), wrapper, inputEl, {
+        onAddExternalContext,
+        resolveNativeFilePath: () => '/tmp/dir',
+      });
 
       wrapper.dispatchEvent('drop', createDropEvent({
-        dataTransfer: { types: ['Files'], files: [osFile('dir', '', '/tmp/dir')] },
+        dataTransfer: { types: ['Files'], files: [osFile('dir', '')] },
       }));
 
       expect(onAddExternalContext).toHaveBeenCalledWith('/tmp/dir');
+      expect(Notice).toHaveBeenCalledWith(expect.stringContaining('/tmp/dir'));
+    });
+
+    it('surfaces rejected folder additions instead of silently ignoring them', () => {
+      (statSync as unknown as jest.Mock).mockReturnValue({ isDirectory: () => true });
+      new VaultDropController(createApp(undefined), wrapper, inputEl, {
+        resolveNativeFilePath: () => '/tmp/dir',
+        onAddExternalContext: () => ({ success: false, error: 'Folder already added' }),
+      });
+      wrapper.dispatchEvent('drop', createDropEvent({
+        dataTransfer: { types: ['Files'], files: [osFile('dir', '')] },
+      }));
+      expect(Notice).toHaveBeenCalledWith(expect.stringContaining('Folder already added'));
     });
 
     it('leaves image drops to the image manager', () => {
       (statSync as unknown as jest.Mock).mockReturnValue({ isDirectory: () => false, isFile: () => true });
       const onAddExternalContext = jest.fn();
-      new VaultDropController(createApp(undefined), wrapper, inputEl, { onAddExternalContext });
+      new VaultDropController(createApp(undefined), wrapper, inputEl, {
+        onAddExternalContext,
+        resolveNativeFilePath: () => '/tmp/i.png',
+      });
 
       const event = createDropEvent({
-        dataTransfer: { types: ['Files'], files: [osFile('i.png', 'image/png', '/tmp/i.png')] },
+        dataTransfer: { types: ['Files'], files: [osFile('i.png', 'image/png')] },
       });
       wrapper.dispatchEvent('drop', event);
 
@@ -146,7 +171,7 @@ describe('VaultDropController', () => {
       new VaultDropController(createApp(undefined), wrapper, inputEl);
 
       wrapper.dispatchEvent('dragenter', createDragEvent('dragenter', {
-        dataTransfer: { types: ['Files'], files: [osFile('a.txt', 'text/plain', '/tmp/a.txt')] },
+        dataTransfer: { types: ['Files'], files: [osFile('a.txt', 'text/plain')] },
       }));
 
       expect(findOverlay(wrapper).className).toContain('visible');

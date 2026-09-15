@@ -438,13 +438,8 @@ export class ExternalContextSelector {
       this.iconEl.addClass('active');
       this.iconEl.setAttribute('title', `${count} external context${count > 1 ? 's' : ''} (click to add more)`);
 
-      // Show badge only when more than 1 path
-      if (count > 1) {
-        this.badgeEl.setText(String(count));
-        this.badgeEl.addClass('visible');
-      } else {
-        this.badgeEl.removeClass('visible');
-      }
+      this.badgeEl.setText(String(count));
+      this.badgeEl.addClass('visible');
     } else {
       this.iconEl.removeClass('active');
       this.iconEl.setAttribute('title', 'Add external contexts (click)');
