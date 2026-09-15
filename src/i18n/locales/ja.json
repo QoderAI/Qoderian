@@ -37,7 +37,29 @@
     "editApplied": "編集を適用しました",
     "newTab": "新しいタブ",
     "newSession": "新しいセッション（現在のタブ）",
-    "closeCurrentTab": "現在のタブを閉じる"
+    "closeCurrentTab": "現在のタブを閉じる",
+    "submitFeedback": "フィードバックを送信"
+  },
+  "feedback": {
+    "title": "フィードバックを送信",
+    "placeholder": "問題や提案を記入…",
+    "emailLabel": "連絡先メール（任意）",
+    "emailPlaceholder": "you@example.com",
+    "emailHint": "Qoderian にサインイン済みの場合は空欄で構いません。",
+    "diagnosticsLabel": "ワークスペースの診断情報を添付",
+    "diagnosticsDesc": "Qoderian が現在の vault の実行状態を収集し、フィードバックと一緒にアップロードして問題の特定に役立てます。",
+    "sessionHint": "現在のセッション {sessionId} に関連付けられます。",
+    "submit": "送信",
+    "submitting": "送信中…",
+    "signIn": "Qoderian にサインイン",
+    "errorCliUnavailable": "Qoder CLI が見つかりません。Qoderian の設定でパスを設定するか、インストールしてから再試行してください。",
+    "errorEmpty": "送信前に問題を記入してください。",
+    "errorTooLong": "フィードバックは {limit} 文字以内です。",
+    "errorRejected": "qodercli がフィードバックを送信できませんでした。",
+    "noticeSuccess": "フィードバックを送信しました。ありがとうございます！",
+    "noticeSuccessWithId": "フィードバックを送信しました（リクエスト {requestId}）。ありがとうございます！",
+    "noticeSuccessCopied": "フィードバックを送信しました。リクエスト {requestId} をクリップボードにコピーしました。",
+    "noticeFailed": "フィードバックは送信されませんでした。"
   },
   "nav": {
     "newConversation": "新しい会話",

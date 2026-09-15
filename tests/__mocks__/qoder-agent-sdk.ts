@@ -146,6 +146,13 @@ let shouldThrowOnIteration = false;
 let throwAfterChunks = 0;
 let queryCallCount = 0;
 
+// submitFeedback control
+let mockFeedbackResult: { success: boolean; message: string; requestId?: string } = {
+  success: true,
+  message: 'Feedback submitted successfully',
+};
+let lastFeedbackCall: { params: any; options: any } | undefined;
+
 // Allow tests to set custom mock messages
 export function setMockMessages(messages: any[], options?: { appendResult?: boolean }) {
   customMockMessages = messages;
@@ -164,6 +171,8 @@ export function resetMockMessages() {
   shouldThrowOnIteration = false;
   throwAfterChunks = 0;
   queryCallCount = 0;
+  mockFeedbackResult = { success: true, message: 'Feedback submitted successfully' };
+  lastFeedbackCall = undefined;
 }
 
 export function setMockSupportedCommands(
@@ -207,6 +216,27 @@ export function getLastOptions(): Options | undefined {
 
 export function getLastResponse(): typeof lastResponse {
   return lastResponse;
+}
+
+/** Stubs what `qodercli feedback` reports back; the real SDK never throws. */
+export function setMockFeedbackResult(result: {
+  success: boolean;
+  message: string;
+  requestId?: string;
+}) {
+  mockFeedbackResult = result;
+}
+
+export function getLastFeedbackCall(): { params: any; options: any } | undefined {
+  return lastFeedbackCall;
+}
+
+export async function submitFeedback(
+  params: any,
+  options?: any
+): Promise<{ success: boolean; message: string; requestId?: string }> {
+  lastFeedbackCall = { params, options };
+  return { ...mockFeedbackResult };
 }
 
 // Helper to run PreToolUse hooks

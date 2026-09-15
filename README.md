@@ -153,7 +153,8 @@ Open **Settings → Qoderian**:
 - **Environment variables**: The qodercli subprocess inherits Obsidian's process environment. Qoderian does not persist environment-variable overrides in the vault.
 - **File and shell access**: Depending on your permission mode and confirmations, qodercli may read, create, modify, or delete files and run shell commands. Understand the risks before enabling `YOLO`, and keep backups or version control for an important vault.
 - **Reach beyond the vault**: External context and MCP servers may access files outside your vault or third-party network services, under those services' own rules.
-- **Background activity**: Qoderian runs no telemetry of its own. Network activity is limited to qodercli and the MCP endpoints you configure.
+- **Feedback reports**: Submitting feedback (the megaphone button in the composer bar, or the "Submit feedback" command) only ever happens when you choose it. It sends your note together with the plugin version and, when a chat is open, the active session id. By default it also lets `qodercli feedback` collect the current vault's runtime state to help locate the problem; uncheck "Attach workspace diagnostics" in the dialog to send only your note.
+- **Background activity**: Qoderian runs no telemetry of its own — nothing is uploaded automatically or in the background. Network activity is limited to qodercli, the MCP endpoints you configure, and feedback reports you submit yourself.
 
 Redact settings, logs, and screenshots before filing an issue.
 

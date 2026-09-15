@@ -37,7 +37,29 @@
     "editApplied": "已应用编辑",
     "newTab": "新建标签页",
     "newSession": "新建会话（当前标签页）",
-    "closeCurrentTab": "关闭当前标签页"
+    "closeCurrentTab": "关闭当前标签页",
+    "submitFeedback": "提交反馈"
+  },
+  "feedback": {
+    "title": "提交反馈",
+    "placeholder": "描述问题或建议…",
+    "emailLabel": "联系邮箱（可选）",
+    "emailPlaceholder": "you@example.com",
+    "emailHint": "已登录 Qoderian 时可留空。",
+    "diagnosticsLabel": "附带工作区诊断信息",
+    "diagnosticsDesc": "Qoderian 会收集当前 vault 的运行状态，随反馈一起上传，用于定位问题。",
+    "sessionHint": "将关联当前会话 {sessionId}。",
+    "submit": "提交反馈",
+    "submitting": "提交中…",
+    "signIn": "登录 Qoderian",
+    "errorCliUnavailable": "未找到 Qoder CLI。请在 Qoderian 设置中配置其路径或先安装，然后重试。",
+    "errorEmpty": "请先描述问题再提交。",
+    "errorTooLong": "反馈内容不能超过 {limit} 个字符。",
+    "errorRejected": "qodercli 未能提交反馈。",
+    "noticeSuccess": "反馈已提交，感谢！",
+    "noticeSuccessWithId": "反馈已提交（请求号 {requestId}），感谢！",
+    "noticeSuccessCopied": "反馈已提交，请求号 {requestId} 已复制到剪贴板。",
+    "noticeFailed": "反馈未提交成功。"
   },
   "nav": {
     "newConversation": "新建会话",

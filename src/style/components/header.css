@@ -25,3 +25,28 @@
   align-items: center;
   color: var(--qoderian-brand);
 }
+
+.qoderian-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.qoderian-header-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-faint);
+  transition: color 0.15s ease;
+}
+
+.qoderian-header-btn:hover {
+  color: var(--text-normal);
+}
+
+.qoderian-header-btn svg {
+  width: 16px;
+  height: 16px;
+}

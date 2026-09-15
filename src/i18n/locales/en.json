@@ -37,7 +37,29 @@
     "editApplied": "Edit applied",
     "newTab": "New tab",
     "newSession": "New session (in current tab)",
-    "closeCurrentTab": "Close current tab"
+    "closeCurrentTab": "Close current tab",
+    "submitFeedback": "Submit feedback"
+  },
+  "feedback": {
+    "title": "Submit feedback",
+    "placeholder": "Describe the problem or suggestion…",
+    "emailLabel": "Contact email (optional)",
+    "emailPlaceholder": "you@example.com",
+    "emailHint": "Can be left blank when you are signed in to Qoderian.",
+    "diagnosticsLabel": "Attach workspace diagnostics",
+    "diagnosticsDesc": "Qoderian collects the current vault runtime state and uploads it with your note to help locate the problem.",
+    "sessionHint": "Will be linked to the current session {sessionId}.",
+    "submit": "Submit feedback",
+    "submitting": "Submitting…",
+    "signIn": "Sign in to Qoderian",
+    "errorCliUnavailable": "Qoder CLI was not found. Configure its path in Qoderian settings or install it, then try again.",
+    "errorEmpty": "Describe the problem before submitting.",
+    "errorTooLong": "Feedback is limited to {limit} characters.",
+    "errorRejected": "qodercli could not submit the feedback.",
+    "noticeSuccess": "Feedback submitted. Thank you!",
+    "noticeSuccessWithId": "Feedback submitted (request {requestId}). Thank you!",
+    "noticeSuccessCopied": "Feedback submitted. Request {requestId} copied to your clipboard.",
+    "noticeFailed": "Feedback was not submitted."
   },
   "nav": {
     "newConversation": "New conversation",
