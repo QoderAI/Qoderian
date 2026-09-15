@@ -835,6 +835,7 @@ export function initializeTabControllers(
     forkRequestCallback
       ? (id) => handleForkRequest(tab, plugin, id, forkRequestCallback)
       : undefined,
+    () => ui.externalContextSelector?.getExternalContexts() ?? [],
   );
 
   // Selection controller

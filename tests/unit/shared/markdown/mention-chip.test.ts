@@ -98,6 +98,46 @@ describe('replaceMentionTokensWithHtml', () => {
     expect(result).toBe('see @missing/note.md now');
   });
 
+  it('chips an external context root as a folder when contexts are provided', () => {
+    const app = createMockApp();
+    const result = replaceMentionTokensWithHtml('scan @qoderian-verify/ now', app, [
+      '/Users/me/Desktop/qoderian-verify',
+    ]);
+
+    expect(result).toContain('data-kind="folder"');
+    expect(result).toContain('data-path="qoderian-verify"');
+    expect(result).toContain('title="@qoderian-verify/"');
+    expect(result).toContain(' now');
+  });
+
+  it('chips a spaced file name inside an external context root', () => {
+    const app = createMockApp();
+    const result = replaceMentionTokensWithHtml('see @qoderian-verify/my file.md now', app, [
+      '/Users/me/Desktop/qoderian-verify',
+    ]);
+
+    expect(result).toContain('data-kind="file"');
+    expect(result).toContain('data-path="qoderian-verify/my file.md"');
+    expect(result).toContain(' now');
+  });
+
+  it('chips a file inside an external context root', () => {
+    const app = createMockApp();
+    const result = replaceMentionTokensWithHtml('see @qoderian-verify/src/a.md now', app, [
+      '/Users/me/Desktop/qoderian-verify',
+    ]);
+
+    expect(result).toContain('data-kind="file"');
+    expect(result).toContain('data-path="qoderian-verify/src/a.md"');
+  });
+
+  it('leaves external-looking tokens untouched when no contexts are provided', () => {
+    const app = createMockApp();
+    const result = replaceMentionTokensWithHtml('scan @qoderian-verify/ now', app);
+
+    expect(result).toBe('scan @qoderian-verify/ now');
+  });
+
   it('skips tokens inside code fences and inline code', () => {
     const app = createMockApp(['notes/idea.md']);
     const markdown = [

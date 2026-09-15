@@ -177,17 +177,45 @@ function createChipHtml(path: string, kind: ReferenceChipKind): string {
  * an existing vault file or folder becomes a chip; unknown tokens and code
  * spans pass through unchanged.
  */
-export function replaceMentionTokensWithHtml(markdown: string, app: App): string {
+export function replaceMentionTokensWithHtml(
+  markdown: string,
+  app: App,
+  externalContexts: readonly string[] = [],
+): string {
   if (!app?.vault || !markdown.includes('@')) {
     return markdown;
   }
 
+  // External context mentions use the root's folder name as a namespace
+  // (`@root/` or `@root/relative/path`), so a name match is enough and no
+  // filesystem scan is needed on the render path.
+  const externalRootNames = new Set<string>();
+  for (const contextPath of externalContexts) {
+    const segments = contextPath.replace(/\\/g, '/').split('/').filter(Boolean);
+    const name = segments[segments.length - 1];
+    if (name) externalRootNames.add(name.toLowerCase());
+  }
+
+  const matchesExternalContext = (path: string): boolean => {
+    if (externalRootNames.size === 0) return false;
+    const segments = path.replace(/\\/g, '/').replace(/^\/+/, '').split('/');
+    const [rootName, ...rest] = segments;
+    if (!rootName || !externalRootNames.has(rootName.toLowerCase())) return false;
+    if (rest.length === 0) return true;
+    if (rest.some(segment => segment.length === 0)) return false;
+    if (rest.every(segment => !/\s/.test(segment))) return true;
+    // Spaced paths are only accepted when the final segment looks like a file
+    // name, so trailing words from the sentence are not swallowed.
+    return /\.[A-Za-z0-9]{1,8}$/.test(rest[rest.length - 1].trim());
+  };
+
   const resolvePath = (path: string): boolean => {
     try {
-      return app.vault.getAbstractFileByPath(path) !== null;
+      if (app.vault.getAbstractFileByPath(path) !== null) return true;
     } catch {
-      return false;
+      // Vault lookup failures fall through to the external context check.
     }
+    return matchesExternalContext(path);
   };
   const candidates = findMentionCandidates(markdown, resolvePath);
   if (candidates.length === 0) {
@@ -203,14 +231,16 @@ export function replaceMentionTokensWithHtml(markdown: string, app: App): string
     try {
       resolved = app.vault.getAbstractFileByPath(candidate.path);
     } catch {
-      // Vault lookup failures leave the token untouched.
+      // Vault lookup failures fall through to the external context check.
     }
     const kind: ReferenceChipKind | null = resolved instanceof TFolder
       ? 'folder'
       : resolved instanceof TFile
         ? 'file'
-        : null;
-    if (!kind || !resolved) {
+        : matchesExternalContext(candidate.path)
+          ? (candidate.hasTrailingSlash ? 'folder' : 'file')
+          : null;
+    if (!kind) {
       continue;
     }
 
