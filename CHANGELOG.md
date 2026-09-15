@@ -11,6 +11,14 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Fixed
+
+- Hover dropdowns no longer lose their leading characters when their icon
+  sits near the left edge of the input toolbar or the sidebar is narrow. The
+  external-context and MCP server panels now shift back inside the toolbar
+  (and shrink as a last resort) instead of overflowing the chat container's
+  clipped edge.
+
 ## [1.0.9] - 2026-09-15
 
 ### Added
