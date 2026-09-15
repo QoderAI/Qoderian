@@ -893,7 +893,8 @@ export class MessageRenderer {
       if (processedMarkdown.includes('[[')) {
         processFileLinks(this.app, el);
       }
-    } catch {
+    } catch (error) {
+      console.error('[qoderian] Failed to render message content', error);
       el.createDiv({
         cls: 'qoderian-render-error',
         text: 'Failed to render message content.',
