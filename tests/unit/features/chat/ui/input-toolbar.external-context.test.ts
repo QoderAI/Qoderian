@@ -117,6 +117,26 @@ describe('ExternalContextSelector', () => {
         expect.arrayContaining(['/path/a', '/path/b'])
       );
     });
+
+    it('persists a single-file external context', () => {
+      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => false });
+      const onPersistenceChange = jest.fn();
+      selector.setOnPersistenceChange(onPersistenceChange);
+      selector.setExternalContexts(['/tmp/some-file.txt']);
+
+      selector.togglePersistence('/tmp/some-file.txt');
+
+      expect(selector.getPersistentPaths()).toContain('/tmp/some-file.txt');
+      expect(onPersistenceChange).toHaveBeenCalledWith(['/tmp/some-file.txt']);
+    });
+
+    it('keeps persisted file paths when loading from settings', () => {
+      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => false });
+
+      selector.setPersistentPaths(['/tmp/some-file.txt']);
+
+      expect(selector.getPersistentPaths()).toContain('/tmp/some-file.txt');
+    });
   });
 
   describe('clearExternalContexts', () => {

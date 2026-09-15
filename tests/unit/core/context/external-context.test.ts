@@ -2,6 +2,7 @@ import * as fs from 'fs';
 
 import {
   buildExternalContextDisplayEntries,
+  filterValidContextPaths,
   filterValidPaths,
   findConflictingPath,
   getFolderName,
@@ -321,6 +322,32 @@ describe('externalContext utilities', () => {
     it('should handle empty array', () => {
       const result = filterValidPaths([]);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('filterValidContextPaths', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('keeps directories and single files, dropping missing paths', () => {
+      (fs.statSync as jest.Mock).mockImplementation((p: string) => {
+        if (p === '/valid/dir') return { isDirectory: () => true };
+        if (p === '/valid/file.txt') return { isDirectory: () => false };
+        throw new Error('ENOENT');
+      });
+
+      const result = filterValidContextPaths(['/valid/dir', '/valid/file.txt', '/missing']);
+
+      expect(result).toEqual(['/valid/dir', '/valid/file.txt']);
+    });
+
+    it('returns an empty array when no path exists', () => {
+      (fs.statSync as jest.Mock).mockImplementation(() => {
+        throw new Error('ENOENT');
+      });
+
+      expect(filterValidContextPaths(['/gone-a', '/gone-b'])).toEqual([]);
     });
   });
 

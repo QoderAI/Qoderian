@@ -176,6 +176,11 @@ export function filterValidPaths(paths: string[]): string[] {
   return paths.filter(isValidDirectoryPath);
 }
 
+/** Keeps directories and single-file roots alike (external contexts may be either). */
+export function filterValidContextPaths(paths: string[]): string[] {
+  return paths.filter((p) => validateContextPath(p).valid);
+}
+
 export function isDuplicatePath(newPath: string, existingPaths: string[]): boolean {
   const normalizedNew = normalizePathForComparison(newPath);
   return existingPaths.some(existing => normalizePathForComparison(existing) === normalizedNew);

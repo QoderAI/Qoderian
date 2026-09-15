@@ -2,7 +2,7 @@ import { Notice, setIcon } from 'obsidian';
 import * as os from 'os';
 import * as path from 'path';
 
-import { filterValidPaths, findConflictingPath, isDuplicatePath, isValidDirectoryPath, validateContextPath, validateDirectoryPath } from '../../../core/context/external-context';
+import { filterValidContextPaths, findConflictingPath, isDuplicatePath, validateContextPath, validateDirectoryPath } from '../../../core/context/external-context';
 import { expandHomePath, normalizePathForFilesystem } from '../../../core/fs/path';
 import type {
   ManagedMcpServer,
@@ -128,8 +128,8 @@ export class ExternalContextSelector {
   }
 
   setPersistentPaths(paths: string[]): void {
-    // Validate paths - remove non-existent directories
-    const validPaths = filterValidPaths(paths);
+    // Validate paths - remove non-existent entries (directories or files)
+    const validPaths = filterValidContextPaths(paths);
     const invalidPaths = paths.filter(p => !validPaths.includes(p));
 
     this.persistentPaths = new Set(validPaths);
@@ -150,9 +150,9 @@ export class ExternalContextSelector {
     if (this.persistentPaths.has(path)) {
       this.persistentPaths.delete(path);
     } else {
-      // Validate path still exists before persisting
-      if (!isValidDirectoryPath(path)) {
-        new Notice(`Cannot persist "${this.shortenPath(path)}" - directory no longer exists`, 4000);
+      // Validate the path still exists before persisting (file or directory).
+      if (!validateContextPath(path).valid) {
+        new Notice(`Cannot persist "${this.shortenPath(path)}" - path no longer exists`, 4000);
         return;
       }
       this.persistentPaths.add(path);
@@ -263,7 +263,7 @@ export class ExternalContextSelector {
     // Use settings value if provided (most up-to-date), otherwise use local cache
     if (persistentPathsFromSettings) {
       // Validate paths - silently filter during session initialization (not user action)
-      const validPaths = filterValidPaths(persistentPathsFromSettings);
+      const validPaths = filterValidContextPaths(persistentPathsFromSettings);
       this.persistentPaths = new Set(validPaths);
     }
     this.externalContextPaths = [...this.persistentPaths];
