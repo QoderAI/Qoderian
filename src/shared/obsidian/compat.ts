@@ -1,5 +1,6 @@
 import type { App, TAbstractFile, TFile, TFolder, Workspace, WorkspaceLeaf } from 'obsidian';
 import { Notice } from 'obsidian';
+import { isAbsolute } from 'path';
 
 import type { ReferenceChipKind } from '../mention/types';
 
@@ -34,7 +35,39 @@ const referenceChipActions: Record<ReferenceChipKind, ReferenceChipAction> = {
  * notes and offers to create a file.
  */
 export function openReferenceChip(app: App, kind: ReferenceChipKind, path: string): void {
+  if (isAbsolute(path)) {
+    revealExternalPath(path);
+    return;
+  }
   referenceChipActions[kind]?.(app, path);
+}
+
+interface ElectronRemoteShellApi {
+  remote?: {
+    shell?: {
+      /** Reveals the item (file or folder) in the OS file manager. */
+      showItemInFolder?: (fullPath: string) => void;
+    };
+  };
+}
+
+/**
+ * Reveals an absolute path — an external context root or one of its files —
+ * in the OS file manager. Vault chips keep using Obsidian's own reveal.
+ */
+function revealExternalPath(path: string): void {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- Electron remote is exposed only at runtime in Obsidian's renderer.
+    const { remote } = require('electron') as ElectronRemoteShellApi;
+    const showItemInFolder = remote?.shell?.showItemInFolder;
+    if (typeof showItemInFolder === 'function') {
+      showItemInFolder.call(remote?.shell, path);
+      return;
+    }
+  } catch {
+    // Electron remote is unavailable outside the desktop app; fall through.
+  }
+  new Notice(`Cannot reveal path: ${path}`);
 }
 
 function openReferenceFile(app: App, path: string): void {

@@ -105,7 +105,8 @@ describe('replaceMentionTokensWithHtml', () => {
     ]);
 
     expect(result).toContain('data-kind="folder"');
-    expect(result).toContain('data-path="qoderian-verify"');
+    expect(result).toContain('data-path="/Users/me/Desktop/qoderian-verify"');
+    expect(result).toContain('data-external="true"');
     expect(result).toContain('title="@qoderian-verify/"');
     expect(result).toContain(' now');
   });
@@ -117,7 +118,7 @@ describe('replaceMentionTokensWithHtml', () => {
     ]);
 
     expect(result).toContain('data-kind="file"');
-    expect(result).toContain('data-path="qoderian-verify/my file.md"');
+    expect(result).toContain('data-path="/Users/me/Desktop/qoderian-verify/my file.md"');
     expect(result).toContain(' now');
   });
 
@@ -128,7 +129,7 @@ describe('replaceMentionTokensWithHtml', () => {
     ]);
 
     expect(result).toContain('data-kind="file"');
-    expect(result).toContain('data-path="qoderian-verify/src/a.md"');
+    expect(result).toContain('data-path="/Users/me/Desktop/qoderian-verify/src/a.md"');
   });
 
   it('leaves external-looking tokens untouched when no contexts are provided', () => {

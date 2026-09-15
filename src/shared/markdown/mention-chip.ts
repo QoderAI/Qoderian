@@ -159,13 +159,18 @@ function resolveLongestPath(
   return null;
 }
 
-function createChipHtml(path: string, kind: ReferenceChipKind): string {
+function createChipHtml(
+  path: string,
+  kind: ReferenceChipKind,
+  externalPath?: string,
+): string {
   const label = escapeHtml(formatReferenceLabel(path));
-  const escapedPath = escapeHtml(path);
+  const chipPath = escapeHtml(externalPath ?? path);
   const title = escapeHtml(`@${path}${kind === 'folder' ? '/' : ''}`);
+  const externalAttr = externalPath ? ' data-external="true"' : '';
   return (
     `<span class="qoderian-composer-reference qoderian-msg-reference"`
-    + ` data-kind="${kind}" data-path="${escapedPath}" title="${title}">`
+    + ` data-kind="${kind}" data-path="${chipPath}"${externalAttr} title="${title}">`
     + `<span class="qoderian-composer-reference-icon"></span>`
     + `<span class="qoderian-composer-reference-label">${label}</span>`
     + `</span>`
@@ -189,24 +194,28 @@ export function replaceMentionTokensWithHtml(
   // External context mentions use the root's folder name as a namespace
   // (`@root/` or `@root/relative/path`), so a name match is enough and no
   // filesystem scan is needed on the render path.
-  const externalRootNames = new Set<string>();
+  const externalRootsByName = new Map<string, string>();
   for (const contextPath of externalContexts) {
     const segments = contextPath.replace(/\\/g, '/').split('/').filter(Boolean);
     const name = segments[segments.length - 1];
-    if (name) externalRootNames.add(name.toLowerCase());
+    if (name) externalRootsByName.set(name.toLowerCase(), contextPath);
   }
 
-  const matchesExternalContext = (path: string): boolean => {
-    if (externalRootNames.size === 0) return false;
+  const externalAbsolutePath = (path: string): string | null => {
+    if (externalRootsByName.size === 0) return null;
     const segments = path.replace(/\\/g, '/').replace(/^\/+/, '').split('/');
     const [rootName, ...rest] = segments;
-    if (!rootName || !externalRootNames.has(rootName.toLowerCase())) return false;
-    if (rest.length === 0) return true;
-    if (rest.some(segment => segment.length === 0)) return false;
-    if (rest.every(segment => !/\s/.test(segment))) return true;
-    // Spaced paths are only accepted when the final segment looks like a file
-    // name, so trailing words from the sentence are not swallowed.
-    return /\.[A-Za-z0-9]{1,8}$/.test(rest[rest.length - 1].trim());
+    const rootPath = rootName ? externalRootsByName.get(rootName.toLowerCase()) : undefined;
+    if (!rootPath) return null;
+    if (rest.length === 0) return rootPath;
+    if (rest.some(segment => segment.length === 0)) return null;
+    if (rest.some(segment => /\s/.test(segment))) {
+      // Spaced paths are only accepted when the final segment looks like a file
+      // name, so trailing words from the sentence are not swallowed.
+      const last = rest[rest.length - 1].trim();
+      if (!/\.[A-Za-z0-9]{1,8}$/.test(last)) return null;
+    }
+    return `${rootPath.replace(/[\\/]+$/, '')}/${rest.join('/')}`;
   };
 
   const resolvePath = (path: string): boolean => {
@@ -215,7 +224,7 @@ export function replaceMentionTokensWithHtml(
     } catch {
       // Vault lookup failures fall through to the external context check.
     }
-    return matchesExternalContext(path);
+    return externalAbsolutePath(path) !== null;
   };
   const candidates = findMentionCandidates(markdown, resolvePath);
   if (candidates.length === 0) {
@@ -233,11 +242,12 @@ export function replaceMentionTokensWithHtml(
     } catch {
       // Vault lookup failures fall through to the external context check.
     }
+    const externalPath = resolved ? null : externalAbsolutePath(candidate.path);
     const kind: ReferenceChipKind | null = resolved instanceof TFolder
       ? 'folder'
       : resolved instanceof TFile
         ? 'file'
-        : matchesExternalContext(candidate.path)
+        : externalPath
           ? (candidate.hasTrailingSlash ? 'folder' : 'file')
           : null;
     if (!kind) {
@@ -245,7 +255,7 @@ export function replaceMentionTokensWithHtml(
     }
 
     chunks.push(markdown.slice(cursor, candidate.start));
-    chunks.push(createChipHtml(candidate.path, kind));
+    chunks.push(createChipHtml(candidate.path, kind, externalPath ?? undefined));
     cursor = candidate.end;
   }
   if (chunks.length === 0) {

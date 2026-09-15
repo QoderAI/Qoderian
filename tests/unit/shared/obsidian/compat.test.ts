@@ -2,6 +2,12 @@ import type { App, TAbstractFile, Workspace, WorkspaceLeaf } from 'obsidian';
 
 import { openReferenceChip, revealWorkspaceLeaf } from '@/shared/obsidian/compat';
 
+const mockShowItemInFolder = jest.fn();
+
+jest.mock('electron', () => ({
+  remote: { shell: { showItemInFolder: mockShowItemInFolder } },
+}), { virtual: true });
+
 describe('obsidianCompat', () => {
   describe('revealWorkspaceLeaf', () => {
     it('reveals the workspace leaf', async () => {
@@ -96,6 +102,17 @@ describe('obsidianCompat', () => {
 
       openReferenceChip(app, 'file', 'gone/note.md');
 
+      expect(openFile).not.toHaveBeenCalled();
+      expect(revealInFolder).not.toHaveBeenCalled();
+    });
+
+    it('reveals an external absolute path in the OS file manager', () => {
+      const { app, openFile, revealInFolder } = createMockApp({});
+      mockShowItemInFolder.mockClear();
+
+      openReferenceChip(app, 'folder', '/Users/me/Desktop/qoderian-verify');
+
+      expect(mockShowItemInFolder).toHaveBeenCalledWith('/Users/me/Desktop/qoderian-verify');
       expect(openFile).not.toHaveBeenCalled();
       expect(revealInFolder).not.toHaveBeenCalled();
     });
