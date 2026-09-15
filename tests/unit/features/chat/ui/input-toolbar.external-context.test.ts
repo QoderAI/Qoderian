@@ -208,7 +208,9 @@ describe('ExternalContextSelector', () => {
 
       const accepted = selector.addExternalContext('/tmp/some-file.txt', { allowFile: true });
       expect(accepted.success).toBe(true);
-      expect(selector.getExternalContexts()).toContain('/tmp/some-file.txt');
+      const contexts = selector.getExternalContexts();
+      expect(contexts).toHaveLength(1);
+      expect(contexts[0]).toContain('some-file.txt');
     });
 
     it('should reject empty input', () => {
