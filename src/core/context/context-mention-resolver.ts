@@ -85,10 +85,25 @@ export function resolveExternalMentionAtIndex(
     const separator = text[displayNameEnd];
     if (separator !== '/' && separator !== '\\') continue;
 
+    const pathStart = displayNameEnd + 1;
+    // A bare `@root/` targets the external context root itself, mirroring how
+    // a vault folder mention references the whole folder.
+    if (pathStart >= text.length || isWhitespace(text[pathStart])) {
+      const folderMatch: MentionLookupMatch = {
+        resolvedPath: entry.contextRoot,
+        endIndex: pathStart,
+        trailingPunctuation: '',
+      };
+      if (!bestMatch || folderMatch.endIndex > bestMatch.endIndex) {
+        bestMatch = folderMatch;
+      }
+      continue;
+    }
+
     const lookup = getContextLookup(entry.contextRoot);
     const match = findBestMentionLookupMatch(
       text,
-      displayNameEnd + 1,
+      pathStart,
       lookup,
       normalizeMentionPath,
       normalizeForPlatformLookup

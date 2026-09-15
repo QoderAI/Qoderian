@@ -566,6 +566,38 @@ describe('MentionDropdownController', () => {
       localController.destroy();
     });
 
+    it('chips an external context root and settles instead of drilling in', () => {
+      const onAttachFile = jest.fn();
+      const onInsertReference = jest.fn();
+      const localCallbacks = createMockCallbacks({
+        onAttachFile,
+        onInsertReference,
+        getExternalContexts: jest.fn().mockReturnValue(['/tmp/external']),
+      });
+      const localInput = createMockInput();
+      const localController = new MentionDropdownController(createMockEl(), localInput, localCallbacks);
+
+      localInput.value = '@external';
+      localInput.selectionStart = 9;
+      localInput.selectionEnd = 9;
+      localController.handleInputChange();
+      jest.advanceTimersByTime(200);
+
+      const enterEvent = { key: 'Enter', preventDefault: jest.fn(), isComposing: false } as any;
+      localController.handleKeydown(enterEvent);
+
+      expect(localInput.value).toBe('@external/ ');
+      expect(onInsertReference).toHaveBeenCalledWith({
+        token: '@external/',
+        path: '/tmp/external',
+        kind: 'folder',
+      });
+      expect(onAttachFile).not.toHaveBeenCalled();
+      expect(localController.isVisible()).toBe(false);
+
+      localController.destroy();
+    });
+
     it('renders vault folder text in @path/ format', () => {
       const localCallbacks = createMockCallbacks({
         getCachedVaultFolders: jest.fn().mockReturnValue([

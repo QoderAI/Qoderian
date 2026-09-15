@@ -165,8 +165,10 @@
       "moreFiles": "再显示 {count} 个文件"
     },
     "drop": {
-      "context": "拖拽笔记、文件夹或图片到此处，添加为上下文",
-      "ignored": "已忽略 {count} 个不支持的文件，仅支持拖入笔记、文件夹和图片"
+      "added": "已添加外部上下文：{path}",
+      "failed": "添加外部上下文失败：{error}",
+      "context": "拖拽笔记、文件夹、图片或文件到此处，添加为上下文",
+      "ignored": "已忽略 {count} 个不支持的项，仅支持拖入笔记、文件夹、图片和文件"
     },
     "permissionMode": {
       "default": {

@@ -2,7 +2,7 @@ import { Notice, setIcon } from 'obsidian';
 import * as os from 'os';
 import * as path from 'path';
 
-import { filterValidPaths, findConflictingPath, isDuplicatePath, isValidDirectoryPath, validateDirectoryPath } from '../../../core/context/external-context';
+import { filterValidContextPaths, findConflictingPath, isDuplicatePath, validateContextPath, validateDirectoryPath } from '../../../core/context/external-context';
 import { expandHomePath, normalizePathForFilesystem } from '../../../core/fs/path';
 import type {
   ManagedMcpServer,
@@ -128,8 +128,8 @@ export class ExternalContextSelector {
   }
 
   setPersistentPaths(paths: string[]): void {
-    // Validate paths - remove non-existent directories
-    const validPaths = filterValidPaths(paths);
+    // Validate paths - remove non-existent entries (directories or files)
+    const validPaths = filterValidContextPaths(paths);
     const invalidPaths = paths.filter(p => !validPaths.includes(p));
 
     this.persistentPaths = new Set(validPaths);
@@ -150,9 +150,9 @@ export class ExternalContextSelector {
     if (this.persistentPaths.has(path)) {
       this.persistentPaths.delete(path);
     } else {
-      // Validate path still exists before persisting
-      if (!isValidDirectoryPath(path)) {
-        new Notice(`Cannot persist "${this.shortenPath(path)}" - directory no longer exists`, 4000);
+      // Validate the path still exists before persisting (file or directory).
+      if (!validateContextPath(path).valid) {
+        new Notice(`Cannot persist "${this.shortenPath(path)}" - path no longer exists`, 4000);
         return;
       }
       this.persistentPaths.add(path);
@@ -202,7 +202,10 @@ export class ExternalContextSelector {
    * @param pathInput - Path string (supports ~/ expansion)
    * @returns Result with success status and normalized path, or error message on failure
    */
-  addExternalContext(pathInput: string): AddExternalContextResult {
+  addExternalContext(
+    pathInput: string,
+    options: { allowFile?: boolean } = {},
+  ): AddExternalContextResult {
     const trimmed = pathInput?.trim();
     if (!trimmed) {
       return { success: false, error: 'No path provided. Usage: /add-dir /absolute/path' };
@@ -223,8 +226,10 @@ export class ExternalContextSelector {
       return { success: false, error: 'Path must be absolute. Usage: /add-dir /absolute/path' };
     }
 
-    // Validate path exists and is a directory with specific error messages
-    const validation = validateDirectoryPath(normalizedPath);
+    // Validate path exists; a single file is only accepted when explicitly allowed
+    const validation: { valid: boolean; error?: string } = options.allowFile
+      ? validateContextPath(normalizedPath)
+      : validateDirectoryPath(normalizedPath);
     if (!validation.valid) {
       return { success: false, error: `${validation.error}: ${pathInput}` };
     }
@@ -258,7 +263,7 @@ export class ExternalContextSelector {
     // Use settings value if provided (most up-to-date), otherwise use local cache
     if (persistentPathsFromSettings) {
       // Validate paths - silently filter during session initialization (not user action)
-      const validPaths = filterValidPaths(persistentPathsFromSettings);
+      const validPaths = filterValidContextPaths(persistentPathsFromSettings);
       this.persistentPaths = new Set(validPaths);
     }
     this.externalContextPaths = [...this.persistentPaths];
@@ -433,13 +438,8 @@ export class ExternalContextSelector {
       this.iconEl.addClass('active');
       this.iconEl.setAttribute('title', `${count} external context${count > 1 ? 's' : ''} (click to add more)`);
 
-      // Show badge only when more than 1 path
-      if (count > 1) {
-        this.badgeEl.setText(String(count));
-        this.badgeEl.addClass('visible');
-      } else {
-        this.badgeEl.removeClass('visible');
-      }
+      this.badgeEl.setText(String(count));
+      this.badgeEl.addClass('visible');
     } else {
       this.iconEl.removeClass('active');
       this.iconEl.setAttribute('title', 'Add external contexts (click)');

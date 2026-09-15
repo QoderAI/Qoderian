@@ -165,8 +165,10 @@
       "moreFiles": "再顯示 {count} 個檔案"
     },
     "drop": {
-      "context": "拖曳筆記、資料夾或圖片到此處，新增為上下文",
-      "ignored": "已忽略 {count} 個不支援的檔案，僅支援拖入筆記、資料夾與圖片"
+      "added": "已新增外部上下文：{path}",
+      "failed": "新增外部上下文失敗：{error}",
+      "context": "拖曳筆記、資料夾、圖片或檔案到此處，新增為上下文",
+      "ignored": "已忽略 {count} 個不支援的項目，僅支援拖入筆記、資料夾、圖片與檔案"
     },
     "permissionMode": {
       "default": {

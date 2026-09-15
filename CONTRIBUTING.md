@@ -42,9 +42,26 @@ stream events should also be exercised manually against a real qodercli:
 npm run smoke:qoder
 ```
 
-This initialization-only check follows the official TypeScript model-selection
+The initialization-only SDK check follows the official TypeScript model-selection
 sample and does not send a model turn. Set `QODER_CLI_PATH` when qodercli is not
 available on PATH.
+
+Folder-drop changes have a protocol-driven test in a running Obsidian/Electron app. Set
+`OBSIDIAN_VAULT` in `.env.local`, launch Obsidian with remote debugging enabled,
+open that vault, and run:
+
+```bash
+/Applications/Obsidian.app/Contents/MacOS/Obsidian --remote-debugging-port=9222
+npm run test:e2e:file-drop
+```
+
+The test builds and deploys the plugin into the configured test vault, reloads
+it, sends a folder drag through Chromium's input protocol, and verifies that
+the path becomes external context with visible feedback and no composer text
+change. It also checks dragover acceptance with a simulated host interceptor.
+This does not automate the Finder/Explorer mouse gesture; verify that separately.
+Set `QODERIAN_E2E_DROP_KIND=file` for the file case, or `OBSIDIAN_DEBUG_PORT` when
+using a port other than `9222`.
 
 ## Naming conventions
 

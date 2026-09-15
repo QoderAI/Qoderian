@@ -165,8 +165,10 @@
       "moreFiles": "Mostrar mais {count} arquivos"
     },
     "drop": {
-      "context": "Solte notas, pastas ou imagens aqui para adicioná-las como contexto",
-      "ignored": "{count} arquivos não suportados foram ignorados; apenas notas, pastas e imagens podem ser soltas"
+      "added": "Contexto externo adicionado: {path}",
+      "failed": "Não foi possível adicionar o contexto externo: {error}",
+      "context": "Solte notas, pastas, imagens ou arquivos aqui para adicioná-los como contexto",
+      "ignored": "{count} itens não suportados foram ignorados; apenas notas, pastas, imagens e arquivos podem ser soltos"
     },
     "permissionMode": {
       "default": {

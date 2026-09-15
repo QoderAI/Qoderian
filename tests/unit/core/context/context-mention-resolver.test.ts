@@ -243,6 +243,59 @@ describe('contextMentionResolver', () => {
       expect(getContextLookup).toHaveBeenCalledWith('/external');
     });
 
+    it('resolves a bare root mention at the end of the text to the context root path', () => {
+      const text = 'See @external/';
+      const mentionStart = text.indexOf('@');
+      const contextEntries: ExternalContextDisplayEntry[] = [
+        {
+          contextRoot: '/external',
+          displayName: 'external',
+          displayNameLower: 'external',
+        },
+      ];
+      const getContextLookup = jest.fn().mockReturnValue(new Map<string, string>());
+
+      const match = resolveExternalMentionAtIndex(
+        text,
+        mentionStart,
+        contextEntries,
+        getContextLookup
+      );
+
+      expect(match).toEqual({
+        resolvedPath: '/external',
+        trailingPunctuation: '',
+        endIndex: text.length,
+      });
+      expect(getContextLookup).not.toHaveBeenCalled();
+    });
+
+    it('resolves a bare root mention followed by whitespace', () => {
+      const text = 'See @external/ then continue';
+      const mentionStart = text.indexOf('@');
+      const contextEntries: ExternalContextDisplayEntry[] = [
+        {
+          contextRoot: '/external',
+          displayName: 'external',
+          displayNameLower: 'external',
+        },
+      ];
+      const getContextLookup = jest.fn().mockReturnValue(new Map<string, string>());
+
+      const match = resolveExternalMentionAtIndex(
+        text,
+        mentionStart,
+        contextEntries,
+        getContextLookup
+      );
+
+      expect(match).toEqual({
+        resolvedPath: '/external',
+        trailingPunctuation: '',
+        endIndex: text.indexOf('/') + 1,
+      });
+    });
+
     it('returns null when mention does not include a path separator after display name', () => {
       const text = 'Use @external and continue';
       const mentionStart = text.indexOf('@');

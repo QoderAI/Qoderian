@@ -65,6 +65,7 @@ export class MessageRenderer {
   private messagesEl: HTMLElement;
   private rewindCallback?: (messageId: string, mode?: ChatRewindMode) => Promise<void>;
   private forkCallback?: (messageId: string) => Promise<void>;
+  private getExternalContexts?: () => readonly string[];
   private liveMessageEls = new Map<string, HTMLElement>();
 
   constructor(
@@ -73,6 +74,7 @@ export class MessageRenderer {
     messagesEl: HTMLElement,
     rewindCallback?: (messageId: string, mode?: ChatRewindMode) => Promise<void>,
     forkCallback?: (messageId: string) => Promise<void>,
+    getExternalContexts?: () => readonly string[],
   ) {
     this.app = plugin.app;
     this.plugin = plugin;
@@ -80,6 +82,7 @@ export class MessageRenderer {
     this.messagesEl = messagesEl;
     this.rewindCallback = rewindCallback;
     this.forkCallback = forkCallback;
+    this.getExternalContexts = getExternalContexts;
 
     // Register delegated click handler for file links
     registerFileLinkHandler(this.app, this.messagesEl, this.component);
@@ -823,7 +826,11 @@ export class MessageRenderer {
         { mediaFolder: this.plugin.settings.mediaFolder }
       );
       if (options?.userReferenceChips) {
-        processedMarkdown = replaceMentionTokensWithHtml(processedMarkdown, this.app);
+        processedMarkdown = replaceMentionTokensWithHtml(
+          processedMarkdown,
+          this.app,
+          this.getExternalContexts?.() ?? [],
+        );
       }
       await MarkdownRenderer.render(
         this.app,
@@ -886,7 +893,8 @@ export class MessageRenderer {
       if (processedMarkdown.includes('[[')) {
         processFileLinks(this.app, el);
       }
-    } catch {
+    } catch (error) {
+      console.error('[qoderian] Failed to render message content', error);
       el.createDiv({
         cls: 'qoderian-render-error',
         text: 'Failed to render message content.',

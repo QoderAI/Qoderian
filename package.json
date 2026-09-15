@@ -17,6 +17,7 @@
     "lint:names": "node scripts/check-file-names.mjs",
     "lint:fix": "npm run lint -- --fix",
     "test": "node scripts/run-jest.js",
+    "test:e2e:file-drop": "node scripts/e2e-external-file-drop.mjs",
     "test:watch": "node scripts/run-jest.js --watch",
     "test:coverage": "node scripts/run-jest.js --coverage",
     "smoke:qoder": "node scripts/smoke-qoder-sdk.mjs",

@@ -159,13 +159,18 @@ function resolveLongestPath(
   return null;
 }
 
-function createChipHtml(path: string, kind: ReferenceChipKind): string {
+function createChipHtml(
+  path: string,
+  kind: ReferenceChipKind,
+  externalPath?: string,
+): string {
   const label = escapeHtml(formatReferenceLabel(path));
-  const escapedPath = escapeHtml(path);
+  const chipPath = escapeHtml(externalPath ?? path);
   const title = escapeHtml(`@${path}${kind === 'folder' ? '/' : ''}`);
+  const externalAttr = externalPath ? ' data-external="true"' : '';
   return (
     `<span class="qoderian-composer-reference qoderian-msg-reference"`
-    + ` data-kind="${kind}" data-path="${escapedPath}" title="${title}">`
+    + ` data-kind="${kind}" data-path="${chipPath}"${externalAttr} title="${title}">`
     + `<span class="qoderian-composer-reference-icon"></span>`
     + `<span class="qoderian-composer-reference-label">${label}</span>`
     + `</span>`
@@ -177,17 +182,49 @@ function createChipHtml(path: string, kind: ReferenceChipKind): string {
  * an existing vault file or folder becomes a chip; unknown tokens and code
  * spans pass through unchanged.
  */
-export function replaceMentionTokensWithHtml(markdown: string, app: App): string {
+export function replaceMentionTokensWithHtml(
+  markdown: string,
+  app: App,
+  externalContexts: readonly string[] = [],
+): string {
   if (!app?.vault || !markdown.includes('@')) {
     return markdown;
   }
 
+  // External context mentions use the root's folder name as a namespace
+  // (`@root/` or `@root/relative/path`), so a name match is enough and no
+  // filesystem scan is needed on the render path.
+  const externalRootsByName = new Map<string, string>();
+  for (const contextPath of externalContexts) {
+    const segments = contextPath.replace(/\\/g, '/').split('/').filter(Boolean);
+    const name = segments[segments.length - 1];
+    if (name) externalRootsByName.set(name.toLowerCase(), contextPath);
+  }
+
+  const externalAbsolutePath = (path: string): string | null => {
+    if (externalRootsByName.size === 0) return null;
+    const segments = path.replace(/\\/g, '/').replace(/^\/+/, '').split('/');
+    const [rootName, ...rest] = segments;
+    const rootPath = rootName ? externalRootsByName.get(rootName.toLowerCase()) : undefined;
+    if (!rootPath) return null;
+    if (rest.length === 0) return rootPath;
+    if (rest.some(segment => segment.length === 0)) return null;
+    if (rest.some(segment => /\s/.test(segment))) {
+      // Spaced paths are only accepted when the final segment looks like a file
+      // name, so trailing words from the sentence are not swallowed.
+      const last = rest[rest.length - 1].trim();
+      if (!/\.[A-Za-z0-9]{1,8}$/.test(last)) return null;
+    }
+    return `${rootPath.replace(/[\\/]+$/, '')}/${rest.join('/')}`;
+  };
+
   const resolvePath = (path: string): boolean => {
     try {
-      return app.vault.getAbstractFileByPath(path) !== null;
+      if (app.vault.getAbstractFileByPath(path) !== null) return true;
     } catch {
-      return false;
+      // Vault lookup failures fall through to the external context check.
     }
+    return externalAbsolutePath(path) !== null;
   };
   const candidates = findMentionCandidates(markdown, resolvePath);
   if (candidates.length === 0) {
@@ -203,19 +240,22 @@ export function replaceMentionTokensWithHtml(markdown: string, app: App): string
     try {
       resolved = app.vault.getAbstractFileByPath(candidate.path);
     } catch {
-      // Vault lookup failures leave the token untouched.
+      // Vault lookup failures fall through to the external context check.
     }
+    const externalPath = resolved ? null : externalAbsolutePath(candidate.path);
     const kind: ReferenceChipKind | null = resolved instanceof TFolder
       ? 'folder'
       : resolved instanceof TFile
         ? 'file'
-        : null;
-    if (!kind || !resolved) {
+        : externalPath
+          ? (candidate.hasTrailingSlash ? 'folder' : 'file')
+          : null;
+    if (!kind) {
       continue;
     }
 
     chunks.push(markdown.slice(cursor, candidate.start));
-    chunks.push(createChipHtml(candidate.path, kind));
+    chunks.push(createChipHtml(candidate.path, kind, externalPath ?? undefined));
     cursor = candidate.end;
   }
   if (chunks.length === 0) {

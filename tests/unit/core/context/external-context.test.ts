@@ -2,11 +2,10 @@ import * as fs from 'fs';
 
 import {
   buildExternalContextDisplayEntries,
-  filterValidPaths,
+  filterValidContextPaths,
   findConflictingPath,
   getFolderName,
   isDuplicatePath,
-  isValidDirectoryPath,
   normalizePathForComparison,
   validateDirectoryPath,
 } from '@/core/context/external-context';
@@ -260,67 +259,29 @@ describe('externalContext utilities', () => {
     });
   });
 
-  describe('isValidDirectoryPath', () => {
+  describe('filterValidContextPaths', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    it('should return true for existing directory', () => {
-      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => true });
-      expect(isValidDirectoryPath('/existing/dir')).toBe(true);
-      expect(fs.statSync).toHaveBeenCalledWith('/existing/dir');
-    });
-
-    it('should return false for non-existent path', () => {
-      (fs.statSync as jest.Mock).mockImplementation(() => {
-        throw new Error('ENOENT');
-      });
-      expect(isValidDirectoryPath('/non/existent')).toBe(false);
-    });
-
-    it('should return false for file path (not directory)', () => {
-      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => false });
-      expect(isValidDirectoryPath('/path/to/file.txt')).toBe(false);
-    });
-  });
-
-  describe('filterValidPaths', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should filter out non-existent paths', () => {
+    it('keeps directories and single files, dropping missing paths', () => {
       (fs.statSync as jest.Mock).mockImplementation((p: string) => {
-        if (p === '/valid/path') {
-          return { isDirectory: () => true };
-        }
+        if (p === '/valid/dir') return { isDirectory: () => true };
+        if (p === '/valid/file.txt') return { isDirectory: () => false };
         throw new Error('ENOENT');
       });
 
-      const result = filterValidPaths(['/valid/path', '/invalid/path', '/another/invalid']);
-      expect(result).toEqual(['/valid/path']);
+      const result = filterValidContextPaths(['/valid/dir', '/valid/file.txt', '/missing']);
+
+      expect(result).toEqual(['/valid/dir', '/valid/file.txt']);
     });
 
-    it('should return empty array when all paths are invalid', () => {
+    it('returns an empty array when no path exists', () => {
       (fs.statSync as jest.Mock).mockImplementation(() => {
         throw new Error('ENOENT');
       });
 
-      const result = filterValidPaths(['/invalid1', '/invalid2']);
-      expect(result).toEqual([]);
-    });
-
-    it('should return all paths when all are valid', () => {
-      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => true });
-
-      const paths = ['/path1', '/path2', '/path3'];
-      const result = filterValidPaths(paths);
-      expect(result).toEqual(paths);
-    });
-
-    it('should handle empty array', () => {
-      const result = filterValidPaths([]);
-      expect(result).toEqual([]);
+      expect(filterValidContextPaths(['/gone-a', '/gone-b'])).toEqual([]);
     });
   });
 

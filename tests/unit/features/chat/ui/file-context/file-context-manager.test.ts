@@ -344,6 +344,22 @@ describe('FileContextManager', () => {
     manager.destroy();
   });
 
+  it('transforms a bare external root mention to its absolute path', async () => {
+    const app = createMockApp();
+    const manager = new FileContextManager(
+      app,
+      containerEl as any,
+      inputEl,
+      createMockCallbacks({ externalContexts: ['/external'] })
+    );
+    mockScanPaths.mockReturnValue([]);
+
+    const transformed = await manager.transformContextMentions('Explain @external/ then continue.');
+    expect(transformed).toBe('Explain /external then continue.');
+
+    manager.destroy();
+  });
+
   it('transforms pasted external context mention to absolute path without dropdown selection', async () => {
     const app = createMockApp();
     const manager = new FileContextManager(

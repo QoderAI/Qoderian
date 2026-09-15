@@ -298,6 +298,9 @@ function initializeContextManagers(tab: TabData, plugin: QoderianPlugin): void {
     onInsertReference: (reference) => {
       tab.ui.fileContextManager?.registerComposerReference(reference);
     },
+    onAddExternalContext: (path, options) =>
+      tab.ui.externalContextSelector?.addExternalContext(path, options)
+      ?? { success: false, error: 'External context is not available in this tab' },
   });
 
   // Image context manager - drag/drop uses inputContainerEl, preview in contextRowEl
@@ -832,6 +835,7 @@ export function initializeTabControllers(
     forkRequestCallback
       ? (id) => handleForkRequest(tab, plugin, id, forkRequestCallback)
       : undefined,
+    () => ui.externalContextSelector?.getExternalContexts() ?? [],
   );
 
   // Selection controller

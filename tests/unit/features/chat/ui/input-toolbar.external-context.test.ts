@@ -117,6 +117,26 @@ describe('ExternalContextSelector', () => {
         expect.arrayContaining(['/path/a', '/path/b'])
       );
     });
+
+    it('persists a single-file external context', () => {
+      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => false });
+      const onPersistenceChange = jest.fn();
+      selector.setOnPersistenceChange(onPersistenceChange);
+      selector.setExternalContexts(['/tmp/some-file.txt']);
+
+      selector.togglePersistence('/tmp/some-file.txt');
+
+      expect(selector.getPersistentPaths()).toContain('/tmp/some-file.txt');
+      expect(onPersistenceChange).toHaveBeenCalledWith(['/tmp/some-file.txt']);
+    });
+
+    it('keeps persisted file paths when loading from settings', () => {
+      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => false });
+
+      selector.setPersistentPaths(['/tmp/some-file.txt']);
+
+      expect(selector.getPersistentPaths()).toContain('/tmp/some-file.txt');
+    });
   });
 
   describe('clearExternalContexts', () => {
@@ -179,6 +199,20 @@ describe('ExternalContextSelector', () => {
   });
 
   describe('addExternalContext', () => {
+    it('should reject a file path unless allowFile is set', () => {
+      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => false });
+
+      const rejected = selector.addExternalContext('/tmp/some-file.txt');
+      expect(rejected.success).toBe(false);
+      expect(selector.getExternalContexts()).toEqual([]);
+
+      const accepted = selector.addExternalContext('/tmp/some-file.txt', { allowFile: true });
+      expect(accepted.success).toBe(true);
+      const contexts = selector.getExternalContexts();
+      expect(contexts).toHaveLength(1);
+      expect(contexts[0]).toContain('some-file.txt');
+    });
+
     it('should reject empty input', () => {
       const onChange = jest.fn();
       selector.setOnChange(onChange);

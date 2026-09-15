@@ -165,8 +165,10 @@
       "moreFiles": "Afficher {count} fichiers de plus"
     },
     "drop": {
-      "context": "Déposez des notes, des dossiers ou des images ici pour les ajouter comme contexte",
-      "ignored": "{count} fichiers non pris en charge ignorés ; seules les notes, dossiers et images peuvent être déposés"
+      "added": "Contexte externe ajouté : {path}",
+      "failed": "Impossible d’ajouter le contexte externe : {error}",
+      "context": "Déposez des notes, des dossiers, des images ou des fichiers ici pour les ajouter comme contexte",
+      "ignored": "{count} éléments non pris en charge ignorés ; seules les notes, dossiers, images et fichiers peuvent être déposés"
     },
     "permissionMode": {
       "default": {

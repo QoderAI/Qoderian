@@ -525,11 +525,16 @@ export class MentionDropdownController {
         break;
       }
       case 'context-folder': {
+        // Mirrors the vault folder case: chip the whole-root token and settle.
+        // Typing `/` afterwards still drills into the root's file list.
         const replacement = `@${selectedItem.name}/`;
-        this.insertReplacement(beforeAt, replacement, afterCursor);
-        this.inputEl.focus();
-        this.handleInputChange();
-        return;
+        this.callbacks.onInsertReference?.({
+          token: replacement,
+          path: selectedItem.contextRoot,
+          kind: 'folder',
+        });
+        this.insertReplacement(beforeAt, `${replacement} `, afterCursor);
+        break;
       }
       case 'context-file': {
         // Display friendly name in input; absolute path resolution happens at send time.
