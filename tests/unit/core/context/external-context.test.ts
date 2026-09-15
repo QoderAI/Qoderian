@@ -3,11 +3,9 @@ import * as fs from 'fs';
 import {
   buildExternalContextDisplayEntries,
   filterValidContextPaths,
-  filterValidPaths,
   findConflictingPath,
   getFolderName,
   isDuplicatePath,
-  isValidDirectoryPath,
   normalizePathForComparison,
   validateDirectoryPath,
 } from '@/core/context/external-context';
@@ -258,70 +256,6 @@ describe('externalContext utilities', () => {
       expect(result.valid).toBe(false);
       expect(result.error).toContain('Cannot access path');
       expect(result.error).toContain('Something went wrong');
-    });
-  });
-
-  describe('isValidDirectoryPath', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should return true for existing directory', () => {
-      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => true });
-      expect(isValidDirectoryPath('/existing/dir')).toBe(true);
-      expect(fs.statSync).toHaveBeenCalledWith('/existing/dir');
-    });
-
-    it('should return false for non-existent path', () => {
-      (fs.statSync as jest.Mock).mockImplementation(() => {
-        throw new Error('ENOENT');
-      });
-      expect(isValidDirectoryPath('/non/existent')).toBe(false);
-    });
-
-    it('should return false for file path (not directory)', () => {
-      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => false });
-      expect(isValidDirectoryPath('/path/to/file.txt')).toBe(false);
-    });
-  });
-
-  describe('filterValidPaths', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should filter out non-existent paths', () => {
-      (fs.statSync as jest.Mock).mockImplementation((p: string) => {
-        if (p === '/valid/path') {
-          return { isDirectory: () => true };
-        }
-        throw new Error('ENOENT');
-      });
-
-      const result = filterValidPaths(['/valid/path', '/invalid/path', '/another/invalid']);
-      expect(result).toEqual(['/valid/path']);
-    });
-
-    it('should return empty array when all paths are invalid', () => {
-      (fs.statSync as jest.Mock).mockImplementation(() => {
-        throw new Error('ENOENT');
-      });
-
-      const result = filterValidPaths(['/invalid1', '/invalid2']);
-      expect(result).toEqual([]);
-    });
-
-    it('should return all paths when all are valid', () => {
-      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => true });
-
-      const paths = ['/path1', '/path2', '/path3'];
-      const result = filterValidPaths(paths);
-      expect(result).toEqual(paths);
-    });
-
-    it('should handle empty array', () => {
-      const result = filterValidPaths([]);
-      expect(result).toEqual([]);
     });
   });
 

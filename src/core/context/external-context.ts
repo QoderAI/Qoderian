@@ -142,10 +142,6 @@ export function validateDirectoryPath(p: string): DirectoryValidationResult {
   }
 }
 
-export function isValidDirectoryPath(p: string): boolean {
-  return validateDirectoryPath(p).valid;
-}
-
 export interface ContextPathValidationResult {
   valid: boolean;
   error?: string;
@@ -170,10 +166,6 @@ export function validateContextPath(p: string): ContextPathValidationResult {
     }
     return { valid: false, error: `Cannot access path: ${error.message}`, isDirectory: false };
   }
-}
-
-export function filterValidPaths(paths: string[]): string[] {
-  return paths.filter(isValidDirectoryPath);
 }
 
 /** Keeps directories and single-file roots alike (external contexts may be either). */
