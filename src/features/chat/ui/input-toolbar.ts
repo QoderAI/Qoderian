@@ -10,6 +10,7 @@ import type {
 } from '../../../core/types';
 import type { McpServerManager } from '../../../qoder/mcp/mcp-server-manager';
 import { appendCheckIcon, appendMcpIcon } from '../../../shared/icons';
+import { placeHoverDropdown } from './toolbar/hover-dropdown-placement';
 import {
   ModelSelector,
   PermissionToggle,
@@ -37,6 +38,54 @@ interface ElectronRemoteApi {
 export type AddExternalContextResult =
   | { success: true; normalizedPath: string }
   | { success: false; error: string };
+
+/**
+ * Keep an icon-hover dropdown inside the input toolbar: centered on its icon
+ * when it fits, clamped otherwise. The chat container clips overflow, so an
+ * unclamped dropdown lost its leading characters in narrow sidebars. Runs on
+ * every open (and content change) so panel resizes are picked up.
+ *
+ * The values are published as CSS custom properties consumed by the
+ * dropdown stylesheets (`--qoderian-hover-dropdown-left/-min-width/-max-width`).
+ */
+export function positionHoverDropdown(
+  selectorEl: HTMLElement,
+  iconEl: HTMLElement,
+  dropdownEl: HTMLElement,
+): void {
+  const toolbarEl = selectorEl.closest<HTMLElement>('.qoderian-input-toolbar');
+  // Layout-less DOM shims used in tests return a non-element from closest().
+  if (!toolbarEl || typeof toolbarEl.getBoundingClientRect !== 'function') {
+    return;
+  }
+
+  const toolbarRect = toolbarEl.getBoundingClientRect();
+  const selectorRect = selectorEl.getBoundingClientRect();
+  const iconRect = iconEl.getBoundingClientRect();
+
+  // Measure the natural width: caps applied by an earlier pass would
+  // otherwise masquerade as the content width and keep shrinking the cap.
+  dropdownEl.setCssProps({
+    '--qoderian-hover-dropdown-min-width': '',
+    '--qoderian-hover-dropdown-max-width': '',
+  });
+  const dropdownWidth = dropdownEl.getBoundingClientRect().width;
+
+  const placement = placeHoverDropdown(
+    iconRect.left - toolbarRect.left + iconRect.width / 2,
+    dropdownWidth,
+    toolbarRect.width,
+  );
+  if (!placement) {
+    return;
+  }
+
+  dropdownEl.setCssProps({
+    '--qoderian-hover-dropdown-left': `${toolbarRect.left + placement.center - selectorRect.left}px`,
+    '--qoderian-hover-dropdown-min-width': placement.maxWidth !== null ? '0' : '',
+    '--qoderian-hover-dropdown-max-width': placement.maxWidth !== null ? `${placement.maxWidth}px` : '',
+  });
+}
 
 export class ExternalContextSelector {
   private container: HTMLElement;
@@ -236,7 +285,19 @@ export class ExternalContextSelector {
     });
 
     this.dropdownEl = this.container.createDiv({ cls: 'qoderian-external-context-dropdown' });
+
+    // CSS reveals the dropdown on hover; reposition before it becomes visible
+    // so panel-width changes since the last render are picked up.
+    this.container.addEventListener('mouseenter', () => {
+      this.positionDropdown();
+    });
+
     this.renderDropdown();
+  }
+
+  private positionDropdown(): void {
+    if (!this.dropdownEl || !this.iconEl) return;
+    positionHoverDropdown(this.container, this.iconEl, this.dropdownEl);
   }
 
   private async openFolderPicker() {
@@ -334,6 +395,9 @@ export class ExternalContextSelector {
         });
       }
     }
+
+    // Content changes can change the width, so re-clamp against the toolbar.
+    this.positionDropdown();
   }
 
   /** Shorten path for display (replace home dir with ~) */
@@ -508,12 +572,19 @@ export class McpServerSelector {
     if (servers.length === 0) {
       const emptyEl = listEl.createDiv({ cls: 'qoderian-mcp-selector-empty' });
       emptyEl.setText(allServers.length === 0 ? 'No MCP servers configured' : 'All MCP servers disabled');
-      return;
+    } else {
+      for (const server of servers) {
+        this.renderServerItem(listEl, server);
+      }
     }
 
-    for (const server of servers) {
-      this.renderServerItem(listEl, server);
-    }
+    // Content changes can change the width, so re-clamp against the toolbar.
+    this.positionDropdown();
+  }
+
+  private positionDropdown(): void {
+    if (!this.dropdownEl || !this.iconEl) return;
+    positionHoverDropdown(this.container, this.iconEl, this.dropdownEl);
   }
 
   private renderServerItem(listEl: HTMLElement, server: ManagedMcpServer) {

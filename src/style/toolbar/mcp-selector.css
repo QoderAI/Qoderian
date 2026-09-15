@@ -56,12 +56,15 @@
 
 .qoderian-mcp-selector-dropdown {
   position: absolute;
-  left: 50%;
+  /* JS clamps the position and width to the toolbar bounds so narrow
+     sidebars cannot clip the leading characters (positionHoverDropdown);
+     the fallbacks keep the icon-centered look before the first measurement. */
+  left: var(--qoderian-hover-dropdown-left, 50%);
   transform: translateX(-50%);
   bottom: 100%;
   margin-bottom: 4px;
-  min-width: 200px;
-  max-width: 280px;
+  min-width: var(--qoderian-hover-dropdown-min-width, 200px);
+  max-width: var(--qoderian-hover-dropdown-max-width, 280px);
   background: var(--background-secondary);
   border: 1px solid var(--background-modifier-border);
   border-radius: 8px;
