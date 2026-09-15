@@ -128,7 +128,10 @@ export class VaultDropController {
     if (!this.hasClaimableDrag(event)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    this.dropOverlayEl.addClass('visible');
+    // dragenter fires again for every child element; skip the redundant write.
+    if (!this.dropOverlayEl.hasClass('visible')) {
+      this.dropOverlayEl.addClass('visible');
+    }
   };
 
   private readonly handleDragOver = (event: DragEvent): void => {
