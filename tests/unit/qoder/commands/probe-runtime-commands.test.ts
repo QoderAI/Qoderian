@@ -349,4 +349,19 @@ describe('probeRuntimeCatalog', () => {
       fetchStrategy: 'live',
     });
   });
+  it('groups custom-provider models under Custom', async () => {
+    setInitMessage({});
+    sdkMock.setMockAvailableModels([
+      { value: 'gw-gpt', displayName: 'GW GPT', source: 'custom', isEnabled: true },
+      { value: 'auto', displayName: 'Auto', source: 'system', isEnabled: true },
+    ]);
+
+    const result = await probeRuntimeCatalog(createMockPlugin());
+
+    if ('error' in result) throw new Error('probe failed');
+    expect(result.models.map((model) => [model.value, model.group])).toEqual([
+      ['gw-gpt', 'Custom'],
+      ['auto', 'Qoder'],
+    ]);
+  });
 });

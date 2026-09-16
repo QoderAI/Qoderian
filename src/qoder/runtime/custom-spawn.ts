@@ -9,6 +9,13 @@ import {
 } from './windows-cmd-shim';
 
 /**
+ * SDK-spawned sessions run qodercli in its "sdk" runtime mode, where
+ * CLI-configured custom providers (self-defined base URLs) stay disabled
+ * unless this opt-in is present — without it the CLI hides their models.
+ */
+const CUSTOM_PROVIDER_CLI_ENV = { QODER_SDK_CUSTOM_BASE_URL_BYOK: '1' } as const;
+
+/**
  * Spawn qodercli in Obsidian's Electron process.
  *
  * The Qoder SDK owns the CLI argument protocol. This adapter only covers the
@@ -36,7 +43,7 @@ export function createCustomSpawnFunction(
     const resolvedSpawnSpec = resolveWindowsCmdShimSpawnSpec({ args, command });
     const child = spawn(resolvedSpawnSpec.command, resolvedSpawnSpec.args, {
       cwd,
-      env,
+      env: env ? { ...env, ...CUSTOM_PROVIDER_CLI_ENV } : env,
       // stderr is always piped so host code (e.g. the runtime probe) can read
       // CLI diagnostics such as "No qodercli login found". A drain listener is
       // attached below to avoid pipe backpressure when nobody else listens.
