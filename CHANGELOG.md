@@ -11,6 +11,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.10] - 2026-09-16
+
 ### Added
 
 - A settings button in the view header opens Qoderian's settings window in
