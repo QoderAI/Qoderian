@@ -36,7 +36,7 @@ function mapSdkCommands(sdkCommands: SDKSlashCommand[]): SlashCommand[] {
 function resolveSdkModelGroup(model: ModelInfo): string {
   const source = model.source as string | undefined;
   if (model.serverScene === 'byok_enterprise' || source === 'organization') return 'Enterprise';
-  if (source === 'user') return 'Custom';
+  if (source === 'user' || source === 'custom') return 'Custom';
   if (model.isNew) return 'New models';
   return 'Qoder';
 }
@@ -376,6 +376,8 @@ export async function probeRuntimeCatalog(
     const commands = mapSdkCommands(initialization.commands ?? []);
     const agents = mapSdkAgents(initialization.agents ?? []);
 
+    // CLI-configured custom providers already ship with the CLI's model list;
+    // asking the server for them by id fails the live fetch outright.
     let models: QoderDiscoveredModel[] = [];
     try {
       const liveModels: ModelInfo[] = await conversation.getAvailableModels({ fetchStrategy: 'live' });

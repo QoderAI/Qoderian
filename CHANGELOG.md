@@ -11,6 +11,12 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Added
+
+- Models you configured as bring-your-own-key in qodercli — third-party
+  models and self-defined providers with a custom base URL — now show up in
+  the model selector and can be used from the composer.
+
 ## [1.0.10] - 2026-09-16
 
 ### Added

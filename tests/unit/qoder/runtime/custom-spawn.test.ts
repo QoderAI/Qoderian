@@ -108,6 +108,26 @@ describe('createCustomSpawnFunction', () => {
     );
   });
 
+  it('opts every spawned CLI into custom providers', () => {
+    const mockProcess = createMockProcess();
+    spawnMock.mockReturnValue(mockProcess as unknown as ReturnType<typeof spawn>);
+
+    const spawnFn = createCustomSpawnFunction('/enhanced/path');
+    spawnFn({
+      command: 'node',
+      args: ['cli.js'],
+      cwd: '/tmp',
+      env: { PATH: '/usr/bin' },
+      signal: new AbortController().signal,
+    });
+
+    const spawnOptions = spawnMock.mock.calls[0][2];
+    expect(spawnOptions.env).toEqual({
+      PATH: '/usr/bin',
+      QODER_SDK_CUSTOM_BASE_URL_BYOK: '1',
+    });
+  });
+
   it('always pipes stderr so host code can read CLI diagnostics', () => {
     const mockProcess = createMockProcess();
     spawnMock.mockReturnValue(mockProcess as unknown as ReturnType<typeof spawn>);
