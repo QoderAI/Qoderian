@@ -4,8 +4,7 @@ import { QoderianSettingsModal } from '@/features/settings/settings-modal';
 
 let lastModalInstance: any;
 const mockSettingsTab = {
-  containerEl: null as any,
-  display: jest.fn(),
+  mount: jest.fn(),
   hide: jest.fn(),
 };
 
@@ -50,8 +49,7 @@ jest.mock('@/features/settings/settings-tab', () => ({
 
 describe('QoderianSettingsModal', () => {
   beforeEach(() => {
-    mockSettingsTab.containerEl = null;
-    mockSettingsTab.display.mockClear();
+    mockSettingsTab.mount.mockClear();
     mockSettingsTab.hide.mockClear();
   });
 
@@ -60,8 +58,7 @@ describe('QoderianSettingsModal', () => {
 
     expect(lastModalInstance.modalEl.addClass).toHaveBeenCalledWith('qoderian-settings-modal');
     expect(lastModalInstance.titleEl.setText).toHaveBeenCalledWith('Qoderian Settings');
-    expect(mockSettingsTab.containerEl).toBe(lastModalInstance.contentEl);
-    expect(mockSettingsTab.display).toHaveBeenCalledTimes(1);
+    expect(mockSettingsTab.mount).toHaveBeenCalledWith(lastModalInstance.contentEl);
   });
 
   it('detaches the settings tab when the window closes', () => {

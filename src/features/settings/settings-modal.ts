@@ -18,8 +18,7 @@ export class QoderianSettingsModal extends Modal {
     this.titleEl.setText(t('settings.title'));
 
     const settingsTab = new QoderianSettingTab(this.app, this.plugin);
-    settingsTab.containerEl = this.contentEl;
-    settingsTab.display();
+    settingsTab.mount(this.contentEl);
     this.settingsTab = settingsTab;
   }
 
