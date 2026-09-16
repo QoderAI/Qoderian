@@ -14,6 +14,7 @@ import {
 import { setButtonTooltip } from '../../shared/dom/tooltip';
 import { createIconSvg, QODER_ICON,QODERIAN_ICON_ID } from '../../shared/icons';
 import { openFeedbackModal } from '../feedback/ui/feedback-modal';
+import { QoderianSettingsModal } from '../settings/settings-modal';
 import type { HistoryConversationStatus } from './controllers/conversation-controller';
 import {
   sendTabInputMessageFromExplicitEnterShortcut,
@@ -230,6 +231,11 @@ export class QoderianView extends ItemView {
     setIcon(feedbackBtn, 'message-circle-question');
     setButtonTooltip(feedbackBtn, t('commands.submitFeedback'));
     feedbackBtn.addEventListener('click', () => this.openFeedback());
+
+    const settingsBtn = headerActions.createDiv({ cls: 'qoderian-header-btn' });
+    setIcon(settingsBtn, 'settings');
+    setButtonTooltip(settingsBtn, t('settings.title'));
+    settingsBtn.addEventListener('click', () => this.openSettings());
   }
 
   /**
@@ -305,6 +311,10 @@ export class QoderianView extends ItemView {
         this.plugin.qoderServices?.loginService.start();
       },
     });
+  }
+
+  private openSettings(): void {
+    new QoderianSettingsModal(this.plugin).open();
   }
 
   private buildInputFooter(): void {

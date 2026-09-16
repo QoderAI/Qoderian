@@ -208,6 +208,12 @@ export class Modal {
     empty: jest.fn(),
     addClass: jest.fn(),
   };
+  modalEl: any = {
+    addClass: jest.fn(),
+  };
+  titleEl: any = {
+    setText: jest.fn(),
+  };
 
   constructor(app: any) {
     this.app = app;
