@@ -224,7 +224,7 @@ src/
 └── style/                    # Modular CSS
 ```
 
-Qoderian drives qodercli through the pinned `@qoder-ai/qoder-agent-sdk@1.0.16`; `custom-spawn.ts` only handles Obsidian/Electron process compatibility. Qoder is the only integration, so there is no provider registry, capability matrix, or routing layer. See [ARCHITECTURE.md](ARCHITECTURE.md) for dependency rules and the SDK lifecycle conventions followed from the [official TypeScript samples](https://github.com/QoderAI/qoder-agent-sdk-samples/tree/main/typescript).
+Qoderian drives qodercli through `@qoder-ai/qoder-agent-sdk@^1.0.41`; `custom-spawn.ts` only handles Obsidian/Electron process compatibility. Qoder is the only integration, so there is no provider registry, capability matrix, or routing layer. See [ARCHITECTURE.md](ARCHITECTURE.md) for dependency rules and the SDK lifecycle conventions followed from the [official TypeScript samples](https://github.com/QoderAI/qoder-agent-sdk-samples/tree/main/typescript).
 
 ## Releasing
 
