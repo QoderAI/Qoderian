@@ -113,6 +113,44 @@ describe('encodeQoderTurn', () => {
     expect(result.persistedContent).toContain('node-2');
   });
 
+  it('should append the external context notice when provided', () => {
+    const request: ChatTurnRequest = {
+      text: 'hello',
+      externalContextsNotice: ['/Users/me/Workspace', '/tmp/other'],
+    };
+    const result = encodeQoderTurn(request, mcpManager);
+
+    expect(result.persistedContent).toContain('<external_context>');
+    expect(result.persistedContent).toContain('/Users/me/Workspace');
+    expect(result.persistedContent).toContain('/tmp/other');
+  });
+
+  it('should not append the external context tag from the paths alone', () => {
+    const request: ChatTurnRequest = {
+      text: 'hello',
+      externalContextPaths: ['/Users/me/Workspace'],
+    };
+    const result = encodeQoderTurn(request, mcpManager);
+
+    expect(result.persistedContent).toBe('hello');
+  });
+
+  it('should announce an emptied external context list', () => {
+    const result = encodeQoderTurn({ text: 'hello', externalContextsNotice: [] }, mcpManager);
+
+    expect(result.persistedContent).toContain('<external_context>');
+    expect(result.persistedContent).toContain('(none)');
+  });
+
+  it('should skip the external context notice for /compact', () => {
+    const result = encodeQoderTurn(
+      { text: '/compact', externalContextsNotice: ['/Users/me/Workspace'] },
+      mcpManager,
+    );
+
+    expect(result.persistedContent).toBe('/compact');
+  });
+
   it('should extract and transform MCP mentions', () => {
     const mentions = new Set(['server-a']);
     mcpManager.extractMentions.mockReturnValue(mentions);

@@ -49,6 +49,8 @@ export interface ChatTurnRequest {
   browserSelection?: BrowserSelectionContext | null;
   canvasSelection?: CanvasSelectionContext | null;
   externalContextPaths?: string[];
+  /** External context list to announce in the turn text when it just changed. */
+  externalContextsNotice?: string[];
   enabledMcpServers?: Set<string>;
 }
 
