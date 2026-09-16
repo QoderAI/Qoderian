@@ -11,6 +11,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.11] - 2026-09-16
+
 ### Added
 
 - Models you configured as bring-your-own-key in qodercli — third-party
