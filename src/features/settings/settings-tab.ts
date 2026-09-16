@@ -503,6 +503,16 @@ export class QoderianSettingTab extends PluginSettingTab {
   }
 
   /**
+   * Imperative renderer for hosts outside Obsidian's settings pane, such as
+   * the header settings window. Shares the same builders as the pre-1.13
+   * display() fallback, which Obsidian owns for older versions.
+   */
+  mount(containerEl: HTMLElement): void {
+    this.containerEl = containerEl;
+    this.renderLegacySettings();
+  }
+
+  /**
    * Imperative entry point for Obsidian versions older than 1.13.0, which
    * never consult getSettingDefinitions(). Kept as the documented fallback
    * and sharing the same builders as the declarative render rows.

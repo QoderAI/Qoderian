@@ -13,6 +13,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ### Added
 
+- A settings button in the view header opens Qoderian's settings window in
+  place, instead of navigating into Obsidian's settings.
 - Show the added external context path after dropping a folder or file, surface
   rejected additions, and show the context count even for a single path.
 - Drag files and folders from your operating system (e.g. macOS Finder) onto
