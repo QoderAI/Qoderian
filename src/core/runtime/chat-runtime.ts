@@ -1,4 +1,4 @@
-import type { ChatMessage, Conversation, SlashCommand, StreamChunk, ToolCallInfo } from '../types';
+import type { ChatMessage, ContextUsageBreakdown, Conversation, SlashCommand, StreamChunk, ToolCallInfo } from '../types';
 import type {
   ApprovalCallback,
   AskUserQuestionCallback,
@@ -41,6 +41,8 @@ export interface ChatRuntime {
   getSessionId(): string | null;
   consumeSessionInvalidation(): boolean;
   isReady(): boolean;
+  /** Context breakdown for the toolbar panel; null when unavailable. */
+  requestContextUsage?(): Promise<ContextUsageBreakdown | null>;
   getSupportedCommands(): Promise<SlashCommand[]>;
   getAuxiliaryModel?(): string | null;
   cleanup(): Promise<void>;

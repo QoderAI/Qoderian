@@ -393,6 +393,19 @@
     "trigger": "Uso",
     "unavailable": "Uso no disponible"
   },
+  "contextUsage": {
+    "title": "Ventana de contexto",
+    "description": "Muestra qué ocupa la ventana de contexto de esta conversación. Compactar resume el contenido anterior, con una breve espera y algunos créditos.",
+    "empty": "Los detalles del contexto aparecen tras la primera respuesta.",
+    "compact": "Compactar contexto",
+    "categorySystemPrompt": "Prompt del sistema",
+    "categorySystemTools": "Herramientas del sistema",
+    "categorySkills": "Habilidades ({count})",
+    "categoryMessages": "Mensajes",
+    "categoryOther": "Otros",
+    "categoryFreeSpace": "Espacio libre",
+    "categoryAutoCompact": "Compactación automática"
+  },
   "model": {
     "edit": "Editar",
     "contextWindow": "Ventana de contexto",

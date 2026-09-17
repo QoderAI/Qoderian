@@ -127,6 +127,7 @@ let mockSupportedCommands: Array<{ name: string; description: string; argumentHi
 let mockAvailableModels: any[] = [];
 let mockInitializationModels: any[] | undefined;
 let mockUsageInfo: any = undefined;
+let mockContextUsage: any = undefined;
 let lastResponse: (AsyncGenerator<any> & {
   interrupt: jest.Mock;
   setModel: jest.Mock;
@@ -138,6 +139,7 @@ let lastResponse: (AsyncGenerator<any> & {
   getAvailableModels: jest.Mock;
   initializationResult: jest.Mock;
   getUsageInfo: jest.Mock;
+  getContextUsage: jest.Mock;
   close: jest.Mock;
 }) | null = null;
 
@@ -167,6 +169,7 @@ export function resetMockMessages() {
   mockAvailableModels = [];
   mockInitializationModels = undefined;
   mockUsageInfo = undefined;
+  mockContextUsage = undefined;
   lastResponse = null;
   shouldThrowOnIteration = false;
   throwAfterChunks = 0;
@@ -192,6 +195,11 @@ export function setMockInitializationModels(models: any[]) {
 /** Sets the usage snapshot returned by getUsageInfo(); pass an Error to make it reject. */
 export function setMockUsageInfo(usageInfo: any) {
   mockUsageInfo = usageInfo;
+}
+
+/** Sets the `/context` payload returned by getContextUsage(); pass an Error to make it reject. */
+export function setMockContextUsage(contextUsage: any) {
+  mockContextUsage = contextUsage;
 }
 
 /**
@@ -370,6 +378,7 @@ export function query({ prompt, options }: { prompt: any; options: Options }): A
     getAvailableModels: jest.Mock;
     initializationResult: jest.Mock;
     getUsageInfo: jest.Mock;
+    getContextUsage: jest.Mock;
     close: jest.Mock;
   };
   gen.interrupt = jest.fn().mockResolvedValue(undefined);
@@ -411,6 +420,10 @@ export function query({ prompt, options }: { prompt: any; options: Options }): A
   gen.getUsageInfo = jest.fn().mockImplementation(async () => {
     if (mockUsageInfo instanceof Error) throw mockUsageInfo;
     return mockUsageInfo;
+  });
+  gen.getContextUsage = jest.fn().mockImplementation(async () => {
+    if (mockContextUsage instanceof Error) throw mockContextUsage;
+    return mockContextUsage;
   });
   lastResponse = gen;
 

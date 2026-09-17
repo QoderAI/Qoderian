@@ -11,6 +11,7 @@ import { t } from '../../../i18n/i18n';
 import type QoderianPlugin from '../../../main';
 import { isHiddenCommand } from '../../../qoder/commands/command-visibility-policy';
 import { getQoderSettings, updateQoderSettings } from '../../../qoder/config/settings';
+import { fetchStoredSessionContextUsage } from '../../../qoder/services/context-usage';
 import {
   SlashCommandDropdown,
   toSlashCommandDropdownEntries,
@@ -429,6 +430,22 @@ function initializeInputToolbar(
       await plugin.qoderServices.agentCatalog.refresh();
     },
     loginService: plugin.qoderServices.loginService,
+    requestContextUsage: async () => {
+      const runtime = tab.service;
+      if (runtime?.requestContextUsage) {
+        return runtime.requestContextUsage();
+      }
+      // A restored tab keeps its runtime unstarted until the first send, so
+      // read the stored session directly through the idle probe instead.
+      const conversation = tab.conversationId
+        ? await plugin.getConversationById(tab.conversationId)
+        : null;
+      const sessionId = conversation?.sessionId;
+      return sessionId ? fetchStoredSessionContextUsage(plugin, sessionId) : null;
+    },
+    onCompactContext: () => {
+      void tab.controllers.inputController?.sendMessage({ content: '/compact' });
+    },
     onModelChange: async (model: string) => {
       // Blank tabs keep their model choice until the first message binds them.
       if (tab.lifecycleState === 'blank') {

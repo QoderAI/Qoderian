@@ -393,6 +393,19 @@
     "trigger": "Usage",
     "unavailable": "Usage unavailable"
   },
+  "contextUsage": {
+    "title": "Context window",
+    "description": "What currently fills this conversation's context window.",
+    "empty": "Context details appear after the first response.",
+    "compact": "Compact context",
+    "categorySystemPrompt": "System prompt",
+    "categorySystemTools": "System tools",
+    "categorySkills": "Skills ({count})",
+    "categoryMessages": "Messages",
+    "categoryOther": "Other",
+    "categoryFreeSpace": "Free space",
+    "categoryAutoCompact": "Auto-compact"
+  },
   "model": {
     "edit": "Edit",
     "contextWindow": "Context",

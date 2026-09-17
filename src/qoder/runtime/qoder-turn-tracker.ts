@@ -1,7 +1,7 @@
 import type { Query, SDKMessage } from '@qoder-ai/qoder-agent-sdk';
 
 import type { ChatTurnMetadata } from '../../core/runtime/types';
-import type { StreamChunk } from '../../core/types';
+import type { ContextUsageBreakdown, StreamChunk } from '../../core/types';
 import { getContextWindowSize } from '../models/model-catalog';
 import { toQoderRuntimeModelId } from '../models/model-selection';
 import {
@@ -9,6 +9,7 @@ import {
   createTransformUsageState,
 } from '../stream/transform-qoder-message';
 import type { TransformEvent } from '../stream/types';
+import { mapContextUsageBreakdown } from './qoder-context-usage';
 
 type UsageChunk = Extract<StreamChunk, { type: 'usage' }>;
 
@@ -25,6 +26,8 @@ interface ContextUsageRequest {
 export class QoderTurnTracker {
   private metadata: ChatTurnMetadata = {};
   private bufferedUsageChunk: UsageChunk | null = null;
+  /** Last `/context` breakdown; survives turn resets so the panel can open instantly. */
+  private contextBreakdown: ContextUsageBreakdown | null = null;
   private readonly streamState = createTransformStreamState();
   private readonly usageState = createTransformUsageState();
 
@@ -94,6 +97,16 @@ export class QoderTurnTracker {
     };
   }
 
+  /** Last breakdown the CLI reported, or null before the first successful read. */
+  getContextBreakdown(): ContextUsageBreakdown | null {
+    return this.contextBreakdown;
+  }
+
+  /** Drops the cached breakdown (session switch or new conversation). */
+  clearContextBreakdown(): void {
+    this.contextBreakdown = null;
+  }
+
   /** Reads the CLI's public context-usage control API when available. */
   async fetchContextUsage(request: ContextUsageRequest): Promise<UsageChunk | null> {
     const activeQuery = request.query;
@@ -108,6 +121,7 @@ export class QoderTurnTracker {
       if (!request.isCurrentQuery(activeQuery)) {
         return null;
       }
+      this.contextBreakdown = mapContextUsageBreakdown(payload);
 
       const previousUsage = this.bufferedUsageChunk?.usage;
       const model = toQoderRuntimeModelId(

@@ -393,6 +393,19 @@
     "trigger": "用量",
     "unavailable": "用量暫不可用"
   },
+  "contextUsage": {
+    "title": "上下文視窗",
+    "description": "顯示目前任務的上下文佔用情況。壓縮會摘要較早的內容，需等待片刻並消耗少量點數。",
+    "empty": "首次回覆後顯示上下文明細。",
+    "compact": "壓縮上下文",
+    "categorySystemPrompt": "系統提示詞",
+    "categorySystemTools": "系統工具",
+    "categorySkills": "Skill ({count} 個)",
+    "categoryMessages": "訊息",
+    "categoryOther": "其他",
+    "categoryFreeSpace": "可用空間",
+    "categoryAutoCompact": "自動壓縮"
+  },
   "model": {
     "edit": "編輯",
     "contextWindow": "上下文視窗",

@@ -5,8 +5,21 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-inline-start: 8px;
+  margin-inline-start: 4px;
+  flex: 0 0 auto;
   cursor: default;
+}
+
+.qoderian-context-meter-trigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.qoderian-context-meter-trigger:hover .qoderian-context-meter-percent {
+  color: var(--text-normal);
 }
 
 /* Custom tooltip */
@@ -14,8 +27,7 @@
   content: attr(data-tooltip);
   position: absolute;
   bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   margin-bottom: 6px;
   padding: 4px 8px;
   font-size: 11px;
@@ -23,7 +35,10 @@
   background: var(--background-secondary);
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
-  white-space: nowrap;
+  width: max-content;
+  max-width: min(240px, calc(100vw - 24px));
+  white-space: normal;
+  overflow-wrap: anywhere;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.15s ease, visibility 0.15s ease;
@@ -36,17 +51,25 @@
   visibility: visible;
 }
 
+/* The panel carries the same readings; a hovering tooltip would only overlap. */
+.qoderian-context-meter--open::after {
+  opacity: 0;
+  visibility: hidden;
+}
+
 .qoderian-context-meter-gauge {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
 }
 
 .qoderian-context-meter-gauge svg {
-  width: 16px;
-  height: 16px;
+  display: block;
+  width: 18px;
+  height: 18px;
+  overflow: visible;
 }
 
 .qoderian-meter-bg {
@@ -60,7 +83,7 @@
 
 .qoderian-context-meter-percent {
   font-size: 11px;
-  color: var(--qoderian-brand);
+  color: var(--text-muted);
   min-width: 24px;
   text-align: end;
   transition: color 0.3s ease;
@@ -73,4 +96,150 @@
 
 .qoderian-context-meter.warning .qoderian-context-meter-percent {
   color: #E57373;
+}
+
+/* Context window panel */
+
+.qoderian-context-panel {
+  position: absolute;
+  /* JS clamps the position and width to the toolbar bounds
+     (positionHoverDropdown); the fallbacks keep the icon-centered look
+     before the first measurement. */
+  left: var(--qoderian-hover-dropdown-left, 50%);
+  transform: translateX(-50%);
+  bottom: 100%;
+  margin-bottom: 6px;
+  min-width: var(--qoderian-hover-dropdown-min-width, 260px);
+  max-width: var(--qoderian-hover-dropdown-max-width, 300px);
+  padding: 10px 12px 12px;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  z-index: 100;
+}
+
+.qoderian-context-meter--open .qoderian-context-panel {
+  opacity: 1;
+  visibility: visible;
+}
+
+.qoderian-context-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.qoderian-context-panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.qoderian-context-panel-percent {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--qoderian-brand);
+  font-variant-numeric: tabular-nums;
+}
+
+.qoderian-context-meter.warning .qoderian-context-panel-percent {
+  color: #E57373;
+}
+
+.qoderian-context-panel-desc {
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.qoderian-context-panel-bar {
+  height: 4px;
+  margin: 10px 0;
+  border-radius: 2px;
+  background: var(--background-modifier-border);
+  overflow: hidden;
+}
+
+.qoderian-context-panel-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--qoderian-brand);
+  transition: width 0.3s ease;
+}
+
+.qoderian-context-meter.warning .qoderian-context-panel-bar-fill {
+  background: #E57373;
+}
+
+.qoderian-context-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: 12px;
+}
+
+.qoderian-context-dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--qoderian-brand);
+}
+
+.qoderian-context-row-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qoderian-context-row-percent {
+  color: var(--text-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+.qoderian-context-compact-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text-normal);
+  background: var(--background-modifier-hover);
+  border: none;
+  border-radius: 6px;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.qoderian-context-compact-btn:hover {
+  background: var(--background-modifier-active-hover, var(--background-modifier-hover));
+}
+
+.qoderian-context-compact-icon {
+  display: flex;
+  align-items: center;
+}
+
+.qoderian-context-compact-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.qoderian-context-panel-empty {
+  padding: 8px 0 2px;
+  font-size: 11px;
+  color: var(--text-muted);
 }

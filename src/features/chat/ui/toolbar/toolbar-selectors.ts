@@ -1,5 +1,6 @@
 import { Notice } from 'obsidian';
 
+import type { ContextUsageBreakdown } from '../../../../core/types';
 import type { QoderRuntimeStatus } from '../../../../core/types/services';
 import type { PermissionMode, QoderModelOverride } from '../../../../core/types/settings';
 import { t } from '../../../../i18n/i18n';
@@ -47,6 +48,10 @@ export interface ToolbarCallbacks {
   getRuntimeStatus?: () => QoderRuntimeStatus;
   retryRuntimeCatalog?: () => Promise<void>;
   subscribeRuntimeStatus?: (listener: (status: QoderRuntimeStatus) => void) => () => void;
+  /** Context breakdown for the context-usage popover. */
+  requestContextUsage?: () => Promise<ContextUsageBreakdown | null>;
+  /** Compacts the conversation from the context-usage popover. */
+  onCompactContext?: () => void;
   loginService?: QoderLoginController;
 }
 

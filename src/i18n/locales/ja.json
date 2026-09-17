@@ -393,6 +393,19 @@
     "trigger": "利用量",
     "unavailable": "利用量情報を取得できません"
   },
+  "contextUsage": {
+    "title": "コンテキストウィンドウ",
+    "description": "この会話でコンテキストを占めている内容を表示します。圧縮すると以前の内容が要約され、少し時間とクレジットを消費します。",
+    "empty": "最初の応答後にコンテキストの内訳が表示されます。",
+    "compact": "コンテキストを圧縮",
+    "categorySystemPrompt": "システムプロンプト",
+    "categorySystemTools": "システムツール",
+    "categorySkills": "スキル ({count})",
+    "categoryMessages": "メッセージ",
+    "categoryOther": "その他",
+    "categoryFreeSpace": "空き領域",
+    "categoryAutoCompact": "自動圧縮"
+  },
   "model": {
     "edit": "編集",
     "contextWindow": "コンテキストウィンドウ",

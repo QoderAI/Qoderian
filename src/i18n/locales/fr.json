@@ -393,6 +393,19 @@
     "trigger": "Utilisation",
     "unavailable": "Utilisation indisponible"
   },
+  "contextUsage": {
+    "title": "Fenêtre de contexte",
+    "description": "Montre ce qui occupe la fenêtre de contexte de cette conversation. Compacter résume les échanges antérieurs, avec un court délai et quelques crédits.",
+    "empty": "Les détails du contexte apparaissent après la première réponse.",
+    "compact": "Compacter le contexte",
+    "categorySystemPrompt": "Prompt système",
+    "categorySystemTools": "Outils système",
+    "categorySkills": "Compétences ({count})",
+    "categoryMessages": "Messages",
+    "categoryOther": "Autre",
+    "categoryFreeSpace": "Espace libre",
+    "categoryAutoCompact": "Compactage auto"
+  },
   "model": {
     "edit": "Modifier",
     "contextWindow": "Fenêtre de contexte",

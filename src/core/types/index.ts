@@ -2,6 +2,9 @@
 export {
   type ChatMessage,
   type ContentBlock,
+  type ContextUsageBreakdown,
+  type ContextUsageCategory,
+  type ContextUsageCategoryType,
   type Conversation,
   type ConversationMeta,
   type ErrorContentBlock,

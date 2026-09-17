@@ -13,12 +13,20 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ### Added
 
+- Click the context usage reading beside the message input to open a context
+  window panel: what fills the window (system prompt, tools, skills,
+  messages), how full it is, and a Compact context button.
 - The agent now learns which external context directories are attached: the
   message you send right after adding or removing one carries the current
   list, so the agent can use those folders without you referencing every file.
 - An update icon appears in the view header when GitHub has a newer stable
   release; click it to open Qoderian's plugin page, where Obsidian's update
   button lives.
+
+### Changed
+
+- The context usage meter is now a complete ring that fills from the top
+  instead of an arc with a gap at the bottom.
 
 ## [1.0.11] - 2026-09-16
 

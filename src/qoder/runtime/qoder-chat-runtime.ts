@@ -42,6 +42,7 @@ import type {
 import type {
   ApprovalDecision,
   ChatMessage,
+  ContextUsageBreakdown,
   Conversation,
   ExitPlanModeCallback,
   ImageAttachment,
@@ -63,6 +64,7 @@ import { qoderModelConfig } from '../models/qoder-model-config';
 import { stripCurrentNoteContext } from '../prompt/context/prompt-context';
 import { encodeQoderTurn } from '../prompt/qoder-turn-encoder';
 import type { QoderHostContext } from '../qoder-host-context';
+import { fetchStoredSessionContextUsage } from '../services/context-usage';
 import {
   createTransformStreamState,
   createTransformUsageState,
@@ -72,6 +74,7 @@ import { isContextWindowEvent, isSessionInitEvent, isStreamChunk } from '../stre
 import { TOOL_SKILL } from '../tools/tool-names';
 import { streamPersistentTurn } from './persistent-turn-stream';
 import { createQoderApprovalCallback } from './qoder-approval-handler';
+import { mapContextUsageBreakdown } from './qoder-context-usage';
 import {
   buildConversationSessionUpdates,
   buildHistoryRebuildRequest,
@@ -1238,6 +1241,36 @@ export class QoderChatRuntime implements ChatRuntime {
   }
 
   /**
+   * Context breakdown for the toolbar panel: a live `/context` read when the
+   * CLI is idle, the snapshot the last turn end collected while a turn runs,
+   * and a read of the stored session when no query is running yet.
+   */
+  async requestContextUsage(): Promise<ContextUsageBreakdown | null> {
+    const query = this.persistentQuery;
+    const cached = () => this.turnTracker.getContextBreakdown();
+    if (query && typeof query.getContextUsage === 'function') {
+      // The control request queues until the CLI is idle again, so querying
+      // it mid-turn would only delay an answer the cached snapshot can give.
+      if (this.messageChannel?.isTurnActive()) return cached();
+
+      try {
+        return mapContextUsageBreakdown(await query.getContextUsage());
+      } catch {
+        // Supplemental read: older or closing queries may reject the request.
+        return cached();
+      }
+    }
+
+    return await this.readStoredSessionContextUsage() ?? cached();
+  }
+
+  private async readStoredSessionContextUsage(): Promise<ContextUsageBreakdown | null> {
+    const sessionId = this.sessionManager.getSessionId();
+    if (!sessionId) return null;
+    return fetchStoredSessionContextUsage(this.plugin, sessionId);
+  }
+
+  /**
    * Get supported commands (SDK skills).
    * Returns cached commands populated on system/init. Falls back to a fresh
    * supportedCommands() call if the cache is empty (e.g., dropdown opened
@@ -1296,6 +1329,7 @@ export class QoderChatRuntime implements ChatRuntime {
       this.crashRecoveryAttempted = false;
       // A restored session never saw the current directories; announce them.
       this.announcedExternalContextPaths = [];
+      this.turnTracker.clearContextBreakdown();
     }
 
     this.sessionManager.setSessionId(id, this.getScopedSettings().model);

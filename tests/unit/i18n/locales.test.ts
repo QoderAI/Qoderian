@@ -111,6 +111,10 @@ const localizedKeys = [
   'feedback.noticeSuccessWithId',
   'feedback.noticeSuccessCopied',
   'feedback.noticeFailed',
+  'contextUsage.title',
+  'contextUsage.description',
+  'contextUsage.empty',
+  'contextUsage.compact',
 ] as const;
 
 const staleBangBashDesc =

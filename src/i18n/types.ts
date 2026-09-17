@@ -127,6 +127,19 @@ export type TranslationKey =
   | 'credits.trigger'
   | 'credits.unavailable'
 
+  // Context window panel
+  | 'contextUsage.title'
+  | 'contextUsage.description'
+  | 'contextUsage.empty'
+  | 'contextUsage.compact'
+  | 'contextUsage.categorySystemPrompt'
+  | 'contextUsage.categorySystemTools'
+  | 'contextUsage.categorySkills'
+  | 'contextUsage.categoryMessages'
+  | 'contextUsage.categoryOther'
+  | 'contextUsage.categoryFreeSpace'
+  | 'contextUsage.categoryAutoCompact'
+
   // Model editor panel
   | 'model.edit'
   | 'model.contextWindow'

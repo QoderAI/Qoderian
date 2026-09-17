@@ -393,6 +393,19 @@
     "trigger": "Nutzung",
     "unavailable": "Nutzung nicht verfügbar"
   },
+  "contextUsage": {
+    "title": "Kontextfenster",
+    "description": "Zeigt, was das Kontextfenster dieser Unterhaltung belegt. Verdichten fasst ältere Inhalte zusammen und kostet kurz Zeit sowie wenige Credits.",
+    "empty": "Kontextdetails erscheinen nach der ersten Antwort.",
+    "compact": "Kontext verdichten",
+    "categorySystemPrompt": "System-Prompt",
+    "categorySystemTools": "System-Tools",
+    "categorySkills": "Skills ({count})",
+    "categoryMessages": "Nachrichten",
+    "categoryOther": "Sonstiges",
+    "categoryFreeSpace": "Freier Platz",
+    "categoryAutoCompact": "Auto-Verdichtung"
+  },
   "model": {
     "edit": "Bearbeiten",
     "contextWindow": "Kontextfenster",

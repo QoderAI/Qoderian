@@ -393,6 +393,19 @@
     "trigger": "用量",
     "unavailable": "用量暂不可用"
   },
+  "contextUsage": {
+    "title": "上下文窗口",
+    "description": "展示当前任务的上下文占用情况。压缩会摘要早期内容，需等待片刻并消耗少量积分。",
+    "empty": "首次回复后显示上下文明细。",
+    "compact": "压缩上下文",
+    "categorySystemPrompt": "系统提示词",
+    "categorySystemTools": "系统工具",
+    "categorySkills": "Skill ({count} 个)",
+    "categoryMessages": "消息",
+    "categoryOther": "其他",
+    "categoryFreeSpace": "可用空间",
+    "categoryAutoCompact": "自动压缩"
+  },
   "model": {
     "edit": "编辑",
     "contextWindow": "上下文窗口",

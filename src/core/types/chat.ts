@@ -183,3 +183,30 @@ export interface UsageInfo {
   contextTokens: number;
   percentage: number;
 }
+
+/** Slots the CLI reports in its `/context` breakdown. */
+export type ContextUsageCategoryType =
+  | 'system_prompt'
+  | 'system_tools'
+  | 'skills'
+  | 'messages'
+  | 'other'
+  | 'free_space'
+  | 'auto_compact';
+
+export interface ContextUsageCategory {
+  type: ContextUsageCategoryType;
+  /** Share of the full context window, 0-100 and possibly fractional. */
+  percentage: number;
+}
+
+/** What currently fills the context window, as reported by the CLI. */
+export interface ContextUsageBreakdown {
+  usedPercentage: number;
+  categories: ContextUsageCategory[];
+  skills: {
+    count: number;
+    /** Aggregate skill frontmatter as a percentage of the full context. */
+    percentageOfContext: number;
+  };
+}

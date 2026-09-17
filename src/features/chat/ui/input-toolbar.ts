@@ -5,11 +5,17 @@ import * as path from 'path';
 import { filterValidContextPaths, findConflictingPath, isDuplicatePath, validateContextPath, validateDirectoryPath } from '../../../core/context/external-context';
 import { expandHomePath, normalizePathForFilesystem } from '../../../core/fs/path';
 import type {
+  ContextUsageBreakdown,
+  ContextUsageCategory,
+  ContextUsageCategoryType,
   ManagedMcpServer,
   UsageInfo,
 } from '../../../core/types';
+import { t } from '../../../i18n/i18n';
+import type { TranslationKey } from '../../../i18n/types';
 import type { McpServerManager } from '../../../qoder/mcp/mcp-server-manager';
 import { appendCheckIcon, appendMcpIcon } from '../../../shared/icons';
+import { ClickPopover } from './toolbar/click-popover';
 import { placeHoverDropdown } from './toolbar/hover-dropdown-placement';
 import {
   ModelSelector,
@@ -679,13 +685,45 @@ export class McpServerSelector {
   }
 }
 
+export interface ContextUsageMeterCallbacks {
+  /** Fresh `/context` read; the runtime answers from its last snapshot while busy. */
+  requestContextUsage?: () => Promise<ContextUsageBreakdown | null>;
+  /** Compacts the conversation (sends `/compact` through the composer). */
+  onCompactContext?: () => void;
+}
+
+/** Skills also report how many are loaded; their label is formatted separately. */
+const CONTEXT_CATEGORY_LABELS: Record<Exclude<ContextUsageCategoryType, 'skills'>, TranslationKey> = {
+  system_prompt: 'contextUsage.categorySystemPrompt',
+  system_tools: 'contextUsage.categorySystemTools',
+  messages: 'contextUsage.categoryMessages',
+  other: 'contextUsage.categoryOther',
+  free_space: 'contextUsage.categoryFreeSpace',
+  auto_compact: 'contextUsage.categoryAutoCompact',
+};
+
+/** Buckets hidden from the panel: they describe headroom, not occupancy. */
+const HIDDEN_CATEGORY_TYPES = new Set<ContextUsageCategoryType>(['free_space', 'auto_compact']);
+
+function roundPercent(value: number): number {
+  return Math.min(100, Math.max(0, Math.round(value)));
+}
+
 export class ContextUsageMeter {
   private container: HTMLElement;
-  private fillPath: SVGPathElement | null = null;
+  private triggerEl: HTMLElement | null = null;
+  private panelEl: HTMLElement | null = null;
+  private popover: ClickPopover | null = null;
+  private fillPath: SVGCircleElement | null = null;
   private percentEl: HTMLElement | null = null;
   private circumference: number = 0;
+  private breakdown: ContextUsageBreakdown | null = null;
+  private refreshToken = 0;
 
-  constructor(parentEl: HTMLElement) {
+  constructor(
+    parentEl: HTMLElement,
+    private readonly callbacks: ContextUsageMeterCallbacks = {},
+  ) {
     this.container = parentEl.createDiv({ cls: 'qoderian-context-meter' });
     this.render();
     // Initially hidden
@@ -697,27 +735,19 @@ export class ContextUsageMeter {
   }
 
   private render() {
-    const size = 16;
+    const size = 18;
     const strokeWidth = 2;
-    const radius = (size - strokeWidth) / 2;
+    const radius = (size - strokeWidth * 2) / 2;
     const cx = size / 2;
     const cy = size / 2;
+    this.circumference = 2 * Math.PI * radius;
 
-    // 240° arc: from 150° to 390° (upper-left through bottom to upper-right)
-    const startAngle = 150;
-    const endAngle = 390;
-    const arcDegrees = endAngle - startAngle;
-    const arcRadians = (arcDegrees * Math.PI) / 180;
-    this.circumference = radius * arcRadians;
+    // Gauge and percentage form the popover trigger; the panel is its sibling
+    // so clicks inside the panel cannot toggle it closed.
+    this.panelEl = this.container.createDiv({ cls: 'qoderian-context-panel' });
+    this.triggerEl = this.container.createDiv({ cls: 'qoderian-context-meter-trigger' });
 
-    const startRad = (startAngle * Math.PI) / 180;
-    const endRad = (endAngle * Math.PI) / 180;
-    const x1 = cx + radius * Math.cos(startRad);
-    const y1 = cy + radius * Math.sin(startRad);
-    const x2 = cx + radius * Math.cos(endRad);
-    const y2 = cy + radius * Math.sin(endRad);
-
-    const gaugeEl = this.container.createDiv({ cls: 'qoderian-context-meter-gauge' });
+    const gaugeEl = this.triggerEl.createDiv({ cls: 'qoderian-context-meter-gauge' });
     const svg = gaugeEl.createSvg('svg', {
       attr: {
         width: String(size),
@@ -726,31 +756,138 @@ export class ContextUsageMeter {
       },
     });
 
-    const pathData = `M ${x1} ${y1} A ${radius} ${radius} 0 1 1 ${x2} ${y2}`;
-    svg.createSvg('path', {
+    svg.createSvg('circle', {
       cls: 'qoderian-meter-bg',
       attr: {
-        d: pathData,
+        cx: String(cx),
+        cy: String(cy),
+        r: String(radius),
         fill: 'none',
         'stroke-width': String(strokeWidth),
-        'stroke-linecap': 'round',
       },
     });
 
-    const fillPath = svg.createSvg('path', {
+    const fillPath = svg.createSvg('circle', {
       cls: 'qoderian-meter-fill',
       attr: {
-        d: pathData,
+        cx: String(cx),
+        cy: String(cy),
+        r: String(radius),
         fill: 'none',
         'stroke-width': String(strokeWidth),
         'stroke-linecap': 'round',
         'stroke-dasharray': String(this.circumference),
         'stroke-dashoffset': String(this.circumference),
+        transform: `rotate(-90 ${cx} ${cy})`,
       },
     });
     this.fillPath = fillPath;
 
-    this.percentEl = this.container.createSpan({ cls: 'qoderian-context-meter-percent' });
+    this.percentEl = this.triggerEl.createSpan({ cls: 'qoderian-context-meter-percent' });
+
+    this.popover = new ClickPopover(
+      this.container,
+      this.triggerEl,
+      this.panelEl,
+      'qoderian-context-meter--open',
+    );
+    this.triggerEl.addEventListener('click', this.handleTriggerClick);
+  }
+
+  private readonly handleTriggerClick = (): void => {
+    // ClickPopover's own handler runs first and flips aria-expanded.
+    if (this.triggerEl?.getAttribute('aria-expanded') !== 'true') return;
+    this.renderPanel();
+    void this.refresh();
+  };
+
+  private async refresh(): Promise<void> {
+    const request = this.callbacks.requestContextUsage;
+    if (!request) return;
+
+    const token = ++this.refreshToken;
+    try {
+      const breakdown = await request();
+      if (token !== this.refreshToken || !breakdown) return;
+      this.breakdown = breakdown;
+      this.renderPanel();
+    } catch {
+      // The panel already shows the last known breakdown.
+    }
+  }
+
+  private renderPanel(): void {
+    const panel = this.panelEl;
+    if (!panel) return;
+    panel.empty();
+
+    const header = panel.createDiv({ cls: 'qoderian-context-panel-header' });
+    header.createSpan({ cls: 'qoderian-context-panel-title', text: t('contextUsage.title') });
+    header.createSpan({
+      cls: 'qoderian-context-panel-percent',
+      text: this.breakdown ? this.formatPercent(this.breakdown.usedPercentage) : '',
+    });
+
+    const breakdown = this.breakdown;
+    if (!breakdown) {
+      panel.createDiv({ cls: 'qoderian-context-panel-empty', text: t('contextUsage.empty') });
+      return;
+    }
+
+    panel.createDiv({ cls: 'qoderian-context-panel-desc', text: t('contextUsage.description') });
+
+    const bar = panel.createDiv({ cls: 'qoderian-context-panel-bar' });
+    const fill = bar.createDiv({ cls: 'qoderian-context-panel-bar-fill' });
+    fill.style.width = `${roundPercent(breakdown.usedPercentage)}%`;
+
+    const list = panel.createDiv({ cls: 'qoderian-context-panel-list' });
+    for (const category of breakdown.categories) {
+      if (HIDDEN_CATEGORY_TYPES.has(category.type)) continue;
+      this.renderCategory(list, category);
+    }
+
+    const compactBtn = panel.createEl('button', {
+      cls: 'qoderian-context-compact-btn',
+      attr: { type: 'button' },
+    });
+    setIcon(compactBtn.createSpan({ cls: 'qoderian-context-compact-icon' }), 'minimize-2');
+    compactBtn.createSpan({ text: t('contextUsage.compact') });
+    compactBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.callbacks.onCompactContext?.();
+      this.popover?.close();
+    });
+
+    this.positionPanel();
+  }
+
+  private renderCategory(parentEl: HTMLElement, category: ContextUsageCategory): void {
+    const row = parentEl.createDiv({ cls: 'qoderian-context-row' });
+    const dot = row.createSpan({ cls: 'qoderian-context-dot' });
+    // Faint dots keep near-empty buckets visible without competing with the
+    // occupied ones.
+    dot.style.opacity = String(Math.max(0.25, Math.min(1, category.percentage / 25)));
+
+    const label = category.type === 'skills'
+      ? t('contextUsage.categorySkills', { count: this.breakdown?.skills.count ?? 0 })
+      : t(CONTEXT_CATEGORY_LABELS[category.type]);
+    row.createSpan({ cls: 'qoderian-context-row-label', text: label });
+    row.createSpan({
+      cls: 'qoderian-context-row-percent',
+      text: this.formatPercent(category.percentage),
+    });
+  }
+
+  private positionPanel(): void {
+    if (!this.triggerEl || !this.panelEl) return;
+    positionHoverDropdown(this.container, this.triggerEl, this.panelEl);
+  }
+
+  /** Sub-1% buckets read as "<1%" instead of rounding down to a bare 0%. */
+  private formatPercent(value: number): string {
+    if (!Number.isFinite(value) || value <= 0) return '0%';
+    if (value < 1) return '<1%';
+    return `${roundPercent(value)}%`;
   }
 
   update(usage: UsageInfo | null): void {
@@ -808,7 +945,7 @@ export function createInputToolbar(
   permissionToggle: PermissionToggle;
 } {
   const modelSelector = new ModelSelector(parentEl, callbacks);
-  const contextUsageMeter = new ContextUsageMeter(parentEl);
+  const contextUsageMeter = new ContextUsageMeter(parentEl, callbacks);
   const externalContextSelector = new ExternalContextSelector(parentEl, callbacks);
   const mcpServerSelector = new McpServerSelector(parentEl);
   const permissionToggle = new PermissionToggle(parentEl, callbacks);

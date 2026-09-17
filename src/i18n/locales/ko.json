@@ -393,6 +393,19 @@
     "trigger": "사용량",
     "unavailable": "사용량을 확인할 수 없음"
   },
+  "contextUsage": {
+    "title": "컨텍스트 창",
+    "description": "이 대화에서 컨텍스트를 차지하는 항목을 보여 줍니다. 압축하면 이전 내용이 요약되며 시간과 크레딧이 조금 소모됩니다.",
+    "empty": "첫 응답 후 컨텍스트 내역이 표시됩니다.",
+    "compact": "컨텍스트 압축",
+    "categorySystemPrompt": "시스템 프롬프트",
+    "categorySystemTools": "시스템 도구",
+    "categorySkills": "스킬 ({count})",
+    "categoryMessages": "메시지",
+    "categoryOther": "기타",
+    "categoryFreeSpace": "여유 공간",
+    "categoryAutoCompact": "자동 압축"
+  },
   "model": {
     "edit": "편집",
     "contextWindow": "컨텍스트 윈도우",

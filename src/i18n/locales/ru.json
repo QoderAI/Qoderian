@@ -393,6 +393,19 @@
     "trigger": "Использование",
     "unavailable": "Использование недоступно"
   },
+  "contextUsage": {
+    "title": "Контекстное окно",
+    "description": "Показывает, что занимает контекст этого диалога. Сжатие суммирует ранние сообщения — это занимает время и немного кредитов.",
+    "empty": "Детали контекста появятся после первого ответа.",
+    "compact": "Сжать контекст",
+    "categorySystemPrompt": "Системный промпт",
+    "categorySystemTools": "Системные инструменты",
+    "categorySkills": "Навыки ({count})",
+    "categoryMessages": "Сообщения",
+    "categoryOther": "Прочее",
+    "categoryFreeSpace": "Свободное место",
+    "categoryAutoCompact": "Автосжатие"
+  },
   "model": {
     "edit": "Редактировать",
     "contextWindow": "Контекстное окно",
