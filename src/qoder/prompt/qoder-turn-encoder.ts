@@ -3,7 +3,7 @@ import type { McpServerManager } from '../mcp/mcp-server-manager';
 import { appendBrowserContext } from './context/browser-context';
 import { appendCanvasContext } from './context/canvas-context';
 import { appendEditorContext } from './context/editor-context';
-import { appendCurrentNote } from './context/prompt-context';
+import { appendCurrentNote, appendExternalContexts } from './context/prompt-context';
 
 function isCompactCommand(text: string): boolean {
   return /^\/compact(\s|$)/i.test(text);
@@ -31,6 +31,10 @@ export function encodeQoderTurn(
 
     if (request.canvasSelection) {
       persistedContent = appendCanvasContext(persistedContent, request.canvasSelection);
+    }
+
+    if (request.externalContextsNotice) {
+      persistedContent = appendExternalContexts(persistedContent, request.externalContextsNotice);
     }
   }
 

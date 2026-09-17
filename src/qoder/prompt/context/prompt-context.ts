@@ -8,6 +8,7 @@ import { escapeXmlClosingTag } from './xml-context';
 
 const LINKED_NOTE_TAG = 'linked_note';
 const NOTE_CONTEXT_TAG_PATTERN = '(linked_note|current_note)';
+const EXTERNAL_CONTEXT_TAG = 'external_context';
 
 // Matches note context at the START of prompt (legacy placement)
 const NOTE_CONTEXT_PREFIX_REGEX = new RegExp(`^<${NOTE_CONTEXT_TAG_PATTERN}>\\n[\\s\\S]*?<\\/\\1>\\n\\n`);
@@ -18,9 +19,9 @@ const NOTE_CONTEXT_SUFFIX_REGEX = new RegExp(`\\n\\n<${NOTE_CONTEXT_TAG_PATTERN}
  * Pattern to match XML context tags appended to prompts.
  * These tags are always preceded by \n\n separator.
  * Matches: linked_note/current_note, editor_selection (with attributes), editor_cursor (with attributes),
- * context_files, canvas_selection, browser_selection
+ * context_files, canvas_selection, browser_selection, external_context
  */
-export const XML_CONTEXT_PATTERN = /\n\n<(?:linked_note|current_note|editor_selection|editor_cursor|context_files|canvas_selection|browser_selection)[\s>]/;
+export const XML_CONTEXT_PATTERN = /\n\n<(?:linked_note|current_note|editor_selection|editor_cursor|context_files|canvas_selection|browser_selection|external_context)[\s>]/;
 const BRACKET_CONTEXT_PATTERN = /\n\[(?:Current note|Editor selection from|Browser selection from|Canvas selection from)\b/;
 
 export function formatCurrentNote(notePath: string): string {
@@ -109,6 +110,7 @@ export function extractUserQuery(prompt: string): string {
     .replace(/<context_files>[\s\S]*?<\/context_files>\s*/g, '')
     .replace(/<canvas_selection[\s\S]*?<\/canvas_selection>\s*/g, '')
     .replace(/<browser_selection[\s\S]*?<\/browser_selection>\s*/g, '')
+    .replace(/<external_context>[\s\S]*?<\/external_context>\s*/g, '')
     .trim();
 }
 
@@ -119,4 +121,18 @@ function formatContextFilesLine(files: string[]): string {
 
 export function appendContextFiles(prompt: string, files: string[]): string {
   return `${prompt}\n\n${formatContextFilesLine(files)}`;
+}
+
+/**
+ * Formats the external context directory list for a turn. Appended only when
+ * the selection just changed, so the model learns about additions and
+ * removals once instead of re-reading the same list every turn.
+ */
+export function formatExternalContexts(paths: readonly string[]): string {
+  const body = paths.length > 0 ? paths.join('\n') : '(none)';
+  return `<${EXTERNAL_CONTEXT_TAG}>\n${escapeXmlClosingTag(body, EXTERNAL_CONTEXT_TAG)}\n</${EXTERNAL_CONTEXT_TAG}>`;
+}
+
+export function appendExternalContexts(prompt: string, paths: readonly string[]): string {
+  return `${prompt}\n\n${formatExternalContexts(paths)}`;
 }

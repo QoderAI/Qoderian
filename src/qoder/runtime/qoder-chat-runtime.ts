@@ -135,6 +135,7 @@ export class QoderChatRuntime implements ChatRuntime {
   private permissionModeSyncCallback: ((sdkMode: string) => void) | null = null;
   private vaultPath: string | null = null;
   private currentExternalContextPaths: string[] = [];
+  private announcedExternalContextPaths: string[] = [];
   private currentMcpServers: Record<string, McpServerConfig> = {};
   private readyStateListeners = new Set<(ready: boolean) => void>();
 
@@ -216,7 +217,25 @@ export class QoderChatRuntime implements ChatRuntime {
   }
 
   prepareTurn(request: ChatTurnRequest): PreparedChatTurn {
-    return encodeQoderTurn(request, this.mcpManager);
+    const notice = this.consumeExternalContextsNotice(request.externalContextPaths);
+    return encodeQoderTurn(
+      notice === undefined ? request : { ...request, externalContextsNotice: notice },
+      this.mcpManager,
+    );
+  }
+
+  /**
+   * The agent cannot see the workspace roots otherwise: the CLI's own
+   * environment block is not part of Qoderian's system prompt. Announce the
+   * current list once per change (empty means every directory was removed).
+   */
+  private consumeExternalContextsNotice(paths: string[] | undefined): string[] | undefined {
+    const current = paths ?? [];
+    const announced = this.announcedExternalContextPaths;
+    this.announcedExternalContextPaths = [...current];
+    const unchanged = current.length === announced.length
+      && current.every((path) => announced.includes(path));
+    return unchanged ? undefined : current;
   }
 
   consumeTurnMetadata(): ChatTurnMetadata {
@@ -1275,6 +1294,8 @@ export class QoderChatRuntime implements ChatRuntime {
     if (sessionChanged) {
       void this.closePersistentQuery('session switch');
       this.crashRecoveryAttempted = false;
+      // A restored session never saw the current directories; announce them.
+      this.announcedExternalContextPaths = [];
     }
 
     this.sessionManager.setSessionId(id, this.getScopedSettings().model);

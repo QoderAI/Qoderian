@@ -141,6 +141,35 @@ describe('QoderChatRuntime', () => {
       const result = service.prepareTurn({ text: '@server-a hello' });
       expect(result.mcpMentions).toEqual(new Set(['server-a']));
     });
+
+    it('should announce external context paths only when they change', () => {
+      const first = service.prepareTurn({ text: 'hi', externalContextPaths: ['/tmp/a'] });
+      expect(first.persistedContent).toContain('<external_context>');
+      expect(first.persistedContent).toContain('/tmp/a');
+
+      const unchanged = service.prepareTurn({ text: 'again', externalContextPaths: ['/tmp/a'] });
+      expect(unchanged.persistedContent).not.toContain('<external_context>');
+
+      const added = service.prepareTurn({
+        text: 'more',
+        externalContextPaths: ['/tmp/b', '/tmp/a'],
+      });
+      expect(added.persistedContent).toContain('<external_context>');
+      expect(added.persistedContent).toContain('/tmp/b');
+
+      const cleared = service.prepareTurn({ text: 'done' });
+      expect(cleared.persistedContent).toContain('(none)');
+    });
+
+    it('should announce external context paths again after a session switch', () => {
+      service.prepareTurn({ text: 'hi', externalContextPaths: ['/tmp/a'] });
+      service.prepareTurn({ text: 'again', externalContextPaths: ['/tmp/a'] });
+
+      service.setSessionId('session-with-contexts', ['/tmp/a']);
+
+      const afterSwitch = service.prepareTurn({ text: 'resumed', externalContextPaths: ['/tmp/a'] });
+      expect(afterSwitch.persistedContent).toContain('<external_context>');
+    });
   });
 
   describe('query with PreparedChatTurn', () => {

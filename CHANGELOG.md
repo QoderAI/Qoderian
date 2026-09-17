@@ -11,6 +11,12 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Added
+
+- The agent now learns which external context directories are attached: the
+  message you send right after adding or removing one carries the current
+  list, so the agent can use those folders without you referencing every file.
+
 ## [1.0.11] - 2026-09-16
 
 ### Added
