@@ -348,4 +348,3 @@ export type TranslationKey =
 
   // Plugin updates
   | 'updates.available'
-  | 'updates.openRelease';

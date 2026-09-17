@@ -3,6 +3,7 @@ import { requestUrl } from 'obsidian';
 import {
   fetchAvailableQoderianUpdate,
   isNewerQoderianVersion,
+  qoderianPluginPageUri,
 } from '@/features/update/plugin-update-checker';
 
 const mockRequestUrl = requestUrl as jest.Mock;
@@ -35,6 +36,11 @@ describe('plugin update checker', () => {
       version: '1.1.0',
       url: 'https://github.com/QoderAI/Qoderian/releases/tag/v1.1.0',
     });
+  });
+
+  it('builds the plugin page URI Obsidian itself handles', () => {
+    expect(qoderianPluginPageUri('qoderian')).toBe('obsidian://show-plugin?id=qoderian');
+    expect(qoderianPluginPageUri('weird id/name')).toBe('obsidian://show-plugin?id=weird%20id%2Fname');
   });
 
   it('fails silently when offline', async () => {

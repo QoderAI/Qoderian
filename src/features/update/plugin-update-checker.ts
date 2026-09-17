@@ -1,5 +1,7 @@
 import { requestUrl } from 'obsidian';
 
+import { openExternalBrowserUrl } from '../../qoder/services/qoder-login-service';
+
 const LATEST_RELEASE_API_URL = 'https://api.github.com/repos/QoderAI/Qoderian/releases/latest';
 
 export interface QoderianUpdate {
@@ -28,6 +30,19 @@ export function isNewerQoderianVersion(currentVersion: string, latestVersion: st
     if (latest[index] !== current[index]) return latest[index] > current[index];
   }
   return false;
+}
+
+/** Obsidian's own URI for a plugin's entry in the community-plugins list. */
+export function qoderianPluginPageUri(pluginId: string): string {
+  return `obsidian://show-plugin?id=${encodeURIComponent(pluginId)}`;
+}
+
+/**
+ * Opens Obsidian's plugin page, where the update button lives. Obsidian
+ * handles its own URI scheme, so this stays inside the app.
+ */
+export function openQoderianUpdatePage(pluginId: string): void {
+  openExternalBrowserUrl(qoderianPluginPageUri(pluginId));
 }
 
 /**

@@ -402,7 +402,6 @@
     "backToList": "Zurück zur Modellliste"
   },
   "updates": {
-    "available": "Update {version}",
-    "openRelease": "Qoderian-Version {version} öffnen"
+    "available": "Update {version}"
   }
 }

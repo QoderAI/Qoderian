@@ -26,27 +26,24 @@
   color: var(--qoderian-brand);
 }
 
-.qoderian-update-badge {
-  flex: none;
-  min-height: 22px;
-  padding: 2px 7px;
-  border: 1px solid rgba(var(--qoderian-brand-rgb), 0.32);
-  border-radius: 999px;
-  background: rgba(var(--qoderian-brand-rgb), 0.1);
+/* Update badge: an icon button in the header actions, shown only while a newer
+   release exists. The doubled class keeps it clear of the theme's default
+   button chrome without !important. */
+.qoderian-header-actions .qoderian-update-badge.qoderian-update-badge {
+  padding: 0;
+  height: auto;
+  min-height: 0;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
   box-shadow: none;
   color: var(--qoderian-brand);
-  font: inherit;
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 1;
-  white-space: nowrap;
-  cursor: pointer;
 }
 
-.qoderian-update-badge:hover,
-.qoderian-update-badge:focus-visible {
-  border-color: rgba(var(--qoderian-brand-rgb), 0.55);
-  background: rgba(var(--qoderian-brand-rgb), 0.16);
+.qoderian-header-actions .qoderian-update-badge.qoderian-update-badge:hover,
+.qoderian-header-actions .qoderian-update-badge.qoderian-update-badge:focus-visible {
+  color: var(--qoderian-brand);
+  background: rgba(var(--qoderian-brand-rgb), 0.14);
   box-shadow: none;
   outline: none;
 }

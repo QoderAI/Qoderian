@@ -402,7 +402,6 @@
     "backToList": "Назад к списку моделей"
   },
   "updates": {
-    "available": "Обновить {version}",
-    "openRelease": "Открыть выпуск Qoderian {version}"
+    "available": "Обновить {version}"
   }
 }
