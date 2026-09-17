@@ -16,6 +16,9 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - The agent now learns which external context directories are attached: the
   message you send right after adding or removing one carries the current
   list, so the agent can use those folders without you referencing every file.
+- An update icon appears in the view header when GitHub has a newer stable
+  release; click it to open Qoderian's plugin page, where Obsidian's update
+  button lives.
 
 ## [1.0.11] - 2026-09-16
 

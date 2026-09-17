@@ -400,5 +400,8 @@
     "thinkingEffort": "Thinking Effort",
     "default": "По умолчанию",
     "backToList": "Назад к списку моделей"
+  },
+  "updates": {
+    "available": "Обновить {version}"
   }
 }

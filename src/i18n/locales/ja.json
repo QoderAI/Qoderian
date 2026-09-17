@@ -400,5 +400,8 @@
     "thinkingEffort": "Thinking Effort",
     "default": "デフォルト",
     "backToList": "モデルリストに戻る"
+  },
+  "updates": {
+    "available": "更新 {version}"
   }
 }

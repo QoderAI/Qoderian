@@ -465,3 +465,5 @@ export class TFolder {
     this.name = path.split('/').pop() || '';
   }
 }
+
+export const requestUrl = jest.fn();

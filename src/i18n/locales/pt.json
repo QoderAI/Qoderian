@@ -400,5 +400,8 @@
     "thinkingEffort": "Thinking Effort",
     "default": "Padrão",
     "backToList": "Voltar à lista de modelos"
+  },
+  "updates": {
+    "available": "Atualizar {version}"
   }
 }

@@ -400,5 +400,8 @@
     "thinkingEffort": "Thinking Effort",
     "default": "默认",
     "backToList": "返回模型列表"
+  },
+  "updates": {
+    "available": "更新 {version}"
   }
 }

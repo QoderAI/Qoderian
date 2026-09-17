@@ -15,6 +15,7 @@ import { setButtonTooltip } from '../../shared/dom/tooltip';
 import { createIconSvg, QODER_ICON,QODERIAN_ICON_ID } from '../../shared/icons';
 import { openFeedbackModal } from '../feedback/ui/feedback-modal';
 import { QoderianSettingsModal } from '../settings/settings-modal';
+import { openQoderianUpdatePage } from '../update/plugin-update-checker';
 import type { HistoryConversationStatus } from './controllers/conversation-controller';
 import {
   sendTabInputMessageFromExplicitEnterShortcut,
@@ -46,6 +47,7 @@ export class QoderianView extends ItemView {
   // DOM Elements
   private viewContainerEl: HTMLElement | null = null;
   private logoEl: HTMLElement | null = null;
+  private updateBadgeEl: HTMLElement | null = null;
   private newTabButtonEl: HTMLElement | null = null;
   private newConversationButtonEl: HTMLElement | null = null;
   private historyButtonEl: HTMLElement | null = null;
@@ -227,6 +229,13 @@ export class QoderianView extends ItemView {
     titleEl.createEl('h4', { text: 'Qoder', cls: 'qoderian-title-text' });
 
     const headerActions = header.createDiv({ cls: 'qoderian-header-actions' });
+    this.updateBadgeEl = headerActions.createEl('button', {
+      cls: 'qoderian-header-btn qoderian-update-badge qoderian-hidden',
+      attr: { type: 'button' },
+    });
+    setIcon(this.updateBadgeEl, 'download');
+    void this.refreshUpdateBadge();
+
     const feedbackBtn = headerActions.createDiv({ cls: 'qoderian-header-btn' });
     setIcon(feedbackBtn, 'message-circle-question');
     setButtonTooltip(feedbackBtn, t('commands.submitFeedback'));
@@ -317,6 +326,20 @@ export class QoderianView extends ItemView {
     new QoderianSettingsModal(this.plugin).open();
   }
 
+  /** Shows the badge once GitHub reports a newer stable release. */
+  private async refreshUpdateBadge(): Promise<void> {
+    const badge = this.updateBadgeEl;
+    if (!badge) return;
+
+    const update = await this.plugin.getAvailableUpdate();
+    if (!update || this.updateBadgeEl !== badge) return;
+
+    badge.dataset.version = update.version;
+    setButtonTooltip(badge, t('updates.available', { version: update.version }));
+    badge.removeClass('qoderian-hidden');
+    badge.addEventListener('click', () => openQoderianUpdatePage(this.plugin.manifest.id));
+  }
+
   private buildInputFooter(): void {
     if (!this.viewContainerEl) return;
 
@@ -387,6 +410,12 @@ export class QoderianView extends ItemView {
       setButtonTooltip(this.newConversationButtonEl, t('nav.newConversation'));
     }
     if (this.historyButtonEl) setButtonTooltip(this.historyButtonEl, t('nav.chatHistory'));
+    if (this.updateBadgeEl?.dataset.version) {
+      setButtonTooltip(
+        this.updateBadgeEl,
+        t('updates.available', { version: this.updateBadgeEl.dataset.version }),
+      );
+    }
     this.creditsUsageButton?.refreshLocale();
     for (const tab of this.tabManager?.getAllTabs() ?? []) {
       tab.ui.composerResize?.refreshLocale();

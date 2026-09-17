@@ -26,6 +26,28 @@
   color: var(--qoderian-brand);
 }
 
+/* Update badge: an icon button in the header actions, shown only while a newer
+   release exists. The doubled class keeps it clear of the theme's default
+   button chrome without !important. */
+.qoderian-header-actions .qoderian-update-badge.qoderian-update-badge {
+  padding: 0;
+  height: auto;
+  min-height: 0;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--qoderian-brand);
+}
+
+.qoderian-header-actions .qoderian-update-badge.qoderian-update-badge:hover,
+.qoderian-header-actions .qoderian-update-badge.qoderian-update-badge:focus-visible {
+  color: var(--qoderian-brand);
+  background: rgba(var(--qoderian-brand-rgb), 0.14);
+  box-shadow: none;
+  outline: none;
+}
+
 .qoderian-header-actions {
   display: flex;
   align-items: center;

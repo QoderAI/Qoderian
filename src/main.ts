@@ -24,6 +24,10 @@ import { QoderianView } from './features/chat/chat-view';
 import { openFeedbackModal } from './features/feedback/ui/feedback-modal';
 import { type InlineEditContext, InlineEditModal } from './features/inline-edit/ui/modal';
 import { QoderianSettingTab } from './features/settings/settings-tab';
+import {
+  fetchAvailableQoderianUpdate,
+  type QoderianUpdate,
+} from './features/update/plugin-update-checker';
 import { setLocale, t } from './i18n/i18n';
 import type { Locale } from './i18n/types';
 import { getActiveQoderCliEdition, setActiveQoderCliEdition } from './qoder/config/cli-edition';
@@ -51,6 +55,13 @@ export default class QoderianPlugin extends Plugin {
   qoderServices!: QoderServices;
   private conversations: Conversation[] = [];
   private lastKnownTabManagerState: AppTabManagerState | null = null;
+  private updateCheckPromise: Promise<QoderianUpdate | null> | null = null;
+
+  /** Checks once per plugin session so reopening the view does not hit GitHub repeatedly. */
+  getAvailableUpdate(): Promise<QoderianUpdate | null> {
+    this.updateCheckPromise ??= fetchAvailableQoderianUpdate(this.manifest.version);
+    return this.updateCheckPromise;
+  }
 
   async onload() {
     await this.loadSettings();
