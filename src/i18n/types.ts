@@ -344,4 +344,8 @@ export type TranslationKey =
 
   // Settings - Language
   | 'settings.language.name'
-  | 'settings.language.desc';
+  | 'settings.language.desc'
+
+  // Plugin updates
+  | 'updates.available'
+  | 'updates.openRelease';

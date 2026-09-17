@@ -26,6 +26,31 @@
   color: var(--qoderian-brand);
 }
 
+.qoderian-update-badge {
+  flex: none;
+  min-height: 22px;
+  padding: 2px 7px;
+  border: 1px solid rgba(var(--qoderian-brand-rgb), 0.32);
+  border-radius: 999px;
+  background: rgba(var(--qoderian-brand-rgb), 0.1);
+  box-shadow: none;
+  color: var(--qoderian-brand);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.qoderian-update-badge:hover,
+.qoderian-update-badge:focus-visible {
+  border-color: rgba(var(--qoderian-brand-rgb), 0.55);
+  background: rgba(var(--qoderian-brand-rgb), 0.16);
+  box-shadow: none;
+  outline: none;
+}
+
 .qoderian-header-actions {
   display: flex;
   align-items: center;

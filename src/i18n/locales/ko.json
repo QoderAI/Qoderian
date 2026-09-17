@@ -400,5 +400,9 @@
     "thinkingEffort": "Thinking Effort",
     "default": "기본",
     "backToList": "모델 목록으로 돌아가기"
+  },
+  "updates": {
+    "available": "업데이트 {version}",
+    "openRelease": "Qoderian {version} 릴리스 열기"
   }
 }
