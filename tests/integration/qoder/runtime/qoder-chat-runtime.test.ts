@@ -1164,7 +1164,7 @@ describe('QoderChatRuntime', () => {
       // Now test the standalone function directly
       const context = buildContextFromHistory(messages);
 
-      expect(context).toContain('<linked_note>');
+      expect(context).toContain('<current_note>');
       expect(context).toContain('notes/file.md');
     });
 
@@ -1226,7 +1226,7 @@ describe('QoderChatRuntime', () => {
       expect(prompts[0]).toBe('Follow up');
       expect(prompts[1]).toContain('User: First question');
       expect(prompts[1]).toContain('Assistant: Answer');
-      expect(prompts[1]).toContain('<linked_note>');
+      expect(prompts[1]).toContain('<current_note>');
       expect(prompts[1]).toContain('note.md');
       expect(chunks.some((c) => c.type === 'text' && c.content === 'Recovered')).toBe(true);
       expect(service.getSessionId()).toBeNull();
