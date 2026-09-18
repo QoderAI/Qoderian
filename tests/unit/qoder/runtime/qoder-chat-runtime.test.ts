@@ -170,6 +170,40 @@ describe('QoderChatRuntime', () => {
       const afterSwitch = service.prepareTurn({ text: 'resumed', externalContextPaths: ['/tmp/a'] });
       expect(afterSwitch.persistedContent).toContain('<external_context>');
     });
+
+    it('should announce the current note only when it changes', () => {
+      const first = service.prepareTurn({ text: 'hi', currentNotePath: 'notes/a.md' });
+      expect(first.persistedContent).toContain('<linked_note>');
+      expect(first.persistedContent).toContain('notes/a.md');
+
+      const unchanged = service.prepareTurn({ text: 'again', currentNotePath: 'notes/a.md' });
+      expect(unchanged.persistedContent).not.toContain('<linked_note>');
+
+      const switched = service.prepareTurn({ text: 'more', currentNotePath: 'notes/b.md' });
+      expect(switched.persistedContent).toContain('<linked_note>');
+      expect(switched.persistedContent).toContain('notes/b.md');
+    });
+
+    it('should stay silent when the note is closed and report it again when reopened', () => {
+      service.prepareTurn({ text: 'hi', currentNotePath: 'notes/a.md' });
+
+      const closed = service.prepareTurn({ text: 'closed' });
+      expect(closed.persistedContent).not.toContain('<linked_note>');
+
+      const reopened = service.prepareTurn({ text: 'reopened', currentNotePath: 'notes/a.md' });
+      expect(reopened.persistedContent).toContain('<linked_note>');
+      expect(reopened.persistedContent).toContain('notes/a.md');
+    });
+
+    it('should announce the current note again after a session switch', () => {
+      service.prepareTurn({ text: 'hi', currentNotePath: 'notes/a.md' });
+      service.prepareTurn({ text: 'again', currentNotePath: 'notes/a.md' });
+
+      service.setSessionId('session-with-note');
+
+      const afterSwitch = service.prepareTurn({ text: 'resumed', currentNotePath: 'notes/a.md' });
+      expect(afterSwitch.persistedContent).toContain('<linked_note>');
+    });
   });
 
   describe('query with PreparedChatTurn', () => {

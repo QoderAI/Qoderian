@@ -136,6 +136,7 @@ export class QoderChatRuntime implements ChatRuntime {
   private vaultPath: string | null = null;
   private currentExternalContextPaths: string[] = [];
   private announcedExternalContextPaths: string[] = [];
+  private announcedCurrentNotePath: string | null = null;
   private currentMcpServers: Record<string, McpServerConfig> = {};
   private readyStateListeners = new Set<(ready: boolean) => void>();
 
@@ -217,9 +218,14 @@ export class QoderChatRuntime implements ChatRuntime {
   }
 
   prepareTurn(request: ChatTurnRequest): PreparedChatTurn {
-    const notice = this.consumeExternalContextsNotice(request.externalContextPaths);
+    const contextsNotice = this.consumeExternalContextsNotice(request.externalContextPaths);
+    const noteNotice = this.consumeCurrentNoteNotice(request.currentNotePath);
     return encodeQoderTurn(
-      notice === undefined ? request : { ...request, externalContextsNotice: notice },
+      {
+        ...request,
+        ...(contextsNotice === undefined ? {} : { externalContextsNotice: contextsNotice }),
+        currentNotePath: noteNotice,
+      },
       this.mcpManager,
     );
   }
@@ -236,6 +242,21 @@ export class QoderChatRuntime implements ChatRuntime {
     const unchanged = current.length === announced.length
       && current.every((path) => announced.includes(path));
     return unchanged ? undefined : current;
+  }
+
+  /**
+   * The composer no longer shows which note the user is viewing, so the model
+   * learns it from the turn text: announce the path once per change. Closing
+   * the note is not announced, but it resets the tracker so reopening the
+   * same note reports it again.
+   */
+  private consumeCurrentNoteNotice(notePath: string | undefined): string | undefined {
+    const current = notePath ?? null;
+    if (current === this.announcedCurrentNotePath) {
+      return undefined;
+    }
+    this.announcedCurrentNotePath = current;
+    return current ?? undefined;
   }
 
   consumeTurnMetadata(): ChatTurnMetadata {
@@ -1296,6 +1317,8 @@ export class QoderChatRuntime implements ChatRuntime {
       this.crashRecoveryAttempted = false;
       // A restored session never saw the current directories; announce them.
       this.announcedExternalContextPaths = [];
+      // Likewise, report the note the user is viewing to the restored session.
+      this.announcedCurrentNotePath = null;
     }
 
     this.sessionManager.setSessionId(id, this.getScopedSettings().model);

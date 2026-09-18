@@ -1,40 +1,18 @@
 export class FileContextState {
   private attachedFiles: Set<string> = new Set();
-  private sessionStarted = false;
   private mentionedMcpServers: Set<string> = new Set();
-  private currentNoteSent = false;
 
   getAttachedFiles(): Set<string> {
     return new Set(this.attachedFiles);
   }
 
-  hasSentCurrentNote(): boolean {
-    return this.currentNoteSent;
-  }
-
-  markCurrentNoteSent(): void {
-    this.currentNoteSent = true;
-  }
-
-  isSessionStarted(): boolean {
-    return this.sessionStarted;
-  }
-
-  startSession(): void {
-    this.sessionStarted = true;
-  }
-
   resetForNewConversation(): void {
-    this.sessionStarted = false;
-    this.currentNoteSent = false;
     this.attachedFiles.clear();
     this.clearMcpMentions();
   }
 
-  resetForLoadedConversation(hasMessages: boolean): void {
-    this.currentNoteSent = hasMessages;
+  resetForLoadedConversation(): void {
     this.attachedFiles.clear();
-    this.sessionStarted = hasMessages;
     this.clearMcpMentions();
   }
 

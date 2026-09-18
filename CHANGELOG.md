@@ -78,11 +78,17 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - The resize grip above the message input stays hidden until the pointer is
   inside the input area or the composer has focus, so the input's top edge
   reads as a plain border while you are reading or scrolling.
+- The agent now learns which note you are viewing from the message text: the
+  turn you send after switching notes carries the new path, and switching
+  conversations reports it again, so the composer no longer needs a chip for
+  it.
 
 ### Removed
 
 - The hover tooltip on the message input's resize grip; the resize cursor and
   the accent highlight while dragging already signal what the grip does.
+- The current-note chip above the composer is gone. Use the "Excluded tags"
+  setting to keep a note out of context.
 
 ## [1.0.11] - 2026-09-16
 

@@ -11,7 +11,6 @@ jest.mock('obsidian', () => {
   return {
     ...actual,
     setIcon: jest.fn(),
-    Notice: jest.fn(),
   };
 });
 
@@ -109,6 +108,20 @@ function createMockCallbacks(options: {
   };
 }
 
+/** Picks a file from the @ dropdown, which attaches it to the manager state. */
+function attachViaMention(
+  manager: FileContextManager,
+  inputEl: HTMLTextAreaElement,
+  query: string,
+): void {
+  inputEl.value = `@${query}`;
+  inputEl.selectionStart = inputEl.value.length;
+  inputEl.selectionEnd = inputEl.value.length;
+  manager.handleInputChange();
+  jest.advanceTimersByTime(200);
+  manager.handleMentionKeydown({ key: 'Enter', preventDefault: jest.fn() } as any);
+}
+
 describe('FileContextManager', () => {
   let containerEl: MockElement;
   let inputEl: HTMLTextAreaElement;
@@ -131,8 +144,11 @@ describe('FileContextManager', () => {
     jest.useRealTimers();
   });
 
-  it('tracks current note send state per session', () => {
-    const app = createMockApp();
+  it('resolves the current note from the active file', () => {
+    const app = createMockApp({
+      files: ['notes/alpha.md'],
+      activeFilePath: 'notes/alpha.md',
+    });
     const manager = new FileContextManager(
       app,
       containerEl as any,
@@ -140,85 +156,36 @@ describe('FileContextManager', () => {
       createMockCallbacks()
     );
 
-    manager.setCurrentNote('notes/alpha.md');
-    expect(manager.shouldSendCurrentNote()).toBe(true);
-    manager.markCurrentNoteSent();
-    expect(manager.shouldSendCurrentNote()).toBe(false);
+    expect(manager.getCurrentNotePath()).toBe('notes/alpha.md');
 
-    manager.resetForLoadedConversation(true);
-    manager.setCurrentNote('notes/alpha.md');
-    expect(manager.shouldSendCurrentNote()).toBe(false);
-
-    manager.resetForLoadedConversation(false);
-    manager.setCurrentNote('notes/beta.md');
-    expect(manager.shouldSendCurrentNote()).toBe(true);
-
-    manager.destroy();
-  });
-
-  it('should NOT resend current note when loading conversation with existing messages', () => {
-    const app = createMockApp();
-    const manager = new FileContextManager(
-      app,
-      containerEl as any,
-      inputEl,
-      createMockCallbacks()
-    );
-
-    // When loading a conversation that already has messages, the current note
-    // should be marked as already sent to avoid re-sending context
-    manager.resetForLoadedConversation(true);
-    manager.setCurrentNote('notes/restored.md');
-    expect(manager.shouldSendCurrentNote()).toBe(false);
-
-    manager.destroy();
-  });
-
-  it('should send current note when loading empty conversation', () => {
-    const app = createMockApp();
-    const manager = new FileContextManager(
-      app,
-      containerEl as any,
-      inputEl,
-      createMockCallbacks()
-    );
-
-    // When loading a conversation with no messages, the current note
-    // should be sent with the first message
-    manager.resetForLoadedConversation(false);
-    manager.setCurrentNote('notes/new.md');
-    expect(manager.shouldSendCurrentNote()).toBe(true);
-
-    manager.destroy();
-  });
-
-  it('renders current note chip and removes on click', () => {
-    const app = createMockApp();
-    const manager = new FileContextManager(
-      app,
-      containerEl as any,
-      inputEl,
-      createMockCallbacks()
-    );
-
-    manager.setCurrentNote('notes/chip.md');
-
-    const indicator = findByClass(containerEl, 'qoderian-file-indicator');
-    expect(indicator).toBeDefined();
-    expect(indicator?.style.display).toBe('flex');
-
-    const removeEl = findByClass(containerEl, 'qoderian-file-chip-remove');
-    expect(removeEl).toBeDefined();
-
-    removeEl!.click();
-
+    app.workspace.getActiveFile = jest.fn(() => null);
     expect(manager.getCurrentNotePath()).toBeNull();
-    expect(indicator?.style.display).toBe('none');
 
     manager.destroy();
   });
 
-  it('auto-attaches active file unless excluded by tag', () => {
+  it('resolves the current note from the most recent file even when the sidebar is focused', () => {
+    const app = createMockApp({
+      files: ['notes/alpha.md', 'notes/beta.md'],
+      activeFilePath: 'notes/alpha.md',
+    });
+    const manager = new FileContextManager(
+      app,
+      containerEl as any,
+      inputEl,
+      createMockCallbacks()
+    );
+
+    expect(manager.getCurrentNotePath()).toBe('notes/alpha.md');
+
+    // Switching notes is picked up without any file-open bookkeeping.
+    app.workspace.getActiveFile = jest.fn(() => createMockTFile('notes/beta.md'));
+    expect(manager.getCurrentNotePath()).toBe('notes/beta.md');
+
+    manager.destroy();
+  });
+
+  it('does not resolve a current note with an excluded tag', () => {
     const fileCacheByPath = new Map<string, any>([
       ['notes/private.md', { frontmatter: { tags: ['private'] } }],
     ]);
@@ -235,11 +202,9 @@ describe('FileContextManager', () => {
       createMockCallbacks({ excludedTags: ['private'] })
     );
 
-    manager.autoAttachActiveFile();
     expect(manager.getCurrentNotePath()).toBeNull();
 
     app.workspace.getActiveFile = jest.fn(() => createMockTFile('notes/public.md'));
-    manager.autoAttachActiveFile();
     expect(manager.getCurrentNotePath()).toBe('notes/public.md');
 
     manager.destroy();
@@ -484,40 +449,7 @@ describe('FileContextManager', () => {
     manager.destroy();
   });
 
-  describe('session lifecycle', () => {
-    it('should report session not started initially', () => {
-      const app = createMockApp();
-      const manager = new FileContextManager(
-        app, containerEl as any, inputEl, createMockCallbacks()
-      );
-      expect(manager.isSessionStarted()).toBe(false);
-      manager.destroy();
-    });
-
-    it('should report session started after startSession', () => {
-      const app = createMockApp();
-      const manager = new FileContextManager(
-        app, containerEl as any, inputEl, createMockCallbacks()
-      );
-      manager.startSession();
-      expect(manager.isSessionStarted()).toBe(true);
-      manager.destroy();
-    });
-
-    it('should reset state for new conversation', () => {
-      const app = createMockApp();
-      const manager = new FileContextManager(
-        app, containerEl as any, inputEl, createMockCallbacks()
-      );
-      manager.setCurrentNote('notes/test.md');
-      manager.startSession();
-
-      manager.resetForNewConversation();
-      expect(manager.getCurrentNotePath()).toBeNull();
-      expect(manager.isSessionStarted()).toBe(false);
-      manager.destroy();
-    });
-
+  describe('conversation boundaries', () => {
     it('clears tracked composer references at conversation boundaries', () => {
       const app = createMockApp();
       const onReferencesChanged = jest.fn();
@@ -534,88 +466,35 @@ describe('FileContextManager', () => {
       expect(onReferencesChanged).toHaveBeenLastCalledWith([]);
 
       manager.registerComposerReference({ token: '@b.md', path: 'b.md', kind: 'file' });
-      manager.resetForLoadedConversation(true);
+      manager.resetForLoadedConversation();
       expect(onReferencesChanged).toHaveBeenLastCalledWith([]);
       manager.destroy();
     });
   });
 
-  describe('handleFileOpen', () => {
-    it('should update current note when session not started', () => {
-      const app = createMockApp({ files: ['notes/new.md'] });
-      const manager = new FileContextManager(
-        app, containerEl as any, inputEl, createMockCallbacks()
-      );
-
-      const file = createMockTFile('notes/new.md');
-      manager.handleFileOpen(file);
-      expect(manager.getCurrentNotePath()).toBe('notes/new.md');
-      manager.destroy();
-    });
-
-    it('should clear attachments when opening a new file before session starts', () => {
-      const app = createMockApp({ files: ['notes/a.md', 'notes/b.md'] });
-      const manager = new FileContextManager(
-        app, containerEl as any, inputEl, createMockCallbacks()
-      );
-
-      manager.setCurrentNote('notes/a.md');
-      const fileB = createMockTFile('notes/b.md');
-      manager.handleFileOpen(fileB);
-      expect(manager.getCurrentNotePath()).toBe('notes/b.md');
-      manager.destroy();
-    });
-
-    it('should not update current note when session is started', () => {
-      const app = createMockApp({ files: ['notes/a.md'] });
-      const manager = new FileContextManager(
-        app, containerEl as any, inputEl, createMockCallbacks()
-      );
-
-      manager.setCurrentNote('notes/a.md');
-      manager.startSession();
-
-      const fileB = createMockTFile('notes/b.md');
-      manager.handleFileOpen(fileB);
-      // Should NOT update because session is started
-      expect(manager.getCurrentNotePath()).toBe('notes/a.md');
-      manager.destroy();
-    });
-
-    it('should not attach file with excluded tag', () => {
-      const fileCacheByPath = new Map<string, any>([
-        ['notes/secret.md', { frontmatter: { tags: ['private'] } }],
-      ]);
-      const app = createMockApp({ files: ['notes/secret.md'], fileCacheByPath });
-      const manager = new FileContextManager(
-        app, containerEl as any, inputEl,
-        createMockCallbacks({ excludedTags: ['private'] })
-      );
-
-      const file = createMockTFile('notes/secret.md');
-      manager.handleFileOpen(file);
-      expect(manager.getCurrentNotePath()).toBeNull();
-      manager.destroy();
-    });
-  });
-
   describe('file rename handling', () => {
-    it('should update current note path when file is renamed', () => {
+    it('rewrites composer reference tokens when the file is renamed', () => {
       const app = createMockApp({ files: ['notes/old.md', 'notes/new.md'] });
+      const onReferencesChanged = jest.fn();
       const manager = new FileContextManager(
-        app, containerEl as any, inputEl, createMockCallbacks()
+        app, containerEl as any, inputEl, { ...createMockCallbacks(), onReferencesChanged }
       );
 
-      manager.setCurrentNote('notes/old.md');
-      expect(manager.getCurrentNotePath()).toBe('notes/old.md');
+      manager.registerComposerReference({
+        token: '@notes/old.md', path: 'notes/old.md', kind: 'file',
+      });
+      inputEl.value = 'See @notes/old.md for details';
 
-      // Simulate vault rename event
       const renameHandler = (app.vault.on as jest.Mock).mock.calls
         .find((c: any[]) => c[0] === 'rename')?.[1];
       expect(renameHandler).toBeDefined();
 
       renameHandler(createMockTFile('notes/new.md'), 'notes/old.md');
-      expect(manager.getCurrentNotePath()).toBe('notes/new.md');
+
+      expect(inputEl.value).toBe('See @notes/new.md for details');
+      expect(onReferencesChanged).toHaveBeenLastCalledWith(
+        [expect.objectContaining({ token: '@notes/new.md', path: 'notes/new.md' })],
+      );
       manager.destroy();
     });
 
@@ -625,7 +504,8 @@ describe('FileContextManager', () => {
         app, containerEl as any, inputEl, createMockCallbacks()
       );
 
-      manager.setCurrentNote('notes/old.md');
+      attachViaMention(manager, inputEl, 'old');
+      expect(manager.getAttachedFiles().has('notes/old.md')).toBe(true);
 
       const renameHandler = (app.vault.on as jest.Mock).mock.calls
         .find((c: any[]) => c[0] === 'rename')?.[1];
@@ -635,40 +515,24 @@ describe('FileContextManager', () => {
       expect(manager.getAttachedFiles().has('notes/old.md')).toBe(false);
       manager.destroy();
     });
-
-    it('should not update if renamed file is not attached', () => {
-      const app = createMockApp({ files: ['notes/a.md', 'notes/unrelated.md'] });
-      const manager = new FileContextManager(
-        app, containerEl as any, inputEl, createMockCallbacks()
-      );
-
-      manager.setCurrentNote('notes/a.md');
-
-      const renameHandler = (app.vault.on as jest.Mock).mock.calls
-        .find((c: any[]) => c[0] === 'rename')?.[1];
-
-      renameHandler(createMockTFile('notes/renamed.md'), 'notes/unrelated.md');
-      // Current note should remain unchanged
-      expect(manager.getCurrentNotePath()).toBe('notes/a.md');
-      manager.destroy();
-    });
   });
 
   describe('file delete handling', () => {
-    it('should clear current note when file is deleted', () => {
-      const app = createMockApp({ files: ['notes/doomed.md'] });
+    it('drops composer references when the file is deleted', () => {
+      const app = createMockApp({ files: ['notes/a.md'] });
       const manager = new FileContextManager(
         app, containerEl as any, inputEl, createMockCallbacks()
       );
 
-      manager.setCurrentNote('notes/doomed.md');
+      manager.registerComposerReference({ token: '@notes/a.md', path: 'notes/a.md', kind: 'file' });
+      inputEl.value = 'See @notes/a.md';
 
       const deleteHandler = (app.vault.on as jest.Mock).mock.calls
         .find((c: any[]) => c[0] === 'delete')?.[1];
       expect(deleteHandler).toBeDefined();
 
-      deleteHandler(createMockTFile('notes/doomed.md'));
-      expect(manager.getCurrentNotePath()).toBeNull();
+      deleteHandler(createMockTFile('notes/a.md'));
+      expect(inputEl.value).toBe('See ');
       manager.destroy();
     });
 
@@ -678,7 +542,7 @@ describe('FileContextManager', () => {
         app, containerEl as any, inputEl, createMockCallbacks()
       );
 
-      manager.setCurrentNote('notes/a.md');
+      attachViaMention(manager, inputEl, 'a');
       expect(manager.getAttachedFiles().has('notes/a.md')).toBe(true);
 
       const deleteHandler = (app.vault.on as jest.Mock).mock.calls
@@ -686,22 +550,6 @@ describe('FileContextManager', () => {
 
       deleteHandler(createMockTFile('notes/a.md'));
       expect(manager.getAttachedFiles().has('notes/a.md')).toBe(false);
-      manager.destroy();
-    });
-
-    it('should not update if deleted file is not attached', () => {
-      const app = createMockApp({ files: ['notes/a.md', 'notes/other.md'] });
-      const manager = new FileContextManager(
-        app, containerEl as any, inputEl, createMockCallbacks()
-      );
-
-      manager.setCurrentNote('notes/a.md');
-
-      const deleteHandler = (app.vault.on as jest.Mock).mock.calls
-        .find((c: any[]) => c[0] === 'delete')?.[1];
-
-      deleteHandler(createMockTFile('notes/other.md'));
-      expect(manager.getCurrentNotePath()).toBe('notes/a.md');
       manager.destroy();
     });
   });
@@ -724,7 +572,6 @@ describe('FileContextManager', () => {
         createMockCallbacks({ excludedTags: ['system'] })
       );
 
-      manager.autoAttachActiveFile();
       expect(manager.getCurrentNotePath()).toBeNull();
       manager.destroy();
     });
@@ -744,7 +591,6 @@ describe('FileContextManager', () => {
         createMockCallbacks({ excludedTags: ['private'] })
       );
 
-      manager.autoAttachActiveFile();
       expect(manager.getCurrentNotePath()).toBeNull();
       manager.destroy();
     });
@@ -764,7 +610,6 @@ describe('FileContextManager', () => {
         createMockCallbacks({ excludedTags: ['draft'] })
       );
 
-      manager.autoAttachActiveFile();
       expect(manager.getCurrentNotePath()).toBeNull();
       manager.destroy();
     });
@@ -783,7 +628,6 @@ describe('FileContextManager', () => {
         createMockCallbacks({ excludedTags: ['#System'] })
       );
 
-      manager.autoAttachActiveFile();
       expect(manager.getCurrentNotePath()).toBeNull();
       manager.destroy();
     });
@@ -802,7 +646,6 @@ describe('FileContextManager', () => {
         createMockCallbacks({ excludedTags: ['private'] })
       );
 
-      manager.autoAttachActiveFile();
       expect(manager.getCurrentNotePath()).toBeNull();
       manager.destroy();
     });
@@ -821,7 +664,6 @@ describe('FileContextManager', () => {
         createMockCallbacks({ excludedTags: ['private'] })
       );
 
-      manager.autoAttachActiveFile();
       expect(manager.getCurrentNotePath()).toBe('notes/privateer.md');
       manager.destroy();
     });
@@ -998,24 +840,6 @@ describe('FileContextManager', () => {
 
       manager.destroy();
       expect(app.vault.offref).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('onOpenFile callback', () => {
-    it('should show Notice when file not found in vault', async () => {
-      const { Notice: NoticeMock } = jest.requireMock('obsidian');
-      const app = createMockApp();
-      const manager = new FileContextManager(
-        app, containerEl as any, inputEl, createMockCallbacks()
-      );
-
-      const chipsView = (manager as any).chipsView;
-      const openCallback = chipsView.callbacks.onOpenFile;
-      expect(openCallback).toBeDefined();
-
-      await openCallback('notes/missing.md');
-      expect(NoticeMock).toHaveBeenCalledWith(expect.stringContaining('Could not open file'));
-      manager.destroy();
     });
   });
 });
