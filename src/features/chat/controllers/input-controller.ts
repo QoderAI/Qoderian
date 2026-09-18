@@ -197,7 +197,6 @@ export class InputController {
 
     const inputEl = this.deps.getInputEl();
     const imageContextManager = this.deps.getImageContextManager();
-    const fileContextManager = this.deps.getFileContextManager();
 
     const contentOverride = options?.content;
     const shouldUseInput = contentOverride === undefined;
@@ -266,8 +265,6 @@ export class InputController {
       welcomeEl.addClass('qoderian-hidden');
     }
 
-    fileContextManager?.startSession();
-
     // Slash commands are passed directly to SDK for handling
     // SDK handles expansion, $ARGUMENTS, @file references, and frontmatter options
     const images = imageOverride ?? imageContextManager?.getAttachedImages() ?? [];
@@ -292,8 +289,6 @@ export class InputController {
         canvasContextOverride: options?.canvasContextOverride,
       });
     const { displayContent, turnRequest } = turnSubmission;
-
-    fileContextManager?.markCurrentNoteSent();
 
     const userMsg: ChatMessage = {
       id: this.deps.generateId(),
@@ -656,7 +651,6 @@ export class InputController {
     const externalContextSelector = this.deps.getExternalContextSelector();
 
     const currentNotePath = fileContextManager?.getCurrentNotePath() || null;
-    const shouldSendCurrentNote = fileContextManager?.shouldSendCurrentNote(currentNotePath) ?? false;
 
     const editorContext = options.editorContextOverride !== undefined
       ? options.editorContextOverride
@@ -680,7 +674,7 @@ export class InputController {
       turnRequest: {
         text: transformedText,
         images: options.images,
-        currentNotePath: shouldSendCurrentNote && currentNotePath ? currentNotePath : undefined,
+        currentNotePath: currentNotePath ?? undefined,
         editorSelection: editorContext,
         browserSelection: browserContext,
         canvasSelection: canvasContext,

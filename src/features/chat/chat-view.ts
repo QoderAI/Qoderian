@@ -700,15 +700,6 @@ export class QoderianView extends ItemView {
       this.plugin.app.vault.on('modify', () => markCacheDirty(false))
     );
 
-    // File open event
-    this.registerEvent(
-      this.plugin.app.workspace.on('file-open', (file) => {
-        if (file) {
-          this.tabManager?.getActiveTab()?.ui.fileContextManager?.handleFileOpen(file);
-        }
-      })
-    );
-
     // Click outside to close mention dropdown
     this.registerDomEvent(activeDocument, 'click', (e) => {
       const activeTab = this.tabManager?.getActiveTab();
