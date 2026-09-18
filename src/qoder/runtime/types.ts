@@ -102,6 +102,8 @@ export interface PersistentQueryConfig {
   effortLevel: EffortLevel;
   permissionMode: PermissionMode | null;
   sdkPermissionMode: SDKPermissionMode | null;
+  /** Memory is a query-launch option, so toggling it restarts the session. */
+  memoryEnabled: boolean;
   systemPromptKey: string;
   disallowedToolsKey: string;
   mcpServersKey: string;

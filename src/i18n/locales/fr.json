@@ -318,6 +318,10 @@
       "name": "Charger les paramètres utilisateur Qoder",
       "desc": "Charge ~/.qoder/settings.json. Lorsqu'activé, les règles de permission de l'utilisateur peuvent contourner le mode sécurisé."
     },
+    "enableMemory": {
+      "name": "Mémoire",
+      "desc": "Enregistre et charge automatiquement les informations réutilisables entre les conversations. Les mémoires sont stockées dans le répertoire de mémoire de Qoder CLI et partagées avec la CLI du terminal."
+    },
     "qoderSafeMode": {
       "name": "Autorisations du mode sécurisé",
       "desc": "Comportement des autorisations lorsque le mode sécurisé est activé.",

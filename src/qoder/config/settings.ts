@@ -44,6 +44,7 @@ export const DEFAULT_QODER_SETTINGS: Readonly<QoderSettings> = Object.freeze({
   edition: 'global',
   loadUserSettings: true,
   enableBangBash: false,
+  enableMemory: false,
   discoveredModels: [],
   discoveredAgents: [],
   lastModel: 'auto',
@@ -238,6 +239,8 @@ export function getQoderSettings(
       ?? DEFAULT_QODER_SETTINGS.loadUserSettings,
     enableBangBash: (config.enableBangBash as boolean | undefined)
       ?? DEFAULT_QODER_SETTINGS.enableBangBash,
+    enableMemory: (config.enableMemory as boolean | undefined)
+      ?? DEFAULT_QODER_SETTINGS.enableMemory,
     discoveredModels: normalizeQoderDiscoveredModels(config.discoveredModels),
     discoveredAgents: normalizeQoderDiscoveredAgents(config.discoveredAgents),
     lastModel: (config.lastModel as string | undefined) ?? DEFAULT_QODER_SETTINGS.lastModel,

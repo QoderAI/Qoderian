@@ -156,3 +156,46 @@ describe('QueryOptionsBuilder model policy', () => {
     });
   });
 });
+
+describe('QueryOptionsBuilder memory', () => {
+  it('leaves memory off by default on persistent and cold-start queries', () => {
+    const persistent = QueryOptionsBuilder.buildPersistentQueryOptions(
+      createContext('default'),
+    );
+    const coldStart = QueryOptionsBuilder.buildColdStartQueryOptions(
+      createColdStartContext(),
+    );
+
+    expect(persistent.memory).toBeUndefined();
+    expect(coldStart.memory).toBeUndefined();
+  });
+
+  it('requests CLI-native memory on persistent queries when enabled', () => {
+    const ctx = createContext('default');
+    ctx.settings.qoder.enableMemory = true;
+
+    const options = QueryOptionsBuilder.buildPersistentQueryOptions(ctx);
+
+    expect(options.memory).toEqual({ mode: 'native' });
+  });
+
+  it('carries native memory into chat cold-start queries when enabled', () => {
+    const ctx = createColdStartContext();
+    ctx.settings.qoder.enableMemory = true;
+
+    const options = QueryOptionsBuilder.buildColdStartQueryOptions(ctx);
+
+    expect(options.memory).toEqual({ mode: 'native' });
+  });
+
+  it('restarts the session when the memory setting is toggled', () => {
+    const off = QueryOptionsBuilder.buildPersistentQueryConfig(createContext('default'));
+
+    const onCtx = createContext('default');
+    onCtx.settings.qoder.enableMemory = true;
+    const on = QueryOptionsBuilder.buildPersistentQueryConfig(onCtx);
+
+    expect(QueryOptionsBuilder.needsRestart(off, on)).toBe(true);
+    expect(QueryOptionsBuilder.needsRestart(off, off)).toBe(false);
+  });
+});

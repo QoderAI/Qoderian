@@ -318,6 +318,10 @@
       "name": "Benutzer-Qoder-Einstellungen laden",
       "desc": "Lädt ~/.qoder/settings.json. Wenn aktiviert, können Benutzer-Qoder-CLI-Berechtigungsregeln den Sicherheitsmodus umgehen."
     },
+    "enableMemory": {
+      "name": "Gedächtnis",
+      "desc": "Speichert wiederverwendbare Informationen automatisch und lädt sie über Unterhaltungen hinweg. Die Daten liegen im Gedächtnisverzeichnis der Qoder CLI und werden mit der Terminal-CLI geteilt."
+    },
     "qoderSafeMode": {
       "name": "Berechtigungen im sicheren Modus",
       "desc": "Berechtigungsverhalten bei aktiviertem sicheren Modus.",
