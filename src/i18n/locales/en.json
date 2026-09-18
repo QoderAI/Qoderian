@@ -23,8 +23,7 @@
   },
   "composer": {
     "send": "Send message",
-    "stop": "Stop generation",
-    "resize": "Drag to resize the message input; double-click to reset"
+    "stop": "Stop generation"
   },
   "restore": {
     "failed": "Some of your previous tabs or conversations could not be restored ({count} issue(s)). Details are in the developer console."

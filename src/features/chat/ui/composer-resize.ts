@@ -1,13 +1,9 @@
-import { t } from '../../../i18n/i18n';
-import { setButtonTooltip } from '../../../shared/dom/tooltip';
-
 export const COMPOSER_MIN_HEIGHT = 140;
 export const COMPOSER_MAX_HEIGHT_PERCENT = 0.75;
 export const COMPOSER_KEYBOARD_RESIZE_STEP = 24;
 
 export interface ComposerResizeController {
   destroy(): void;
-  refreshLocale(): void;
   reset(): void;
 }
 
@@ -113,15 +109,10 @@ export function attachComposerResize(
     applyHeight(currentHeight() + delta);
   };
 
-  const refreshLocale = (): void => {
-    setButtonTooltip(handleEl, t('composer.resize'));
-  };
-
   handleEl.setAttribute('role', 'separator');
   handleEl.setAttribute('aria-orientation', 'horizontal');
   handleEl.setAttribute('tabindex', '0');
   updateAriaBounds(currentHeight());
-  refreshLocale();
   handleEl.addEventListener('pointerdown', handlePointerDown);
   handleEl.addEventListener('dblclick', reset);
   handleEl.addEventListener('keydown', handleKeydown);
@@ -148,7 +139,6 @@ export function attachComposerResize(
       handleEl.removeEventListener('keydown', handleKeydown);
       viewWindow?.removeEventListener('blur', stopDragging);
     },
-    refreshLocale,
     reset,
   };
 }

@@ -23,8 +23,7 @@
   },
   "composer": {
     "send": "Envoyer le message",
-    "stop": "Arrêter la génération",
-    "resize": "Faites glisser pour redimensionner la saisie ; double-cliquez pour réinitialiser"
+    "stop": "Arrêter la génération"
   },
   "restore": {
     "failed": "Certains onglets ou conversations n'ont pas pu être restaurés ({count} problème(s)). Détails dans la console développeur."
