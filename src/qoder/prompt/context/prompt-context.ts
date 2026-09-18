@@ -6,8 +6,8 @@
 
 import { escapeXmlClosingTag } from './xml-context';
 
-const LINKED_NOTE_TAG = 'linked_note';
-const NOTE_CONTEXT_TAG_PATTERN = '(linked_note|current_note)';
+const CURRENT_NOTE_TAG = 'current_note';
+const NOTE_CONTEXT_TAG_PATTERN = '(current_note|linked_note)';
 const EXTERNAL_CONTEXT_TAG = 'external_context';
 
 // Matches note context at the START of prompt (legacy placement)
@@ -18,15 +18,15 @@ const NOTE_CONTEXT_SUFFIX_REGEX = new RegExp(`\\n\\n<${NOTE_CONTEXT_TAG_PATTERN}
 /**
  * Pattern to match XML context tags appended to prompts.
  * These tags are always preceded by \n\n separator.
- * Matches: linked_note/current_note, editor_selection (with attributes), editor_cursor (with attributes),
+ * Matches: current_note/linked_note, editor_selection (with attributes), editor_cursor (with attributes),
  * context_files, canvas_selection, browser_selection, external_context
  */
-export const XML_CONTEXT_PATTERN = /\n\n<(?:linked_note|current_note|editor_selection|editor_cursor|context_files|canvas_selection|browser_selection|external_context)[\s>]/;
+export const XML_CONTEXT_PATTERN = /\n\n<(?:current_note|linked_note|editor_selection|editor_cursor|context_files|canvas_selection|browser_selection|external_context)[\s>]/;
 const BRACKET_CONTEXT_PATTERN = /\n\[(?:Current note|Editor selection from|Browser selection from|Canvas selection from)\b/;
 
 export function formatCurrentNote(notePath: string): string {
-  const safePath = escapeXmlClosingTag(notePath, LINKED_NOTE_TAG);
-  return `<${LINKED_NOTE_TAG}>\n${safePath}\n</${LINKED_NOTE_TAG}>`;
+  const safePath = escapeXmlClosingTag(notePath, CURRENT_NOTE_TAG);
+  return `<${CURRENT_NOTE_TAG}>\n${safePath}\n</${CURRENT_NOTE_TAG}>`;
 }
 
 export function appendCurrentNote(prompt: string, notePath: string): string {
@@ -35,7 +35,7 @@ export function appendCurrentNote(prompt: string, notePath: string): string {
 
 /**
  * Strips note context from a prompt.
- * Handles legacy <current_note> tags and canonical <linked_note> tags.
+ * Handles legacy <linked_note> tags and canonical <current_note> tags.
  */
 export function stripCurrentNoteContext(prompt: string): string {
   const strippedPrefix = prompt.replace(NOTE_CONTEXT_PREFIX_REGEX, '');
@@ -104,7 +104,7 @@ export function extractUserQuery(prompt: string): string {
 
   // No XML context - return the whole prompt stripped of any remaining tags
   return prompt
-    .replace(/<(linked_note|current_note)>[\s\S]*?<\/\1>\s*/g, '')
+    .replace(/<(current_note|linked_note)>[\s\S]*?<\/\1>\s*/g, '')
     .replace(/<editor_selection[\s\S]*?<\/editor_selection>\s*/g, '')
     .replace(/<editor_cursor[\s\S]*?<\/editor_cursor>\s*/g, '')
     .replace(/<context_files>[\s\S]*?<\/context_files>\s*/g, '')

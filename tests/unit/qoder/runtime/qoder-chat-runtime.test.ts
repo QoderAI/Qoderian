@@ -123,7 +123,7 @@ describe('QoderChatRuntime', () => {
         text: 'explain this',
         currentNotePath: 'notes/test.md',
       });
-      expect(result.persistedContent).toContain('<linked_note>');
+      expect(result.persistedContent).toContain('<current_note>');
       expect(result.persistedContent).toContain('notes/test.md');
     });
 
@@ -173,14 +173,14 @@ describe('QoderChatRuntime', () => {
 
     it('should announce the current note only when it changes', () => {
       const first = service.prepareTurn({ text: 'hi', currentNotePath: 'notes/a.md' });
-      expect(first.persistedContent).toContain('<linked_note>');
+      expect(first.persistedContent).toContain('<current_note>');
       expect(first.persistedContent).toContain('notes/a.md');
 
       const unchanged = service.prepareTurn({ text: 'again', currentNotePath: 'notes/a.md' });
-      expect(unchanged.persistedContent).not.toContain('<linked_note>');
+      expect(unchanged.persistedContent).not.toContain('<current_note>');
 
       const switched = service.prepareTurn({ text: 'more', currentNotePath: 'notes/b.md' });
-      expect(switched.persistedContent).toContain('<linked_note>');
+      expect(switched.persistedContent).toContain('<current_note>');
       expect(switched.persistedContent).toContain('notes/b.md');
     });
 
@@ -188,10 +188,10 @@ describe('QoderChatRuntime', () => {
       service.prepareTurn({ text: 'hi', currentNotePath: 'notes/a.md' });
 
       const closed = service.prepareTurn({ text: 'closed' });
-      expect(closed.persistedContent).not.toContain('<linked_note>');
+      expect(closed.persistedContent).not.toContain('<current_note>');
 
       const reopened = service.prepareTurn({ text: 'reopened', currentNotePath: 'notes/a.md' });
-      expect(reopened.persistedContent).toContain('<linked_note>');
+      expect(reopened.persistedContent).toContain('<current_note>');
       expect(reopened.persistedContent).toContain('notes/a.md');
     });
 
@@ -202,7 +202,7 @@ describe('QoderChatRuntime', () => {
       service.setSessionId('session-with-note');
 
       const afterSwitch = service.prepareTurn({ text: 'resumed', currentNotePath: 'notes/a.md' });
-      expect(afterSwitch.persistedContent).toContain('<linked_note>');
+      expect(afterSwitch.persistedContent).toContain('<current_note>');
     });
   });
 

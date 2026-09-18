@@ -79,9 +79,10 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   inside the input area or the composer has focus, so the input's top edge
   reads as a plain border while you are reading or scrolling.
 - The agent now learns which note you are viewing from the message text: the
-  turn you send after switching notes carries the new path, and switching
-  conversations reports it again, so the composer no longer needs a chip for
-  it.
+  turn you send after switching notes carries the new path as a
+  `<current_note>` tag (older messages may still carry `<linked_note>`, which
+  keeps working), and switching conversations reports it again, so the
+  composer no longer needs a chip for it.
 
 ### Removed
 
