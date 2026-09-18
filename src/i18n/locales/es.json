@@ -23,8 +23,7 @@
   },
   "composer": {
     "send": "Enviar mensaje",
-    "stop": "Detener generación",
-    "resize": "Arrastra para ajustar la altura del campo; haz doble clic para restablecer"
+    "stop": "Detener generación"
   },
   "restore": {
     "failed": "No se pudieron restaurar algunas pestañas o conversaciones ({count} problema(s)). Detalles en la consola de desarrollador."

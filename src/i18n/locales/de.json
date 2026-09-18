@@ -23,8 +23,7 @@
   },
   "composer": {
     "send": "Nachricht senden",
-    "stop": "Generierung stoppen",
-    "resize": "Ziehen, um die Eingabehöhe anzupassen; doppelklicken zum Zurücksetzen"
+    "stop": "Generierung stoppen"
   },
   "restore": {
     "failed": "Einige Tabs oder Unterhaltungen konnten nicht wiederhergestellt werden ({count} Problem(e)). Details in der Entwicklerkonsole."

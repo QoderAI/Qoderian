@@ -27,6 +27,14 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 - The context usage meter is now a complete ring that fills from the top
   instead of an arc with a gap at the bottom.
+- The resize grip above the message input stays hidden until the pointer is
+  inside the input area or the composer has focus, so the input's top edge
+  reads as a plain border while you are reading or scrolling.
+
+### Removed
+
+- The hover tooltip on the message input's resize grip; the resize cursor and
+  the accent highlight while dragging already signal what the grip does.
 
 ## [1.0.11] - 2026-09-16
 

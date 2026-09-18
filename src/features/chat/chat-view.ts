@@ -417,9 +417,6 @@ export class QoderianView extends ItemView {
       );
     }
     this.creditsUsageButton?.refreshLocale();
-    for (const tab of this.tabManager?.getAllTabs() ?? []) {
-      tab.ui.composerResize?.refreshLocale();
-    }
     this.updateTabBar();
   }
 

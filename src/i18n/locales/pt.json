@@ -23,8 +23,7 @@
   },
   "composer": {
     "send": "Enviar mensagem",
-    "stop": "Parar geração",
-    "resize": "Arraste para ajustar a altura da entrada; clique duas vezes para redefinir"
+    "stop": "Parar geração"
   },
   "restore": {
     "failed": "Algumas abas ou conversas não puderam ser restauradas ({count} problema(s)). Detalhes no console do desenvolvedor."
