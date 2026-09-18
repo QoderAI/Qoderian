@@ -56,8 +56,16 @@
   border-radius: 999px;
   background: var(--background-primary);
   transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+/* The grip stays out of the way until the pointer is inside the composer or it has focus. */
+.qoderian-input-wrapper:hover .qoderian-composer-resize-handle::after,
+.qoderian-input-wrapper:focus-within .qoderian-composer-resize-handle::after,
+.qoderian-composer-resize-handle:focus-visible::after,
+.qoderian-composer-resizing .qoderian-composer-resize-handle::after {
   opacity: 1;
-  transition: border-color 0.12s ease, background 0.12s ease;
 }
 
 .qoderian-composer-resize-handle:hover::after,
