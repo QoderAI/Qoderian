@@ -19,6 +19,10 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - An update icon appears in the view header when GitHub has a newer stable
   release; click it to open Qoderian's plugin page, where Obsidian's update
   button lives.
+- An opt-in Memory toggle in Settings → Safety lets the Qoder CLI save and
+  reload reusable information across conversations. Memories live in the
+  Qoder CLI memory directory and are shared with the terminal CLI; toggling
+  it restarts the running session once.
 
 ### Changed
 

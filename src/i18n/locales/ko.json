@@ -318,6 +318,10 @@
       "name": "사용자 Qoder 설정 로드",
       "desc": "~/.qoder/settings.json을 로드합니다. 활성화하면 사용자의 Qoder CLI 허용 규칙이 보안 모드를 우회할 수 있습니다."
     },
+    "enableMemory": {
+      "name": "메모리",
+      "desc": "대화를 넘어 재사용할 수 있는 정보를 자동으로 저장하고 불러옵니다. 메모리는 Qoder CLI 메모리 디렉터리에 저장되며 터미널 CLI와 공유됩니다."
+    },
     "qoderSafeMode": {
       "name": "안전 모드 권한",
       "desc": "안전 모드가 켜져 있을 때 사용할 권한 동작입니다.",

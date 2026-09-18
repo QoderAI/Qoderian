@@ -318,6 +318,10 @@
       "name": "Load user Qoder settings",
       "desc": "Load ~/.qoder/settings.json. When enabled, user's Qoder CLI permission rules may bypass Safe mode."
     },
+    "enableMemory": {
+      "name": "Memory",
+      "desc": "Automatically save and load reusable information across conversations. Memories live in your Qoder CLI memory directory and are shared with the terminal CLI."
+    },
     "qoderSafeMode": {
       "name": "Safe mode permissions",
       "desc": "Permission behavior used while the Safe toggle is on.",
