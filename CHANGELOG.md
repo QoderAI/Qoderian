@@ -11,6 +11,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.12] - 2026-09-20
+
 ### Added
 
 - The agent now learns which external context directories are attached: the
