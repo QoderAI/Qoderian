@@ -19,6 +19,9 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - An update icon appears in the view header when GitHub has a newer stable
   release; click it to open Qoderian's plugin page, where Obsidian's update
   button lives.
+- With the message input empty, ArrowUp walks back through the messages you
+  sent in this conversation and ArrowDown walks forward again, so you can
+  recall, edit, or resend an earlier prompt without scrolling the transcript.
 
 ### Changed
 

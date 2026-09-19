@@ -31,6 +31,7 @@ import type { BrowserSelectionController } from './browser-selection-controller'
 import type { CanvasSelectionController } from './canvas-selection-controller';
 import type { ConversationController } from './conversation-controller';
 import { InputCommandController } from './input-command-controller';
+import { PromptHistoryController } from './prompt-history-controller';
 import { QueuedMessageController } from './queued-message-controller';
 import { cloneChatTurnRequest, type QueuedChatTurn } from './queued-turn';
 import type { SelectionController } from './selection-controller';
@@ -76,6 +77,7 @@ export class InputController {
   private deps: InputControllerDeps;
   private readonly approvalFlow: ApprovalFlowController;
   private readonly inputCommands: InputCommandController;
+  private readonly promptHistory: PromptHistoryController;
   private readonly queuedMessages: QueuedMessageController;
   private activeStreamingAssistantMessage: ChatMessage | null = null;
   // While a steer splice is swapping the render target (finalizing the old
@@ -133,6 +135,11 @@ export class InputController {
           turnRequestOverride: message.request,
         });
       },
+    });
+    this.promptHistory = new PromptHistoryController({
+      getInputEl: deps.getInputEl,
+      getMessages: () => deps.state.messages,
+      getConversationId: () => deps.state.currentConversationId,
     });
   }
 
@@ -1104,6 +1111,12 @@ export class InputController {
   }
   handleResumeKeydown(e: KeyboardEvent): boolean {
     return this.inputCommands.handleResumeKeydown(e);
+  }
+
+  handlePromptHistoryKeydown(e: KeyboardEvent): boolean {
+    // An armed instruction mode (#) owns the empty composer; leave the arrows alone.
+    if (this.deps.getInstructionModeManager()?.isActive()) return false;
+    return this.promptHistory.handleKeydown(e);
   }
 
   isResumeDropdownVisible(): boolean {

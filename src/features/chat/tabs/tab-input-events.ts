@@ -49,6 +49,7 @@ export function wireTabInputEvents(tab: TabData, plugin: QoderianPlugin): void {
     if (ui.instructionModeManager?.handleKeydown(event)) return;
     if (sendTabInputMessageFromExplicitEnterShortcut(tab, event)) return;
     if (handleDropdownKeydown(event)) return;
+    if (controllers.inputController?.handlePromptHistoryKeydown(event)) return;
 
     if (event.key === 'Escape' && !event.isComposing && state.isStreaming) {
       event.preventDefault();
