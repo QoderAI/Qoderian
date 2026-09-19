@@ -13,8 +13,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ### Added
 
-- An opt-in Memory toggle in Settings → Safety lets the Qoder CLI save and
-  reload reusable information across conversations. Memories live in the
+- An opt-in Memory toggle in Settings → Experimental lets the Qoder CLI save
+  and reload reusable information across conversations. Memories live in the
   Qoder CLI memory directory and are shared with the terminal CLI; toggling
   it restarts the running session once.
 

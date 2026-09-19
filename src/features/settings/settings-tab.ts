@@ -259,15 +259,6 @@ export class QoderianSettingTab extends PluginSettingTab {
               defaultValue: qoderSettings.loadUserSettings,
             },
           },
-          {
-            name: t('settings.enableMemory.name'),
-            desc: t('settings.enableMemory.desc'),
-            control: {
-              type: 'toggle',
-              key: 'enableMemory',
-              defaultValue: qoderSettings.enableMemory,
-            },
-          },
         ],
       },
       {
@@ -385,6 +376,15 @@ export class QoderianSettingTab extends PluginSettingTab {
                 injected = renderBangBashControl(setting, host, { plugin: this.plugin });
               });
               return () => { injected?.remove(); };
+            },
+          },
+          {
+            name: t('settings.enableMemory.name'),
+            desc: t('settings.enableMemory.desc'),
+            control: {
+              type: 'toggle',
+              key: 'enableMemory',
+              defaultValue: qoderSettings.enableMemory,
             },
           },
         ],
