@@ -11,6 +11,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.13] - 2026-09-20
+
 ### Added
 
 - An opt-in Memory toggle in Settings → Experimental lets the Qoder CLI save
