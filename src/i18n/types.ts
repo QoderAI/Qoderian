@@ -307,6 +307,8 @@ export type TranslationKey =
   | 'settings.safety'
   | 'settings.loadUserSettings.name'
   | 'settings.loadUserSettings.desc'
+  | 'settings.enableMemory.name'
+  | 'settings.enableMemory.desc'
   | 'settings.qoderSafeMode.name'
   | 'settings.qoderSafeMode.desc'
   | 'settings.qoderSafeMode.modes.acceptEdits'

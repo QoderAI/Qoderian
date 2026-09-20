@@ -71,6 +71,7 @@ export class QueryOptionsBuilder {
 
     // These require restart (cannot be updated dynamically)
     if (currentConfig.systemPromptKey !== newConfig.systemPromptKey) return true;
+    if (currentConfig.memoryEnabled !== newConfig.memoryEnabled) return true;
     if (currentConfig.disallowedToolsKey !== newConfig.disallowedToolsKey) return true;
     if (currentConfig.mcpServersKey !== newConfig.mcpServersKey) return true;
     if (currentConfig.pluginsKey !== newConfig.pluginsKey) return true;
@@ -118,6 +119,7 @@ export class QueryOptionsBuilder {
             effortLevel: resolveModelReasoningEffort(runtimeModel, ctx.settings),
       permissionMode: ctx.settings.permissionMode,
       sdkPermissionMode,
+      memoryEnabled: qoderSettings.enableMemory,
       systemPromptKey: computeSystemPromptKey(systemPromptSettings),
       disallowedToolsKey,
       mcpServersKey: '', // Dynamic via setMcpServers, not tracked for restart
@@ -277,6 +279,12 @@ export class QueryOptionsBuilder {
       },
       includePartialMessages: true,
     };
+
+    if (qoderSettings.enableMemory) {
+      // CLI-native memory: the CLI writes memories after turns and injects
+      // them into later turns, using the same store as the terminal CLI.
+      options.memory = { mode: 'native' };
+    }
 
     options.spawnQoderCLIProcess = createCustomSpawnFunction(ctx.enhancedPath);
 

@@ -74,6 +74,8 @@ const localizedKeys = [
   'settings.enableBangBash.name',
   'settings.enableBangBash.desc',
   'settings.enableBangBash.validation.noNode',
+  'settings.enableMemory.name',
+  'settings.enableMemory.desc',
   'settings.requireCommandOrControlEnterToSend.name',
   'settings.requireCommandOrControlEnterToSend.desc',
   'settings.qoderSafeMode.name',

@@ -111,6 +111,12 @@ export interface QoderSettings {
   edition: QoderCliEdition;
   loadUserSettings: boolean;
   enableBangBash: boolean;
+  /**
+   * Let the CLI generate and consume memory across conversations. Memories
+   * live in the Qoder CLI memory directory and are shared with the terminal
+   * CLI.
+   */
+  enableMemory: boolean;
   discoveredModels: Array<{
     value: string;
     displayName: string;

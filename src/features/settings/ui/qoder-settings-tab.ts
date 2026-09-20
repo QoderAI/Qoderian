@@ -392,4 +392,16 @@ export function renderQoderSettingsTab(container: HTMLElement, context: QoderSet
       .setName(t('settings.enableBangBash.name'))
       .setDesc(t('settings.enableBangBash.desc'));
     renderBangBashControl(bangBashSetting, container, context);
+
+    new Setting(container)
+      .setName(t('settings.enableMemory.name'))
+      .setDesc(t('settings.enableMemory.desc'))
+      .addToggle((toggle) =>
+        toggle
+          .setValue(qoderSettings.enableMemory)
+          .onChange(async (value) => {
+            updateQoderSettings(settingsBag, { enableMemory: value });
+            await context.plugin.saveSettings();
+          })
+      );
 }

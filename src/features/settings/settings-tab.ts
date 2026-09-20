@@ -378,6 +378,15 @@ export class QoderianSettingTab extends PluginSettingTab {
               return () => { injected?.remove(); };
             },
           },
+          {
+            name: t('settings.enableMemory.name'),
+            desc: t('settings.enableMemory.desc'),
+            control: {
+              type: 'toggle',
+              key: 'enableMemory',
+              defaultValue: qoderSettings.enableMemory,
+            },
+          },
         ],
       },
     ];
@@ -391,6 +400,10 @@ export class QoderianSettingTab extends PluginSettingTab {
       if (key === 'loadUserSettings') {
         const settingsBag = this.plugin.settings as unknown as Record<string, unknown>;
         return getQoderSettings(settingsBag).loadUserSettings;
+      }
+      if (key === 'enableMemory') {
+        const settingsBag = this.plugin.settings as unknown as Record<string, unknown>;
+        return getQoderSettings(settingsBag).enableMemory;
       }
       if (key === 'titleGenerationModel') {
         return this.plugin.settings.titleGenerationModel || 'auto';
@@ -414,6 +427,12 @@ export class QoderianSettingTab extends PluginSettingTab {
       if (key === 'loadUserSettings') {
         const settingsBag = this.plugin.settings as unknown as Record<string, unknown>;
         updateQoderSettings(settingsBag, { loadUserSettings: Boolean(value) });
+        return this.plugin.saveSettings();
+      }
+
+      if (key === 'enableMemory') {
+        const settingsBag = this.plugin.settings as unknown as Record<string, unknown>;
+        updateQoderSettings(settingsBag, { enableMemory: Boolean(value) });
         return this.plugin.saveSettings();
       }
 

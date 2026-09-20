@@ -318,6 +318,10 @@
       "name": "載入使用者 Qoder 設定",
       "desc": "載入 ~/.qoder/settings.json。啟用後，使用者的 Qoder CLI 權限規則可能繞過安全模式。"
     },
+    "enableMemory": {
+      "name": "記憶",
+      "desc": "自動儲存並載入跨工作階段可重複使用的資訊。記憶存放在 Qoder CLI 的記憶目錄中，與終端 CLI 共用。"
+    },
     "qoderSafeMode": {
       "name": "安全模式權限",
       "desc": "開啟安全模式時使用的權限策略。",
