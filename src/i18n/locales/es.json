@@ -62,8 +62,10 @@
   },
   "nav": {
     "newConversation": "Nueva conversación",
+    "newSession": "Nueva sesión",
     "chatHistory": "Historial del chat",
-    "newChat": "Nuevo chat"
+    "newChat": "Nuevo chat",
+    "closeSession": "Cerrar sesión"
   },
   "chat": {
     "rewind": {
@@ -99,6 +101,9 @@
       "errorNoActiveTab": "No hay ninguna pestaña activa",
       "commandNoMessages": "No se puede bifurcar: no hay mensajes en la conversación",
       "commandNoAssistantUuid": "No se puede bifurcar: no hay respuesta del asistente con identificadores"
+    },
+    "tabs": {
+      "maxTabsReached": "Límite de sesiones alcanzado ({count}). Puedes cambiar el límite en Ajustes."
     },
     "bangBash": {
       "placeholder": "> Ejecuta un comando bash...",
@@ -321,6 +326,10 @@
     "enableMemory": {
       "name": "Memoria",
       "desc": "Guarda y carga automáticamente información reutilizable entre conversaciones. Los recuerdos se almacenan en el directorio de memoria de Qoder CLI y se comparten con la CLI de terminal."
+    },
+    "enableSessionTabsRedesign": {
+      "name": "Nuevas pestañas de sesión",
+      "desc": "Las pestañas muestran el título con un botón de cierre, las sesiones nuevas y las abiertas desde el historial usan su propia pestaña, y la fila se desplaza en lugar de comprimirse. Desactivado, se mantienen las pestañas numeradas."
     },
     "qoderSafeMode": {
       "name": "Permisos del modo seguro",

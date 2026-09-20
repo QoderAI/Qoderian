@@ -11,6 +11,25 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Added
+
+- An opt-in **New session tabs** toggle in Settings → Experimental changes how
+  the session tabs above the composer behave:
+
+  - Tabs show the conversation title with a close button that appears on hover
+    instead of a number.
+  - New sessions and conversations picked from the history list each open in
+    their own tab, so the session in the active tab is never replaced; once the
+    tab limit is reached the notice points at the setting that raises it.
+  - With many sessions the row scrolls instead of squeezing every tab, follows
+    the active session, and keeps the new-session and history buttons pinned.
+  - The new-conversation button that reset the active tab, and its
+    `New session (in current tab)` command, are hidden; `/clear` still resets
+    the current session.
+
+  The toggle is off by default; off keeps the numbered tabs and the existing
+  interactions unchanged.
+
 ## [1.0.14] - 2026-09-20
 
 ### Changed

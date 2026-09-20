@@ -193,6 +193,8 @@ export interface QoderianSettings {
   deferMathRenderingDuringStreaming: boolean;
   expandFileEditsByDefault: boolean;
   chatViewPlacement: ChatViewPlacement;
+  /** Experimental: session pills with titles, close buttons, and new-tab semantics. */
+  enableSessionTabsRedesign: boolean;
 
   // Allow forward-compatible settings fields
   [key: string]: unknown;

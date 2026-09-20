@@ -4,6 +4,7 @@ export interface MockElement {
   style: Record<string, string>;
   dataset: Record<string, string>;
   scrollTop: number;
+  scrollLeft: number;
   scrollHeight: number;
   innerHTML: string;
   textContent: string;
@@ -191,6 +192,7 @@ export function createMockEl(tag = 'div'): any {
     style,
     dataset,
     scrollTop: 0,
+    scrollLeft: 0,
     scrollHeight: 0,
     innerHTML: '',
 

@@ -1,6 +1,7 @@
 import type { App, SettingDefinitionItem, SettingGroup } from 'obsidian';
 import { Notice, PluginSettingTab, requireApiVersion, Setting } from 'obsidian';
 
+import { DEFAULT_QODERIAN_SETTINGS } from '../../app/settings/settings-storage';
 import type { ChatViewPlacement } from '../../core/types/settings';
 import { getAvailableLocales, getLocaleDisplayName, setLocale, t } from '../../i18n/i18n';
 import type { Locale } from '../../i18n/types';
@@ -387,6 +388,15 @@ export class QoderianSettingTab extends PluginSettingTab {
               defaultValue: qoderSettings.enableMemory,
             },
           },
+          {
+            name: t('settings.enableSessionTabsRedesign.name'),
+            desc: t('settings.enableSessionTabsRedesign.desc'),
+            control: {
+              type: 'toggle',
+              key: 'enableSessionTabsRedesign',
+              defaultValue: DEFAULT_QODERIAN_SETTINGS.enableSessionTabsRedesign,
+            },
+          },
         ],
       },
     ];
@@ -466,6 +476,10 @@ export class QoderianSettingTab extends PluginSettingTab {
       } else if (key === 'maxTabs') {
         for (const view of this.plugin.getAllViews()) {
           view.refreshTabControls();
+        }
+      } else if (key === 'enableSessionTabsRedesign') {
+        for (const view of this.plugin.getAllViews()) {
+          view.refreshSessionTabsMode();
         }
       } else if (key === 'enableAutoTitleGeneration') {
         this.refreshDomState();

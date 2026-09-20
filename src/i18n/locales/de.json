@@ -62,8 +62,10 @@
   },
   "nav": {
     "newConversation": "Neue Unterhaltung",
+    "newSession": "Neue Sitzung",
     "chatHistory": "Chatverlauf",
-    "newChat": "Neuer Chat"
+    "newChat": "Neuer Chat",
+    "closeSession": "Sitzung schließen"
   },
   "chat": {
     "rewind": {
@@ -99,6 +101,9 @@
       "errorNoActiveTab": "Kein aktiver Tab",
       "commandNoMessages": "Verzweigung nicht möglich: keine Nachrichten in der Konversation",
       "commandNoAssistantUuid": "Verzweigung nicht möglich: keine Assistentenantwort mit Kennungen"
+    },
+    "tabs": {
+      "maxTabsReached": "Sitzungslimit erreicht ({count}). Du kannst das Limit in den Einstellungen ändern."
     },
     "bangBash": {
       "placeholder": "> Einen Bash-Befehl ausführen...",
@@ -321,6 +326,10 @@
     "enableMemory": {
       "name": "Gedächtnis",
       "desc": "Speichert wiederverwendbare Informationen automatisch und lädt sie über Unterhaltungen hinweg. Die Daten liegen im Gedächtnisverzeichnis der Qoder CLI und werden mit der Terminal-CLI geteilt."
+    },
+    "enableSessionTabsRedesign": {
+      "name": "Neue Sitzungs-Tabs",
+      "desc": "Sitzungs-Tabs zeigen den Titel mit Schließen-Schaltfläche, neue und aus dem Verlauf geöffnete Sitzungen laufen in eigenen Tabs, und die Leiste scrollt statt zu quetschen. Aus lässt die nummerierten Tabs unverändert."
     },
     "qoderSafeMode": {
       "name": "Berechtigungen im sicheren Modus",

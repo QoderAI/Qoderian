@@ -163,6 +163,8 @@ body.qoderian-composer-resizing * {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Breathing room between the scrolled session strip and the action buttons. */
+  gap: 12px;
   width: 100%;
   min-width: 0;
 }

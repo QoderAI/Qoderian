@@ -22,7 +22,7 @@ import {
 } from './tabs/tab';
 import { TabBar } from './tabs/tab-bar';
 import { TabManager } from './tabs/tab-manager';
-import type { TabData, TabId } from './tabs/types';
+import { DEFAULT_MAX_TABS, type TabData, type TabId } from './tabs/types';
 import { CreditsUsageButton } from './ui/credits-usage-button';
 
 type LoadableView = {
@@ -262,8 +262,9 @@ export class QoderianView extends ItemView {
   private buildNavRowContent(): HTMLElement {
     const wrapper = createDiv({ cls: 'qoderian-input-nav-content' });
 
-    this.tabBarContainerEl = wrapper.createDiv({ cls: 'qoderian-tab-bar-container' });
-    this.tabBar = new TabBar(this.tabBarContainerEl, {
+    const tabBarContainerEl = wrapper.createDiv({ cls: 'qoderian-tab-bar-container' });
+    this.tabBarContainerEl = tabBarContainerEl;
+    this.tabBar = new TabBar(tabBarContainerEl, {
       onTabClick: (tabId) => this.handleTabClick(tabId),
       onTabClose: (tabId) => {
         void this.handleTabClose(tabId);
@@ -271,13 +272,15 @@ export class QoderianView extends ItemView {
       onNewTab: () => {
         void this.createNewTab().catch(() => new Notice('Failed to create tab'));
       },
+    }, {
+      isLegacyMode: () => !this.sessionTabsRedesignEnabled(),
     });
 
     const navActionsEl = wrapper.createDiv({ cls: 'qoderian-input-nav-actions' });
 
     this.newTabButtonEl = navActionsEl.createDiv({ cls: 'qoderian-input-nav-btn qoderian-new-tab-btn' });
     setIcon(this.newTabButtonEl, 'square-plus');
-    setButtonTooltip(this.newTabButtonEl, t('commands.newTab'));
+    setButtonTooltip(this.newTabButtonEl, this.newSessionButtonTooltip());
     this.newTabButtonEl.addEventListener('click', () => {
       void this.createNewTab().catch(() => new Notice('Failed to create tab'));
     });
@@ -286,6 +289,7 @@ export class QoderianView extends ItemView {
     setIcon(newBtn, 'square-pen');
     setButtonTooltip(newBtn, t('nav.newConversation'));
     this.newConversationButtonEl = newBtn;
+    newBtn.toggleClass('qoderian-hidden', this.sessionTabsRedesignEnabled());
     newBtn.addEventListener('click', () => {
       void (async () => {
         await this.tabManager?.createNewConversation();
@@ -398,14 +402,36 @@ export class QoderianView extends ItemView {
     this.activeInputTabId = null;
   }
 
+  /** Whether the experimental session-tab interaction (own tab per session) is on. */
+  private sessionTabsRedesignEnabled(): boolean {
+    return this.plugin.settings.enableSessionTabsRedesign === true;
+  }
+
+  private newSessionButtonTooltip(): string {
+    return this.sessionTabsRedesignEnabled() ? t('nav.newSession') : t('commands.newTab');
+  }
+
   /** Refreshes tab controls after settings that affect tab availability change. */
   refreshTabControls(): void {
     this.updateTabBarVisibility();
   }
 
+  /** Re-renders tab chrome after the experimental session-tab mode changes. */
+  refreshSessionTabsMode(): void {
+    this.newConversationButtonEl?.toggleClass(
+      'qoderian-hidden',
+      this.sessionTabsRedesignEnabled(),
+    );
+    if (this.newTabButtonEl) {
+      setButtonTooltip(this.newTabButtonEl, this.newSessionButtonTooltip());
+    }
+    this.updateTabBarVisibility();
+    this.updateTabBar();
+  }
+
   /** Re-applies locale-dependent static text after a language change. */
   refreshLocalizedChrome(): void {
-    if (this.newTabButtonEl) setButtonTooltip(this.newTabButtonEl, t('commands.newTab'));
+    if (this.newTabButtonEl) setButtonTooltip(this.newTabButtonEl, this.newSessionButtonTooltip());
     if (this.newConversationButtonEl) {
       setButtonTooltip(this.newConversationButtonEl, t('nav.newConversation'));
     }
@@ -446,8 +472,7 @@ export class QoderianView extends ItemView {
   async createNewTab(): Promise<void> {
     const tab = await this.tabManager?.createTab();
     if (!tab) {
-      const maxTabs = this.plugin.settings.maxTabs ?? 3;
-      new Notice(`Maximum ${maxTabs} tabs allowed`);
+      this.noticeSessionLimit();
       this.updateTabBarVisibility();
       return;
     }
@@ -474,6 +499,8 @@ export class QoderianView extends ItemView {
 
   private updateTabBarVisibility(): void {
     if (!this.tabBarContainerEl || !this.tabManager) return;
+    // Session pills stay visible for a single session too.
+    if (this.sessionTabsRedesignEnabled()) return;
 
     const tabCount = this.tabManager.getTabCount();
     const showTabBar = tabCount >= 2;
@@ -485,6 +512,7 @@ export class QoderianView extends ItemView {
 
   private updateNewTabButtonVisibility(): void {
     if (!this.newTabButtonEl || !this.tabManager) return;
+    if (this.sessionTabsRedesignEnabled()) return;
 
     const canCreateTab = this.tabManager.canCreateTab();
     this.newTabButtonEl.toggleClass('qoderian-hidden', !canCreateTab);
@@ -546,7 +574,14 @@ export class QoderianView extends ItemView {
   }
 
   private async openHistoryConversation(conversationId: string): Promise<void> {
-    await this.tabManager?.openConversation(conversationId);
+    // With the redesigned tabs, resuming a conversation must not replace the
+    // session in the active tab; legacy keeps opening it in the current tab.
+    const opened = await this.tabManager?.openConversation(conversationId, {
+      preferNewTab: this.sessionTabsRedesignEnabled(),
+    });
+    if (opened === false) {
+      this.noticeSessionLimit();
+    }
     this.historyDropdown?.removeClass('visible');
   }
 
@@ -554,11 +589,19 @@ export class QoderianView extends ItemView {
     conversationId: string,
     activate = true,
   ): Promise<void> {
-    await this.tabManager?.openConversation(conversationId, {
+    const opened = await this.tabManager?.openConversation(conversationId, {
       preferNewTab: true,
       activate,
     });
+    if (opened === false) {
+      this.noticeSessionLimit();
+    }
     this.historyDropdown?.removeClass('visible');
+  }
+
+  private noticeSessionLimit(): void {
+    const maxTabs = this.plugin.settings.maxTabs ?? DEFAULT_MAX_TABS;
+    new Notice(t('chat.tabs.maxTabsReached', { count: String(maxTabs) }));
   }
 
   private getHistoryConversationStatus(conversationId: string): HistoryConversationStatus {

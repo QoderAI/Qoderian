@@ -62,8 +62,10 @@
   },
   "nav": {
     "newConversation": "新建對話",
+    "newSession": "新增對話",
     "chatHistory": "聊天歷史",
-    "newChat": "新對話"
+    "newChat": "新對話",
+    "closeSession": "關閉對話"
   },
   "chat": {
     "rewind": {
@@ -99,6 +101,9 @@
       "errorNoActiveTab": "沒有使用中的分頁",
       "commandNoMessages": "無法分叉：對話中沒有訊息",
       "commandNoAssistantUuid": "無法分叉：沒有帶識別碼的助手回覆"
+    },
+    "tabs": {
+      "maxTabsReached": "已達對話上限（{count}），可在設定中調整上限。"
     },
     "bangBash": {
       "placeholder": "> 執行 bash 指令...",
@@ -321,6 +326,10 @@
     "enableMemory": {
       "name": "記憶",
       "desc": "自動儲存並載入跨工作階段可重複使用的資訊。記憶存放在 Qoder CLI 的記憶目錄中，與終端 CLI 共用。"
+    },
+    "enableSessionTabsRedesign": {
+      "name": "新版對話分頁",
+      "desc": "對話分頁顯示標題並可個別關閉；新對話與從歷史開啟的對話都使用獨立分頁；分頁過多時橫向捲動而非擠壓。關閉後維持原本的數字分頁。"
     },
     "qoderSafeMode": {
       "name": "安全模式權限",

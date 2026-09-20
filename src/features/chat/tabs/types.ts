@@ -271,7 +271,7 @@ export interface TabManagerCallbacks {
  */
 export interface TabBarItem {
   id: TabId;
-  /** 1-based index for display. */
+  /** 1-based index, shown by the legacy numbered badges. */
   index: number;
   title: string;
   isActive: boolean;

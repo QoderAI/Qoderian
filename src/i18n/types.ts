@@ -35,8 +35,10 @@ export type TranslationKey =
   | 'feedback.noticeSuccessCopied'
   | 'feedback.noticeFailed'
 
-  // Nav row buttons and tab badges
+  // Nav row buttons and session pills
   | 'nav.newConversation'
+  | 'nav.newSession'
+  | 'nav.closeSession'
   | 'nav.chatHistory'
   | 'nav.newChat'
 
@@ -155,6 +157,7 @@ export type TranslationKey =
   | 'chat.fork.errorNoActiveTab'
   | 'chat.fork.commandNoMessages'
   | 'chat.fork.commandNoAssistantUuid'
+  | 'chat.tabs.maxTabsReached'
 
   // Send queue (multi-message queue above the composer)
   | 'chat.queue.title'
@@ -309,6 +312,8 @@ export type TranslationKey =
   | 'settings.loadUserSettings.desc'
   | 'settings.enableMemory.name'
   | 'settings.enableMemory.desc'
+  | 'settings.enableSessionTabsRedesign.name'
+  | 'settings.enableSessionTabsRedesign.desc'
   | 'settings.qoderSafeMode.name'
   | 'settings.qoderSafeMode.desc'
   | 'settings.qoderSafeMode.modes.acceptEdits'

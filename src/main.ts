@@ -148,6 +148,10 @@ export default class QoderianPlugin extends Plugin {
       id: 'new-session',
       name: t('commands.newSession'),
       checkCallback: (checking: boolean) => {
+        // Only the legacy tabs reset the active tab; the redesigned tabs open
+        // every session in its own tab, so the command stays out of the way.
+        if (this.settings.enableSessionTabsRedesign) return false;
+
         const view = this.getView();
         if (!view) return false;
 

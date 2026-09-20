@@ -62,8 +62,10 @@
   },
   "nav": {
     "newConversation": "新建会话",
+    "newSession": "新会话",
     "chatHistory": "聊天历史",
-    "newChat": "新会话"
+    "newChat": "新会话",
+    "closeSession": "关闭会话"
   },
   "chat": {
     "rewind": {
@@ -99,6 +101,9 @@
       "errorNoActiveTab": "没有活动标签页",
       "commandNoMessages": "无法分叉：对话中没有消息",
       "commandNoAssistantUuid": "无法分叉：没有带标识符的助手回复"
+    },
+    "tabs": {
+      "maxTabsReached": "已达会话上限（{count}），可在设置中调整上限。"
     },
     "bangBash": {
       "placeholder": "> 运行命令...",
@@ -321,6 +326,10 @@
     "enableMemory": {
       "name": "记忆",
       "desc": "自动保存并加载跨会话可复用的信息。记忆存放在 Qoder CLI 的记忆目录中，与终端 CLI 共用。"
+    },
+    "enableSessionTabsRedesign": {
+      "name": "新版会话标签页",
+      "desc": "会话标签显示标题并可单独关闭；新会话与从历史打开的会话都占用独立标签页；会话多时横向滚动而不是挤压。关闭则保持原有的数字标签页交互。"
     },
     "qoderSafeMode": {
       "name": "安全模式权限",

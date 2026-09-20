@@ -404,4 +404,19 @@ export function renderQoderSettingsTab(container: HTMLElement, context: QoderSet
             await context.plugin.saveSettings();
           })
       );
+
+    new Setting(container)
+      .setName(t('settings.enableSessionTabsRedesign.name'))
+      .setDesc(t('settings.enableSessionTabsRedesign.desc'))
+      .addToggle((toggle) =>
+        toggle
+          .setValue(context.plugin.settings.enableSessionTabsRedesign === true)
+          .onChange(async (value) => {
+            context.plugin.settings.enableSessionTabsRedesign = value;
+            await context.plugin.saveSettings();
+            for (const view of context.plugin.getAllViews()) {
+              view.refreshSessionTabsMode();
+            }
+          })
+      );
 }
