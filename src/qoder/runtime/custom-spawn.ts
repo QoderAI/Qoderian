@@ -16,6 +16,15 @@ import {
 const CUSTOM_PROVIDER_CLI_ENV = { QODER_SDK_CUSTOM_BASE_URL_BYOK: '1' } as const;
 
 /**
+ * Identifies this host integration to the CLI, which reports it as the
+ * `integration_id` telemetry attribute. Only a UUIDv4 is accepted; any other
+ * value is silently dropped.
+ */
+const INTEGRATION_CLI_ENV = {
+  QODER_INTEGRATION_ID: '70457212-a449-4ae3-af1e-5fb9e00fafcf',
+} as const;
+
+/**
  * Spawn qodercli in Obsidian's Electron process.
  *
  * The Qoder SDK owns the CLI argument protocol. This adapter only covers the
@@ -43,7 +52,7 @@ export function createCustomSpawnFunction(
     const resolvedSpawnSpec = resolveWindowsCmdShimSpawnSpec({ args, command });
     const child = spawn(resolvedSpawnSpec.command, resolvedSpawnSpec.args, {
       cwd,
-      env: env ? { ...env, ...CUSTOM_PROVIDER_CLI_ENV } : env,
+      env: env ? { ...env, ...CUSTOM_PROVIDER_CLI_ENV, ...INTEGRATION_CLI_ENV } : env,
       // stderr is always piped so host code (e.g. the runtime probe) can read
       // CLI diagnostics such as "No qodercli login found". A drain listener is
       // attached below to avoid pipe backpressure when nobody else listens.

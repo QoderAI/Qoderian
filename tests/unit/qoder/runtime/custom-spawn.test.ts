@@ -125,6 +125,7 @@ describe('createCustomSpawnFunction', () => {
     expect(spawnOptions.env).toEqual({
       PATH: '/usr/bin',
       QODER_SDK_CUSTOM_BASE_URL_BYOK: '1',
+      QODER_INTEGRATION_ID: '70457212-a449-4ae3-af1e-5fb9e00fafcf',
     });
   });
 
