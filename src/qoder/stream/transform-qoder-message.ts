@@ -428,6 +428,13 @@ export function* transformSDKMessage(
         if (notification) {
           yield notification;
         }
+      } else if (message.subtype === 'model_queue_status') {
+        yield {
+          type: 'model_queue',
+          status: message.status,
+          queueCount: message.queue_count,
+          waitTimeMs: message.wait_time_ms,
+        };
       }
       break;
 

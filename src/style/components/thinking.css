@@ -10,6 +10,10 @@
   color: var(--qoderian-compact);
 }
 
+.qoderian-thinking.qoderian-thinking--queue {
+  color: var(--text-warning);
+}
+
 .qoderian-thinking-hint {
   color: var(--text-muted);
   font-style: normal;

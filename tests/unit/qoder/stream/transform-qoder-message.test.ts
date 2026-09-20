@@ -136,6 +136,52 @@ describe('transformSDKMessage', () => {
         },
       ]);
     });
+
+    it('maps model_queue_status queued progress to a model_queue chunk', () => {
+      const message = msg({
+        type: 'system',
+        subtype: 'model_queue_status',
+        status: 'queued',
+        request_id: 'req-1',
+        request_set_id: 'set-1',
+        model_key: 'qoder-model-queue-test',
+        queue_count: 3,
+        wait_time_ms: 12000,
+      } as any);
+
+      const results = [...transformSDKMessage(message)];
+
+      expect(results).toEqual([
+        {
+          type: 'model_queue',
+          status: 'queued',
+          queueCount: 3,
+          waitTimeMs: 12000,
+        },
+      ]);
+    });
+
+    it('maps model_queue_status ready without optional queue fields', () => {
+      const message = msg({
+        type: 'system',
+        subtype: 'model_queue_status',
+        status: 'ready',
+        request_id: 'req-2',
+        request_set_id: 'set-2',
+        model_key: 'qoder-model-queue-test',
+      } as any);
+
+      const results = [...transformSDKMessage(message)];
+
+      expect(results).toEqual([
+        {
+          type: 'model_queue',
+          status: 'ready',
+          queueCount: undefined,
+          waitTimeMs: undefined,
+        },
+      ]);
+    });
   });
 
   describe('assistant messages', () => {
