@@ -62,8 +62,10 @@
   },
   "nav": {
     "newConversation": "New conversation",
+    "newSession": "New session",
     "chatHistory": "Chat history",
-    "newChat": "New Chat"
+    "newChat": "New Chat",
+    "closeSession": "Close session"
   },
   "chat": {
     "rewind": {
@@ -99,6 +101,9 @@
       "errorNoActiveTab": "No active tab",
       "commandNoMessages": "Cannot fork: no messages in conversation",
       "commandNoAssistantUuid": "Cannot fork: no assistant response with identifiers"
+    },
+    "tabs": {
+      "maxTabsReached": "Session limit reached ({count}). You can change the limit in Settings."
     },
     "bangBash": {
       "placeholder": "> Run a bash command...",
@@ -321,6 +326,10 @@
     "enableMemory": {
       "name": "Memory",
       "desc": "Automatically save and load reusable information across conversations. Memories live in your Qoder CLI memory directory and are shared with the terminal CLI."
+    },
+    "enableSessionTabsRedesign": {
+      "name": "New session tabs",
+      "desc": "Session tabs show the conversation title with a close button, new and resumed sessions open in their own tab, and the row scrolls instead of squeezing. Off keeps the numbered tabs."
     },
     "qoderSafeMode": {
       "name": "Safe mode permissions",

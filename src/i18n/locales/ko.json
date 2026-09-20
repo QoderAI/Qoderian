@@ -62,8 +62,10 @@
   },
   "nav": {
     "newConversation": "새 대화",
+    "newSession": "새 세션",
     "chatHistory": "대화 기록",
-    "newChat": "새 채팅"
+    "newChat": "새 채팅",
+    "closeSession": "세션 닫기"
   },
   "chat": {
     "rewind": {
@@ -99,6 +101,9 @@
       "errorNoActiveTab": "활성 탭이 없습니다",
       "commandNoMessages": "포크할 수 없습니다: 대화에 메시지가 없습니다",
       "commandNoAssistantUuid": "포크할 수 없습니다: 식별자가 있는 어시스턴트 응답이 없습니다"
+    },
+    "tabs": {
+      "maxTabsReached": "세션 한도({count})에 도달했습니다. 설정에서 한도를 변경할 수 있습니다."
     },
     "bangBash": {
       "placeholder": "> bash 명령 실행...",
@@ -321,6 +326,10 @@
     "enableMemory": {
       "name": "메모리",
       "desc": "대화를 넘어 재사용할 수 있는 정보를 자동으로 저장하고 불러옵니다. 메모리는 Qoder CLI 메모리 디렉터리에 저장되며 터미널 CLI와 공유됩니다."
+    },
+    "enableSessionTabsRedesign": {
+      "name": "새 세션 탭",
+      "desc": "세션 탭에 제목과 닫기 버튼을 표시하고, 새 세션과 기록에서 연 세션을 각각 별도 탭에서 엽니다. 탭이 많으면 가로로 스크롤합니다. 끄면 기존 번호 탭이 유지됩니다."
     },
     "qoderSafeMode": {
       "name": "안전 모드 권한",

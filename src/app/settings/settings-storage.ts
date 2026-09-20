@@ -47,6 +47,7 @@ export const DEFAULT_QODERIAN_SETTINGS: QoderianSettings = {
   deferMathRenderingDuringStreaming: true,
   expandFileEditsByDefault: false,
   chatViewPlacement: 'right-sidebar',
+  enableSessionTabsRedesign: false,
 };
 
 export interface SettingsRecoveryNotice {

@@ -62,8 +62,10 @@
   },
   "nav": {
     "newConversation": "Nova conversa",
+    "newSession": "Nova sessão",
     "chatHistory": "Histórico de conversas",
-    "newChat": "Novo chat"
+    "newChat": "Novo chat",
+    "closeSession": "Fechar sessão"
   },
   "chat": {
     "rewind": {
@@ -99,6 +101,9 @@
       "errorNoActiveTab": "Nenhuma aba ativa",
       "commandNoMessages": "Não é possível bifurcar: não há mensagens na conversa",
       "commandNoAssistantUuid": "Não é possível bifurcar: não há resposta do assistente com identificadores"
+    },
+    "tabs": {
+      "maxTabsReached": "Limite de sessões atingido ({count}). Você pode alterar o limite nas configurações."
     },
     "bangBash": {
       "placeholder": "> Executar um comando bash...",
@@ -321,6 +326,10 @@
     "enableMemory": {
       "name": "Memória",
       "desc": "Salva e carrega automaticamente informações reutilizáveis entre conversas. As memórias ficam no diretório de memória do Qoder CLI e são compartilhadas com a CLI do terminal."
+    },
+    "enableSessionTabsRedesign": {
+      "name": "Novas abas de sessão",
+      "desc": "As abas mostram o título com um botão de fechar, novas sessões e as abertas pelo histórico usam a própria aba, e a linha rola em vez de se comprimir. Desativado, mantém as abas numeradas."
     },
     "qoderSafeMode": {
       "name": "Permissões do modo seguro",

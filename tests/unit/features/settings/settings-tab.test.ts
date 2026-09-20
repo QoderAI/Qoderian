@@ -3,7 +3,6 @@ import { QoderianSettingTab } from '@/features/settings/settings-tab';
 function createTab() {
   const view = {
     refreshLocalizedChrome: jest.fn(),
-    refreshTabControls: jest.fn(),
   };
   const plugin = {
     settings: {

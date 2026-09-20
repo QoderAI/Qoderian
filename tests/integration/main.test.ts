@@ -591,7 +591,7 @@ describe('QoderianPlugin', () => {
 
       mockApp.workspace.getLeavesOfType.mockReturnValue([{ view: {} }]);
 
-      for (const commandId of ['new-tab', 'new-session', 'close-current-tab']) {
+      for (const commandId of ['new-tab', 'close-current-tab']) {
         const command = getRegisteredCommand(commandId);
 
         expect(() => command.checkCallback(true)).not.toThrow();

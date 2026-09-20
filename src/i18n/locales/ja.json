@@ -62,8 +62,10 @@
   },
   "nav": {
     "newConversation": "新しい会話",
+    "newSession": "新しいセッション",
     "chatHistory": "チャット履歴",
-    "newChat": "新しいチャット"
+    "newChat": "新しいチャット",
+    "closeSession": "セッションを閉じる"
   },
   "chat": {
     "rewind": {
@@ -99,6 +101,9 @@
       "errorNoActiveTab": "アクティブなタブがありません",
       "commandNoMessages": "フォークできません: 会話にメッセージがありません",
       "commandNoAssistantUuid": "フォークできません: 識別子付きのアシスタント応答がありません"
+    },
+    "tabs": {
+      "maxTabsReached": "セッションの上限（{count}）に達しました。設定で上限を変更できます。"
     },
     "bangBash": {
       "placeholder": "> bash コマンドを実行...",
@@ -321,6 +326,10 @@
     "enableMemory": {
       "name": "メモリ",
       "desc": "会話をまたいで再利用できる情報を自動的に保存・読み込みします。メモリは Qoder CLI のメモリディレクトリに保存され、ターミナル CLI と共有されます。"
+    },
+    "enableSessionTabsRedesign": {
+      "name": "新しいセッションタブ",
+      "desc": "セッションタブにタイトルと閉じるボタンを表示し、新規セッションと履歴から開いたセッションはそれぞれ別タブで開きます。タブが多いときは横スクロールします。オフなら従来の番号タブのままです。"
     },
     "qoderSafeMode": {
       "name": "セーフモードの権限",

@@ -66,6 +66,11 @@ export class TabManager implements TabManagerInterface {
     return Math.max(MIN_TABS, Math.min(MAX_TABS, settingsValue));
   }
 
+  /** Whether the experimental session-tab interaction (own tab per session) is on. */
+  private sessionTabsRedesignEnabled(): boolean {
+    return this.plugin.settings.enableSessionTabsRedesign === true;
+  }
+
   constructor(
     plugin: QoderianPlugin,
     containerEl: HTMLElement,
@@ -145,7 +150,7 @@ export class TabManager implements TabManagerInterface {
       this.plugin,
       this.view,
       (forkContext) => this.handleForkRequest(forkContext),
-      (conversationId) => this.openConversation(conversationId),
+      (conversationId) => this.openConversation(conversationId).then(() => undefined),
       () => this.getQoderCatalogConfig(tab),
     );
 
@@ -326,6 +331,7 @@ export class TabManager implements TabManagerInterface {
 
   /** Gets data for rendering the tab bar. */
   getTabBarItems(): TabBarItem[] {
+    const legacy = !this.sessionTabsRedesignEnabled();
     const items: TabBarItem[] = [];
     let index = 1;
 
@@ -337,7 +343,10 @@ export class TabManager implements TabManagerInterface {
         isActive: tab.id === this.activeTabId,
         isStreaming: tab.state.isStreaming,
         needsAttention: tab.state.needsAttention,
-        canClose: this.tabs.size > 1 || !tab.state.isStreaming,
+        canClose: legacy
+          ? this.tabs.size > 1 || !tab.state.isStreaming
+          // A lone blank pill has nothing to close; anything else can be closed.
+          : this.tabs.size > 1 || (tab.conversationId !== null && !tab.state.isStreaming),
       });
     }
 
@@ -352,11 +361,12 @@ export class TabManager implements TabManagerInterface {
    * Opens a conversation in a new tab or existing tab.
    * @param conversationId The conversation to open.
    * @param options Controls tab creation behavior (backward-compatible with boolean).
+   * @returns False when a new tab was requested but the tab limit is reached.
    */
   async openConversation(
     conversationId: string,
     options: boolean | OpenConversationOptions = false,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const preferNewTab = typeof options === 'boolean'
       ? options
       : options.preferNewTab ?? false;
@@ -368,7 +378,7 @@ export class TabManager implements TabManagerInterface {
     for (const tab of this.tabs.values()) {
       if (tab.conversationId === conversationId) {
         await this.switchToTab(tab.id);
-        return;
+        return true;
       }
     }
 
@@ -380,26 +390,34 @@ export class TabManager implements TabManagerInterface {
       // Focus the other view and switch to its tab instead of opening duplicate
       await revealWorkspaceLeaf(this.plugin.app.workspace, crossViewResult.view.leaf);
       await crossViewResult.view.getTabManager()?.switchToTab(crossViewResult.tabId);
-      return;
+      return true;
     }
 
-    // Open in current tab or new tab
-    if (preferNewTab && this.canCreateTab()) {
-      await this.createTab(conversationId, undefined, { activate });
-    } else {
-      // Open in current tab
-      // Note: Don't set tab.conversationId here - the onConversationIdChanged callback
-      // will sync it after successful switch. Setting it before switchTo() would cause
-      // incorrect tab metadata if switchTo() returns early (streaming/switching/creating).
-      const activeTab = this.getActiveTab();
-      if (activeTab) {
-        await activeTab.controllers.conversationController?.switchTo(conversationId);
+    // Open in a new tab when requested. The redesigned tabs never replace the
+    // active tab silently; the legacy behavior keeps the old fallback.
+    if (preferNewTab) {
+      if (this.canCreateTab()) {
+        await this.createTab(conversationId, undefined, { activate });
+        return true;
+      }
+      if (this.sessionTabsRedesignEnabled()) {
+        return false;
       }
     }
+
+    // Open in current tab
+    // Note: Don't set tab.conversationId here - the onConversationIdChanged callback
+    // will sync it after successful switch. Setting it before switchTo() would cause
+    // incorrect tab metadata if switchTo() returns early (streaming/switching/creating).
+    const activeTab = this.getActiveTab();
+    if (activeTab) {
+      await activeTab.controllers.conversationController?.switchTo(conversationId);
+    }
+    return true;
   }
 
   /**
-   * Creates a new conversation in the active tab.
+   * Creates a new conversation in the active tab (legacy tab interaction).
    */
   async createNewConversation(): Promise<void> {
     const activeTab = this.getActiveTab();
