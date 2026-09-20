@@ -1,4 +1,4 @@
-/* Credits usage button + popover panel (nav row, mirrors Qoder IDE usage view) */
+/* Credits usage button + popover panel (view header, mirrors Qoder IDE usage view) */
 
 .qoderian-credits-container {
   position: static;
@@ -9,13 +9,13 @@
   align-items: center;
 }
 
-/* Panel opens upward from the input footer, right-aligned. Width tracks the
-   footer so narrow sidebars clip neither edge (same approach as #18). */
+/* Panel opens downward from the header, right-aligned. Width tracks the header
+   so narrow sidebars clip neither edge (same approach as #18). */
 .qoderian-credits-panel {
   display: none;
   position: absolute;
-  bottom: 100%;
-  margin-bottom: 4px;
+  top: 100%;
+  margin-top: 6px;
   inset-inline-end: 0;
   width: min(320px, calc(100% - 16px));
   padding: 12px;
@@ -24,7 +24,7 @@
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--background-modifier-border);
   border-radius: 8px;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   z-index: 1000;
 }
 

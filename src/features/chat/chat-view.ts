@@ -236,6 +236,14 @@ export class QoderianView extends ItemView {
     setIcon(this.updateBadgeEl, 'download');
     void this.refreshUpdateBadge();
 
+    // Credits usage popover (account-level, shared across tabs)
+    const agentCatalog = this.plugin.qoderServices.agentCatalog;
+    this.creditsUsageButton = new CreditsUsageButton(headerActions, {
+      getCachedUsage: () => agentCatalog.getUsageInfo(),
+      fetchUsage: () => fetchCreditsUsage(this.plugin),
+      subscribeRuntimeStatus: (listener) => agentCatalog.subscribeRuntimeStatus(listener),
+    });
+
     const feedbackBtn = headerActions.createDiv({ cls: 'qoderian-header-btn' });
     setIcon(feedbackBtn, 'message-circle-question');
     setButtonTooltip(feedbackBtn, t('commands.submitFeedback'));
@@ -297,14 +305,6 @@ export class QoderianView extends ItemView {
     historyBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       this.toggleHistoryDropdown();
-    });
-
-    // Credits usage popover (account-level, shared across tabs)
-    const agentCatalog = this.plugin.qoderServices.agentCatalog;
-    this.creditsUsageButton = new CreditsUsageButton(navActionsEl, {
-      getCachedUsage: () => agentCatalog.getUsageInfo(),
-      fetchUsage: () => fetchCreditsUsage(this.plugin),
-      subscribeRuntimeStatus: (listener) => agentCatalog.subscribeRuntimeStatus(listener),
     });
 
     return wrapper;

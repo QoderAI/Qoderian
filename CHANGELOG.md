@@ -11,6 +11,13 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Changed
+
+- The usage button — the gauge that opens your plan and add-on quota panel —
+  moved from the composer's icon row into the view header, beside the feedback
+  and settings buttons. Its panel now opens downward from the header; the new
+  tab, new conversation, and history buttons stay in the composer row.
+
 ## [1.0.13] - 2026-09-20
 
 ### Added
