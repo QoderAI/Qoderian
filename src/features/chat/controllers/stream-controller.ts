@@ -174,6 +174,10 @@ export class StreamController {
         await this.appendText(`\n\n⚠️ **${chunk.level === 'warning' ? 'Blocked' : 'Notice'}:** ${chunk.content}`);
         break;
 
+      case 'model_queue':
+        this.thinkingIndicator.setQueue(chunk);
+        break;
+
       case 'error':
         await this.handleError(chunk, msg);
         break;

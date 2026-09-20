@@ -154,6 +154,7 @@ export type StreamChunk =
   | { type: 'tool_output'; id: string; content: string }
   | { type: 'error'; content: string; code?: string }
   | { type: 'notice'; content: string; level?: 'info' | 'warning' }
+  | { type: 'model_queue'; status: 'queued' | 'ready'; queueCount?: number; waitTimeMs?: number }
   | { type: 'done' }
   | { type: 'usage'; usage: UsageInfo; sessionId?: string | null }
   | { type: 'context_compacted' }

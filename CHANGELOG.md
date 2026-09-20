@@ -30,6 +30,11 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   The toggle is off by default; off keeps the numbered tabs and the existing
   interactions unchanged.
 
+- When the selected model is at capacity, the waiting indicator now says so
+  with the queue position and estimated wait, e.g.
+  `Model is queued (3 ahead · ~12s wait)...`, and returns to the usual
+  wording as soon as the request leaves the queue.
+
 ## [1.0.14] - 2026-09-20
 
 ### Changed
