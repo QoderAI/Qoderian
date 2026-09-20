@@ -11,6 +11,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.14] - 2026-09-20
+
 ### Changed
 
 - The usage button — the gauge that opens your plan and add-on quota panel —
