@@ -35,6 +35,10 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   `Model is queued (3 ahead · ~12s wait)...`, and returns to the usual
   wording as soon as the request leaves the queue.
 
+- Images an agent embeds in a reply now offer **Copy image** in their
+  right-click menu, which puts the bitmap on the system clipboard ready to
+  paste into any application or another note.
+
 ## [1.0.14] - 2026-09-20
 
 ### Changed

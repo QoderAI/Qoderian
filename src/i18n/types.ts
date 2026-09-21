@@ -84,6 +84,10 @@ export type TranslationKey =
   | 'chat.rewind.cannot'
   | 'chat.rewind.unavailableStreaming'
   | 'chat.rewind.unavailableNoUuid'
+  // Chat - Embedded images
+  | 'chat.imageEmbed.copyImage'
+  | 'chat.imageEmbed.copied'
+  | 'chat.imageEmbed.copyFailed'
   | 'chat.bangBash.placeholder'
   | 'chat.bangBash.commandPanel'
   | 'chat.bangBash.copyAriaLabel'

@@ -68,6 +68,11 @@
     "closeSession": "Sitzung schließen"
   },
   "chat": {
+    "imageEmbed": {
+      "copyImage": "Bild kopieren",
+      "copied": "Bild in die Zwischenablage kopiert",
+      "copyFailed": "Bild konnte nicht kopiert werden"
+    },
     "rewind": {
       "confirmMessage": "Zu diesem Punkt zurückspulen? Dateiänderungen nach dieser Nachricht werden rückgängig gemacht. Das Zurückspulen betrifft keine manuell oder über Bash bearbeiteten Dateien.",
       "confirmMessageConversationOnly": "Konversation zu diesem Punkt zurückspulen? Dateiänderungen bleiben erhalten.",

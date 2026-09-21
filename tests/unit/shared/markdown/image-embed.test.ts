@@ -68,6 +68,13 @@ describe('replaceImageEmbedsWithHtml', () => {
       expect(result).toContain('image');
       expect(result).toContain('<img');
     });
+
+    it('carries the resolved vault path for downstream image actions', () => {
+      const app = createMockApp(new Map([['attachments/diagram.png', 'app://local/attachments/diagram.png']]));
+      const result = replaceImageEmbedsWithHtml('![[diagram.png]]', app);
+
+      expect(result).toContain('data-qoderian-image-path="attachments/diagram.png"');
+    });
   });
 
   describe('alt text and dimensions', () => {

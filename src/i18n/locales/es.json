@@ -68,6 +68,11 @@
     "closeSession": "Cerrar sesión"
   },
   "chat": {
+    "imageEmbed": {
+      "copyImage": "Copiar imagen",
+      "copied": "Imagen copiada al portapapeles",
+      "copyFailed": "No se pudo copiar la imagen"
+    },
     "rewind": {
       "confirmMessage": "¿Rebobinar a este punto? Los cambios de archivos después de este mensaje serán revertidos. El rebobinado no afecta archivos editados manualmente o mediante bash.",
       "confirmMessageConversationOnly": "¿Rebobinar la conversación hasta este punto? Se conservarán los cambios de archivos.",
