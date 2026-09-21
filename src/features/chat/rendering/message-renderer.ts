@@ -24,7 +24,8 @@ import {
 } from '../../../shared/markdown/markdown-math';
 import { replaceMentionTokensWithHtml } from '../../../shared/markdown/mention-chip';
 import type { ReferenceChipKind } from '../../../shared/mention/types';
-import { openReferenceChip } from '../../../shared/obsidian/compat';
+import { getVaultFileByPath, openReferenceChip } from '../../../shared/obsidian/compat';
+import { copyVaultImageToClipboard } from '../../../shared/obsidian/image-clipboard';
 import { TurnChangesModal } from '../changes/turn-changes-modal';
 import { collectTurnChanges } from '../changes/turn-file-changes';
 import { turnFileDisplayPath } from '../changes/turn-file-path';
@@ -844,6 +845,10 @@ export class MessageRenderer {
         this.enhanceMentionChips(el);
       }
 
+      if (processedMarkdown.includes('qoderian-embedded-image')) {
+        this.enhanceEmbeddedImages(el);
+      }
+
       // Wrap pre elements and move buttons outside scroll area
       el.querySelectorAll('pre').forEach((pre) => {
         // Skip if already wrapped
@@ -919,6 +924,39 @@ export class MessageRenderer {
         openReferenceChip(this.app, kind, path);
       });
     });
+  }
+
+  /**
+   * Binds a copy action onto rendered vault images. Embeds render as plain
+   * <img> elements, so Obsidian's own image context menu never applies here.
+   */
+  private enhanceEmbeddedImages(el: HTMLElement): void {
+    el.querySelectorAll<HTMLElement>('.qoderian-embedded-image').forEach((imageEl) => {
+      const path = imageEl.dataset.qoderianImagePath;
+      if (!path) return;
+
+      imageEl.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        this.showImageCopyMenu(event, path);
+      });
+    });
+  }
+
+  private showImageCopyMenu(event: MouseEvent, path: string): void {
+    const menu = new Menu();
+    menu.addItem((item) => {
+      item
+        .setTitle(t('chat.imageEmbed.copyImage'))
+        .setIcon('copy')
+        .onClick(() => {
+          runRendererAction(async () => {
+            const file = getVaultFileByPath(this.app, path);
+            const copied = file ? await copyVaultImageToClipboard(this.app, file) : false;
+            new Notice(copied ? t('chat.imageEmbed.copied') : t('chat.imageEmbed.copyFailed'));
+          });
+        });
+    });
+    menu.showAtMouseEvent(event);
   }
 
   // ============================================

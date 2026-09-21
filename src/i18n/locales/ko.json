@@ -68,6 +68,11 @@
     "closeSession": "세션 닫기"
   },
   "chat": {
+    "imageEmbed": {
+      "copyImage": "이미지 복사",
+      "copied": "이미지를 클립보드에 복사했습니다",
+      "copyFailed": "이미지 복사 실패"
+    },
     "rewind": {
       "confirmMessage": "이 시점으로 되감으시겠습니까? 이 메시지 이후의 파일 변경 사항이 되돌려집니다. 수동으로 또는 bash를 통해 편집된 파일에는 영향을 미치지 않습니다.",
       "confirmMessageConversationOnly": "대화를 이 시점으로 되감으시겠습니까? 파일 변경 사항은 유지됩니다.",

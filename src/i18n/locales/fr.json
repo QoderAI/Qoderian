@@ -68,6 +68,11 @@
     "closeSession": "Fermer la session"
   },
   "chat": {
+    "imageEmbed": {
+      "copyImage": "Copier l'image",
+      "copied": "Image copiée dans le presse-papiers",
+      "copyFailed": "Échec de la copie de l'image"
+    },
     "rewind": {
       "confirmMessage": "Rembobiner jusqu'à ce point ? Les modifications de fichiers après ce message seront annulées. Le rembobinage n'affecte pas les fichiers modifiés manuellement ou via bash.",
       "confirmMessageConversationOnly": "Rembobiner la conversation jusqu'à ce point ? Les modifications de fichiers seront conservées.",

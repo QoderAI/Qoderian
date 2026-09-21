@@ -68,6 +68,11 @@
     "closeSession": "關閉對話"
   },
   "chat": {
+    "imageEmbed": {
+      "copyImage": "複製圖片",
+      "copied": "圖片已複製到剪貼簿",
+      "copyFailed": "複製圖片失敗"
+    },
     "rewind": {
       "confirmMessage": "回退到此處？此訊息之後的檔案變更將被還原。回退不會影響手動或透過 bash 編輯的檔案。",
       "confirmMessageConversationOnly": "將對話回退到此處？檔案變更將保留。",

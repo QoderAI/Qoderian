@@ -81,7 +81,7 @@ function createImageHtml(
   const alt = escapeHtml(altText || file.basename);
   const style = buildStyleAttribute(altText);
 
-  return `<span class="qoderian-embedded-image"><img src="${escapeHtml(src)}" alt="${alt}" loading="lazy"${style}></span>`;
+  return `<span class="qoderian-embedded-image" data-qoderian-image-path="${escapeHtml(file.path)}"><img src="${escapeHtml(src)}" alt="${alt}" loading="lazy"${style}></span>`;
 }
 
 function createFallbackHtml(wikilink: string): string {
