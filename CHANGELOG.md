@@ -11,6 +11,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.15] - 2026-09-21
+
 ### Added
 
 - An opt-in **New session tabs** toggle in Settings → Experimental changes how
