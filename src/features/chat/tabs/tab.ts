@@ -269,20 +269,13 @@ function initializeContextManagers(tab: TabData, plugin: QoderianPlugin): void {
     },
   });
 
-  // File context manager - chips in contextRowEl, dropdown in inputContainerEl
+  // File context manager - dropdown in inputContainerEl
   tab.ui.fileContextManager = new FileContextManager(
     app,
     dom.contextRowEl,
     dom.inputEl,
     {
       getExcludedTags: () => plugin.settings.excludedTags,
-      onChipsChanged: () => {
-        tab.controllers.selectionController?.updateContextRowVisibility();
-        tab.controllers.browserSelectionController?.updateContextRowVisibility();
-        tab.controllers.canvasSelectionController?.updateContextRowVisibility();
-        autoResizeTextarea(dom.inputEl);
-        tab.renderer?.scrollToBottomIfNeeded();
-      },
       onReferencesChanged: (references) => {
         tab.ui.composerBridge?.setReferences(references);
       },

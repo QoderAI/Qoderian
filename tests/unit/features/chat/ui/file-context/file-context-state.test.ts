@@ -12,65 +12,32 @@ describe('FileContextState', () => {
       expect(state.getAttachedFiles().size).toBe(0);
     });
 
-    it('should start with session not started', () => {
-      expect(state.isSessionStarted()).toBe(false);
-    });
-
-    it('should start with current note not sent', () => {
-      expect(state.hasSentCurrentNote()).toBe(false);
-    });
-
     it('should start with no MCP mentions', () => {
       expect(state.getMentionedMcpServers().size).toBe(0);
     });
   });
 
-  describe('session lifecycle', () => {
-    it('should mark session as started', () => {
-      state.startSession();
-      expect(state.isSessionStarted()).toBe(true);
-    });
-
-    it('should mark current note as sent', () => {
-      state.markCurrentNoteSent();
-      expect(state.hasSentCurrentNote()).toBe(true);
-    });
-  });
-
   describe('resetForNewConversation', () => {
     it('should reset all state', () => {
-      state.startSession();
-      state.markCurrentNoteSent();
       state.attachFile('file1.md');
       state.addMentionedMcpServer('server1');
 
       state.resetForNewConversation();
 
-      expect(state.isSessionStarted()).toBe(false);
-      expect(state.hasSentCurrentNote()).toBe(false);
       expect(state.getAttachedFiles().size).toBe(0);
       expect(state.getMentionedMcpServers().size).toBe(0);
     });
   });
 
   describe('resetForLoadedConversation', () => {
-    it('should set state based on whether conversation has messages', () => {
+    it('should reset all state', () => {
       state.attachFile('file1.md');
       state.addMentionedMcpServer('server1');
 
-      state.resetForLoadedConversation(true);
+      state.resetForLoadedConversation();
 
-      expect(state.isSessionStarted()).toBe(true);
-      expect(state.hasSentCurrentNote()).toBe(true);
       expect(state.getAttachedFiles().size).toBe(0);
       expect(state.getMentionedMcpServers().size).toBe(0);
-    });
-
-    it('should not mark as started when no messages', () => {
-      state.resetForLoadedConversation(false);
-
-      expect(state.isSessionStarted()).toBe(false);
-      expect(state.hasSentCurrentNote()).toBe(false);
     });
   });
 

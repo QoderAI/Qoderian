@@ -11,6 +11,19 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Changed
+
+- The agent now learns which note you are viewing from the message text: the
+  turn you send after switching notes carries the new path as a
+  `<current_note>` tag (older messages may still carry `<linked_note>`, which
+  keeps working), and switching conversations reports it again, so the
+  composer no longer needs a chip for it.
+
+### Removed
+
+- The current-note chip above the composer is gone. Use the "Excluded tags"
+  setting to keep a note out of context.
+
 ## [1.0.15] - 2026-09-21
 
 ### Added

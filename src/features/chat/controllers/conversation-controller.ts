@@ -165,7 +165,6 @@ export class ConversationController {
 
       const fileCtx = this.deps.getFileContextManager();
       fileCtx?.resetForNewConversation();
-      fileCtx?.autoAttachActiveFile();
 
       this.deps.getImageContextManager()?.clearImages();
       this.deps.getMcpServerSelector()?.clearEnabled();
@@ -211,7 +210,6 @@ export class ConversationController {
 
       const fileCtx = this.deps.getFileContextManager();
       fileCtx?.resetForNewConversation();
-      fileCtx?.autoAttachActiveFile();
 
       // Initialize external contexts with persistent paths from settings
       this.deps.getExternalContextSelector()?.clearExternalContexts(
@@ -232,7 +230,7 @@ export class ConversationController {
     }
 
     await this.deps.ensureServiceForConversation?.(conversation);
-    this.restoreConversation(conversation, { autoAttachFile: true });
+    this.restoreConversation(conversation);
     this.updateWelcomeVisibility();
 
     this.callbacks.onConversationLoaded?.();
@@ -448,10 +446,7 @@ export class ConversationController {
    * Shared logic for restoring a conversation into the current tab.
    * Used by both loadActive() and switchTo() to avoid duplication.
    */
-  private restoreConversation(
-    conversation: Conversation,
-    options?: { autoAttachFile?: boolean }
-  ): void {
+  private restoreConversation(conversation: Conversation): void {
     const { plugin, state, renderer } = this.deps;
 
     state.currentConversationId = conversation.id;
@@ -471,13 +466,7 @@ export class ConversationController {
     this.getAgentService()?.syncConversationState(conversation, externalContextPaths);
 
     const fileCtx = this.deps.getFileContextManager();
-    fileCtx?.resetForLoadedConversation(hasMessages);
-
-    if (conversation.currentNote) {
-      fileCtx?.setCurrentNote(conversation.currentNote);
-    } else if (!hasMessages && options?.autoAttachFile) {
-      fileCtx?.autoAttachActiveFile();
-    }
+    fileCtx?.resetForLoadedConversation();
 
     this.restoreExternalContextPaths(conversation.externalContextPaths, !hasMessages);
 
@@ -985,10 +974,7 @@ export class ConversationController {
     const welcomeEl = this.deps.getWelcomeEl();
     if (!welcomeEl) return;
 
-    // Initialize file context to auto-attach the currently focused note
-    const fileCtx = this.deps.getFileContextManager();
-    fileCtx?.resetForNewConversation();
-    fileCtx?.autoAttachActiveFile();
+    this.deps.getFileContextManager()?.resetForNewConversation();
 
     // Only add greeting if not already present
     if (!welcomeEl.querySelector('.qoderian-welcome-greeting')) {
