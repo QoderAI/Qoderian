@@ -11,6 +11,7 @@ const readJson = (relativePath) =>
 const packageJson = readJson('package.json');
 const rootManifest = readJson('manifest.json');
 const versions = readJson('versions.json');
+const lock = readJson('package-lock.json');
 const changelog = fs.readFileSync(path.join(rootDir, 'CHANGELOG.md'), 'utf8');
 const errors = [];
 
@@ -38,6 +39,10 @@ for (const field of requiredManifestFields) {
 requireCondition(
   packageJson.version === rootManifest.version,
   `package.json version (${packageJson.version}) does not match manifest version (${rootManifest.version})`,
+);
+requireCondition(
+  lock.version === packageJson.version && lock.packages?.['']?.version === packageJson.version,
+  `package-lock.json version (${lock.version}) does not match package.json version (${packageJson.version}); run "node scripts/sync-version.js"`,
 );
 requireCondition(
   versions[rootManifest.version] === rootManifest.minAppVersion,
