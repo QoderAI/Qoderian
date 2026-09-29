@@ -11,6 +11,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.16] - 2026-09-29
+
 ### Changed
 
 - The ribbon icon, view header logo, and model selector rows now use the new
