@@ -11,10 +11,3 @@ body.theme-light .qoderian-container {
   --qoderian-brand: #35CC5F;
   --qoderian-brand-rgb: 53, 204, 95;
 }
-
-/* The Qoder glyph has a white half for dark surfaces. On light Obsidian
-   themes that half disappears into the canvas, so use the same ink tone as
-   the plugin title while retaining the native green half. */
-body.theme-light .qoderian-icon path[fill="#FFFFFF"] {
-  fill: #202124;
-}
