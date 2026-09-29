@@ -7,7 +7,7 @@ slug: /introduction
 
 Qoderian is an Obsidian plugin that embeds [Qoder CLI](https://qoder.com) (`qodercli`) in your vault. Your vault becomes the agent's working directory — file read/write, search, bash, and multi-step workflows all work out of the box.
 
-![Qoderian in an agentic Obsidian workspace](pathname:///qoderian/img/preview.png)
+![Qoderian in an agentic Obsidian workspace](pathname:///Qoderian/img/preview.png)
 
 ## Highlights
 

@@ -8,9 +8,10 @@ const config = {
   title: "Qoderian",
   tagline: "Qoder CLI embedded in your Obsidian vault.",
   url: "https://qoderai.github.io",
-  baseUrl: "/qoderian/",
+  // GitHub Pages serves this repo at /Qoderian/ — the path is case-sensitive.
+  baseUrl: "/Qoderian/",
   organizationName: "QoderAI",
-  projectName: "qoderian",
+  projectName: "Qoderian",
   trailingSlash: false,
 
   onBrokenLinks: "throw",

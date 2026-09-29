@@ -7,7 +7,7 @@ slug: /introduction
 
 Qoderian 是一个把 [Qoder CLI](https://qoder.com)（`qodercli`）嵌入 Obsidian 仓库的插件。你的仓库就是智能体的工作目录——文件读写、检索、bash 和多步工作流开箱即用。
 
-![Qoderian 在智能体化的 Obsidian 工作区中](pathname:///qoderian/img/preview.png)
+![Qoderian 在智能体化的 Obsidian 工作区中](pathname:///Qoderian/img/preview.png)
 
 ## 亮点
 
