@@ -1,31 +1,28 @@
 import { createQoderianIconContent, QODERIAN_ICON_ID } from '@/shared/icons';
 
-const SOURCE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">`
-  + `<defs><clipPath id="mask"><rect x="0" y="0" width="180" height="180" rx="40"/></clipPath></defs>`
-  + `<g clip-path="url(#mask)"><rect x="0" y="0" width="180" height="180" fill="#111113"/>`
-  + `<path d="M10 20 L30 40 Z" fill="#2ADB5C"/><path d="M50 60 L70 80 Z" fill="#FFFFFF"/></g></svg>`;
+const SOURCE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" fill="none">`
+  + `<path fill-rule="evenodd" clip-rule="evenodd" d="M10 20 L30 40 Z" fill="currentColor"/>`
+  + `<path fill="none" stroke="currentColor" stroke-width="1.7" d="M50 60 L70 80 Z"/></svg>`;
 
 describe('createQoderianIconContent', () => {
-  it('keeps only the mark paths, dropping the artwork backdrop and clip ids', () => {
+  it('lifts the mark paths verbatim, keeping their paint attributes', () => {
     const content = createQoderianIconContent(SOURCE_SVG);
 
-    expect(content).toContain('d="M10 20 L30 40 Z"');
-    expect(content).toContain('<path d="M50 60 L70 80 Z"/>');
+    expect(content).toContain('<path fill-rule="evenodd" clip-rule="evenodd" d="M10 20 L30 40 Z" fill="currentColor"/>');
+    expect(content).toContain('<path fill="none" stroke="currentColor" stroke-width="1.7" d="M50 60 L70 80 Z"/>');
     expect(content).not.toContain('rect');
     expect(content).not.toContain('clip-path');
   });
 
-  it('renders the mark in one theme color, dimming the body behind the front ring', () => {
+  it('renders the mark in one theme color inside the ribbon viewport', () => {
     const content = createQoderianIconContent(SOURCE_SVG);
 
     expect(content).toContain('fill="currentColor"');
-    expect(content).toContain('<path opacity="0.32" d="M10 20 L30 40 Z"/>');
-    expect(content).toMatch(/transform="translate\([-\d. ]+\) scale\(0?\.\d+\)"/);
-    expect(content).not.toContain('#2ADB5C');
-    expect(content).not.toContain('#FFFFFF');
+    expect(content).toContain('stroke="currentColor"');
+    expect(content).toMatch(/^<g transform="translate\(-[\d.]+ -[\d.]+\) scale\([\d.]+\)"?>/);
   });
 
-  it('draws the front ring after the body so it stays on top', () => {
+  it('draws the filled body before the outlined contour', () => {
     const content = createQoderianIconContent(SOURCE_SVG);
 
     expect(content.indexOf('M10 20')).toBeLessThan(content.indexOf('M50 60'));

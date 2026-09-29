@@ -214,10 +214,11 @@
   opacity: 0.7;
 }
 
-/* Qoder's dual-green mark stays branded on the active option, while inactive
-   options inherit the muted selector text just like PR #973. */
-.qoderian-model-option:not(.selected) .qoderian-model-icon * {
-  fill: currentColor;
+/* The mark is monochrome and follows the theme's ink tone, so the selected
+   row's green label must not bleed into the icon. */
+.qoderian-model-option.selected .qoderian-model-icon {
+  color: var(--text-normal);
+  opacity: 1;
 }
 
 .qoderian-model-option {

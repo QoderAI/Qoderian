@@ -11,6 +11,13 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Changed
+
+- The ribbon icon, view header logo, and model selector rows now use the new
+  Qoder mark introduced with the new Qoder app, replacing the old QoderIDE
+  glyph. Like the new app icon, the monochrome mark follows the theme's ink
+  tone — dark on light themes, light on dark themes — instead of brand green.
+
 ## [1.0.15] - 2026-09-21
 
 ### Added

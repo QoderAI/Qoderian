@@ -23,7 +23,9 @@
 .qoderian-logo {
   display: flex;
   align-items: center;
-  color: var(--qoderian-brand);
+  /* The Qoder mark is monochrome, so it follows the theme's ink tone like the
+     app icon does: dark on light themes, light on dark themes. */
+  color: var(--text-normal);
 }
 
 /* Update badge: an icon button in the header actions, shown only while a newer

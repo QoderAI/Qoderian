@@ -61,7 +61,7 @@ export function appendCheckIcon(container: HTMLElement): void {
 
 export const QODER_ICON: IconSvg = {
   kind: 'raw',
-  viewBox: '0 0 180 180',
+  viewBox: '0 0 100 100',
   svg: qoderIconSvg,
 };
 
@@ -96,29 +96,22 @@ export const CHECK_ICON: IconSvg = {
 
 export const QODERIAN_ICON_ID = 'qoderian-logo';
 
-// Obsidian draws registered icons inside a `0 0 100 100` viewport, so the mark
-// of the 180x180 app artwork (bounding box 32.4..147.6 x 30.2..148.4) is
-// re-centered and scaled down to leave the padding ribbon icons expect.
-const QODER_MARK_TRANSFORM = 'translate(-14.8 -14.29) scale(0.72)';
+// Obsidian draws registered icons inside a `0 0 100 100` viewport. The mark
+// fills 15.2..84.8 x 15.0..86.1 of the 100x100 artwork, so it is scaled up
+// and re-centered to leave the padding ribbon icons expect.
+const QODER_MARK_TRANSFORM = 'translate(-9.61 -10.31) scale(1.19)';
 // `addIcon` takes markup as a string and the artwork is a build-time asset, so
 // the mark paths are lifted textually instead of through a DOM round-trip.
-const QODER_MARK_PATH_PATTERN = /<path[^>]*\sd="([^"]+)"/g;
-// Ribbon and tab icons follow a single theme color, so the artwork's white
-// front ring and green extruded body both become `currentColor`. Drawing them
-// at the same strength collapses the mark into one blob, so the body behind
-// the ring is dimmed to keep the depth the two-tone original conveys.
-const QODER_MARK_BODY_OPACITY = '0.32';
+const QODER_MARK_PATH_PATTERN = /<path\b[^>]*>/g;
 
 export function createQoderianIconContent(sourceSvg: string = qoderIconSvg): string {
-  // The artwork draws the extruded body first and the front ring second; that
-  // order is preserved so the ring stays on top of the dimmed body.
+  // The artwork fills the outline body first and strokes the contour second;
+  // that order is preserved so the stroke stays on top of the fill.
   const paths = Array.from(sourceSvg.matchAll(QODER_MARK_PATH_PATTERN))
-    .map(([, pathData], index) => (index === 0
-      ? `<path opacity="${QODER_MARK_BODY_OPACITY}" d="${pathData}"/>`
-      : `<path d="${pathData}"/>`))
+    .map(([path]) => path)
     .join('');
 
-  return `<g transform="${QODER_MARK_TRANSFORM}" fill="currentColor">${paths}</g>`;
+  return `<g transform="${QODER_MARK_TRANSFORM}">${paths}</g>`;
 }
 
 export interface CreateIconSvgOptions {
@@ -158,12 +151,6 @@ export function createIconSvg(
     if (sourceSvg) {
       for (const child of Array.from(sourceSvg.children)) {
         const clone = ownerDocument.importNode(child, true) as SVGElement;
-        // The source artwork is an app-icon variant with a dark rounded-square
-        // backdrop. In a compact model selector that backdrop turns into the
-        // grey block seen on every option, so keep only the Qoder mark.
-        if (clone.tagName.toLowerCase() === 'g') {
-          clone.querySelector(':scope > rect')?.remove();
-        }
         svg.appendChild(clone);
       }
     }
