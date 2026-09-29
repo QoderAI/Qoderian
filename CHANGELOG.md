@@ -11,6 +11,12 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Changed
+
+- The context usage meter beside the composer is now a complete ring that fills
+  clockwise from the top, replacing the 240° arc. The percentage, the hover
+  tooltip, and the pale-red warning state above 80% are unchanged.
+
 ## [1.0.16] - 2026-09-29
 
 ### Changed
