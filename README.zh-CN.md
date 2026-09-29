@@ -1,6 +1,6 @@
 # Qoderian
 
-[English](README.md) | 中文
+[English](README.md) | 中文 · [文档](https://qoderai.github.io/Qoderian/zh-Hans/docs/introduction)
 
 一个把 [Qoder CLI](https://qoder.com)（`qodercli`）嵌入 Obsidian 仓库的插件。你的仓库就是智能体的工作目录——文件读写、检索、bash 和多步工作流开箱即用。
 
