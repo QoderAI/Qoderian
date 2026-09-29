@@ -10,6 +10,7 @@ const repoRoot = join(scriptsDir, "..", "..");
 
 const targets = [
   ["assets/preview.png", "static/img/preview.png"],
+  ["assets/social-card.jpg", "static/img/social-card.jpg"],
 ];
 
 for (const [from, to] of targets) {
