@@ -1,6 +1,6 @@
 # Qoderian
 
-[English](README.md) | [中文](README.zh-CN.md)
+[English](README.md) | [中文](README.zh-CN.md) · [Docs](https://qoderai.github.io/Qoderian/docs/introduction)
 
 An Obsidian plugin that embeds [Qoder CLI](https://qoder.com) (`qodercli`) in your vault. Your vault becomes the agent's working directory — file read/write, search, bash, and multi-step workflows all work out of the box.
 
