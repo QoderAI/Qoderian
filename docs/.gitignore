@@ -1,5 +1,5 @@
 # Synced by scripts/sync-assets.mjs, not committed
-/static/img/preview.png
+/static/img/
 
 # Docusaurus build output (also covered by root .gitignore, kept for local runs)
 /build/
