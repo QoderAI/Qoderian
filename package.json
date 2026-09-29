@@ -23,7 +23,7 @@
     "smoke:qoder": "node scripts/smoke-qoder-sdk.mjs",
     "audit:prod": "npm audit --omit=dev",
     "release:check": "node scripts/validate-release.mjs",
-    "version": "node scripts/sync-version.js && git add manifest.json versions.json"
+    "version": "node scripts/sync-version.js && git add manifest.json versions.json package-lock.json"
   },
   "keywords": [
     "qodercli",
