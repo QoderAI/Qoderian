@@ -25,6 +25,9 @@ export type ReferenceChipAction = (app: App, path: string) => void;
 const referenceChipActions: Record<ReferenceChipKind, ReferenceChipAction> = {
   file: openReferenceFile,
   folder: revealReferenceFolder,
+  selection: openReferenceFile,
+  'canvas-selection': openReferenceFile,
+  'browser-selection': openBrowserReference,
 };
 
 /**
@@ -100,6 +103,12 @@ function revealReferenceFolder(app: App, path: string): void {
   if (!isVaultFolder(entry)) return;
 
   revealInFileExplorer(app, entry);
+}
+
+/** Opens a browser-selection chip's stored URL in a new external tab. */
+function openBrowserReference(_app: App, url: string): void {
+  if (!url) return;
+  window.open(url, '_blank');
 }
 
 /** Internal file-explorer API used by community plugins to locate an entry. */

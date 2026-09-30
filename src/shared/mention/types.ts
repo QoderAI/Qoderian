@@ -63,7 +63,12 @@ export type MentionItem =
  * behavior dispatched by `openReferenceChip`; extend this union (and the
  * action registry) to support new reference targets.
  */
-export type ReferenceChipKind = 'file' | 'folder';
+export type ReferenceChipKind =
+  | 'file'
+  | 'folder'
+  | 'selection'
+  | 'browser-selection'
+  | 'canvas-selection';
 
 /** A reference token inserted into the input by selecting a mention item. */
 export interface MentionInsertReference {
@@ -72,4 +77,8 @@ export interface MentionInsertReference {
   /** Path used for chip labels and open actions. */
   path: string;
   kind: ReferenceChipKind;
+  /** Overrides the default label derived from `path`. */
+  label?: string;
+  /** Overrides the default icon derived from `kind`. */
+  icon?: string;
 }

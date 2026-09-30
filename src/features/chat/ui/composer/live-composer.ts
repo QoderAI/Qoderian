@@ -69,9 +69,9 @@ class ReferenceWidget extends WidgetType {
     element.dataset.kind = reference.kind;
     element.title = reference.token;
     icon.classList.add('qoderian-composer-reference-icon');
-    setIcon(icon, reference.kind === 'folder' ? 'folder' : 'file-text');
+    setIcon(icon, reference.icon ?? (reference.kind === 'folder' ? 'folder' : 'file-text'));
     label.classList.add('qoderian-composer-reference-label');
-    label.textContent = formatReferenceLabel(reference.path);
+    label.textContent = reference.label ?? formatReferenceLabel(reference.path);
     remove.classList.add('qoderian-composer-reference-remove');
     remove.setAttribute('aria-label', `Remove ${reference.token}`);
     setIcon(remove, 'x');

@@ -245,6 +245,12 @@ export class FileContextManager {
     this.notifyReferencesChanged();
   }
 
+  /** Drops a single reference token, e.g. when its selection is cleared. */
+  unregisterComposerReference(token: string): void {
+    if (!this.composerReferences.delete(token)) return;
+    this.notifyReferencesChanged();
+  }
+
   /** Drops all tracked composer references at a conversation boundary. */
   private clearComposerReferences(): void {
     if (this.composerReferences.size === 0) return;
