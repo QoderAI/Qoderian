@@ -19,11 +19,12 @@ import { openReferenceChip } from '../../../shared/obsidian/compat';
 import { BrowserSelectionController } from '../controllers/browser-selection-controller';
 import { CanvasSelectionController } from '../controllers/canvas-selection-controller';
 import { ContextRowOverflowController } from '../controllers/context-row-overflow';
+import { updateContextRowHasContent } from '../controllers/context-row-visibility';
 import { ConversationController } from '../controllers/conversation-controller';
 import { InputController } from '../controllers/input-controller';
 import { NavigationController } from '../controllers/navigation-controller';
-import { createSelectionChip } from '../controllers/selection-chip';
 import { SelectionController } from '../controllers/selection-controller';
+import type { SelectionTokenSink } from '../controllers/selection-token';
 import { StreamController } from '../controllers/stream-controller';
 import { MessageRenderer } from '../rendering/message-renderer';
 import { BangBashService } from '../services/bang-bash-service';
@@ -302,9 +303,7 @@ function initializeContextManagers(tab: TabData, plugin: QoderianPlugin): void {
     dom.inputEl,
     {
       onImagesChanged: () => {
-        tab.controllers.selectionController?.updateContextRowVisibility();
-        tab.controllers.browserSelectionController?.updateContextRowVisibility();
-        tab.controllers.canvasSelectionController?.updateContextRowVisibility();
+        updateContextRowHasContent(dom.contextRowEl);
         autoResizeTextarea(dom.inputEl);
         tab.renderer?.scrollToBottomIfNeeded();
         updateComposerSendAvailability(tab);
@@ -590,25 +589,6 @@ export function initializeTabUI(
   // Initialize context managers (file/image)
   initializeContextManagers(tab, plugin);
 
-  // Selection chips - add to contextRowEl (pill style: icon + label + remove)
-  dom.selectionIndicatorEl = createSelectionChip(
-    dom.contextRowEl,
-    'qoderian-selection-indicator',
-    'text-select'
-  );
-
-  dom.browserIndicatorEl = createSelectionChip(
-    dom.contextRowEl,
-    'qoderian-browser-selection-indicator',
-    'globe'
-  );
-
-  dom.canvasIndicatorEl = createSelectionChip(
-    dom.contextRowEl,
-    'qoderian-canvas-indicator',
-    'network'
-  );
-
   // Collapse chips into "+N more" when the sidebar is too narrow.
   tab.controllers.contextRowOverflow = new ContextRowOverflowController(dom.contextRowEl);
 
@@ -831,30 +811,30 @@ export function initializeTabControllers(
     () => ui.externalContextSelector?.getExternalContexts() ?? [],
   );
 
-  // Selection controller
+  // Selection controllers append inline tokens to the composer and register
+  // them as chips through the file context manager.
+  const selectionTokenSink: SelectionTokenSink = {
+    register: (reference) => tab.ui.fileContextManager?.registerComposerReference(reference),
+    unregister: (token) => tab.ui.fileContextManager?.unregisterComposerReference(token),
+  };
+
   tab.controllers.selectionController = new SelectionController(
     plugin.app,
-    dom.selectionIndicatorEl!,
     dom.inputEl,
-    dom.contextRowEl,
-    () => autoResizeTextarea(dom.inputEl),
+    selectionTokenSink,
     [dom.contentEl, dom.inputComposerEl, ...getSharedSelectionFocusScopeEls(component)],
   );
 
   tab.controllers.browserSelectionController = new BrowserSelectionController(
     plugin.app,
-    dom.browserIndicatorEl!,
     dom.inputEl,
-    dom.contextRowEl,
-    () => autoResizeTextarea(dom.inputEl)
+    selectionTokenSink,
   );
 
   tab.controllers.canvasSelectionController = new CanvasSelectionController(
     plugin.app,
-    dom.canvasIndicatorEl!,
     dom.inputEl,
-    dom.contextRowEl,
-    () => autoResizeTextarea(dom.inputEl)
+    selectionTokenSink,
   );
 
   tab.controllers.streamController = new StreamController({

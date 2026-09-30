@@ -1,30 +1,7 @@
 import { createMockEl } from '@test/helpers/mock-element';
 
 import { CanvasSelectionController } from '@/features/chat/controllers/canvas-selection-controller';
-
-function createMockIndicator() {
-  const indicator = createMockEl();
-  indicator.addClass('qoderian-canvas-indicator');
-  indicator.addClass('qoderian-hidden');
-  return indicator;
-}
-
-function createMockContextRow() {
-  const elements: Record<string, any> = {
-    '.qoderian-selection-indicator': createMockEl(),
-    '.qoderian-canvas-indicator': createMockIndicator(),
-    '.qoderian-image-preview': null,
-  };
-  elements['.qoderian-selection-indicator'].addClass('qoderian-selection-indicator');
-  elements['.qoderian-selection-indicator'].addClass('qoderian-hidden');
-
-  const contextRow = createMockEl();
-  const toggle = contextRow.classList.toggle;
-  contextRow.classList.toggle = jest.fn((cls: string, force?: boolean) => toggle(cls, force));
-
-  contextRow.querySelector = jest.fn((selector: string) => elements[selector] ?? null);
-  return contextRow as any;
-}
+import { buildCanvasSelectionToken } from '@/features/chat/controllers/selection-token';
 
 function createMockCanvasNode(id: string) {
   return { id };
@@ -33,18 +10,17 @@ function createMockCanvasNode(id: string) {
 describe('CanvasSelectionController', () => {
   let controller: CanvasSelectionController;
   let app: any;
-  let indicatorEl: any;
   let inputEl: any;
-  let contextRowEl: any;
+  let tokenSink: { register: jest.Mock; unregister: jest.Mock };
   let canvasView: any;
   let originalDocument: any;
 
   beforeEach(() => {
     jest.useFakeTimers();
 
-    indicatorEl = createMockIndicator();
     inputEl = createMockEl();
-    contextRowEl = createMockContextRow();
+    inputEl.value = '';
+    tokenSink = { register: jest.fn(), unregister: jest.fn() };
 
     const node1 = createMockCanvasNode('abc123');
     const node2 = createMockCanvasNode('def456');
@@ -65,7 +41,7 @@ describe('CanvasSelectionController', () => {
       },
     };
 
-    controller = new CanvasSelectionController(app, indicatorEl, inputEl, contextRowEl);
+    controller = new CanvasSelectionController(app, inputEl, tokenSink);
 
     originalDocument = (global as any).document;
     (global as any).document = { activeElement: null };
@@ -77,42 +53,38 @@ describe('CanvasSelectionController', () => {
     (global as any).document = originalDocument;
   });
 
-  it('captures canvas selection and updates indicator', () => {
+  it('captures canvas selection, appends the token, and registers a chip', () => {
     controller.start();
     jest.advanceTimersByTime(250);
 
+    const token = buildCanvasSelectionToken('my-canvas.canvas');
     expect(controller.hasSelection()).toBe(true);
     expect(controller.getContext()).toEqual({
       canvasPath: 'my-canvas.canvas',
       nodeIds: expect.arrayContaining(['abc123', 'def456']),
     });
-    expect(indicatorEl.textContent).toBe('2 nodes selected');
-    expect(indicatorEl.style.display).toBe('block');
+    expect(inputEl.value).toBe(token);
+    expect(tokenSink.register).toHaveBeenCalledWith({
+      token,
+      path: 'my-canvas.canvas',
+      kind: 'canvas-selection',
+      label: 'my-canvas.canvas',
+      icon: 'network',
+    });
   });
 
-  it('shows node ID for single selection', () => {
-    const singleNode = createMockCanvasNode('single1');
-    canvasView.canvas.selection = new Set([singleNode]);
-
-    controller.start();
-    jest.advanceTimersByTime(250);
-
-    expect(controller.getContext()?.nodeIds).toEqual(['single1']);
-    expect(indicatorEl.textContent).toBe('node "single1" selected');
-  });
-
-  it('clears selection when no nodes selected and input not focused', () => {
+  it('clears the token when the selection is dropped', () => {
     controller.start();
     jest.advanceTimersByTime(250);
     expect(controller.hasSelection()).toBe(true);
 
     canvasView.canvas.selection = new Set();
     (global as any).document.activeElement = null;
-
     jest.advanceTimersByTime(250);
 
     expect(controller.hasSelection()).toBe(false);
-    expect(indicatorEl.style.display).toBe('none');
+    expect(inputEl.value).toBe('');
+    expect(tokenSink.unregister).toHaveBeenCalledWith(buildCanvasSelectionToken('my-canvas.canvas'));
   });
 
   it('preserves selection when input is focused (sticky)', () => {
@@ -122,11 +94,10 @@ describe('CanvasSelectionController', () => {
 
     canvasView.canvas.selection = new Set();
     (global as any).document.activeElement = inputEl;
-
     jest.advanceTimersByTime(250);
 
     expect(controller.hasSelection()).toBe(true);
-    expect(indicatorEl.textContent).toBe('2 nodes selected');
+    expect(inputEl.value).toBe(buildCanvasSelectionToken('my-canvas.canvas'));
   });
 
   it('returns null context when no selection', () => {
@@ -137,43 +108,26 @@ describe('CanvasSelectionController', () => {
     expect(controller.getContext()).toBeNull();
   });
 
-  it('does not update when selection unchanged', () => {
+  it('does not re-register when the selection is unchanged', () => {
     controller.start();
     jest.advanceTimersByTime(250);
-
-    contextRowEl.classList.toggle.mockClear();
+    tokenSink.register.mockClear();
 
     jest.advanceTimersByTime(250);
 
-    // toggle should not be called again (no change)
-    expect(contextRowEl.classList.toggle).not.toHaveBeenCalled();
-  });
-
-  it('keeps context row visible when editor selection indicator is visible', () => {
-    const editorIndicator = createMockEl();
-    editorIndicator.addClass('qoderian-selection-indicator');
-    contextRowEl.querySelector.mockImplementation((selector: string) => {
-      if (selector === '.qoderian-selection-indicator') return editorIndicator;
-      return null;
-    });
-
-    controller.updateContextRowVisibility();
-
-    expect(contextRowEl.classList.toggle).toHaveBeenCalledWith('has-content', true);
+    expect(tokenSink.register).not.toHaveBeenCalled();
   });
 
   it('prefers active canvas leaf when multiple canvases are open', () => {
-    const activeNode = createMockCanvasNode('active-node');
-    const inactiveNode = createMockCanvasNode('inactive-node');
-    const inactiveCanvasView = {
-      getViewType: () => 'canvas',
-      canvas: { selection: new Set([inactiveNode]) },
-      file: { path: 'inactive.canvas' },
-    };
     const activeCanvasView = {
       getViewType: () => 'canvas',
-      canvas: { selection: new Set([activeNode]) },
+      canvas: { selection: new Set([createMockCanvasNode('active-node')]) },
       file: { path: 'active.canvas' },
+    };
+    const inactiveCanvasView = {
+      getViewType: () => 'canvas',
+      canvas: { selection: new Set([createMockCanvasNode('inactive-node')]) },
+      file: { path: 'inactive.canvas' },
     };
 
     app.workspace.getLeavesOfType.mockReturnValue([
@@ -202,7 +156,7 @@ describe('CanvasSelectionController', () => {
     expect(controller.getContext()).toBeNull();
   });
 
-  it('clear() resets state and indicator', () => {
+  it('clear() removes the token and unregisters', () => {
     controller.start();
     jest.advanceTimersByTime(250);
     expect(controller.hasSelection()).toBe(true);
@@ -210,6 +164,28 @@ describe('CanvasSelectionController', () => {
     controller.clear();
 
     expect(controller.hasSelection()).toBe(false);
-    expect(indicatorEl.style.display).toBe('none');
+    expect(inputEl.value).toBe('');
+    expect(tokenSink.unregister).toHaveBeenCalled();
+  });
+
+  it('drops the stored selection when the token is deleted from the input', () => {
+    controller.start();
+    jest.advanceTimersByTime(250);
+    expect(controller.hasSelection()).toBe(true);
+
+    inputEl.value = '';
+    inputEl.dispatchEvent('input');
+
+    expect(controller.hasSelection()).toBe(false);
+    expect(tokenSink.unregister).toHaveBeenCalledWith(buildCanvasSelectionToken('my-canvas.canvas'));
+  });
+
+  it('removes an orphan canvas token when nothing is stored', () => {
+    inputEl.value = `hello ${buildCanvasSelectionToken('stale.canvas')}`;
+    controller.start();
+
+    inputEl.dispatchEvent('input');
+
+    expect(inputEl.value).toBe('hello');
   });
 });

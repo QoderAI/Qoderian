@@ -1,10 +1,18 @@
 import type { App, ItemView } from 'obsidian';
 
 import type { CanvasSelectionContext } from '../../../core/context/types';
-import { updateContextRowHasContent } from './context-row-visibility';
-import { bindSelectionChipRemove, setSelectionChipLabel } from './selection-chip';
+import {
+  appendSelectionToken,
+  basename,
+  buildCanvasSelectionToken,
+  removeSelectionToken,
+  type SelectionTokenReference,
+  type SelectionTokenSink,
+  truncateLabel,
+} from './selection-token';
 
 const CANVAS_POLL_INTERVAL = 250;
+const ORPHAN_TOKEN_PATTERN = /@canvas:\S+/;
 
 type CanvasSelectionNode = { id?: unknown };
 
@@ -19,30 +27,23 @@ type CanvasViewLike = ItemView & {
 
 export class CanvasSelectionController {
   private app: App;
-  private indicatorEl: HTMLElement;
-  private inputEl: HTMLElement;
-  private contextRowEl: HTMLElement;
-  private onVisibilityChange: (() => void) | null;
+  private inputEl: HTMLTextAreaElement;
+  private tokenSink: SelectionTokenSink;
   private storedSelection: CanvasSelectionContext | null = null;
+  private storedToken: string | null = null;
+  private syncingToken = false;
   private pollInterval: number | null = null;
+  private readonly handleInput = (): void => this.reconcileToken();
 
-  constructor(
-    app: App,
-    indicatorEl: HTMLElement,
-    inputEl: HTMLElement,
-    contextRowEl: HTMLElement,
-    onVisibilityChange?: () => void
-  ) {
+  constructor(app: App, inputEl: HTMLTextAreaElement, tokenSink: SelectionTokenSink) {
     this.app = app;
-    this.indicatorEl = indicatorEl;
     this.inputEl = inputEl;
-    this.contextRowEl = contextRowEl;
-    this.onVisibilityChange = onVisibilityChange ?? null;
-    bindSelectionChipRemove(this.indicatorEl, () => this.clear());
+    this.tokenSink = tokenSink;
   }
 
   start(): void {
     if (this.pollInterval) return;
+    this.inputEl.addEventListener('input', this.handleInput);
     this.pollInterval = window.setInterval(() => this.poll(), CANVAS_POLL_INTERVAL);
   }
 
@@ -51,6 +52,7 @@ export class CanvasSelectionController {
       window.clearInterval(this.pollInterval);
       this.pollInterval = null;
     }
+    this.inputEl.removeEventListener('input', this.handleInput);
     this.clear();
   }
 
@@ -77,12 +79,12 @@ export class CanvasSelectionController {
 
       if (!sameSelection) {
         this.storedSelection = { canvasPath, nodeIds };
-        this.updateIndicator();
+        this.applyToken(buildCanvasSelectionToken(canvasPath), canvasPath);
       }
     } else if (this.getActiveElement() !== this.inputEl) {
       if (this.storedSelection) {
         this.storedSelection = null;
-        this.updateIndicator();
+        this.applyToken(null);
       }
     }
   }
@@ -104,26 +106,59 @@ export class CanvasSelectionController {
     return leaf ? (leaf.view as CanvasViewLike) : null;
   }
 
-  private updateIndicator(): void {
-    if (!this.indicatorEl) return;
-
-    if (this.storedSelection) {
-      const { nodeIds } = this.storedSelection;
-      setSelectionChipLabel(this.indicatorEl, nodeIds.length === 1
-        ? `node "${nodeIds[0]}" selected`
-        : `${nodeIds.length} nodes selected`);
-      this.indicatorEl.removeClass('qoderian-hidden');
-    } else {
-      this.indicatorEl.addClass('qoderian-hidden');
-      setSelectionChipLabel(this.indicatorEl, '');
-    }
-    this.updateContextRowVisibility();
+  private buildReference(token: string, canvasPath: string): SelectionTokenReference {
+    return {
+      token,
+      path: canvasPath,
+      kind: 'canvas-selection',
+      label: truncateLabel(basename(canvasPath)),
+      icon: 'network',
+    };
   }
 
-  updateContextRowVisibility(): void {
-    if (!this.contextRowEl) return;
-    updateContextRowHasContent(this.contextRowEl);
-    this.onVisibilityChange?.();
+  private applyToken(nextToken: string | null, canvasPath?: string): void {
+    if (nextToken === this.storedToken) return;
+
+    this.syncingToken = true;
+    try {
+      const previous = this.storedToken;
+      this.storedToken = nextToken;
+      if (previous) {
+        removeSelectionToken(this.inputEl, previous);
+        this.tokenSink.unregister(previous);
+      }
+      if (nextToken && canvasPath) {
+        appendSelectionToken(this.inputEl, nextToken);
+        this.tokenSink.register(this.buildReference(nextToken, canvasPath));
+      }
+    } finally {
+      this.syncingToken = false;
+    }
+  }
+
+  private reconcileToken(): void {
+    if (this.syncingToken) return;
+
+    const value = this.inputEl.value;
+    if (this.storedToken) {
+      if (!value.includes(this.storedToken)) {
+        const stale = this.storedToken;
+        this.storedToken = null;
+        this.storedSelection = null;
+        this.tokenSink.unregister(stale);
+      }
+      return;
+    }
+
+    const orphan = value.match(ORPHAN_TOKEN_PATTERN)?.[0];
+    if (orphan) {
+      this.syncingToken = true;
+      try {
+        removeSelectionToken(this.inputEl, orphan);
+      } finally {
+        this.syncingToken = false;
+      }
+    }
   }
 
   getContext(): CanvasSelectionContext | null {
@@ -140,6 +175,6 @@ export class CanvasSelectionController {
 
   clear(): void {
     this.storedSelection = null;
-    this.updateIndicator();
+    this.applyToken(null);
   }
 }

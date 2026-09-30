@@ -158,12 +158,8 @@ export interface TabDOMElements {
   /** Nav row for tab badges and header icons (above input wrapper). */
   navRowEl: HTMLElement;
 
-  /** Context row for file chips and selection indicator (inside input wrapper). */
+  /** Context row for image previews (inside input wrapper). */
   contextRowEl: HTMLElement;
-
-  selectionIndicatorEl: HTMLElement | null;
-  browserIndicatorEl: HTMLElement | null;
-  canvasIndicatorEl: HTMLElement | null;
 
   /** Cleanup functions for event listeners (prevents memory leaks). */
   eventCleanups: Array<() => void>;

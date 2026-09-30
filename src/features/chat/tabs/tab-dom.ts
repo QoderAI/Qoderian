@@ -35,9 +35,6 @@ export function buildTabDOM(contentEl: HTMLElement): TabDOMElements {
     inputEl,
     navRowEl,
     contextRowEl,
-    selectionIndicatorEl: null,
-    browserIndicatorEl: null,
-    canvasIndicatorEl: null,
     eventCleanups: [],
   };
 }

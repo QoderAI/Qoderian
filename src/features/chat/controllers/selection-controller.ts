@@ -4,12 +4,20 @@ import { MarkdownView } from 'obsidian';
 import { type EditorSelectionContext, getEditorView } from '../../../core/editor/editor-context';
 import { hideSelectionHighlight, showSelectionHighlight } from '../../../shared/components/selection-highlight';
 import type { StoredSelection } from '../state/types';
-import { updateContextRowHasContent } from './context-row-visibility';
-import { bindSelectionChipRemove, setSelectionChipLabel } from './selection-chip';
+import {
+  appendSelectionToken,
+  basename,
+  buildEditorSelectionToken,
+  removeSelectionToken,
+  type SelectionTokenReference,
+  type SelectionTokenSink,
+  truncateLabel,
+} from './selection-token';
 
 const SELECTION_POLL_INTERVAL = 250;
 const INPUT_HANDOFF_GRACE_MS = 1500;
 const HIGHLIGHT_KEY = 'qoderian-selection';
+const ORPHAN_TOKEN_PATTERN = /@[^\s@]+#L\d+(?:-\d+)?/;
 
 type CustomHighlightRegistry = {
   delete: (name: string) => boolean;
@@ -20,14 +28,15 @@ type FocusScopeInput = HTMLElement | HTMLElement[];
 
 export class SelectionController {
   private app: App;
-  private indicatorEl: HTMLElement;
-  private inputEl: HTMLElement;
+  private inputEl: HTMLTextAreaElement;
+  private tokenSink: SelectionTokenSink;
   private focusScopeEls: HTMLElement[];
-  private contextRowEl: HTMLElement;
-  private onVisibilityChange: (() => void) | null;
   private storedSelection: StoredSelection | null = null;
+  private storedToken: string | null = null;
+  private syncingToken = false;
   private inputHandoffGraceUntil: number | null = null;
   private pollInterval: number | null = null;
+  private readonly handleInput = (): void => this.reconcileToken();
   private readonly focusScopePointerDownHandler = () => {
     if (!this.storedSelection) return;
     this.inputHandoffGraceUntil = Date.now() + INPUT_HANDOFF_GRACE_MS;
@@ -40,23 +49,19 @@ export class SelectionController {
 
   constructor(
     app: App,
-    indicatorEl: HTMLElement,
-    inputEl: HTMLElement,
-    contextRowEl: HTMLElement,
-    onVisibilityChange?: () => void,
+    inputEl: HTMLTextAreaElement,
+    tokenSink: SelectionTokenSink,
     focusScopeEl?: FocusScopeInput
   ) {
     this.app = app;
-    this.indicatorEl = indicatorEl;
     this.inputEl = inputEl;
+    this.tokenSink = tokenSink;
     this.focusScopeEls = this.normalizeFocusScopes(focusScopeEl);
-    this.contextRowEl = contextRowEl;
-    this.onVisibilityChange = onVisibilityChange ?? null;
-    bindSelectionChipRemove(this.indicatorEl, () => this.clear());
   }
 
   start(): void {
     if (this.pollInterval) return;
+    this.inputEl.addEventListener('input', this.handleInput);
     this.inputEl.addEventListener('pointerdown', this.focusScopePointerDownHandler);
     for (const focusScopeEl of this.focusScopeEls) {
       if (focusScopeEl !== this.inputEl) {
@@ -72,6 +77,7 @@ export class SelectionController {
       window.clearInterval(this.pollInterval);
       this.pollInterval = null;
     }
+    this.inputEl.removeEventListener('input', this.handleInput);
     this.inputEl.removeEventListener('pointerdown', this.focusScopePointerDownHandler);
     for (const focusScopeEl of this.focusScopeEls) {
       if (focusScopeEl !== this.inputEl) {
@@ -141,7 +147,7 @@ export class SelectionController {
           this.clearHighlight();
         }
         this.storedSelection = { notePath, selectedText, lineCount, startLine, from, to, editorView };
-        this.updateIndicator();
+        this.syncTokenFromStored();
       }
     } else {
       this.handleDeselection();
@@ -184,7 +190,7 @@ export class SelectionController {
       if (!unchanged) {
         this.clearHighlight();
         this.storedSelection = { notePath, selectedText, lineCount, domRanges };
-        this.updateIndicator();
+        this.syncTokenFromStored();
       }
     } else {
       this.handleDeselection();
@@ -314,7 +320,7 @@ export class SelectionController {
     this.inputHandoffGraceUntil = null;
     this.clearHighlight();
     this.storedSelection = null;
-    this.updateIndicator();
+    this.syncTokenFromStored();
   }
 
   private handleDeselection(): void {
@@ -331,7 +337,7 @@ export class SelectionController {
     this.inputHandoffGraceUntil = null;
     this.clearHighlight();
     this.storedSelection = null;
-    this.updateIndicator();
+    this.syncTokenFromStored();
   }
 
   // ============================================
@@ -378,27 +384,76 @@ export class SelectionController {
   }
 
   // ============================================
-  // Indicator
+  // Token Sync
   // ============================================
 
-  private updateIndicator(): void {
-    if (!this.indicatorEl) return;
+  private currentToken(): { token: string; reference: SelectionTokenReference } | null {
+    const sel = this.storedSelection;
+    if (!sel) return null;
 
-    if (this.storedSelection) {
-      const lineText = this.storedSelection.lineCount === 1 ? 'line' : 'lines';
-      setSelectionChipLabel(this.indicatorEl, `${this.storedSelection.lineCount} ${lineText} selected`);
-      this.indicatorEl.removeClass('qoderian-hidden');
-    } else {
-      this.indicatorEl.addClass('qoderian-hidden');
-      setSelectionChipLabel(this.indicatorEl, '');
-    }
-    this.updateContextRowVisibility();
+    const fromLine = sel.startLine;
+    const toLine = fromLine !== undefined ? fromLine + sel.lineCount - 1 : undefined;
+    const token = buildEditorSelectionToken(sel.notePath, fromLine, toLine);
+    const lineText = fromLine === undefined
+      ? ''
+      : (toLine !== undefined && toLine !== fromLine ? ` L${fromLine}-${toLine}` : ` L${fromLine}`);
+    return {
+      token,
+      reference: {
+        token,
+        path: sel.notePath,
+        kind: 'selection',
+        label: `${truncateLabel(basename(sel.notePath))}${lineText}`,
+        icon: 'text-select',
+      },
+    };
   }
 
-  updateContextRowVisibility(): void {
-    if (!this.contextRowEl) return;
-    updateContextRowHasContent(this.contextRowEl);
-    this.onVisibilityChange?.();
+  private syncTokenFromStored(): void {
+    const next = this.currentToken();
+    const nextToken = next?.token ?? null;
+    if (nextToken === this.storedToken) return;
+
+    this.syncingToken = true;
+    try {
+      const previous = this.storedToken;
+      this.storedToken = nextToken;
+      if (previous) {
+        removeSelectionToken(this.inputEl, previous);
+        this.tokenSink.unregister(previous);
+      }
+      if (next) {
+        appendSelectionToken(this.inputEl, next.token);
+        this.tokenSink.register(next.reference);
+      }
+    } finally {
+      this.syncingToken = false;
+    }
+  }
+
+  private reconcileToken(): void {
+    if (this.syncingToken) return;
+
+    const value = this.inputEl.value;
+    if (this.storedToken) {
+      if (!value.includes(this.storedToken)) {
+        const stale = this.storedToken;
+        this.storedToken = null;
+        this.storedSelection = null;
+        this.tokenSink.unregister(stale);
+      }
+      return;
+    }
+
+    const orphan = value.match(ORPHAN_TOKEN_PATTERN)?.[0];
+    if (orphan) {
+      this.syncingToken = true;
+      try {
+        removeSelectionToken(this.inputEl, orphan);
+      } finally {
+        this.syncingToken = false;
+      }
+    }
   }
 
   // ============================================
@@ -428,6 +483,6 @@ export class SelectionController {
     this.inputHandoffGraceUntil = null;
     this.clearHighlight();
     this.storedSelection = null;
-    this.updateIndicator();
+    this.syncTokenFromStored();
   }
 }
