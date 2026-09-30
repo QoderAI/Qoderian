@@ -144,7 +144,7 @@ describe('SelectionController', () => {
       lineCount: 1,
       startLine: 1,
     });
-    expect(inputEl.value).toBe(SOURCE_TOKEN);
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
     expect(tokenSink.register).toHaveBeenCalledWith({
       token: SOURCE_TOKEN,
       path: 'notes/test.md',
@@ -204,7 +204,7 @@ describe('SelectionController', () => {
     jest.advanceTimersByTime(250);
 
     expect(controller.hasSelection()).toBe(true);
-    expect(inputEl.value).toBe(SOURCE_TOKEN);
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
   });
 
   it('preserves selection when a relocated composer outside tab content has focus', () => {
@@ -227,7 +227,7 @@ describe('SelectionController', () => {
     jest.advanceTimersByTime(250);
 
     expect(controller.hasSelection()).toBe(true);
-    expect(inputEl.value).toBe(SOURCE_TOKEN);
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
   });
 
   it('preserves selection when shared footer controls have focus', () => {
@@ -252,7 +252,7 @@ describe('SelectionController', () => {
     jest.advanceTimersByTime(250);
 
     expect(controller.hasSelection()).toBe(true);
-    expect(inputEl.value).toBe(SOURCE_TOKEN);
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
   });
 
   it('shows selection highlight when focus enters shared footer controls', () => {
@@ -389,7 +389,7 @@ describe('SelectionController', () => {
         selectedText: 'reading selection',
         lineCount: 1,
       });
-      expect(inputEl.value).toBe('@notes/reading.md');
+      expect(inputEl.value).toBe('@notes/reading.md ');
       expect(tokenSink.register).toHaveBeenCalledWith(
         expect.objectContaining({ path: 'notes/reading.md', kind: 'selection' }),
       );
@@ -536,7 +536,7 @@ describe('SelectionController', () => {
       jest.advanceTimersByTime(250);
 
       expect(controller.hasSelection()).toBe(true);
-      expect(inputEl.value).toBe('@notes/reading.md');
+      expect(inputEl.value).toBe('@notes/reading.md ');
     });
 
     it('clears CSS highlight when reading mode selection is deselected', () => {

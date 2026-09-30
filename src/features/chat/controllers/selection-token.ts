@@ -87,8 +87,10 @@ export function appendSelectionToken(inputEl: SelectionTokenInput, token: string
   const current = inputEl.value;
   if (current.includes(token)) return;
 
+  // Chips only decorate tokens surrounded by boundaries, so a trailing space
+  // keeps the chip alive when the user starts typing right after it.
   const trimmed = current.replace(/\s+$/, '');
-  inputEl.value = trimmed.length === 0 ? token : `${trimmed} ${token}`;
+  inputEl.value = trimmed.length === 0 ? `${token} ` : `${trimmed} ${token} `;
   dispatchInput(inputEl);
 }
 

@@ -63,7 +63,7 @@ describe('CanvasSelectionController', () => {
       canvasPath: 'my-canvas.canvas',
       nodeIds: expect.arrayContaining(['abc123', 'def456']),
     });
-    expect(inputEl.value).toBe(token);
+    expect(inputEl.value).toBe(`${token} `);
     expect(tokenSink.register).toHaveBeenCalledWith({
       token,
       path: 'my-canvas.canvas',
@@ -97,7 +97,7 @@ describe('CanvasSelectionController', () => {
     jest.advanceTimersByTime(250);
 
     expect(controller.hasSelection()).toBe(true);
-    expect(inputEl.value).toBe(buildCanvasSelectionToken('my-canvas.canvas'));
+    expect(inputEl.value).toBe(`${buildCanvasSelectionToken('my-canvas.canvas')} `);
   });
 
   it('returns null context when no selection', () => {

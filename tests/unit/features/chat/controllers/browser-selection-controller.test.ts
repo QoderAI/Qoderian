@@ -70,7 +70,7 @@ describe('BrowserSelectionController', () => {
       title: 'Surfing',
       url: 'https://example.com',
     });
-    expect(inputEl.value).toBe(token);
+    expect(inputEl.value).toBe(`${token} `);
     expect(tokenSink.register).toHaveBeenCalledWith({
       token,
       path: 'https://example.com',
@@ -107,7 +107,7 @@ describe('BrowserSelectionController', () => {
     await flushMicrotasks();
 
     expect(controller.hasSelection()).toBe(true);
-    expect(inputEl.value).toBe(buildBrowserSelectionToken('Surfing'));
+    expect(inputEl.value).toBe(`${buildBrowserSelectionToken('Surfing')} `);
   });
 
   it('clears selection when clear is called', async () => {

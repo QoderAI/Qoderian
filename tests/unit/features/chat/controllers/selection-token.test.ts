@@ -67,20 +67,20 @@ describe('appendSelectionToken', () => {
   it('appends with a single separating space and dispatches input', () => {
     const input = createInput('hello');
     appendSelectionToken(input, '@notes/a.md#L1');
-    expect(input.value).toBe('hello @notes/a.md#L1');
+    expect(input.value).toBe('hello @notes/a.md#L1 ');
     expect(input.dispatched).toBe(1);
   });
 
-  it('trims trailing whitespace before appending', () => {
+  it('trims trailing whitespace and keeps a trailing space', () => {
     const input = createInput('hello   \n');
     appendSelectionToken(input, '@t');
-    expect(input.value).toBe('hello @t');
+    expect(input.value).toBe('hello @t ');
   });
 
   it('does not add a leading space to an empty input', () => {
     const input = createInput('');
     appendSelectionToken(input, '@t');
-    expect(input.value).toBe('@t');
+    expect(input.value).toBe('@t ');
   });
 
   it('is idempotent when the token already exists', () => {
