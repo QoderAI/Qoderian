@@ -29,6 +29,114 @@ export interface MentionCandidate {
   hasTrailingSlash: boolean;
   start: number;
   end: number;
+  /** Pre-resolved kind for selection tokens; skips vault lookup in the loop. */
+  kind?: ReferenceChipKind;
+  /** Pre-computed chip label override. */
+  label?: string;
+  /** Pre-computed tooltip (the original token) override. */
+  title?: string;
+}
+
+/** Selection token grammars recognized in sent message text (display-only). */
+const EDITOR_SELECTION_TOKEN = /@([^\s@#]+)#L(\d+)(?:-(\d+))?/g;
+const BROWSER_SELECTION_TOKEN = /@browser:(\S+)/g;
+const CANVAS_SELECTION_TOKEN = /@canvas:(\S+)/g;
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+/**
+ * Finds selection tokens (`@path#L10-15`, `@browser:...`, `@canvas:...`)
+ * outside code spans. Each carries a pre-resolved kind/label/title so the
+ * replacement loop can chip them without a second vault lookup.
+ */
+export function findSelectionCandidates(
+  text: string,
+  resolvePath?: (path: string) => boolean,
+): MentionCandidate[] {
+  const candidates: MentionCandidate[] = [];
+  const segments = text.split(CODE_SEGMENTS);
+  let offset = 0;
+  let isCodeSegment = false;
+
+  for (const segment of segments) {
+    if (!isCodeSegment) {
+      collectSelectionCandidates(segment, offset, candidates, resolvePath);
+    }
+    offset += segment.length;
+    isCodeSegment = !isCodeSegment;
+  }
+
+  return candidates;
+}
+
+function collectSelectionCandidates(
+  segment: string,
+  segmentOffset: number,
+  candidates: MentionCandidate[],
+  resolvePath?: (path: string) => boolean,
+): void {
+  const atBoundary = (index: number): boolean => isTokenBoundary(segment[index - 1]);
+
+  EDITOR_SELECTION_TOKEN.lastIndex = 0;
+  for (let match = EDITOR_SELECTION_TOKEN.exec(segment); match; match = EDITOR_SELECTION_TOKEN.exec(segment)) {
+    const index = match.index;
+    if (!atBoundary(index)) continue;
+    const path = match[1];
+    if (resolvePath && !resolvePath(path)) continue;
+    const fromLine = match[2];
+    const toLine = match[3];
+    const lineSuffix = toLine && toLine !== fromLine ? ` L${fromLine}-${toLine}` : ` L${fromLine}`;
+    candidates.push({
+      raw: match[0].slice(1),
+      path,
+      hasTrailingSlash: false,
+      start: segmentOffset + index,
+      end: segmentOffset + index + match[0].length,
+      kind: 'selection',
+      label: `${formatReferenceLabel(path)}${lineSuffix}`,
+      title: match[0],
+    });
+  }
+
+  BROWSER_SELECTION_TOKEN.lastIndex = 0;
+  for (let match = BROWSER_SELECTION_TOKEN.exec(segment); match; match = BROWSER_SELECTION_TOKEN.exec(segment)) {
+    const index = match.index;
+    if (!atBoundary(index)) continue;
+    const title = safeDecode(match[1]);
+    candidates.push({
+      raw: match[0].slice(1),
+      path: title,
+      hasTrailingSlash: false,
+      start: segmentOffset + index,
+      end: segmentOffset + index + match[0].length,
+      kind: 'browser-selection',
+      label: formatReferenceLabel(title),
+      title: match[0],
+    });
+  }
+
+  CANVAS_SELECTION_TOKEN.lastIndex = 0;
+  for (let match = CANVAS_SELECTION_TOKEN.exec(segment); match; match = CANVAS_SELECTION_TOKEN.exec(segment)) {
+    const index = match.index;
+    if (!atBoundary(index)) continue;
+    const canvasPath = safeDecode(match[1]);
+    candidates.push({
+      raw: match[0].slice(1),
+      path: canvasPath,
+      hasTrailingSlash: false,
+      start: segmentOffset + index,
+      end: segmentOffset + index + match[0].length,
+      kind: 'canvas-selection',
+      label: formatReferenceLabel(canvasPath),
+      title: match[0],
+    });
+  }
 }
 
 /**
@@ -162,17 +270,18 @@ function resolveLongestPath(
 function createChipHtml(
   path: string,
   kind: ReferenceChipKind,
-  externalPath?: string,
+  options: { externalPath?: string; label?: string; title?: string } = {},
 ): string {
-  const label = escapeHtml(formatReferenceLabel(path));
+  const { externalPath, label, title } = options;
+  const chipLabel = escapeHtml(label ?? formatReferenceLabel(path));
   const chipPath = escapeHtml(externalPath ?? path);
-  const title = escapeHtml(`@${path}${kind === 'folder' ? '/' : ''}`);
+  const chipTitle = escapeHtml(title ?? `@${path}${kind === 'folder' ? '/' : ''}`);
   const externalAttr = externalPath ? ' data-external="true"' : '';
   return (
     `<span class="qoderian-composer-reference qoderian-msg-reference"`
-    + ` data-kind="${kind}" data-path="${chipPath}"${externalAttr} title="${title}">`
+    + ` data-kind="${kind}" data-path="${chipPath}"${externalAttr} title="${chipTitle}">`
     + `<span class="qoderian-composer-reference-icon"></span>`
-    + `<span class="qoderian-composer-reference-label">${label}</span>`
+    + `<span class="qoderian-composer-reference-label">${chipLabel}</span>`
     + `</span>`
   );
 }
@@ -226,15 +335,30 @@ export function replaceMentionTokensWithHtml(
     }
     return externalAbsolutePath(path) !== null;
   };
-  const candidates = findMentionCandidates(markdown, resolvePath);
+  const candidates = [
+    ...findSelectionCandidates(markdown, resolvePath),
+    ...findMentionCandidates(markdown, resolvePath),
+  ];
   if (candidates.length === 0) {
     return markdown;
   }
+  // Pre-resolved selection tokens win over generic candidates at the same start.
+  candidates.sort((a, b) => a.start - b.start || (a.kind ? 0 : 1) - (b.kind ? 0 : 1));
 
   const chunks: string[] = [];
   let cursor = 0;
   for (const candidate of candidates) {
     if (candidate.start < cursor) continue;
+
+    if (candidate.kind) {
+      chunks.push(markdown.slice(cursor, candidate.start));
+      chunks.push(createChipHtml(candidate.path, candidate.kind, {
+        label: candidate.label,
+        title: candidate.title,
+      }));
+      cursor = candidate.end;
+      continue;
+    }
 
     let resolved: TAbstractFile | null = null;
     try {
@@ -255,7 +379,7 @@ export function replaceMentionTokensWithHtml(
     }
 
     chunks.push(markdown.slice(cursor, candidate.start));
-    chunks.push(createChipHtml(candidate.path, kind, externalPath ?? undefined));
+    chunks.push(createChipHtml(candidate.path, kind, { externalPath: externalPath ?? undefined }));
     cursor = candidate.end;
   }
   if (chunks.length === 0) {

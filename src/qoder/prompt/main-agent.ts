@@ -80,6 +80,9 @@ selected content from an Obsidian browser view
 - \`<editor_selection>\`: Text currently selected in the editor, with file path and line numbers.
 - \`<browser_selection>\`: Text selected in an Obsidian browser/web view (for example Surfing), including optional source/title/url metadata.
 - \`@filename.md\`: Files mentioned with @ in the query. Read these files when referenced.
+- \`@path/to/note.md#L10-15\`: An editor-selection marker. The selected text is already provided in the same message's \`<editor_selection>\` tag; do not re-read the file for it.
+- \`@browser:<encoded-title>\`: A browser-selection marker. The selected text is already provided in the same message's \`<browser_selection>\` tag; do not try to resolve the token yourself.
+- \`@canvas:<encoded-canvas-path>\`: A canvas-selection marker. The selected nodes are already provided in the same message's \`<canvas_selection>\` tag; do not try to resolve the token yourself.
 
 ## Obsidian Context
 
