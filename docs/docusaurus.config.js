@@ -14,6 +14,18 @@ const config = {
   projectName: "Qoderian",
   trailingSlash: false,
 
+  headTags: [
+    {
+      tagName: "link",
+      attributes: {
+        rel: "icon",
+        type: "image/svg+xml",
+        // headTags hrefs are emitted verbatim, so the baseUrl prefix is manual.
+        href: "/Qoderian/img/favicon.svg",
+      },
+    },
+  ],
+
   onBrokenLinks: "throw",
 
   i18n: {
