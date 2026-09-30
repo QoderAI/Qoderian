@@ -13,7 +13,6 @@ function createMockContextRow() {
   const elements: Record<string, any> = {
     '.qoderian-selection-indicator': createMockEl(),
     '.qoderian-canvas-indicator': createMockIndicator(),
-    '.qoderian-file-indicator': null,
     '.qoderian-image-preview': null,
   };
   elements['.qoderian-selection-indicator'].addClass('qoderian-selection-indicator');

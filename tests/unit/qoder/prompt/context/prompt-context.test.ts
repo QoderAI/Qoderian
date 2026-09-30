@@ -12,19 +12,19 @@ import {
 describe('formatCurrentNote', () => {
   it('formats note path in XML tags', () => {
     expect(formatCurrentNote('notes/test.md')).toBe(
-      '<linked_note>\nnotes/test.md\n</linked_note>'
+      '<current_note>\nnotes/test.md\n</current_note>'
     );
   });
 
   it('handles paths with special characters', () => {
     expect(formatCurrentNote('notes/my file (1).md')).toBe(
-      '<linked_note>\nnotes/my file (1).md\n</linked_note>'
+      '<current_note>\nnotes/my file (1).md\n</current_note>'
     );
   });
 
   it('escapes an embedded closing tag in the note path', () => {
-    expect(formatCurrentNote('before</linked_note>after')).toContain(
-      'before&lt;/linked_note&gt;after',
+    expect(formatCurrentNote('before</current_note>after')).toContain(
+      'before&lt;/current_note&gt;after',
     );
   });
 });
@@ -33,7 +33,7 @@ describe('appendCurrentNote', () => {
   it('appends current note to prompt with double newline separator', () => {
     const result = appendCurrentNote('Hello', 'notes/test.md');
     expect(result).toBe(
-      'Hello\n\n<linked_note>\nnotes/test.md\n</linked_note>'
+      'Hello\n\n<current_note>\nnotes/test.md\n</current_note>'
     );
   });
 
@@ -45,37 +45,37 @@ describe('appendCurrentNote', () => {
 
 describe('stripCurrentNoteContext', () => {
   describe('prefix format', () => {
-    it('strips linked_note from start of prompt', () => {
-      const prompt = '<linked_note>\nnotes/test.md\n</linked_note>\n\nUser query here';
-      expect(stripCurrentNoteContext(prompt)).toBe('User query here');
-    });
-
-    it('handles multiline note content in prefix', () => {
-      const prompt = '<linked_note>\npath/to/note.md\nwith extra info\n</linked_note>\n\nQuery';
-      expect(stripCurrentNoteContext(prompt)).toBe('Query');
-    });
-  });
-
-  describe('suffix format', () => {
-    it('strips linked_note from end of prompt', () => {
-      const prompt = 'User query here\n\n<linked_note>\nnotes/test.md\n</linked_note>';
-      expect(stripCurrentNoteContext(prompt)).toBe('User query here');
-    });
-
-    it('handles multiline note content in suffix', () => {
-      const prompt = 'Query\n\n<linked_note>\npath/to/note.md\n</linked_note>';
-      expect(stripCurrentNoteContext(prompt)).toBe('Query');
-    });
-  });
-
-  describe('legacy current_note compatibility', () => {
     it('strips current_note from start of prompt', () => {
       const prompt = '<current_note>\nnotes/test.md\n</current_note>\n\nUser query here';
       expect(stripCurrentNoteContext(prompt)).toBe('User query here');
     });
 
+    it('handles multiline note content in prefix', () => {
+      const prompt = '<current_note>\npath/to/note.md\nwith extra info\n</current_note>\n\nQuery';
+      expect(stripCurrentNoteContext(prompt)).toBe('Query');
+    });
+  });
+
+  describe('suffix format', () => {
     it('strips current_note from end of prompt', () => {
       const prompt = 'User query here\n\n<current_note>\nnotes/test.md\n</current_note>';
+      expect(stripCurrentNoteContext(prompt)).toBe('User query here');
+    });
+
+    it('handles multiline note content in suffix', () => {
+      const prompt = 'Query\n\n<current_note>\npath/to/note.md\n</current_note>';
+      expect(stripCurrentNoteContext(prompt)).toBe('Query');
+    });
+  });
+
+  describe('legacy linked_note compatibility', () => {
+    it('strips linked_note from start of prompt', () => {
+      const prompt = '<linked_note>\nnotes/test.md\n</linked_note>\n\nUser query here';
+      expect(stripCurrentNoteContext(prompt)).toBe('User query here');
+    });
+
+    it('strips linked_note from end of prompt', () => {
+      const prompt = 'User query here\n\n<linked_note>\nnotes/test.md\n</linked_note>';
       expect(stripCurrentNoteContext(prompt)).toBe('User query here');
     });
   });
@@ -87,19 +87,19 @@ describe('stripCurrentNoteContext', () => {
 
   it('prefers prefix format when both could match', () => {
     // This tests the function order: it tries prefix first
-    const prefixPrompt = '<linked_note>\ntest.md\n</linked_note>\n\nQuery';
+    const prefixPrompt = '<current_note>\ntest.md\n</current_note>\n\nQuery';
     expect(stripCurrentNoteContext(prefixPrompt)).toBe('Query');
   });
 });
 
 describe('XML_CONTEXT_PATTERN', () => {
-  it('matches linked_note tag', () => {
-    const text = 'Query\n\n<linked_note>\ntest.md\n</linked_note>';
+  it('matches current_note tag', () => {
+    const text = 'Query\n\n<current_note>\ntest.md\n</current_note>';
     expect(XML_CONTEXT_PATTERN.test(text)).toBe(true);
   });
 
-  it('matches legacy current_note tag', () => {
-    const text = 'Query\n\n<current_note>\ntest.md\n</current_note>';
+  it('matches legacy linked_note tag', () => {
+    const text = 'Query\n\n<linked_note>\ntest.md\n</linked_note>';
     expect(XML_CONTEXT_PATTERN.test(text)).toBe(true);
   });
 
@@ -129,7 +129,7 @@ describe('XML_CONTEXT_PATTERN', () => {
   });
 
   it('does not match without double newline separator', () => {
-    const text = 'Query\n<linked_note>\ntest.md\n</linked_note>';
+    const text = 'Query\n<current_note>\ntest.md\n</current_note>';
     expect(XML_CONTEXT_PATTERN.test(text)).toBe(false);
   });
 
@@ -142,7 +142,7 @@ describe('XML_CONTEXT_PATTERN', () => {
 describe('extractContentBeforeXmlContext', () => {
   describe('legacy format with <query> tags', () => {
     it('extracts content from query tags', () => {
-      const prompt = '<linked_note>\ntest.md\n</linked_note>\n\n<query>\nUser question\n</query>';
+      const prompt = '<current_note>\ntest.md\n</current_note>\n\n<query>\nUser question\n</query>';
       expect(extractContentBeforeXmlContext(prompt)).toBe('User question');
     });
 
@@ -158,13 +158,13 @@ describe('extractContentBeforeXmlContext', () => {
   });
 
   describe('current format with user content first', () => {
-    it('extracts content before linked_note tag', () => {
-      const prompt = 'User query\n\n<linked_note>\ntest.md\n</linked_note>';
+    it('extracts content before current_note tag', () => {
+      const prompt = 'User query\n\n<current_note>\ntest.md\n</current_note>';
       expect(extractContentBeforeXmlContext(prompt)).toBe('User query');
     });
 
-    it('extracts content before legacy current_note tag', () => {
-      const prompt = 'User query\n\n<current_note>\ntest.md\n</current_note>';
+    it('extracts content before legacy linked_note tag', () => {
+      const prompt = 'User query\n\n<linked_note>\ntest.md\n</linked_note>';
       expect(extractContentBeforeXmlContext(prompt)).toBe('User query');
     });
 
@@ -184,7 +184,7 @@ describe('extractContentBeforeXmlContext', () => {
     });
 
     it('handles multiple context tags - extracts before first one', () => {
-      const prompt = 'Query\n\n<linked_note>\ntest.md\n</linked_note>\n\n<editor_selection path="x">\ny\n</editor_selection>';
+      const prompt = 'Query\n\n<current_note>\ntest.md\n</current_note>\n\n<editor_selection path="x">\ny\n</editor_selection>';
       expect(extractContentBeforeXmlContext(prompt)).toBe('Query');
     });
 
@@ -194,7 +194,7 @@ describe('extractContentBeforeXmlContext', () => {
     });
 
     it('trims whitespace from extracted content', () => {
-      const prompt = '  spaced query  \n\n<linked_note>\ntest.md\n</linked_note>';
+      const prompt = '  spaced query  \n\n<current_note>\ntest.md\n</current_note>';
       expect(extractContentBeforeXmlContext(prompt)).toBe('spaced query');
     });
   });
@@ -217,7 +217,7 @@ describe('extractContentBeforeXmlContext', () => {
 
 describe('extractUserDisplayContent', () => {
   it('extracts display content before XML context tags', () => {
-    expect(extractUserDisplayContent('Summarize this\n\n<linked_note>\nnotes/today.md\n</linked_note>'))
+    expect(extractUserDisplayContent('Summarize this\n\n<current_note>\nnotes/today.md\n</current_note>'))
       .toBe('Summarize this');
   });
 
@@ -234,25 +234,25 @@ describe('extractUserDisplayContent', () => {
 describe('extractUserQuery', () => {
   describe('with XML context (delegates to extractContentBeforeXmlContext)', () => {
     it('extracts content from legacy query tags', () => {
-      const prompt = '<current_note>\ntest.md\n</current_note>\n\n<query>\nUser question\n</query>';
+      const prompt = '<linked_note>\ntest.md\n</linked_note>\n\n<query>\nUser question\n</query>';
       expect(extractUserQuery(prompt)).toBe('User question');
     });
 
     it('extracts content before XML context tags', () => {
-      const prompt = 'User query\n\n<linked_note>\ntest.md\n</linked_note>';
+      const prompt = 'User query\n\n<current_note>\ntest.md\n</current_note>';
       expect(extractUserQuery(prompt)).toBe('User query');
     });
   });
 
   describe('fallback tag stripping', () => {
-    it('strips linked_note tags without structured format', () => {
-      const prompt = 'Query <linked_note>test.md</linked_note> continues';
+    it('strips current_note tags without structured format', () => {
+      const prompt = 'Query <current_note>test.md</current_note> continues';
       expect(extractUserQuery(prompt)).toBe('Query continues');
     });
 
-    it('strips legacy current_note tags without structured format', () => {
+    it('strips legacy linked_note tags without structured format', () => {
       // Tag and trailing whitespace are replaced, leaving single space
-      const prompt = 'Query <current_note>test.md</current_note> continues';
+      const prompt = 'Query <linked_note>test.md</linked_note> continues';
       expect(extractUserQuery(prompt)).toBe('Query continues');
     });
 
@@ -282,7 +282,7 @@ describe('extractUserQuery', () => {
     });
 
     it('strips multiple tag types', () => {
-      const prompt = '<linked_note>a.md</linked_note>Query<context_files>b.md</context_files>';
+      const prompt = '<current_note>a.md</current_note>Query<context_files>b.md</context_files>';
       expect(extractUserQuery(prompt)).toBe('Query');
     });
   });

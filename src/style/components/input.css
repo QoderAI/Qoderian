@@ -269,27 +269,7 @@ body.qoderian-composer-resizing * {
   padding: 4px 6px 6px 6px;
 }
 
-/* File indicator (attached files) */
-.qoderian-file-indicator {
-  display: none;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.qoderian-file-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 6px 3px 8px;
-  background: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 12px;
-  font-size: 12px;
-  line-height: 1;
-  max-width: 200px;
-  cursor: pointer;
-}
-
+/* Chip part styles shared by the selection indicators (see selection-chip.ts) */
 .qoderian-file-chip-icon {
   display: flex;
   align-items: center;
@@ -326,10 +306,6 @@ body.qoderian-composer-resizing * {
 .qoderian-file-chip-remove:hover {
   background: var(--background-modifier-hover);
   color: var(--text-normal);
-}
-
-.qoderian-file-chip:hover {
-  background: var(--background-modifier-hover);
 }
 
 /* Composer send-queue panel: collapsible list of pending turns. */

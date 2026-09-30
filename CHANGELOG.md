@@ -16,6 +16,16 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - The context usage meter beside the composer is now a complete ring that fills
   clockwise from the top, replacing the 240° arc. The percentage, the hover
   tooltip, and the pale-red warning state above 80% are unchanged.
+- The agent now learns which note you are viewing from the message text: the
+  turn you send after switching notes carries the new path as a
+  `<current_note>` tag (older messages may still carry `<linked_note>`, which
+  keeps working), and switching conversations reports it again, so the
+  composer no longer needs a chip for it.
+
+### Removed
+
+- The current-note chip above the composer is gone. Use the "Excluded tags"
+  setting to keep a note out of context.
 
 ## [1.0.16] - 2026-09-29
 

@@ -172,23 +172,6 @@ describe('ImageContextManager', () => {
       const previewEl = previewContainer.querySelector('.qoderian-image-preview');
       expect(previewEl).not.toBeNull();
     });
-
-    it('should insert image preview before file indicator if present', () => {
-      const previewContainer = createMockEl();
-      const fileIndicator = previewContainer.createDiv({ cls: 'qoderian-file-indicator' });
-      // Patch parentElement to match check in constructor
-      Object.defineProperty(fileIndicator, 'parentElement', { get: () => previewContainer });
-
-      const { container: c } = createContainerWithInputWrapper();
-      const input = createMockTextArea();
-      const cb = createMockCallbacks();
-
-      new ImageContextManager(c, input, cb, previewContainer);
-      const children = previewContainer.children;
-      const fileIndicatorIdx = children.indexOf(fileIndicator);
-      const previewIdx = children.findIndex((el: any) => el.hasClass?.('qoderian-image-preview'));
-      expect(previewIdx).toBeLessThan(fileIndicatorIdx);
-    });
   });
 });
 

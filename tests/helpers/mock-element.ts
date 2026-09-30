@@ -73,7 +73,6 @@ const CLASS_DISPLAY: Record<string, string> = {
   'qoderian-browser-selection-indicator': 'block',
   'qoderian-canvas-indicator': 'block',
   'qoderian-context-meter': 'flex',
-  'qoderian-file-indicator': 'none',
   'qoderian-image-preview': 'none',
   'qoderian-mcp-selector': 'flex',
   'qoderian-permission-toggle': 'flex',

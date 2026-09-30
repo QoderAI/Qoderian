@@ -18,9 +18,6 @@ function createMockContextRow(browserIndicator: HTMLElement) {
   const canvasIndicator = createMockEl();
   canvasIndicator.addClass('qoderian-canvas-indicator');
   canvasIndicator.addClass('qoderian-hidden');
-  const fileIndicator = createMockEl();
-  fileIndicator.addClass('qoderian-file-indicator');
-  fileIndicator.addClass('qoderian-hidden');
   const imagePreview = createMockEl();
   imagePreview.addClass('qoderian-image-preview');
   imagePreview.addClass('qoderian-hidden');
@@ -28,7 +25,6 @@ function createMockContextRow(browserIndicator: HTMLElement) {
     '.qoderian-selection-indicator': editorIndicator,
     '.qoderian-browser-selection-indicator': browserIndicator,
     '.qoderian-canvas-indicator': canvasIndicator,
-    '.qoderian-file-indicator': fileIndicator,
     '.qoderian-image-preview': imagePreview,
   };
   const contextRow = createMockEl();

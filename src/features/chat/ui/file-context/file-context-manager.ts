@@ -1,5 +1,5 @@
 import type { App, EventRef } from 'obsidian';
-import { Notice, setIcon, TFile } from 'obsidian';
+import { setIcon, TFile } from 'obsidian';
 
 import {
   createExternalContextLookupGetter,
@@ -20,13 +20,11 @@ import type { ExtensionMentionItem, MentionExtensionProvider } from '../../../..
 import type { MentionInsertReference } from '../../../../shared/mention/types';
 import { VaultMentionIndex } from '../../../../shared/mention/vault-mention-index';
 import type { ComposerReference } from '../composer/composer-reference';
-import { FileChipsView } from './file-chips-view';
 import { FileContextState } from './file-context-state';
 import { isTagExcluded } from './tag-exclusion';
 
 export interface FileContextCallbacks {
   getExcludedTags: () => string[];
-  onChipsChanged?: () => void;
   /** Notified whenever the composer reference set changes (insert/rename/delete). */
   onReferencesChanged?: (references: readonly ComposerReference[]) => void;
   getExternalContexts?: () => string[];
@@ -37,20 +35,15 @@ export interface FileContextCallbacks {
 export class FileContextManager {
   private app: App;
   private callbacks: FileContextCallbacks;
-  private chipsContainerEl: HTMLElement;
   private dropdownContainerEl: HTMLElement;
   private inputEl: HTMLTextAreaElement;
   private state: FileContextState;
   private mentionIndex: VaultMentionIndex;
-  private chipsView: FileChipsView;
   private mentionDropdown: MentionDropdownController;
   private mcpManager: McpServerManager | null = null;
   private agentService: AgentMentionIndex | null = null;
   private deleteEventRef: EventRef | null = null;
   private renameEventRef: EventRef | null = null;
-
-  // Current note (shown as chip)
-  private currentNotePath: string | null = null;
 
   // Reference tokens inserted via the mention dropdown, keyed by token text
   private readonly composerReferences = new Map<string, ComposerReference>();
@@ -66,7 +59,6 @@ export class FileContextManager {
     dropdownContainerEl?: HTMLElement
   ) {
     this.app = app;
-    this.chipsContainerEl = chipsContainerEl;
     this.dropdownContainerEl = dropdownContainerEl ?? chipsContainerEl;
     this.inputEl = inputEl;
     this.callbacks = callbacks;
@@ -74,30 +66,6 @@ export class FileContextManager {
     this.state = new FileContextState();
     this.mentionIndex = new VaultMentionIndex(this.app);
     this.mentionIndex.initializeInBackground();
-
-    this.chipsView = new FileChipsView(this.chipsContainerEl, {
-      onRemoveAttachment: (filePath) => {
-        if (filePath === this.currentNotePath) {
-          this.currentNotePath = null;
-          this.state.detachFile(filePath);
-          this.refreshCurrentNoteChip();
-        }
-      },
-      onOpenFile: (filePath) => {
-        void (async (): Promise<void> => {
-          const file = this.app.vault.getAbstractFileByPath(filePath);
-          if (!(file instanceof TFile)) {
-            new Notice(`Could not open file: ${filePath}`);
-            return;
-          }
-          try {
-            await this.app.workspace.getLeaf().openFile(file);
-          } catch (error) {
-            new Notice(`Failed to open file: ${error instanceof Error ? error.message : String(error)}`);
-          }
-        })();
-      },
-    });
 
     this.mentionDropdown = new MentionDropdownController(
       this.dropdownContainerEl,
@@ -122,87 +90,31 @@ export class FileContextManager {
     });
   }
 
-  /** Returns the current note path (shown as chip). */
+  /**
+   * Resolves the note the user is currently viewing (vault-relative), or null
+   * when none is open. Read live so the answer is never stale, e.g. when the
+   * user switched notes while another tab was active.
+   */
   getCurrentNotePath(): string | null {
-    return this.currentNotePath;
+    const activeFile = this.app.workspace.getActiveFile();
+    if (!activeFile || this.hasExcludedTag(activeFile)) return null;
+    return this.normalizePathForVault(activeFile.path);
   }
 
   getAttachedFiles(): Set<string> {
     return this.state.getAttachedFiles();
   }
 
-  /** Checks whether current note should be sent for this session. */
-  shouldSendCurrentNote(notePath?: string | null): boolean {
-    const resolvedPath = notePath ?? this.currentNotePath;
-    return !!resolvedPath && !this.state.hasSentCurrentNote();
-  }
-
-  /** Marks current note as sent (call after sending a message). */
-  markCurrentNoteSent() {
-    this.state.markCurrentNoteSent();
-  }
-
-  isSessionStarted(): boolean {
-    return this.state.isSessionStarted();
-  }
-
-  startSession() {
-    this.state.startSession();
-  }
-
   /** Resets state for a new conversation. */
   resetForNewConversation() {
-    this.currentNotePath = null;
     this.clearComposerReferences();
     this.state.resetForNewConversation();
-    this.refreshCurrentNoteChip();
   }
 
   /** Resets state for loading an existing conversation. */
-  resetForLoadedConversation(hasMessages: boolean) {
-    this.currentNotePath = null;
+  resetForLoadedConversation() {
     this.clearComposerReferences();
-    this.state.resetForLoadedConversation(hasMessages);
-    this.refreshCurrentNoteChip();
-  }
-
-  /** Sets current note (for restoring persisted state). */
-  setCurrentNote(notePath: string | null) {
-    this.currentNotePath = notePath;
-    if (notePath) {
-      this.state.attachFile(notePath);
-    }
-    this.refreshCurrentNoteChip();
-  }
-
-  /** Auto-attaches the currently focused file (for new sessions). */
-  autoAttachActiveFile() {
-    const activeFile = this.app.workspace.getActiveFile();
-    if (activeFile && !this.hasExcludedTag(activeFile)) {
-      const normalizedPath = this.normalizePathForVault(activeFile.path);
-      if (normalizedPath) {
-        this.currentNotePath = normalizedPath;
-        this.state.attachFile(normalizedPath);
-        this.refreshCurrentNoteChip();
-      }
-    }
-  }
-
-  /** Handles file open event. */
-  handleFileOpen(file: TFile) {
-    const normalizedPath = this.normalizePathForVault(file.path);
-    if (!normalizedPath) return;
-
-    if (!this.state.isSessionStarted()) {
-      this.state.clearAttachments();
-      if (!this.hasExcludedTag(file)) {
-        this.currentNotePath = normalizedPath;
-        this.state.attachFile(normalizedPath);
-      } else {
-        this.currentNotePath = null;
-      }
-      this.refreshCurrentNoteChip();
-    }
+    this.state.resetForLoadedConversation();
   }
 
   markFileCacheDirty() {
@@ -285,7 +197,6 @@ export class FileContextManager {
     if (this.deleteEventRef) this.app.vault.offref(this.deleteEventRef);
     if (this.renameEventRef) this.app.vault.offref(this.renameEventRef);
     this.mentionDropdown.destroy();
-    this.chipsView.destroy();
   }
 
   /** Normalizes a file path to be vault-relative with forward slashes. */
@@ -294,23 +205,10 @@ export class FileContextManager {
     return normalizePathForVaultUtil(rawPath, vaultPath);
   }
 
-  private refreshCurrentNoteChip(): void {
-    this.chipsView.renderCurrentNote(this.currentNotePath);
-    this.callbacks.onChipsChanged?.();
-  }
-
   private handleFileRenamed(oldPath: string, newPath: string) {
     const normalizedOld = this.normalizePathForVault(oldPath);
     const normalizedNew = this.normalizePathForVault(newPath);
     if (!normalizedOld) return;
-
-    let needsUpdate = false;
-
-    // Update current note path if renamed
-    if (this.currentNotePath === normalizedOld) {
-      this.currentNotePath = normalizedNew;
-      needsUpdate = true;
-    }
 
     // Update attached files
     if (this.state.getAttachedFiles().has(normalizedOld)) {
@@ -318,45 +216,23 @@ export class FileContextManager {
       if (normalizedNew) {
         this.state.attachFile(normalizedNew);
       }
-      needsUpdate = true;
     }
 
     // Update composer reference tokens so chips survive renames
-    if (this.renameComposerReferences(normalizedOld, normalizedNew)) {
-      needsUpdate = true;
-    }
-
-    if (needsUpdate) {
-      this.refreshCurrentNoteChip();
-    }
+    this.renameComposerReferences(normalizedOld, normalizedNew);
   }
 
   private handleFileDeleted(deletedPath: string): void {
     const normalized = this.normalizePathForVault(deletedPath);
     if (!normalized) return;
 
-    let needsUpdate = false;
-
-    // Clear current note if deleted
-    if (this.currentNotePath === normalized) {
-      this.currentNotePath = null;
-      needsUpdate = true;
-    }
-
     // Remove from attached files
     if (this.state.getAttachedFiles().has(normalized)) {
       this.state.detachFile(normalized);
-      needsUpdate = true;
     }
 
     // Drop composer references whose file no longer exists
-    if (this.removeComposerReferencesForPath(normalized)) {
-      needsUpdate = true;
-    }
-
-    if (needsUpdate) {
-      this.refreshCurrentNoteChip();
-    }
+    this.removeComposerReferencesForPath(normalized);
   }
 
   // ========================================
