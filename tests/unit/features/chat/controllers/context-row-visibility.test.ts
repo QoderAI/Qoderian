@@ -2,17 +2,8 @@ import { createMockEl } from '@test/helpers/mock-element';
 
 import { updateContextRowHasContent } from '@/features/chat/controllers/context-row-visibility';
 
-function createContextRow(browserIndicator: HTMLElement | null): HTMLElement {
-  const editorIndicator = createMockEl();
-  editorIndicator.addClass('qoderian-selection-indicator qoderian-hidden');
-  const canvasIndicator = createMockEl();
-  canvasIndicator.addClass('qoderian-canvas-indicator qoderian-hidden');
-  const imagePreview = createMockEl();
-  imagePreview.addClass('qoderian-image-preview qoderian-hidden');
+function createContextRow(imagePreview: HTMLElement | null): HTMLElement {
   const lookup = new Map<string, unknown>([
-    ['.qoderian-selection-indicator', editorIndicator],
-    ['.qoderian-browser-selection-indicator', browserIndicator],
-    ['.qoderian-canvas-indicator', canvasIndicator],
     ['.qoderian-image-preview', imagePreview],
   ]);
 
@@ -24,20 +15,30 @@ function createContextRow(browserIndicator: HTMLElement | null): HTMLElement {
 }
 
 describe('updateContextRowHasContent', () => {
-  it('does not treat missing browser indicator as visible content', () => {
+  it('does not treat a missing image preview as visible content', () => {
     const contextRowEl = createContextRow(null);
 
     expect(() => updateContextRowHasContent(contextRowEl)).not.toThrow();
     expect((contextRowEl.classList.toggle as jest.Mock)).toHaveBeenCalledWith('has-content', false);
   });
 
-  it('treats browser indicator as visible only when it is not hidden', () => {
-    const browserIndicator = createMockEl();
-    browserIndicator.addClass('qoderian-browser-selection-indicator');
-    const contextRowEl = createContextRow(browserIndicator);
+  it('treats the image preview as visible only when it is shown', () => {
+    const imagePreview = createMockEl();
+    imagePreview.addClass('qoderian-image-preview qoderian-visible-flex');
+    const contextRowEl = createContextRow(imagePreview);
 
     updateContextRowHasContent(contextRowEl);
 
     expect((contextRowEl.classList.toggle as jest.Mock)).toHaveBeenCalledWith('has-content', true);
+  });
+
+  it('ignores a hidden image preview', () => {
+    const imagePreview = createMockEl();
+    imagePreview.addClass('qoderian-image-preview qoderian-hidden');
+    const contextRowEl = createContextRow(imagePreview);
+
+    updateContextRowHasContent(contextRowEl);
+
+    expect((contextRowEl.classList.toggle as jest.Mock)).toHaveBeenCalledWith('has-content', false);
   });
 });
