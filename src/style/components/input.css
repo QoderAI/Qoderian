@@ -85,33 +85,45 @@ body.qoderian-composer-resizing * {
   user-select: none;
 }
 
-/* Context row (context chips: files, images, selections) - inside input wrapper at top */
+/* Context row (image preview) above the textarea and selection row (selection
+   chips) below it - both inside the input wrapper */
 /* Collapsed by default; expanded via .has-content class; textarea fills remaining space */
-.qoderian-context-row {
+.qoderian-context-row,
+.qoderian-selection-row {
   display: none;
   position: relative;
   align-items: flex-start;
   justify-content: flex-start;
   flex-shrink: 0;
-  padding: 6px 10px 0 10px;
   gap: 8px;
 }
 
-/* Show context row when it has visible content */
-.qoderian-context-row.has-content {
+.qoderian-context-row {
+  padding: 6px 10px 0 10px;
+}
+
+.qoderian-selection-row {
+  padding: 0 10px 6px 10px;
+}
+
+/* Show a row when it has visible content */
+.qoderian-context-row.has-content,
+.qoderian-selection-row.has-content {
   display: flex;
 }
 
 /* Overflow collapse: chips that do not fit a narrow row are parked behind a
    "+N more" pill. Hidden items stay measurable (absolute + invisible). */
-.qoderian-context-row > .qoderian-context-overflow-hidden {
+.qoderian-context-row > .qoderian-context-overflow-hidden,
+.qoderian-selection-row > .qoderian-context-overflow-hidden {
   position: absolute;
   visibility: hidden;
   pointer-events: none;
 }
 
 /* Expanded state (pill clicked): wrap so every chip stays reachable. */
-.qoderian-context-row.qoderian-context-row--expanded {
+.qoderian-context-row.qoderian-context-row--expanded,
+.qoderian-selection-row.qoderian-context-row--expanded {
   flex-wrap: wrap;
 }
 

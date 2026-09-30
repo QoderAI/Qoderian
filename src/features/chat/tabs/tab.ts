@@ -19,6 +19,7 @@ import { openReferenceChip } from '../../../shared/obsidian/compat';
 import { BrowserSelectionController } from '../controllers/browser-selection-controller';
 import { CanvasSelectionController } from '../controllers/canvas-selection-controller';
 import { ContextRowOverflowController } from '../controllers/context-row-overflow';
+import { updateContextRowHasContent } from '../controllers/context-row-visibility';
 import { ConversationController } from '../controllers/conversation-controller';
 import { InputController } from '../controllers/input-controller';
 import { NavigationController } from '../controllers/navigation-controller';
@@ -305,6 +306,7 @@ function initializeContextManagers(tab: TabData, plugin: QoderianPlugin): void {
         tab.controllers.selectionController?.updateContextRowVisibility();
         tab.controllers.browserSelectionController?.updateContextRowVisibility();
         tab.controllers.canvasSelectionController?.updateContextRowVisibility();
+        updateContextRowHasContent(dom.contextRowEl);
         autoResizeTextarea(dom.inputEl);
         tab.renderer?.scrollToBottomIfNeeded();
         updateComposerSendAvailability(tab);
@@ -590,27 +592,27 @@ export function initializeTabUI(
   // Initialize context managers (file/image)
   initializeContextManagers(tab, plugin);
 
-  // Selection chips - add to contextRowEl (pill style: icon + label + remove)
+  // Selection chips - add to selectionRowEl below the textarea (pill style: icon + label + remove)
   dom.selectionIndicatorEl = createSelectionChip(
-    dom.contextRowEl,
+    dom.selectionRowEl,
     'qoderian-selection-indicator',
     'text-select'
   );
 
   dom.browserIndicatorEl = createSelectionChip(
-    dom.contextRowEl,
+    dom.selectionRowEl,
     'qoderian-browser-selection-indicator',
     'globe'
   );
 
   dom.canvasIndicatorEl = createSelectionChip(
-    dom.contextRowEl,
+    dom.selectionRowEl,
     'qoderian-canvas-indicator',
     'network'
   );
 
   // Collapse chips into "+N more" when the sidebar is too narrow.
-  tab.controllers.contextRowOverflow = new ContextRowOverflowController(dom.contextRowEl);
+  tab.controllers.contextRowOverflow = new ContextRowOverflowController(dom.selectionRowEl);
 
   const catalogInfo = options.getQoderCatalogConfig?.() ?? null;
   initializeSlashCommands(
@@ -836,7 +838,7 @@ export function initializeTabControllers(
     plugin.app,
     dom.selectionIndicatorEl!,
     dom.inputEl,
-    dom.contextRowEl,
+    dom.selectionRowEl,
     () => autoResizeTextarea(dom.inputEl),
     [dom.contentEl, dom.inputComposerEl, ...getSharedSelectionFocusScopeEls(component)],
   );
@@ -845,7 +847,7 @@ export function initializeTabControllers(
     plugin.app,
     dom.browserIndicatorEl!,
     dom.inputEl,
-    dom.contextRowEl,
+    dom.selectionRowEl,
     () => autoResizeTextarea(dom.inputEl)
   );
 
@@ -853,7 +855,7 @@ export function initializeTabControllers(
     plugin.app,
     dom.canvasIndicatorEl!,
     dom.inputEl,
-    dom.contextRowEl,
+    dom.selectionRowEl,
     () => autoResizeTextarea(dom.inputEl)
   );
 

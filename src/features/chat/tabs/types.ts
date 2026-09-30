@@ -158,8 +158,11 @@ export interface TabDOMElements {
   /** Nav row for tab badges and header icons (above input wrapper). */
   navRowEl: HTMLElement;
 
-  /** Context row for file chips and selection indicator (inside input wrapper). */
+  /** Context row for the image preview (inside input wrapper, above textarea). */
   contextRowEl: HTMLElement;
+
+  /** Row for selection chips (inside input wrapper, below textarea). */
+  selectionRowEl: HTMLElement;
 
   selectionIndicatorEl: HTMLElement | null;
   browserIndicatorEl: HTMLElement | null;

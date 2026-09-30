@@ -21,6 +21,7 @@ export function buildTabDOM(contentEl: HTMLElement): TabDOMElements {
       dir: 'auto',
     },
   });
+  const selectionRowEl = inputWrapper.createDiv({ cls: 'qoderian-selection-row' });
 
   return {
     contentEl,
@@ -35,6 +36,7 @@ export function buildTabDOM(contentEl: HTMLElement): TabDOMElements {
     inputEl,
     navRowEl,
     contextRowEl,
+    selectionRowEl,
     selectionIndicatorEl: null,
     browserIndicatorEl: null,
     canvasIndicatorEl: null,
