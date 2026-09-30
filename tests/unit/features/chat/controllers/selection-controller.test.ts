@@ -75,7 +75,6 @@ function createMockContextRow() {
   const elements: Record<string, any> = {
     '.qoderian-selection-indicator': createMockIndicator(),
     '.qoderian-canvas-indicator': createMockEl(),
-    '.qoderian-file-indicator': null,
     '.qoderian-image-preview': null,
   };
   elements['.qoderian-canvas-indicator'].addClass('qoderian-canvas-indicator');

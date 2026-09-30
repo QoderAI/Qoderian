@@ -7,15 +7,12 @@ function createContextRow(browserIndicator: HTMLElement | null): HTMLElement {
   editorIndicator.addClass('qoderian-selection-indicator qoderian-hidden');
   const canvasIndicator = createMockEl();
   canvasIndicator.addClass('qoderian-canvas-indicator qoderian-hidden');
-  const fileIndicator = createMockEl();
-  fileIndicator.addClass('qoderian-file-indicator qoderian-hidden');
   const imagePreview = createMockEl();
   imagePreview.addClass('qoderian-image-preview qoderian-hidden');
   const lookup = new Map<string, unknown>([
     ['.qoderian-selection-indicator', editorIndicator],
     ['.qoderian-browser-selection-indicator', browserIndicator],
     ['.qoderian-canvas-indicator', canvasIndicator],
-    ['.qoderian-file-indicator', fileIndicator],
     ['.qoderian-image-preview', imagePreview],
   ]);
 

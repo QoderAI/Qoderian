@@ -44,12 +44,7 @@ export class ImageContextManager {
     this.inputEl = inputEl;
     this.callbacks = callbacks;
 
-    // Create image preview in previewContainerEl, before file indicator if present
-    const fileIndicator = this.previewContainerEl.querySelector('.qoderian-file-indicator');
     this.imagePreviewEl = this.previewContainerEl.createDiv({ cls: 'qoderian-image-preview' });
-    if (fileIndicator && fileIndicator.parentElement === this.previewContainerEl) {
-      this.previewContainerEl.insertBefore(this.imagePreviewEl, fileIndicator);
-    }
 
     this.setupDragAndDrop();
     this.setupPasteHandler();
