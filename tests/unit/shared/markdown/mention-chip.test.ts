@@ -191,6 +191,18 @@ describe('replaceMentionTokensWithHtml', () => {
       expect(result).toContain('idea.md L4');
     });
 
+    it('chips an editor selection token whose path contains spaces', () => {
+      const app = createMockApp(['30 res/full stack open/README.md']);
+      const result = replaceMentionTokensWithHtml(
+        'see @30 res/full stack open/README.md#L6-15 now',
+        app,
+      );
+
+      expect(result).toContain('data-kind="selection"');
+      expect(result).toContain('data-path="30 res/full stack open/README.md"');
+      expect(result).toContain('README.md L6-15');
+    });
+
     it('leaves an editor selection token untouched when the path is unknown', () => {
       const app = createMockApp(['notes/idea.md']);
       const result = replaceMentionTokensWithHtml('see @missing/note.md#L1-2 now', app);

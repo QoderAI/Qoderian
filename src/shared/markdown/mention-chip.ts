@@ -38,7 +38,8 @@ export interface MentionCandidate {
 }
 
 /** Selection token grammars recognized in sent message text (display-only). */
-const EDITOR_SELECTION_TOKEN = /@([^\s@#]+)#L(\d+)(?:-(\d+))?/g;
+// Paths may contain spaces, so the path part runs lazily up to the #L anchor.
+const EDITOR_SELECTION_TOKEN = /@([^@\n]+?)#L(\d+)(?:-(\d+))?/g;
 const BROWSER_SELECTION_TOKEN = /@browser:(\S+)/g;
 const CANVAS_SELECTION_TOKEN = /@canvas:(\S+)/g;
 
