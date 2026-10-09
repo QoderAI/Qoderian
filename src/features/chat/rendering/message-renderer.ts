@@ -934,7 +934,9 @@ export class MessageRenderer {
         const path = chip.dataset.path;
         const kind = chip.dataset.kind as ReferenceChipKind | undefined;
         if (!path || !kind) return;
-        openReferenceChip(this.app, kind, path);
+        const title = chip.getAttribute('title');
+        const token = title?.startsWith('@') ? title.slice(1) : undefined;
+        openReferenceChip(this.app, kind, path, token);
       });
     });
   }

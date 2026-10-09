@@ -266,7 +266,7 @@ function initializeContextManagers(tab: TabData, plugin: QoderianPlugin): void {
   // textarea interceptors cover every later listener/programmatic access.
   tab.ui.composerBridge = new ComposerBridge(dom.inputEl, {
     onOpenReference: (reference) => {
-      openReferenceChip(app, reference.kind, reference.path);
+      openReferenceChip(app, reference.kind, reference.path, reference.token);
     },
   });
 
