@@ -290,6 +290,12 @@ export class InputController {
       });
     const { displayContent, turnRequest } = turnSubmission;
 
+    // The selection travelled with this turn; collapse it so the live
+    // selection<->chip sync does not put it straight back into the composer.
+    if (shouldUseInput && options?.editorContextOverride === undefined) {
+      selectionController?.releaseSelectionAfterSend();
+    }
+
     const userMsg: ChatMessage = {
       id: this.deps.generateId(),
       role: 'user',

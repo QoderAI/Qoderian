@@ -169,35 +169,33 @@ describe('SelectionController', () => {
     expect(tokenSink.unregister).toHaveBeenCalledWith(SOURCE_TOKEN);
   });
 
-  it('does not re-append a selection whose chip left the input while the highlight persists', () => {
+  it('collapses the editor selection on send so the chip does not come back', () => {
     controller.start();
     jest.advanceTimersByTime(250);
     expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
 
-    // Simulates sending: the composer clears while the editor selection stays.
-    inputEl.value = '';
-    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    controller.releaseSelectionAfterSend();
+    expect(editorView.dispatch).toHaveBeenCalledWith({ selection: { anchor: 0 } });
+
+    editor.getSelection.mockReturnValue('');
     jest.advanceTimersByTime(750);
 
     expect(inputEl.value).toBe('');
     expect(controller.hasSelection()).toBe(false);
   });
 
-  it('keeps suppressing a consumed range across deselect and identical re-select', () => {
+  it('re-appends when the same range is selected again after a send', () => {
     controller.start();
     jest.advanceTimersByTime(250);
-    inputEl.value = '';
-    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    controller.releaseSelectionAfterSend();
+    editor.getSelection.mockReturnValue('');
     jest.advanceTimersByTime(250);
     expect(inputEl.value).toBe('');
 
-    editor.getSelection.mockReturnValue('');
-    jest.advanceTimersByTime(500);
     editor.getSelection.mockReturnValue('selected text');
-    jest.advanceTimersByTime(500);
+    jest.advanceTimersByTime(250);
 
-    expect(inputEl.value).toBe('');
-    expect(controller.hasSelection()).toBe(false);
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
   });
 
   it('appends again when the selection range changes after being consumed', () => {

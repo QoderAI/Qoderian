@@ -33,8 +33,6 @@ export class SelectionController {
   private focusScopeEls: HTMLElement[];
   private storedSelection: StoredSelection | null = null;
   private storedToken: string | null = null;
-  /** Signature of a selection whose chip was sent or removed; never auto-appended again. */
-  private consumedSignature: string | null = null;
   private syncingToken = false;
   private inputHandoffGraceUntil: number | null = null;
   private pollInterval: number | null = null;
@@ -133,13 +131,6 @@ export class SelectionController {
       const notePath = view.file?.path || 'unknown';
       const lineCount = selectedText.split(/\r?\n/).length;
 
-      if (
-        !this.storedSelection
-        && this.consumedSignature === this.selectionSignature({ notePath, from, to, selectedText })
-      ) {
-        return;
-      }
-
       const s = this.storedSelection;
       const sameRange = s
         && s.editorView === editorView
@@ -188,13 +179,6 @@ export class SelectionController {
       const notePath = view.file?.path || 'unknown';
       const lineCount = selectedText.split(/\r?\n/).length;
       const domRanges = this.cloneDOMRanges(selection);
-
-      if (
-        !this.storedSelection
-        && this.consumedSignature === this.selectionSignature({ notePath, selectedText })
-      ) {
-        return;
-      }
 
       const unchanged = this.storedSelection
         && this.storedSelection.editorView === undefined
@@ -403,17 +387,6 @@ export class SelectionController {
   // Token Sync
   // ============================================
 
-  /** Identifies a selection so a sent/removed one is not re-appended while it persists. */
-  private selectionSignature(sel: {
-    notePath: string;
-    from?: number;
-    to?: number;
-    selectedText: string;
-  }): string {
-    const range = sel.from === undefined ? 'dom' : `${sel.from}-${sel.to}`;
-    return `${sel.notePath}:${range}:${sel.selectedText}`;
-  }
-
   private currentToken(): { token: string; reference: SelectionTokenReference } | null {
     const sel = this.storedSelection;
     if (!sel) return null;
@@ -441,10 +414,6 @@ export class SelectionController {
     const nextToken = next?.token ?? null;
     if (nextToken === this.storedToken) return;
 
-    if (nextToken && this.storedSelection) {
-      // A changed selection is a fresh intent; forget any consumed marker.
-      this.consumedSignature = null;
-    }
     this.syncingToken = true;
     try {
       const previous = this.storedToken;
@@ -469,11 +438,6 @@ export class SelectionController {
     if (this.storedToken) {
       if (!value.includes(this.storedToken)) {
         const stale = this.storedToken;
-        // The chip left the text (sent or deleted): remember the selection so
-        // the still-active editor highlight does not immediately re-append it.
-        if (this.storedSelection) {
-          this.consumedSignature = this.selectionSignature(this.storedSelection);
-        }
         this.storedToken = null;
         this.storedSelection = null;
         this.tokenSink.unregister(stale);
@@ -515,11 +479,25 @@ export class SelectionController {
   // Clear
   // ============================================
 
+  /**
+   * Collapses the editor selection after a turn is sent. The chip travels with
+   * the message, and without this the still-active highlight would immediately
+   * re-append it to the now-empty composer.
+   */
+  releaseSelectionAfterSend(): void {
+    const sel = this.storedSelection;
+    if (sel?.editorView) {
+      sel.editorView.dispatch({ selection: { anchor: sel.from ?? 0 } });
+    } else if (sel) {
+      this.getFocusScopeOwnerDocument()?.getSelection()?.removeAllRanges();
+    }
+    this.clear();
+  }
+
   clear(): void {
     this.inputHandoffGraceUntil = null;
     this.clearHighlight();
     this.storedSelection = null;
-    this.consumedSignature = null;
     this.syncTokenFromStored();
   }
 }
