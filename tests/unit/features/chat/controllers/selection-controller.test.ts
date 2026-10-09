@@ -192,11 +192,29 @@ describe('SelectionController', () => {
     expect(inputEl.value).toBe('');
 
     editor.getSelection.mockReturnValue('');
-    jest.advanceTimersByTime(250);
+    jest.advanceTimersByTime(500);
     editor.getSelection.mockReturnValue('selected text');
     jest.advanceTimersByTime(250);
 
     expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
+  });
+
+  it('ignores a single empty poll blip so reopening the note does not re-append', () => {
+    controller.start();
+    jest.advanceTimersByTime(250);
+    inputEl.value = '';
+    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    jest.advanceTimersByTime(250);
+    expect(inputEl.value).toBe('');
+
+    // View-reload blip: one empty poll, then the persisted selection returns.
+    editor.getSelection.mockReturnValue('');
+    jest.advanceTimersByTime(250);
+    editor.getSelection.mockReturnValue('selected text');
+    jest.advanceTimersByTime(500);
+
+    expect(inputEl.value).toBe('');
+    expect(controller.hasSelection()).toBe(false);
   });
 
   it('removes an orphan editor token when nothing is stored', () => {

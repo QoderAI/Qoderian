@@ -35,6 +35,8 @@ export class SelectionController {
   private storedToken: string | null = null;
   /** Signature of a selection whose chip was sent or removed; not re-appended while it persists. */
   private consumedSignature: string | null = null;
+  /** Consecutive empty-selection polls; a real deselect needs more than a view-reload blip. */
+  private emptySelectionPolls = 0;
   private syncingToken = false;
   private inputHandoffGraceUntil: number | null = null;
   private pollInterval: number | null = null;
@@ -123,6 +125,7 @@ export class SelectionController {
     const selectedText = editor.getSelection();
 
     if (selectedText.trim()) {
+      this.emptySelectionPolls = 0;
       this.inputHandoffGraceUntil = null;
       const fromPos = editor.getCursor('from');
       const toPos = editor.getCursor('to');
@@ -159,8 +162,7 @@ export class SelectionController {
         this.syncTokenFromStored();
       }
     } else {
-      // The highlight is gone: a later identical selection is a fresh intent.
-      this.consumedSignature = null;
+      this.noteEmptySelectionPoll();
       this.handleDeselection();
     }
   }
@@ -176,13 +178,14 @@ export class SelectionController {
     const selectedText = selection?.toString() ?? '';
 
     if (selectedText.trim()) {
+      this.emptySelectionPolls = 0;
       const anchorNode = selection?.anchorNode;
       const focusNode = selection?.focusNode;
       if (
         (!anchorNode || !containerEl.contains(anchorNode))
         && (!focusNode || !containerEl.contains(focusNode))
       ) {
-        this.consumedSignature = null;
+        this.noteEmptySelectionPoll();
         this.handleDeselection();
         return;
       }
@@ -212,7 +215,7 @@ export class SelectionController {
         this.syncTokenFromStored();
       }
     } else {
-      this.consumedSignature = null;
+      this.noteEmptySelectionPoll();
       this.handleDeselection();
     }
   }
@@ -407,6 +410,17 @@ export class SelectionController {
   // ============================================
   // Token Sync
   // ============================================
+
+  /**
+   * A single empty poll can be a view-reload blip (e.g. reopening the note from
+   * a sent-message chip); only a sustained collapse marks a fresh intent.
+   */
+  private noteEmptySelectionPoll(): void {
+    this.emptySelectionPolls += 1;
+    if (this.emptySelectionPolls >= 2) {
+      this.consumedSignature = null;
+    }
+  }
 
   /** Identifies a selection so a sent/removed one is not re-appended while it persists. */
   private selectionSignature(sel: {
