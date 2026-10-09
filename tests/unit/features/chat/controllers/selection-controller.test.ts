@@ -169,6 +169,36 @@ describe('SelectionController', () => {
     expect(tokenSink.unregister).toHaveBeenCalledWith(SOURCE_TOKEN);
   });
 
+  it('does not re-append a selection whose chip left the input while the highlight persists', () => {
+    controller.start();
+    jest.advanceTimersByTime(250);
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
+
+    // Simulates sending: the composer clears while the editor selection stays.
+    inputEl.value = '';
+    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    jest.advanceTimersByTime(750);
+
+    expect(inputEl.value).toBe('');
+    expect(controller.hasSelection()).toBe(false);
+  });
+
+  it('re-appends the same range once it is deselected and selected again', () => {
+    controller.start();
+    jest.advanceTimersByTime(250);
+    inputEl.value = '';
+    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    jest.advanceTimersByTime(250);
+    expect(inputEl.value).toBe('');
+
+    editor.getSelection.mockReturnValue('');
+    jest.advanceTimersByTime(250);
+    editor.getSelection.mockReturnValue('selected text');
+    jest.advanceTimersByTime(250);
+
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
+  });
+
   it('removes an orphan editor token when nothing is stored', () => {
     inputEl.value = `see ${buildEditorSelectionToken('notes/other.md', 3, 5)} now`;
     controller.start();
