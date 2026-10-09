@@ -183,7 +183,7 @@ describe('SelectionController', () => {
     expect(controller.hasSelection()).toBe(false);
   });
 
-  it('re-appends the same range once it is deselected and selected again', () => {
+  it('keeps suppressing a consumed range across deselect and identical re-select', () => {
     controller.start();
     jest.advanceTimersByTime(250);
     inputEl.value = '';
@@ -193,28 +193,27 @@ describe('SelectionController', () => {
 
     editor.getSelection.mockReturnValue('');
     jest.advanceTimersByTime(500);
-    editor.getSelection.mockReturnValue('selected text');
-    jest.advanceTimersByTime(250);
-
-    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
-  });
-
-  it('ignores a single empty poll blip so reopening the note does not re-append', () => {
-    controller.start();
-    jest.advanceTimersByTime(250);
-    inputEl.value = '';
-    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-    jest.advanceTimersByTime(250);
-    expect(inputEl.value).toBe('');
-
-    // View-reload blip: one empty poll, then the persisted selection returns.
-    editor.getSelection.mockReturnValue('');
-    jest.advanceTimersByTime(250);
     editor.getSelection.mockReturnValue('selected text');
     jest.advanceTimersByTime(500);
 
     expect(inputEl.value).toBe('');
     expect(controller.hasSelection()).toBe(false);
+  });
+
+  it('appends again when the selection range changes after being consumed', () => {
+    controller.start();
+    jest.advanceTimersByTime(250);
+    inputEl.value = '';
+    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    jest.advanceTimersByTime(250);
+
+    editor.getSelection.mockReturnValue('selected text plus');
+    editor.getCursor.mockImplementation((which: 'from' | 'to') => (
+      which === 'from' ? { line: 2, ch: 0 } : { line: 2, ch: 8 }
+    ));
+    jest.advanceTimersByTime(250);
+
+    expect(inputEl.value).toContain('#L3');
   });
 
   it('removes an orphan editor token when nothing is stored', () => {
