@@ -438,6 +438,7 @@ export class SelectionController {
     if (this.storedToken) {
       if (!value.includes(this.storedToken)) {
         const stale = this.storedToken;
+        this.clearHighlight();
         this.storedToken = null;
         this.storedSelection = null;
         this.tokenSink.unregister(stale);

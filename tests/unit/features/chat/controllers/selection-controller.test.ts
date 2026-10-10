@@ -157,7 +157,7 @@ describe('SelectionController', () => {
     expect(showSelectionHighlight).toHaveBeenCalledWith(editorView, 0, 4);
   });
 
-  it('drops the stored selection when the token is removed from the input', () => {
+  it('drops the stored selection and clears the highlight when the token is removed from the input', () => {
     controller.start();
     jest.advanceTimersByTime(250);
     expect(controller.hasSelection()).toBe(true);
@@ -167,6 +167,7 @@ describe('SelectionController', () => {
 
     expect(controller.hasSelection()).toBe(false);
     expect(tokenSink.unregister).toHaveBeenCalledWith(SOURCE_TOKEN);
+    expect(hideSelectionHighlight).toHaveBeenCalledWith(editorView);
   });
 
   it('collapses the editor selection on send so the chip does not come back', () => {
@@ -603,6 +604,29 @@ describe('SelectionController', () => {
       );
       jest.advanceTimersByTime(250);
 
+      expect(mockHighlights.delete).toHaveBeenCalledWith('qoderian-selection');
+    });
+
+    it('clears CSS highlight when the selection chip token is removed in reading mode', () => {
+      const anchorNode = {};
+      (global as any).document = {
+        activeElement: null,
+        getSelection: jest.fn().mockReturnValue(
+          createMockDOMSelection('reading selection', anchorNode),
+        ),
+      };
+      const mockHighlights = { set: jest.fn(), delete: jest.fn() };
+      (global as any).CSS = { highlights: mockHighlights };
+
+      controller.start();
+      jest.advanceTimersByTime(250);
+      expect(controller.hasSelection()).toBe(true);
+
+      inputEl.value = '';
+      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+      expect(controller.hasSelection()).toBe(false);
+      expect(tokenSink.unregister).toHaveBeenCalledWith('@notes/reading.md');
       expect(mockHighlights.delete).toHaveBeenCalledWith('qoderian-selection');
     });
 
