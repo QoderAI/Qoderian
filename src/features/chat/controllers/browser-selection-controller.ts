@@ -1,10 +1,17 @@
 import type { App, ItemView } from 'obsidian';
 
 import type { BrowserSelectionContext } from '../../../core/context/types';
-import { updateContextRowHasContent } from './context-row-visibility';
-import { bindSelectionChipRemove, setSelectionChipLabel } from './selection-chip';
+import {
+  appendSelectionToken,
+  buildBrowserSelectionToken,
+  removeSelectionToken,
+  type SelectionTokenReference,
+  type SelectionTokenSink,
+  truncateLabel,
+} from './selection-token';
 
 const BROWSER_SELECTION_POLL_INTERVAL = 250;
+const ORPHAN_TOKEN_PATTERN = /@browser:\S+/;
 
 type BrowserLikeWebview = HTMLElement & {
   executeJavaScript?: (code: string, userGesture?: boolean) => Promise<unknown>;
@@ -12,31 +19,24 @@ type BrowserLikeWebview = HTMLElement & {
 
 export class BrowserSelectionController {
   private app: App;
-  private indicatorEl: HTMLElement;
-  private inputEl: HTMLElement;
-  private contextRowEl: HTMLElement;
-  private onVisibilityChange: (() => void) | null;
+  private inputEl: HTMLTextAreaElement;
+  private tokenSink: SelectionTokenSink;
   private storedSelection: BrowserSelectionContext | null = null;
+  private storedToken: string | null = null;
+  private syncingToken = false;
   private pollInterval: number | null = null;
   private pollInFlight = false;
+  private readonly handleInput = (): void => this.reconcileToken();
 
-  constructor(
-    app: App,
-    indicatorEl: HTMLElement,
-    inputEl: HTMLElement,
-    contextRowEl: HTMLElement,
-    onVisibilityChange?: () => void
-  ) {
+  constructor(app: App, inputEl: HTMLTextAreaElement, tokenSink: SelectionTokenSink) {
     this.app = app;
-    this.indicatorEl = indicatorEl;
     this.inputEl = inputEl;
-    this.contextRowEl = contextRowEl;
-    this.onVisibilityChange = onVisibilityChange ?? null;
-    bindSelectionChipRemove(this.indicatorEl, () => this.clear());
+    this.tokenSink = tokenSink;
   }
 
   start(): void {
     if (this.pollInterval) return;
+    this.inputEl.addEventListener('input', this.handleInput);
     this.pollInterval = window.setInterval(() => {
       void this.poll();
     }, BROWSER_SELECTION_POLL_INTERVAL);
@@ -47,6 +47,7 @@ export class BrowserSelectionController {
       window.clearInterval(this.pollInterval);
       this.pollInterval = null;
     }
+    this.inputEl.removeEventListener('input', this.handleInput);
     this.clear();
   }
 
@@ -65,7 +66,7 @@ export class BrowserSelectionController {
         const nextContext = this.buildContext(browserView.view, browserView.viewType, browserView.containerEl, selectedText);
         if (!this.isSameSelection(nextContext, this.storedSelection)) {
           this.storedSelection = nextContext;
-          this.updateIndicator();
+          this.applyToken(this.buildToken(nextContext), nextContext);
         }
       } else {
         this.clearWhenInputIsNotFocused();
@@ -236,50 +237,75 @@ export class BrowserSelectionController {
       && left.url === right.url;
   }
 
+  private displayTitle(context: BrowserSelectionContext): string {
+    return context.title ?? context.url ?? context.source;
+  }
+
+  private buildToken(context: BrowserSelectionContext): string {
+    return buildBrowserSelectionToken(this.displayTitle(context));
+  }
+
+  private buildReference(token: string, context: BrowserSelectionContext): SelectionTokenReference {
+    return {
+      token,
+      path: context.url ?? context.source,
+      kind: 'browser-selection',
+      label: truncateLabel(this.displayTitle(context)),
+      icon: 'globe',
+    };
+  }
+
+  private applyToken(nextToken: string | null, context?: BrowserSelectionContext): void {
+    if (nextToken === this.storedToken) return;
+
+    this.syncingToken = true;
+    try {
+      const previous = this.storedToken;
+      this.storedToken = nextToken;
+      if (previous) {
+        removeSelectionToken(this.inputEl, previous);
+        this.tokenSink.unregister(previous);
+      }
+      if (nextToken && context) {
+        appendSelectionToken(this.inputEl, nextToken);
+        this.tokenSink.register(this.buildReference(nextToken, context));
+      }
+    } finally {
+      this.syncingToken = false;
+    }
+  }
+
+  private reconcileToken(): void {
+    if (this.syncingToken) return;
+
+    const value = this.inputEl.value;
+    if (this.storedToken) {
+      if (!value.includes(this.storedToken)) {
+        const stale = this.storedToken;
+        this.storedToken = null;
+        this.storedSelection = null;
+        this.tokenSink.unregister(stale);
+      }
+      return;
+    }
+
+    const orphan = value.match(ORPHAN_TOKEN_PATTERN)?.[0];
+    if (orphan) {
+      this.syncingToken = true;
+      try {
+        removeSelectionToken(this.inputEl, orphan);
+      } finally {
+        this.syncingToken = false;
+      }
+    }
+  }
+
   private clearWhenInputIsNotFocused(): void {
     if (this.inputEl.ownerDocument.activeElement === this.inputEl) return;
     if (this.storedSelection) {
       this.storedSelection = null;
-      this.updateIndicator();
+      this.applyToken(null);
     }
-  }
-
-  private updateIndicator(): void {
-    if (!this.indicatorEl) return;
-
-    if (this.storedSelection) {
-      const lineCount = this.storedSelection.selectedText.split(/\r?\n/).length;
-      const lineLabel = lineCount === 1 ? 'line' : 'lines';
-      setSelectionChipLabel(this.indicatorEl, `${lineCount} ${lineLabel} selected`);
-      this.indicatorEl.setAttribute('title', this.buildIndicatorTitle());
-      this.indicatorEl.removeClass('qoderian-hidden');
-    } else {
-      this.indicatorEl.addClass('qoderian-hidden');
-      setSelectionChipLabel(this.indicatorEl, '');
-      this.indicatorEl.removeAttribute('title');
-    }
-    this.updateContextRowVisibility();
-  }
-
-  private buildIndicatorTitle(): string {
-    if (!this.storedSelection) return '';
-
-    const charCount = this.storedSelection.selectedText.length;
-    const charLabel = charCount === 1 ? 'char' : 'chars';
-    const lines = [`${charCount} ${charLabel} selected`, `source=${this.storedSelection.source}`];
-    if (this.storedSelection.title) {
-      lines.push(`title=${this.storedSelection.title}`);
-    }
-    if (this.storedSelection.url) {
-      lines.push(this.storedSelection.url);
-    }
-    return lines.join('\n');
-  }
-
-  updateContextRowVisibility(): void {
-    if (!this.contextRowEl) return;
-    updateContextRowHasContent(this.contextRowEl);
-    this.onVisibilityChange?.();
   }
 
   getContext(): BrowserSelectionContext | null {
@@ -292,6 +318,6 @@ export class BrowserSelectionController {
 
   clear(): void {
     this.storedSelection = null;
-    this.updateIndicator();
+    this.applyToken(null);
   }
 }

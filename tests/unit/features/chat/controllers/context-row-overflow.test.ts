@@ -98,7 +98,7 @@ function installDomMocks(): void {
 
 function createChip(width: number): HTMLElement {
   const chip = document.createElement('div');
-  chip.className = 'qoderian-selection-indicator qoderian-visible-flex';
+  chip.className = 'qoderian-image-preview qoderian-visible-flex';
   chip.dataset.mockWidth = String(width);
   return chip;
 }

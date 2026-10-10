@@ -59,6 +59,19 @@ function runRendererAction(action: () => Promise<void>): void {
   });
 }
 
+/** Maps a rendered chip kind to its icon; bubbles carry no icon override. */
+const REFERENCE_CHIP_ICONS: Record<ReferenceChipKind, string> = {
+  file: 'file-text',
+  folder: 'folder',
+  selection: 'text-select',
+  'browser-selection': 'globe',
+  'canvas-selection': 'network',
+};
+
+function referenceChipIcon(kind: string | undefined): string {
+  return REFERENCE_CHIP_ICONS[kind as ReferenceChipKind] ?? 'file-text';
+}
+
 export class MessageRenderer {
   private app: App;
   private plugin: QoderianPlugin;
@@ -915,13 +928,15 @@ export class MessageRenderer {
     el.querySelectorAll<HTMLElement>('.qoderian-msg-reference').forEach((chip) => {
       const iconEl = chip.querySelector<HTMLElement>('.qoderian-composer-reference-icon');
       if (iconEl) {
-        setIcon(iconEl, chip.dataset.kind === 'folder' ? 'folder' : 'file-text');
+        setIcon(iconEl, referenceChipIcon(chip.dataset.kind));
       }
       chip.addEventListener('click', () => {
         const path = chip.dataset.path;
         const kind = chip.dataset.kind as ReferenceChipKind | undefined;
         if (!path || !kind) return;
-        openReferenceChip(this.app, kind, path);
+        const title = chip.getAttribute('title');
+        const token = title?.startsWith('@') ? title.slice(1) : undefined;
+        openReferenceChip(this.app, kind, path, token);
       });
     });
   }

@@ -70,13 +70,10 @@ export interface MockElement {
 }
 
 const CLASS_DISPLAY: Record<string, string> = {
-  'qoderian-browser-selection-indicator': 'block',
-  'qoderian-canvas-indicator': 'block',
   'qoderian-context-meter': 'flex',
   'qoderian-image-preview': 'none',
   'qoderian-mcp-selector': 'flex',
   'qoderian-permission-toggle': 'flex',
-  'qoderian-selection-indicator': 'block',
   'qoderian-status-panel-bash': 'block',
   'qoderian-status-panel-bash-content': 'block',
   'qoderian-status-panel-bash-entry-content': 'block',

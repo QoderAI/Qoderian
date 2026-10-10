@@ -17,6 +17,10 @@ export interface ComposerReference {
   /** Path used for the chip label and open actions. */
   path: string;
   kind: ComposerReferenceKind;
+  /** Overrides the default label derived from `path`. */
+  label?: string;
+  /** Overrides the default icon derived from `kind`. */
+  icon?: string;
 }
 
 export interface ComposerReferenceRange {

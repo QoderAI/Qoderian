@@ -1,6 +1,6 @@
 import type { App, TAbstractFile, Workspace, WorkspaceLeaf } from 'obsidian';
 
-import { openReferenceChip, revealWorkspaceLeaf } from '@/shared/obsidian/compat';
+import { openReferenceChip, parseSelectionLineRange, revealWorkspaceLeaf } from '@/shared/obsidian/compat';
 
 const mockShowItemInFolder = jest.fn();
 
@@ -116,5 +116,48 @@ describe('obsidianCompat', () => {
       expect(openFile).not.toHaveBeenCalled();
       expect(revealInFolder).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('selection chip click', () => {
+  function createMockAppWithEditor(path: string) {
+    const setSelection = jest.fn();
+    const scrollIntoView = jest.fn();
+    const editor = {
+      lineCount: () => 20,
+      getLine: () => '0123456789',
+      setSelection,
+      scrollIntoView,
+    };
+    const openFile = jest.fn().mockResolvedValue(undefined);
+    const app = {
+      vault: {
+        getAbstractFileByPath: (p: string) => (
+          p === path ? { path, basename: 'x.md' } : null
+        ),
+      },
+      workspace: {
+        getLeaf: () => ({ openFile, view: { editor } }),
+      },
+    } as unknown as App;
+    return { app, setSelection, scrollIntoView, openFile };
+  }
+
+  it('parses line ranges from selection tokens', () => {
+    expect(parseSelectionLineRange('@notes/a.md#L6-8')).toEqual({ from: 6, to: 8 });
+    expect(parseSelectionLineRange('@notes/a.md#L6')).toEqual({ from: 6, to: 6 });
+    expect(parseSelectionLineRange('@notes/a.md')).toBeNull();
+    expect(parseSelectionLineRange('@browser:x')).toBeNull();
+  });
+
+  it('re-selects the referenced lines when a selection chip is clicked', async () => {
+    const { app, setSelection, scrollIntoView } = createMockAppWithEditor('notes/a.md');
+
+    openReferenceChip(app, 'selection', 'notes/a.md', '@notes/a.md#L6-8');
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(setSelection).toHaveBeenCalledWith({ line: 5, ch: 0 }, { line: 7, ch: 10 });
+    expect(scrollIntoView).toHaveBeenCalled();
   });
 });

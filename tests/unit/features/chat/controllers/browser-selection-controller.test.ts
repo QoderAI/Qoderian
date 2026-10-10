@@ -1,39 +1,7 @@
 /** @jest-environment jsdom */
 
-import { createMockEl } from '@test/helpers/mock-element';
-
 import { BrowserSelectionController } from '@/features/chat/controllers/browser-selection-controller';
-
-function createMockIndicator() {
-  const indicatorEl = createMockEl();
-  indicatorEl.addClass('qoderian-browser-selection-indicator');
-  indicatorEl.addClass('qoderian-hidden');
-  return indicatorEl;
-}
-
-function createMockContextRow(browserIndicator: HTMLElement) {
-  const editorIndicator = createMockEl();
-  editorIndicator.addClass('qoderian-selection-indicator');
-  editorIndicator.addClass('qoderian-hidden');
-  const canvasIndicator = createMockEl();
-  canvasIndicator.addClass('qoderian-canvas-indicator');
-  canvasIndicator.addClass('qoderian-hidden');
-  const imagePreview = createMockEl();
-  imagePreview.addClass('qoderian-image-preview');
-  imagePreview.addClass('qoderian-hidden');
-  const elements: Record<string, any> = {
-    '.qoderian-selection-indicator': editorIndicator,
-    '.qoderian-browser-selection-indicator': browserIndicator,
-    '.qoderian-canvas-indicator': canvasIndicator,
-    '.qoderian-image-preview': imagePreview,
-  };
-  const contextRow = createMockEl();
-  const toggle = contextRow.classList.toggle;
-  contextRow.classList.toggle = jest.fn((cls: string, force?: boolean) => toggle(cls, force));
-
-  contextRow.querySelector = jest.fn((selector: string) => elements[selector] ?? null);
-  return contextRow as any;
-}
+import { buildBrowserSelectionToken } from '@/features/chat/controllers/selection-token';
 
 async function flushMicrotasks(): Promise<void> {
   await Promise.resolve();
@@ -43,9 +11,8 @@ async function flushMicrotasks(): Promise<void> {
 describe('BrowserSelectionController', () => {
   let controller: BrowserSelectionController;
   let app: any;
-  let indicatorEl: any;
   let inputEl: HTMLTextAreaElement;
-  let contextRowEl: any;
+  let tokenSink: { register: jest.Mock; unregister: jest.Mock };
   let containerEl: HTMLElement;
   let selectionText = 'selected web snippet';
   let getSelectionSpy: jest.SpyInstance;
@@ -54,10 +21,9 @@ describe('BrowserSelectionController', () => {
     jest.useFakeTimers();
     selectionText = 'selected web snippet';
 
-    indicatorEl = createMockIndicator();
     inputEl = document.createElement('textarea');
     document.body.appendChild(inputEl);
-    contextRowEl = createMockContextRow(indicatorEl);
+    tokenSink = { register: jest.fn(), unregister: jest.fn() };
     containerEl = document.createElement('div');
     const selectionAnchor = document.createElement('span');
     containerEl.appendChild(selectionAnchor);
@@ -82,7 +48,7 @@ describe('BrowserSelectionController', () => {
       },
     };
 
-    controller = new BrowserSelectionController(app, indicatorEl, inputEl, contextRowEl);
+    controller = new BrowserSelectionController(app, inputEl, tokenSink);
   });
 
   afterEach(() => {
@@ -92,33 +58,26 @@ describe('BrowserSelectionController', () => {
     jest.useRealTimers();
   });
 
-  it('captures browser selection and updates indicator', async () => {
+  it('captures browser selection, appends the token, and registers a chip', async () => {
     controller.start();
     jest.advanceTimersByTime(250);
     await flushMicrotasks();
 
+    const token = buildBrowserSelectionToken('Surfing');
     expect(controller.getContext()).toEqual({
       source: 'browser:https://example.com',
       selectedText: 'selected web snippet',
       title: 'Surfing',
       url: 'https://example.com',
     });
-    expect(indicatorEl.style.display).toBe('block');
-    expect(indicatorEl.textContent).toBe('1 line selected');
-    expect(indicatorEl.textContent).not.toContain('source=');
-    expect(indicatorEl.getAttribute('title')).toContain('chars selected');
-    expect(indicatorEl.getAttribute('title')).toContain('source=browser:https://example.com');
-    expect(indicatorEl.getAttribute('title')).toContain('title=Surfing');
-    expect(indicatorEl.getAttribute('title')).toContain('https://example.com');
-  });
-
-  it('shows line-based indicator text for multi-line browser selection', async () => {
-    selectionText = 'line 1\nline 2';
-    controller.start();
-    jest.advanceTimersByTime(250);
-    await flushMicrotasks();
-
-    expect(indicatorEl.textContent).toBe('2 lines selected');
+    expect(inputEl.value).toBe(`${token} `);
+    expect(tokenSink.register).toHaveBeenCalledWith({
+      token,
+      path: 'https://example.com',
+      kind: 'browser-selection',
+      label: 'Surfing',
+      icon: 'globe',
+    });
   });
 
   it('clears selection when text is deselected and input is not focused', async () => {
@@ -132,7 +91,8 @@ describe('BrowserSelectionController', () => {
     await flushMicrotasks();
 
     expect(controller.hasSelection()).toBe(false);
-    expect(indicatorEl.style.display).toBe('none');
+    expect(inputEl.value).toBe('');
+    expect(tokenSink.unregister).toHaveBeenCalledWith(buildBrowserSelectionToken('Surfing'));
   });
 
   it('keeps selection while input is focused', async () => {
@@ -147,6 +107,7 @@ describe('BrowserSelectionController', () => {
     await flushMicrotasks();
 
     expect(controller.hasSelection()).toBe(true);
+    expect(inputEl.value).toBe(`${buildBrowserSelectionToken('Surfing')} `);
   });
 
   it('clears selection when clear is called', async () => {
@@ -158,7 +119,29 @@ describe('BrowserSelectionController', () => {
     controller.clear();
 
     expect(controller.hasSelection()).toBe(false);
-    expect(indicatorEl.style.display).toBe('none');
+    expect(inputEl.value).toBe('');
+  });
+
+  it('drops the stored selection when the token is deleted from the input', async () => {
+    controller.start();
+    jest.advanceTimersByTime(250);
+    await flushMicrotasks();
+    expect(controller.hasSelection()).toBe(true);
+
+    inputEl.value = '';
+    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+    expect(controller.hasSelection()).toBe(false);
+    expect(tokenSink.unregister).toHaveBeenCalledWith(buildBrowserSelectionToken('Surfing'));
+  });
+
+  it('removes an orphan browser token when nothing is stored', () => {
+    inputEl.value = `look ${buildBrowserSelectionToken('Stale')} here`;
+    controller.start();
+
+    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+    expect(inputEl.value).toBe('look here');
   });
 
   it('handles polling errors without unhandled rejection', async () => {

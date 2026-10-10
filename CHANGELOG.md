@@ -13,6 +13,11 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ### Changed
 
+- Editor, browser, and canvas selections now appear as inline chips inside the
+  composer text (matching `@file` mentions) instead of pills on the row above
+  the input. The selection is still sent as its `<editor_selection>`,
+  `<browser_selection>`, or `<canvas_selection>` snapshot, and the chip's token
+  now travels in the message text too.
 - The context usage meter beside the composer is now a complete ring that fills
   clockwise from the top, replacing the 240° arc. The percentage, the hover
   tooltip, and the pale-red warning state above 80% are unchanged.
@@ -24,6 +29,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ### Removed
 
+- The selection pills above the composer are gone; that row now only shows
+  image previews.
 - The current-note chip above the composer is gone. Use the "Excluded tags"
   setting to keep a note out of context.
 

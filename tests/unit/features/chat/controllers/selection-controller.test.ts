@@ -1,13 +1,15 @@
 import { createMockEl } from '@test/helpers/mock-element';
 
-import { createSelectionChip } from '@/features/chat/controllers/selection-chip';
 import { SelectionController } from '@/features/chat/controllers/selection-controller';
+import { buildEditorSelectionToken } from '@/features/chat/controllers/selection-token';
 import { hideSelectionHighlight, showSelectionHighlight } from '@/shared/components/selection-highlight';
 
 jest.mock('@/shared/components/selection-highlight', () => ({
   showSelectionHighlight: jest.fn(),
   hideSelectionHighlight: jest.fn(),
 }));
+
+const SOURCE_TOKEN = buildEditorSelectionToken('notes/test.md', 1, 1);
 
 function createMockDOMRange(overrides: Partial<{
   startContainer: { isConnected: boolean };
@@ -40,17 +42,11 @@ function createMockDOMSelection(text: string, anchorNode: any, focusNode?: any, 
   };
 }
 
-function createMockIndicator() {
-  const indicator = createMockEl();
-  indicator.addClass('qoderian-selection-indicator');
-  indicator.addClass('qoderian-hidden');
-  return indicator;
-}
-
 function createMockEventTarget() {
   const listeners = new Map<string, Set<(...args: unknown[]) => void>>();
   const containedNodes = new Set<unknown>();
   const el: any = {
+    value: '',
     ownerDocument: createMockEl().ownerDocument,
     addEventListener: jest.fn((event: string, listener: (...args: unknown[]) => void) => {
       const handlers = listeners.get(event) ?? new Set<(...args: unknown[]) => void>();
@@ -60,6 +56,11 @@ function createMockEventTarget() {
     removeEventListener: jest.fn((event: string, listener: (...args: unknown[]) => void) => {
       listeners.get(event)?.delete(listener);
     }),
+    dispatchEvent: (event: any) => {
+      const type = typeof event === 'string' ? event : event?.type;
+      listeners.get(type)?.forEach(handler => handler(event));
+      return true;
+    },
     trigger: (event: string, eventData: unknown = {}) => {
       listeners.get(event)?.forEach(handler => handler(eventData));
     },
@@ -71,47 +72,28 @@ function createMockEventTarget() {
   return el;
 }
 
-function createMockContextRow() {
-  const elements: Record<string, any> = {
-    '.qoderian-selection-indicator': createMockIndicator(),
-    '.qoderian-canvas-indicator': createMockEl(),
-    '.qoderian-image-preview': null,
-  };
-  elements['.qoderian-canvas-indicator'].addClass('qoderian-canvas-indicator');
-  elements['.qoderian-canvas-indicator'].addClass('qoderian-hidden');
-  const contextRow = createMockEl();
-  const toggle = contextRow.classList.toggle;
-  contextRow.classList.toggle = jest.fn((cls: string, force?: boolean) => toggle(cls, force));
-
-  contextRow.querySelector = jest.fn((selector: string) => elements[selector] ?? null);
-  return contextRow as any;
-}
-
 describe('SelectionController', () => {
   let controller: SelectionController;
   let app: any;
-  let indicatorEl: any;
   let inputEl: any;
   let focusScopeEl: any;
-  let contextRowEl: any;
+  let tokenSink: { register: jest.Mock; unregister: jest.Mock };
   let editor: any;
   let editorView: any;
   let originalDocument: any;
   let originalCSS: any;
 
   beforeEach(() => {
-    // Mock Highlight constructor for CSS Custom Highlight API tests
     (global as any).Highlight = jest.fn((...ranges: any[]) => ({ ranges }));
     originalCSS = (global as any).CSS;
     jest.useFakeTimers();
     (showSelectionHighlight as jest.Mock).mockClear();
     (hideSelectionHighlight as jest.Mock).mockClear();
 
-    indicatorEl = createMockIndicator();
     inputEl = createMockEventTarget();
     focusScopeEl = createMockEventTarget();
     focusScopeEl.addContainedNode(inputEl);
-    contextRowEl = createMockContextRow();
+    tokenSink = { register: jest.fn(), unregister: jest.fn() };
 
     editorView = {
       id: 'editor-view',
@@ -136,7 +118,7 @@ describe('SelectionController', () => {
       },
     };
 
-    controller = new SelectionController(app, indicatorEl, inputEl, contextRowEl, undefined, focusScopeEl);
+    controller = new SelectionController(app, inputEl, tokenSink, focusScopeEl);
 
     originalDocument = (global as any).document;
     (global as any).document = { activeElement: null };
@@ -150,7 +132,7 @@ describe('SelectionController', () => {
     delete (global as any).Highlight;
   });
 
-  it('captures selection and updates indicator', () => {
+  it('captures selection, appends the token, and registers a chip', () => {
     controller.start();
     jest.advanceTimersByTime(250);
 
@@ -162,29 +144,83 @@ describe('SelectionController', () => {
       lineCount: 1,
       startLine: 1,
     });
-    expect(indicatorEl.textContent).toBe('1 line selected');
-    expect(indicatorEl.style.display).toBe('block');
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
+    expect(tokenSink.register).toHaveBeenCalledWith({
+      token: SOURCE_TOKEN,
+      path: 'notes/test.md',
+      kind: 'selection',
+      label: 'test.md L1',
+      icon: 'text-select',
+    });
 
     controller.showHighlight();
     expect(showSelectionHighlight).toHaveBeenCalledWith(editorView, 0, 4);
   });
 
-  it('clears the selection when the chip remove button is clicked', () => {
-    const chipEl = createSelectionChip(contextRowEl, 'qoderian-selection-indicator', 'text-select');
-    const chipController = new SelectionController(app, chipEl as any, inputEl, contextRowEl, undefined, focusScopeEl);
-    chipController.start();
+  it('drops the stored selection when the token is removed from the input', () => {
+    controller.start();
+    jest.advanceTimersByTime(250);
+    expect(controller.hasSelection()).toBe(true);
+
+    inputEl.value = '';
+    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+    expect(controller.hasSelection()).toBe(false);
+    expect(tokenSink.unregister).toHaveBeenCalledWith(SOURCE_TOKEN);
+  });
+
+  it('collapses the editor selection on send so the chip does not come back', () => {
+    controller.start();
+    jest.advanceTimersByTime(250);
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
+
+    controller.releaseSelectionAfterSend();
+    expect(editorView.dispatch).toHaveBeenCalledWith({ selection: { anchor: 0 } });
+
+    editor.getSelection.mockReturnValue('');
+    jest.advanceTimersByTime(750);
+
+    expect(inputEl.value).toBe('');
+    expect(controller.hasSelection()).toBe(false);
+  });
+
+  it('re-appends when the same range is selected again after a send', () => {
+    controller.start();
+    jest.advanceTimersByTime(250);
+    controller.releaseSelectionAfterSend();
+    editor.getSelection.mockReturnValue('');
+    jest.advanceTimersByTime(250);
+    expect(inputEl.value).toBe('');
+
+    editor.getSelection.mockReturnValue('selected text');
     jest.advanceTimersByTime(250);
 
-    expect(chipController.hasSelection()).toBe(true);
-    const labelEl = chipEl.querySelector('.qoderian-file-chip-name')!;
-    expect(labelEl.textContent).toBe('1 line selected');
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
+  });
 
-    (chipEl.querySelector('.qoderian-file-chip-remove') as any).click();
+  it('appends again when the selection range changes after being consumed', () => {
+    controller.start();
+    jest.advanceTimersByTime(250);
+    inputEl.value = '';
+    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    jest.advanceTimersByTime(250);
 
-    expect(chipController.hasSelection()).toBe(false);
-    expect(chipEl.hasClass('qoderian-hidden')).toBe(true);
-    expect(labelEl.textContent).toBe('');
-    chipController.stop();
+    editor.getSelection.mockReturnValue('selected text plus');
+    editor.getCursor.mockImplementation((which: 'from' | 'to') => (
+      which === 'from' ? { line: 2, ch: 0 } : { line: 2, ch: 8 }
+    ));
+    jest.advanceTimersByTime(250);
+
+    expect(inputEl.value).toContain('#L3');
+  });
+
+  it('removes an orphan editor token when nothing is stored', () => {
+    inputEl.value = `see ${buildEditorSelectionToken('notes/other.md', 3, 5)} now`;
+    controller.start();
+
+    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+    expect(inputEl.value).toBe('see now');
   });
 
   it('clears selection immediately when deselected without input handoff intent', () => {
@@ -196,7 +232,8 @@ describe('SelectionController', () => {
     jest.advanceTimersByTime(250);
 
     expect(controller.hasSelection()).toBe(false);
-    expect(indicatorEl.style.display).toBe('none');
+    expect(inputEl.value).toBe('');
+    expect(tokenSink.unregister).toHaveBeenCalledWith(SOURCE_TOKEN);
     expect(hideSelectionHighlight).toHaveBeenCalledWith(editorView);
   });
 
@@ -212,7 +249,7 @@ describe('SelectionController', () => {
     jest.advanceTimersByTime(250);
 
     expect(controller.hasSelection()).toBe(true);
-    expect(indicatorEl.style.display).toBe('block');
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
   });
 
   it('preserves selection when a relocated composer outside tab content has focus', () => {
@@ -221,10 +258,8 @@ describe('SelectionController', () => {
     composerScopeEl.addContainedNode(inputEl);
     controller = new SelectionController(
       app,
-      indicatorEl,
       inputEl,
-      contextRowEl,
-      undefined,
+      tokenSink,
       [contentScopeEl, composerScopeEl],
     );
 
@@ -237,7 +272,7 @@ describe('SelectionController', () => {
     jest.advanceTimersByTime(250);
 
     expect(controller.hasSelection()).toBe(true);
-    expect(indicatorEl.style.display).toBe('block');
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
   });
 
   it('preserves selection when shared footer controls have focus', () => {
@@ -248,10 +283,8 @@ describe('SelectionController', () => {
     footerScopeEl.addContainedNode(historyButton);
     controller = new SelectionController(
       app,
-      indicatorEl,
       inputEl,
-      contextRowEl,
-      undefined,
+      tokenSink,
       [contentScopeEl, composerScopeEl, footerScopeEl],
     );
 
@@ -264,17 +297,15 @@ describe('SelectionController', () => {
     jest.advanceTimersByTime(250);
 
     expect(controller.hasSelection()).toBe(true);
-    expect(indicatorEl.style.display).toBe('block');
+    expect(inputEl.value).toBe(`${SOURCE_TOKEN} `);
   });
 
   it('shows selection highlight when focus enters shared footer controls', () => {
     const footerScopeEl = createMockEventTarget();
     controller = new SelectionController(
       app,
-      indicatorEl,
       inputEl,
-      contextRowEl,
-      undefined,
+      tokenSink,
       [focusScopeEl, footerScopeEl],
     );
     controller.start();
@@ -292,10 +323,8 @@ describe('SelectionController', () => {
     footerScopeEl.addContainedNode(footerButton);
     controller = new SelectionController(
       app,
-      indicatorEl,
       inputEl,
-      contextRowEl,
-      undefined,
+      tokenSink,
       [focusScopeEl, footerScopeEl],
     );
     controller.start();
@@ -332,7 +361,7 @@ describe('SelectionController', () => {
     jest.advanceTimersByTime(250);
 
     expect(controller.hasSelection()).toBe(false);
-    expect(indicatorEl.style.display).toBe('none');
+    expect(inputEl.value).toBe('');
     expect(hideSelectionHighlight).toHaveBeenCalledWith(editorView);
   });
 
@@ -344,7 +373,6 @@ describe('SelectionController', () => {
     editor.getSelection.mockReturnValue('');
     (global as any).document.activeElement = null;
 
-    // Simulate delayed focus handoff under UI load.
     jest.advanceTimersByTime(1250);
     expect(controller.hasSelection()).toBe(true);
 
@@ -406,8 +434,10 @@ describe('SelectionController', () => {
         selectedText: 'reading selection',
         lineCount: 1,
       });
-      expect(indicatorEl.textContent).toBe('1 line selected');
-      expect(indicatorEl.style.display).toBe('block');
+      expect(inputEl.value).toBe('@notes/reading.md ');
+      expect(tokenSink.register).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'notes/reading.md', kind: 'selection' }),
+      );
     });
 
     it('preserves raw reading mode text and omits line metadata', () => {
@@ -428,7 +458,6 @@ describe('SelectionController', () => {
         selectedText: '  reading selection\nsecond line  ',
         lineCount: 2,
       });
-      expect(indicatorEl.textContent).toBe('2 lines selected');
     });
 
     it('prefers native DOM selection in reading mode, falls back to CSS Highlight API when lost', () => {
@@ -507,7 +536,7 @@ describe('SelectionController', () => {
       jest.advanceTimersByTime(250);
 
       expect(controller.hasSelection()).toBe(false);
-      expect(indicatorEl.style.display).toBe('none');
+      expect(inputEl.value).toBe('');
     });
 
     it('preserves reading mode selection when input is focused', () => {
@@ -552,7 +581,7 @@ describe('SelectionController', () => {
       jest.advanceTimersByTime(250);
 
       expect(controller.hasSelection()).toBe(true);
-      expect(indicatorEl.style.display).toBe('block');
+      expect(inputEl.value).toBe('@notes/reading.md ');
     });
 
     it('clears CSS highlight when reading mode selection is deselected', () => {
@@ -696,18 +725,5 @@ describe('SelectionController', () => {
       });
       expect(showSelectionHighlight).not.toHaveBeenCalled();
     });
-  });
-
-  it('keeps context row visible when canvas selection indicator is visible', () => {
-    const canvasIndicator = createMockEl();
-    canvasIndicator.addClass('qoderian-canvas-indicator');
-    contextRowEl.querySelector.mockImplementation((selector: string) => {
-      if (selector === '.qoderian-canvas-indicator') return canvasIndicator;
-      return null;
-    });
-
-    controller.updateContextRowVisibility();
-
-    expect(contextRowEl.classList.toggle).toHaveBeenCalledWith('has-content', true);
   });
 });

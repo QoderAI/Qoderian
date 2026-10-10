@@ -200,31 +200,6 @@ body.qoderian-composer-resizing * {
   height: 16.8px;
 }
 
-/* Selection chips (editor / browser / canvas selection context) */
-/* Pill-styled like file chips: icon + label + remove button, left aligned in context row */
-.qoderian-selection-indicator,
-.qoderian-browser-selection-indicator,
-.qoderian-canvas-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 6px 3px 8px;
-  background: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 12px;
-  font-size: 12px;
-  line-height: 1;
-  max-width: min(200px, 100%);
-  color: var(--text-normal);
-  flex-shrink: 0;
-}
-
-.qoderian-selection-indicator:hover,
-.qoderian-browser-selection-indicator:hover,
-.qoderian-canvas-indicator:hover {
-  background: var(--background-modifier-hover);
-}
-
 .qoderian-input-wrapper textarea.qoderian-input {
   width: 100%;
   flex: 1 1 0;
@@ -267,45 +242,6 @@ body.qoderian-composer-resizing * {
   row-gap: 2px;
   flex-shrink: 0;
   padding: 4px 6px 6px 6px;
-}
-
-/* Chip part styles shared by the selection indicators (see selection-chip.ts) */
-.qoderian-file-chip-icon {
-  display: flex;
-  align-items: center;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.qoderian-file-chip-icon svg {
-  width: 12px;
-  height: 12px;
-}
-
-.qoderian-file-chip-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--text-normal);
-}
-
-.qoderian-file-chip-remove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 14px;
-  line-height: 1;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.qoderian-file-chip-remove:hover {
-  background: var(--background-modifier-hover);
-  color: var(--text-normal);
 }
 
 /* Composer send-queue panel: collapsible list of pending turns. */

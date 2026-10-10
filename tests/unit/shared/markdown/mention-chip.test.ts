@@ -172,6 +172,72 @@ describe('replaceMentionTokensWithHtml', () => {
     expect(replaceMentionTokensWithHtml('see @notes/idea.md', app)).toBe('see @notes/idea.md');
   });
 
+  describe('selection tokens', () => {
+    it('chips an editor selection token with line range and title', () => {
+      const app = createMockApp(['notes/idea.md']);
+      const result = replaceMentionTokensWithHtml('see @notes/idea.md#L10-15 now', app);
+
+      expect(result).toContain('data-kind="selection"');
+      expect(result).toContain('data-path="notes/idea.md"');
+      expect(result).toContain('title="@notes/idea.md#L10-15"');
+      expect(result).toContain('idea.md L10-15');
+    });
+
+    it('chips a single-line editor selection token', () => {
+      const app = createMockApp(['notes/idea.md']);
+      const result = replaceMentionTokensWithHtml('see @notes/idea.md#L4 now', app);
+
+      expect(result).toContain('data-kind="selection"');
+      expect(result).toContain('idea.md L4');
+    });
+
+    it('chips an editor selection token whose path contains spaces', () => {
+      const app = createMockApp(['30 res/full stack open/README.md']);
+      const result = replaceMentionTokensWithHtml(
+        'see @30 res/full stack open/README.md#L6-15 now',
+        app,
+      );
+
+      expect(result).toContain('data-kind="selection"');
+      expect(result).toContain('data-path="30 res/full stack open/README.md"');
+      expect(result).toContain('README.md L6-15');
+    });
+
+    it('leaves an editor selection token untouched when the path is unknown', () => {
+      const app = createMockApp(['notes/idea.md']);
+      const result = replaceMentionTokensWithHtml('see @missing/note.md#L1-2 now', app);
+
+      expect(result).toBe('see @missing/note.md#L1-2 now');
+    });
+
+    it('chips a browser selection token with a decoded label', () => {
+      const app = createMockApp();
+      const token = `@browser:${encodeURIComponent('Two Sum')}`;
+      const result = replaceMentionTokensWithHtml(`open ${token} now`, app);
+
+      expect(result).toContain('data-kind="browser-selection"');
+      expect(result).toContain('Two Sum');
+      expect(result).toContain(`title="${token}"`);
+    });
+
+    it('chips a canvas selection token with the basename label', () => {
+      const app = createMockApp();
+      const token = `@canvas:${encodeURIComponent('boards/plan.canvas')}`;
+      const result = replaceMentionTokensWithHtml(`see ${token} now`, app);
+
+      expect(result).toContain('data-kind="canvas-selection"');
+      expect(result).toContain('data-path="boards/plan.canvas"');
+      expect(result).toContain('plan.canvas');
+    });
+
+    it('does not chip selection tokens inside code spans', () => {
+      const app = createMockApp(['notes/idea.md']);
+      const result = replaceMentionTokensWithHtml('`@notes/idea.md#L1-2`', app);
+
+      expect(result).toBe('`@notes/idea.md#L1-2`');
+    });
+  });
+
   describe('paths containing spaces', () => {
     it('chipifies a spaced file path via longest-match shrinking', () => {
       const app = createMockApp(['00-入口/Qoderian 宣传文档.md']);

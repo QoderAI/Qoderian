@@ -1,4 +1,4 @@
-import type { App, TAbstractFile, TFile, TFolder, Workspace, WorkspaceLeaf } from 'obsidian';
+import type { App, MarkdownView, TAbstractFile, TFile, TFolder, Workspace, WorkspaceLeaf } from 'obsidian';
 import { Notice } from 'obsidian';
 import { isAbsolute } from 'path';
 
@@ -16,7 +16,7 @@ export async function revealWorkspaceLeaf(workspace: Workspace, leaf: WorkspaceL
   await workspace.revealLeaf(leaf);
 }
 
-export type ReferenceChipAction = (app: App, path: string) => void;
+export type ReferenceChipAction = (app: App, path: string, token?: string) => void;
 
 /**
  * Click behaviors per chip kind. Extend `ReferenceChipKind` and add an entry
@@ -25,6 +25,9 @@ export type ReferenceChipAction = (app: App, path: string) => void;
 const referenceChipActions: Record<ReferenceChipKind, ReferenceChipAction> = {
   file: openReferenceFile,
   folder: revealReferenceFolder,
+  selection: openSelectionReference,
+  'canvas-selection': openReferenceFile,
+  'browser-selection': openBrowserReference,
 };
 
 /**
@@ -34,12 +37,22 @@ const referenceChipActions: Record<ReferenceChipKind, ReferenceChipAction> = {
  * `openLinkText` must not be used here — it treats folder paths as missing
  * notes and offers to create a file.
  */
-export function openReferenceChip(app: App, kind: ReferenceChipKind, path: string): void {
+export function openReferenceChip(app: App, kind: ReferenceChipKind, path: string, token?: string): void {
   if (isAbsolute(path)) {
     revealExternalPath(path);
     return;
   }
-  referenceChipActions[kind]?.(app, path);
+  referenceChipActions[kind]?.(app, path, token);
+}
+
+/** Parses the `#L<a>` / `#L<a>-<b>` suffix of an editor-selection token. */
+export function parseSelectionLineRange(token: string): { from: number; to: number } | null {
+  const match = /#L(\d+)(?:-(\d+))?$/.exec(token);
+  if (!match) return null;
+  const from = Number(match[1]);
+  const to = match[2] ? Number(match[2]) : from;
+  if (!Number.isFinite(from) || !Number.isFinite(to) || from < 1) return null;
+  return to >= from ? { from, to } : { from: to, to: from };
 }
 
 interface ElectronRemoteShellApi {
@@ -89,8 +102,37 @@ function openReferenceFile(app: App, path: string): void {
   })();
 }
 
-function revealReferenceFolder(app: App, path: string): void {
+/**
+ * Opens an editor-selection chip's note and re-selects the referenced lines,
+ * so clicking a sent chip points back at the exact highlighted range.
+ */
+function openSelectionReference(app: App, path: string, token?: string): void {
+  const range = token ? parseSelectionLineRange(token) : null;
   const entry = app.vault.getAbstractFileByPath(path);
+  if (!entry || !isVaultFile(entry)) {
+    openReferenceFile(app, path);
+    return;
+  }
+
+  void (async (): Promise<void> => {
+    try {
+      const leaf = app.workspace.getLeaf();
+      await leaf.openFile(entry);
+      if (!range) return;
+      const editor = (leaf.view as MarkdownView | null)?.editor;
+      if (!editor) return;
+      const lastLine = Math.min(range.to, editor.lineCount());
+      const from = { line: range.from - 1, ch: 0 };
+      const to = { line: lastLine - 1, ch: editor.getLine(lastLine - 1)?.length ?? 0 };
+      editor.setSelection(from, to);
+      editor.scrollIntoView({ from, to }, true);
+    } catch (error) {
+      new Notice(`Failed to open file: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  })();
+}
+
+function revealReferenceFolder(app: App, path: string): void {  const entry = app.vault.getAbstractFileByPath(path);
   if (!entry) return;
 
   if (isVaultFile(entry)) {
@@ -100,6 +142,12 @@ function revealReferenceFolder(app: App, path: string): void {
   if (!isVaultFolder(entry)) return;
 
   revealInFileExplorer(app, entry);
+}
+
+/** Opens a browser-selection chip's stored URL in a new external tab. */
+function openBrowserReference(_app: App, url: string): void {
+  if (!url) return;
+  window.open(url, '_blank');
 }
 
 /** Internal file-explorer API used by community plugins to locate an entry. */
