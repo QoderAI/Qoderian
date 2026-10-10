@@ -11,6 +11,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.17] - 2026-10-10
+
 ### Changed
 
 - Editor, browser, and canvas selections now appear as inline chips inside the
@@ -26,6 +28,12 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   `<current_note>` tag (older messages may still carry `<linked_note>`, which
   keeps working), and switching conversations reports it again, so the
   composer no longer needs a chip for it.
+
+### Fixed
+
+- Removing a captured selection chip by clicking its X now clears the temporary
+  highlight in the editor (or preview-mode CSS highlight) instead of leaving it
+  behind.
 
 ### Removed
 
