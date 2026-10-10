@@ -45,8 +45,8 @@
     "eslint-plugin-jest": "^29.15.1",
     "eslint-plugin-obsidianmd": "^0.4.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "jest": "^30.3.0",
-    "jest-environment-jsdom": "^30.3.0",
+    "jest": "30.3.0",
+    "jest-environment-jsdom": "30.3.0",
     "obsidian": "^1.13.1",
     "ts-jest": "^29.4.9",
     "typescript": "^6.0.2"
@@ -55,7 +55,7 @@
     "@codemirror/commands": "^6.11.0",
     "@codemirror/state": "^6.5.0",
     "@codemirror/view": "^6.38.6",
-    "@modelcontextprotocol/sdk": "~1.30.0",
+    "@modelcontextprotocol/sdk": "~1.32.1",
     "@qoder-ai/qoder-agent-sdk": "^1.0.45",
     "tslib": "^2.8.1"
   },
@@ -65,7 +65,7 @@
     "body-parser": "2.3.0",
     "brace-expansion": "5.0.9",
     "esbuild": "$esbuild",
-    "fast-uri": "3.1.7",
+    "fast-uri": "^3.1.8",
     "hono": "4.13.7",
     "ip-address": "10.7.2",
     "js-yaml": "4.3.0",
