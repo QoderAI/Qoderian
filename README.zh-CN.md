@@ -1,5 +1,9 @@
 # Qoderian
 
+[![Release](https://img.shields.io/github/v/release/QoderAI/Qoderian?label=release&color=blue)](https://github.com/QoderAI/Qoderian/releases/latest)
+[![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22qoderian%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)](https://obsidian.md/plugins?id=qoderian)
+[![License](https://img.shields.io/github/license/QoderAI/Qoderian)](LICENSE)
+
 [English](README.md) | 中文 · [文档](https://qoderai.github.io/Qoderian/zh-Hans/docs/introduction)
 
 一个把 [Qoder CLI](https://qoder.com)（`qodercli`）嵌入 Obsidian 仓库的插件。你的仓库就是智能体的工作目录——文件读写、检索、bash 和多步工作流开箱即用。
