@@ -1,5 +1,9 @@
 # Qoderian
 
+[![Release](https://img.shields.io/github/v/release/QoderAI/Qoderian?label=release&color=blue)](https://github.com/QoderAI/Qoderian/releases/latest)
+[![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22qoderian%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)](https://obsidian.md/plugins?id=qoderian)
+[![License](https://img.shields.io/github/license/QoderAI/Qoderian)](LICENSE)
+
 [English](README.md) | [中文](README.zh-CN.md) · [Docs](https://qoderai.github.io/Qoderian/docs/introduction)
 
 An Obsidian plugin that embeds [Qoder CLI](https://qoder.com) (`qodercli`) in your vault. Your vault becomes the agent's working directory — file read/write, search, bash, and multi-step workflows all work out of the box.
