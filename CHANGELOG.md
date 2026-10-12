@@ -11,6 +11,12 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Fixed
+
+- The context usage meter no longer counts cached prompt tokens twice, so its
+  percentage now reflects the actual occupied portion of the selected context
+  window.
+
 ## [1.0.17] - 2026-10-10
 
 ### Changed
