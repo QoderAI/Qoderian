@@ -311,7 +311,9 @@ function toPromptUsageSnapshot(usage: MessageUsage): PromptUsageSnapshot {
     inputTokens,
     cacheCreationInputTokens,
     cacheReadInputTokens,
-    contextTokens: inputTokens + cacheCreationInputTokens + cacheReadInputTokens,
+    // qodercli normalizes input_tokens to the complete prompt size. Cache read
+    // and creation counts are subsets used for billing detail, not extra context.
+    contextTokens: inputTokens,
   };
 }
 
@@ -327,7 +329,7 @@ function mergePromptUsage(
     inputTokens,
     cacheCreationInputTokens,
     cacheReadInputTokens,
-    contextTokens: inputTokens + cacheCreationInputTokens + cacheReadInputTokens,
+    contextTokens: inputTokens,
   };
 }
 

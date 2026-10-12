@@ -1522,17 +1522,17 @@ describe('transformSDKMessage', () => {
   });
 
   describe('assistant message usage extraction', () => {
-    it('yields usage info from main agent assistant message', () => {
+    it('does not double-count cache details toward context occupancy', () => {
       const message = msg({
         type: 'assistant',
         parent_tool_use_id: null, // Main agent
         message: {
           content: [{ type: 'text', text: 'Hello' }],
           usage: {
-            input_tokens: 1000,
+            input_tokens: 100_000,
             output_tokens: 500,
-            cache_creation_input_tokens: 300,
-            cache_read_input_tokens: 200,
+            cache_creation_input_tokens: 10_000,
+            cache_read_input_tokens: 90_000,
           },
         },
       });
@@ -1543,12 +1543,12 @@ describe('transformSDKMessage', () => {
       expect(usageResults).toHaveLength(1);
 
       const usage = (usageResults[0] as any).usage;
-      expect(usage.inputTokens).toBe(1000);
-      expect(usage.cacheCreationInputTokens).toBe(300);
-      expect(usage.cacheReadInputTokens).toBe(200);
-      expect(usage.contextTokens).toBe(1500); // 1000 + 300 + 200
-      expect(usage.contextWindow).toBe(200000); // Standard context window
-      expect(usage.percentage).toBe(1); // 1500 / 200000 * 100 rounded
+      expect(usage.inputTokens).toBe(100_000);
+      expect(usage.cacheCreationInputTokens).toBe(10_000);
+      expect(usage.cacheReadInputTokens).toBe(90_000);
+      expect(usage.contextTokens).toBe(100_000);
+      expect(usage.contextWindow).toBe(200_000);
+      expect(usage.percentage).toBe(50);
     });
 
     it('yields usage from assistant message when usage state has no stream prompt usage', () => {
@@ -1580,7 +1580,7 @@ describe('transformSDKMessage', () => {
         cacheCreationInputTokens: 300,
         cacheReadInputTokens: 200,
         contextWindow: 200000,
-        contextTokens: 1500,
+        contextTokens: 1000,
         percentage: 1,
       });
     });

@@ -165,8 +165,8 @@ export type StreamChunk =
 /**
  * Context window usage information.
  *
- * `contextTokens` is the Qoder-computed total token count in the context window:
- * `inputTokens + cacheCreationInputTokens + cacheReadInputTokens`.
+ * `contextTokens` is the complete prompt size reported by Qoder. Cache creation
+ * and cache read counts are subsets of `inputTokens`, not additional context.
  *
  * Cache token fields are optional for older Qoder CLI responses. Feature code
  * should use `contextTokens` for display, not recompute from the breakdown.
