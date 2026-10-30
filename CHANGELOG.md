@@ -11,6 +11,11 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Fixed
+
+- Upgraded the embedded Qoder Agent SDK so it stays compatible with qodercli
+  1.1.81.
+
 ## [1.0.17] - 2026-10-10
 
 ### Changed
