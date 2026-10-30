@@ -198,7 +198,6 @@ export class QoderChatRuntime implements ChatRuntime {
           this.sessionManager.clearHistoryRebuild();
           this.pendingForkSession = false;
         }
-        this.messageChannel?.setSessionId(event.sessionId);
         if (event.agents) {
           try { this.getAgentCatalog().applySessionAgents(event.agents); } catch { /* non-critical */ }
         }
@@ -441,7 +440,6 @@ export class QoderChatRuntime implements ChatRuntime {
     this.messageChannel = new QoderMessageChannel();
 
     if (resumeSessionId) {
-      this.messageChannel.setSessionId(resumeSessionId);
       this.sessionManager.setSessionId(resumeSessionId, this.getScopedSettings().model);
     }
 
@@ -874,10 +872,14 @@ export class QoderChatRuntime implements ChatRuntime {
     if (shouldUsePersistent) {
       // Start persistent query if not running
       if (!this.persistentQuery && !this.shuttingDown) {
+        // Seed the launch config with this turn's external context so the
+        // first applyDynamicUpdates() does not restart a query whose daemon
+        // session is still opening.
         await this.startPersistentQuery(
           vaultPath,
           resolvedQoderPath,
-          this.sessionManager.getSessionId() ?? undefined
+          this.sessionManager.getSessionId() ?? undefined,
+          effectiveQueryOptions?.externalContextPaths ?? this.currentExternalContextPaths
         );
       }
 
@@ -1034,11 +1036,9 @@ export class QoderChatRuntime implements ChatRuntime {
   }
 
   private buildSDKUserMessage(prompt: string, images?: ImageAttachment[]): SDKUserMessage {
-    return buildQoderSDKUserMessage(
-      prompt,
-      this.sessionManager.getSessionId() || '',
-      images,
-    );
+    // The daemon owns the session id and stamps it onto each message; sending
+    // a stale one is rejected with a session_id mismatch.
+    return buildQoderSDKUserMessage(prompt, images);
   }
 
   /**

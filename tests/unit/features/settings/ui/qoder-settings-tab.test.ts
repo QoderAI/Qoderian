@@ -323,6 +323,7 @@ function createPlugin(overrides: Record<string, unknown> = {}): any {
       pluginManager: {
         loadPlugins: jest.fn().mockResolvedValue(undefined),
       },
+      shutdownRuntime: jest.fn().mockResolvedValue(undefined),
     },
     saveSettings: mockSaveSettings,
     normalizeModelVariantSettings: jest.fn(() => false),

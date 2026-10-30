@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 import {
+  ProcessTransport,
   qodercliAuth,
   query,
+  shutdownDaemon,
 } from '@qoder-ai/qoder-agent-sdk';
 
 /** Idle async input used for initialization-only SDK operations. */
@@ -38,6 +40,9 @@ async function main() {
       cwd: process.cwd(),
       model: 'auto',
       persistSession: false,
+      // The plugin pins the process carrier so the user's installed CLI runs;
+      // without this the SDK starts its bundled worker runtime instead.
+      transport: ProcessTransport.default,
       ...(cliPath ? { pathToQoderCLIExecutable: cliPath } : {}),
     },
   });
@@ -59,6 +64,8 @@ async function main() {
   } finally {
     input.end();
     await catalogQuery.close();
+    // The daemon is process-wide and keeps Node alive until it is stopped.
+    await shutdownDaemon();
   }
 }
 

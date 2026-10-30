@@ -87,6 +87,29 @@ describe('rendererSafeUnref helpers', () => {
     expect(result.contents.split('\n')).toHaveLength(input.split('\n').length);
   });
 
+  it('patches the qoder-sdk daemon heartbeat watchdog shape', () => {
+    const input = 'this.heartbeatWatchdog=setInterval(()=>{'
+      + 'if(this.failure||this.stopping||!this.initialized)return;'
+      + '},e),this.heartbeatWatchdog.unref()';
+
+    expect(findUnsafeTimerUnrefSites(input)).toEqual([
+      {
+        line: 1,
+        snippet: 'setInterval(()=>{'
+          + 'if(this.failure||this.stopping||!this.initialized)return;'
+          + '},e),this.heartbeatWatchdog.unref()',
+      },
+    ]);
+
+    const result = patchRendererUnsafeUnrefSites(input);
+
+    expect(result.appliedPatches).toEqual([
+      { name: 'qoder-sdk-daemon-heartbeat-watchdog', count: 1 },
+    ]);
+    expect(result.contents).toContain('this.heartbeatWatchdog.unref?.()');
+    expect(findUnsafeTimerUnrefSites(result.contents)).toEqual([]);
+  });
+
   it('reports remaining direct timer .unref() calls but ignores guarded usage', () => {
     const input = [
       'const timer = setTimeout(run, 1000);',

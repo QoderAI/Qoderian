@@ -27,16 +27,11 @@ export class QoderMessageChannel implements AsyncIterable<SDKUserMessage> {
   private turnActive = false;
   private closed = false;
   private resolveNext: ((value: IteratorResult<SDKUserMessage>) => void) | null = null;
-  private currentSessionId: string | null = null;
   private pendingSteerAborts = 0;
   private onWarning: (message: string) => void;
 
   constructor(onWarning: (message: string) => void = () => {}) {
     this.onWarning = onWarning;
-  }
-
-  setSessionId(sessionId: string): void {
-    this.currentSessionId = sessionId;
   }
 
   isTurnActive(): boolean {
@@ -232,7 +227,6 @@ export class QoderMessageChannel implements AsyncIterable<SDKUserMessage> {
         content: pending.content,
       },
       parent_tool_use_id: null,
-      session_id: this.currentSessionId || '',
     };
   }
 }

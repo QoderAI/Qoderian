@@ -1,3 +1,5 @@
+import { shutdownDaemon } from '@qoder-ai/qoder-agent-sdk';
+
 import { getVaultPath } from '../core/fs/path';
 import type { ChatRuntime } from '../core/runtime/chat-runtime';
 import type { VaultFileAdapter } from '../core/storage/vault-file-adapter';
@@ -47,6 +49,12 @@ export interface QoderServices {
   historyService: QoderConversationHistoryService;
   taskResultInterpreter: QoderTaskResultInterpreter;
   loginService: QoderLoginService;
+  /**
+   * Stops the SDK's process-wide daemon. Required after CLI path/edition
+   * changes and login, because a running daemon keeps its original launch
+   * configuration and credentials.
+   */
+  shutdownRuntime(): Promise<void>;
   dispose(): void;
   createRuntime(): ChatRuntime;
   createTitleGenerationService(): QoderTitleGenerationService;
@@ -111,12 +119,16 @@ export async function createQoderServices(
 
   const historyService = new QoderConversationHistoryService();
   const taskResultInterpreter = new QoderTaskResultInterpreter();
+  const shutdownRuntime = async (): Promise<void> => {
+    await shutdownDaemon().catch(() => {
+      // Best-effort: a failed shutdown must not block settings/login flows.
+    });
+  };
   const loginService = new QoderLoginService(plugin, () => {
     if (disposed) return;
-    // Always return to idle once the post-login refresh settles; keeping
-    // 'succeeded' would render a stale "checking status" panel if the runtime
-    // later becomes authRequired again in this session.
-    void agentCatalog.refresh().then(() => {
+    // Credentials are written by the CLI after the daemon may already have
+    // started, so restart the daemon before re-probing the runtime.
+    void shutdownRuntime().then(() => agentCatalog.refresh()).then(() => {
       if (!disposed) loginService.reset();
     });
   });
@@ -134,8 +146,10 @@ export async function createQoderServices(
     historyService,
     taskResultInterpreter,
     loginService,
+    shutdownRuntime,
     dispose: () => {
       disposed = true;
+      void shutdownRuntime();
       loginService.dispose();
       if (startupRetryTimer !== null) {
         window.clearTimeout(startupRetryTimer);
