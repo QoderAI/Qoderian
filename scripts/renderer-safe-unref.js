@@ -82,6 +82,11 @@ const UNSAFE_TIMER_UNREF_PATTERNS = [
       '\n        closeTimeout.unref?.();' +
       '\n      })',
   },
+  {
+    name: 'qoder-sdk-daemon-heartbeat-watchdog',
+    pattern: /this\.heartbeatWatchdog\.unref\(\)/g,
+    replacement: 'this.heartbeatWatchdog.unref?.()',
+  },
 ];
 
 const TIMER_CALL_PREFIXES = ['setTimeout(', 'setInterval('];
@@ -143,7 +148,8 @@ function findUnsafeTimerUnrefSites(contents) {
       continue;
     }
 
-    const unrefMatch = contents.slice(callEnd + 1).match(/^\s*\.unref\(\)/);
+    const unrefMatch = contents.slice(callEnd + 1).match(/^\s*\.unref\(\)/)
+      ?? matchAssignedTimerUnref(contents, timerStart.startIndex, callEnd);
     if (unrefMatch) {
       const startIndex = timerStart.startIndex;
       const endIndex = callEnd + 1 + unrefMatch[0].length;
@@ -160,6 +166,20 @@ function findUnsafeTimerUnrefSites(contents) {
   }
 
   return matches;
+}
+
+function matchAssignedTimerUnref(contents, timerStartIndex, callEnd) {
+  const assignment = contents
+    .slice(Math.max(0, timerStartIndex - 128), timerStartIndex)
+    .match(/([A-Za-z_$][A-Za-z0-9_$.]*)\s*=\s*$/);
+  if (!assignment) {
+    return null;
+  }
+
+  const target = assignment[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return contents
+    .slice(callEnd + 1)
+    .match(new RegExp(`^\\s*,\\s*${target}\\.unref\\(\\)`));
 }
 
 function findNextTimerCall(contents, startIndex) {
