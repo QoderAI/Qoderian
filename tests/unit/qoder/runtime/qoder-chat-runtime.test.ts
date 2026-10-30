@@ -916,16 +916,15 @@ describe('QoderChatRuntime', () => {
         type: 'user',
         message: { role: 'user', content: 'Hello Qoder' },
         parent_tool_use_id: null,
-        session_id: '',
         uuid: expect.any(String),
       });
     });
 
-    it('should include session ID when available', () => {
+    it('omits the session ID so the daemon can stamp its own', () => {
       service.setSessionId('session-abc');
       const message = (service as any).buildSDKUserMessage('Test');
 
-      expect(message.session_id).toBe('session-abc');
+      expect(message.session_id).toBeUndefined();
     });
 
     it('should build message with images', () => {

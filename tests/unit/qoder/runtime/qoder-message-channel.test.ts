@@ -65,7 +65,7 @@ describe('QoderMessageChannel', () => {
   });
 
   describe('enqueue and iteration', () => {
-    it('merges queued text messages and stamps the session ID', async () => {
+    it('merges queued text messages without stamping a session ID', async () => {
       const iterator = channel[Symbol.asyncIterator]();
 
       const firstPromise = iterator.next();
@@ -76,12 +76,11 @@ describe('QoderMessageChannel', () => {
 
       channel.enqueue(createTextUserMessage('second'));
       channel.enqueue(createTextUserMessage('third'));
-      channel.setSessionId('session-abc');
       channel.onTurnComplete();
 
       const merged = await iterator.next();
       expect(merged.value.message.content).toBe('second\n\nthird');
-      expect(merged.value.session_id).toBe('session-abc');
+      expect(merged.value.session_id).toBeUndefined();
       expect(warnings).toHaveLength(0);
     });
 

@@ -30,7 +30,6 @@ function buildUserContentBlocks(prompt: string, images?: ImageAttachment[]): Use
 
 export function buildQoderSDKUserMessage(
   prompt: string,
-  sessionId: string,
   images?: ImageAttachment[],
 ): SDKUserMessage {
   if (!images || images.length === 0) {
@@ -41,7 +40,6 @@ export function buildQoderSDKUserMessage(
         content: prompt,
       },
       parent_tool_use_id: null,
-      session_id: sessionId,
       uuid: randomUUID(),
     };
   }
@@ -53,7 +51,6 @@ export function buildQoderSDKUserMessage(
       content: buildUserContentBlocks(prompt, images),
     },
     parent_tool_use_id: null,
-    session_id: sessionId,
     uuid: randomUUID(),
   };
 }
