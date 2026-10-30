@@ -18,6 +18,7 @@ import {
 import { sortThinkingEfforts } from '../models/model-catalog';
 import type { QoderHostContext } from '../qoder-host-context';
 import { createCustomSpawnFunction } from '../runtime/custom-spawn';
+import { buildDaemonLaunchOptions } from '../runtime/qoder-daemon-launch';
 
 const STDERR_TAIL_LIMIT = 4_000;
 
@@ -190,8 +191,7 @@ export function buildProbeOptions(
     cwd: vaultPath,
     abortController,
     auth: qodercliAuth(),
-    pathToQoderCLIExecutable: cliPath,
-    env: { ...process.env, PATH: enhancedPath },
+    ...buildDaemonLaunchOptions(cliPath, enhancedPath),
     permissionMode: 'bypassPermissions',
     allowDangerouslySkipPermissions: true,
     settingSources: resolveQoderSettingSources(qoderSettings.loadUserSettings),

@@ -60,6 +60,14 @@ export function qodercliAuth() {
   return { type: 'qodercli' } as const;
 }
 
+export const ProcessTransport = {
+  default: { kind: 'process-transport' as const },
+};
+
+export async function shutdownDaemon(): Promise<void> {
+  // No daemon exists in unit tests.
+}
+
 export interface Settings {
   effortLevel?: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
 }

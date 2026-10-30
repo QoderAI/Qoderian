@@ -21,6 +21,7 @@ import {
   type SystemPromptSettings,
 } from '../prompt/main-agent';
 import { createCustomSpawnFunction } from './custom-spawn';
+import { buildDaemonLaunchOptions } from './qoder-daemon-launch';
 import {
   DISABLED_BUILTIN_SUBAGENTS,
   type PersistentQueryConfig,
@@ -270,13 +271,8 @@ export class QueryOptionsBuilder {
       model,
       abortController,
       auth: qodercliAuth(),
-      pathToQoderCLIExecutable: ctx.cliPath,
+      ...buildDaemonLaunchOptions(ctx.cliPath, ctx.enhancedPath, ctx.customEnv),
       settingSources: resolveQoderSettingSources(qoderSettings.loadUserSettings),
-      env: {
-        ...process.env,
-        ...ctx.customEnv,
-        PATH: ctx.enhancedPath,
-      },
       includePartialMessages: true,
     };
 

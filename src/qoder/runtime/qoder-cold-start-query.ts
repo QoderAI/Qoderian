@@ -14,6 +14,7 @@ import {
 import type { QoderHostContext } from '../qoder-host-context';
 import { extractAssistantText } from '../services/extract-assistant-text';
 import { createCustomSpawnFunction } from './custom-spawn';
+import { buildDaemonLaunchOptions } from './qoder-daemon-launch';
 
 export interface ColdStartQueryConfig {
   plugin: QoderHostContext;
@@ -77,11 +78,7 @@ export async function runColdStartQuery(
     model: selectedModel,
     abortController: config.abortController,
     auth: qodercliAuth(),
-    pathToQoderCLIExecutable: resolvedQoderPath,
-    env: {
-      ...process.env,
-      PATH: enhancedPath,
-    },
+    ...buildDaemonLaunchOptions(resolvedQoderPath, enhancedPath),
     permissionMode: 'bypassPermissions',
     allowDangerouslySkipPermissions: true,
     settingSources: resolveQoderSettingSources(qoderSettings.loadUserSettings),

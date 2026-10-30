@@ -136,6 +136,7 @@ export function renderQoderCliPathControl(
       await view?.getTabManager()?.broadcastToAllTabs(
         (service) => Promise.resolve(service.cleanup())
       );
+      await qoderWorkspace.shutdownRuntime();
       void qoderWorkspace.agentCatalog.refresh();
       return true;
     };
@@ -196,6 +197,7 @@ export function renderQoderCliEditionControl(
         qoderWorkspace.cliResolver.reset();
         await qoderWorkspace.pluginManager.loadPlugins();
         await context.plugin.reloadConversationIndex();
+        await qoderWorkspace.shutdownRuntime();
         void qoderWorkspace.agentCatalog.refresh();
       });
   });

@@ -1,4 +1,5 @@
 import type { ModelPolicyContext } from '@qoder-ai/qoder-agent-sdk';
+import { ProcessTransport } from '@qoder-ai/qoder-agent-sdk';
 
 import type { AppPluginManager } from '@/core/types/services';
 import type { PermissionMode, QoderianSettings } from '@/core/types/settings';
@@ -197,5 +198,26 @@ describe('QueryOptionsBuilder memory', () => {
 
     expect(QueryOptionsBuilder.needsRestart(off, on)).toBe(true);
     expect(QueryOptionsBuilder.needsRestart(off, off)).toBe(false);
+  });
+});
+
+describe('QueryOptionsBuilder daemon launch options', () => {
+  it('pins the process carrier and SDK env for every query shape', () => {
+    const persistent = QueryOptionsBuilder.buildPersistentQueryOptions(
+      createContext('default'),
+    );
+    const coldStart = QueryOptionsBuilder.buildColdStartQueryOptions(
+      createColdStartContext(),
+    );
+
+    for (const options of [persistent, coldStart]) {
+      expect(options.transport).toBe(ProcessTransport.default);
+      expect(options.pathToQoderCLIExecutable).toBe('/test/qodercli');
+      expect(options.env).toMatchObject({
+        QODER_SDK_CUSTOM_BASE_URL_BYOK: '1',
+        QODER_INTEGRATION_ID: '70457212-a449-4ae3-af1e-5fb9e00fafcf',
+        PATH: '/test/bin',
+      });
+    }
   });
 });

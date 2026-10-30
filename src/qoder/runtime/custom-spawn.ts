@@ -3,26 +3,14 @@ import { type ChildProcess, spawn } from 'child_process';
 
 import { cliPathRequiresNode, findNodeExecutable } from '../../core/env/environment';
 import {
+  CUSTOM_PROVIDER_CLI_ENV,
+  INTEGRATION_CLI_ENV,
+} from './qoder-daemon-launch';
+import {
   resolveWindowsCmdShimSpawnSpec,
   terminateSpawnedProcess,
   type WindowsCmdShimSpawnSpec,
 } from './windows-cmd-shim';
-
-/**
- * SDK-spawned sessions run qodercli in its "sdk" runtime mode, where
- * CLI-configured custom providers (self-defined base URLs) stay disabled
- * unless this opt-in is present — without it the CLI hides their models.
- */
-const CUSTOM_PROVIDER_CLI_ENV = { QODER_SDK_CUSTOM_BASE_URL_BYOK: '1' } as const;
-
-/**
- * Identifies this host integration to the CLI, which reports it as the
- * `integration_id` telemetry attribute. Only a UUIDv4 is accepted; any other
- * value is silently dropped.
- */
-const INTEGRATION_CLI_ENV = {
-  QODER_INTEGRATION_ID: '70457212-a449-4ae3-af1e-5fb9e00fafcf',
-} as const;
 
 /**
  * Spawn qodercli in Obsidian's Electron process.
