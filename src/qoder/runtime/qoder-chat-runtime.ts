@@ -872,10 +872,14 @@ export class QoderChatRuntime implements ChatRuntime {
     if (shouldUsePersistent) {
       // Start persistent query if not running
       if (!this.persistentQuery && !this.shuttingDown) {
+        // Seed the launch config with this turn's external context so the
+        // first applyDynamicUpdates() does not restart a query whose daemon
+        // session is still opening.
         await this.startPersistentQuery(
           vaultPath,
           resolvedQoderPath,
-          this.sessionManager.getSessionId() ?? undefined
+          this.sessionManager.getSessionId() ?? undefined,
+          effectiveQueryOptions?.externalContextPaths ?? this.currentExternalContextPaths
         );
       }
 

@@ -309,6 +309,23 @@ describe('QoderChatRuntime', () => {
       expect(service.isPersistentQueryActive()).toBe(false);
     });
 
+    it('seeds a newly started persistent query with the turn external context', async () => {
+      service.setSessionId('test-session');
+      const startPersistentQuerySpy = jest
+        .spyOn(service as any, 'startPersistentQuery')
+        .mockResolvedValue(undefined);
+
+      await collectChunks(queryText(
+        'hello',
+        undefined,
+        undefined,
+        { externalContextPaths: ['/external/a'] },
+      ));
+
+      expect(startPersistentQuerySpy).toHaveBeenCalledTimes(1);
+      expect(startPersistentQuerySpy.mock.calls[0][3]).toEqual(['/external/a']);
+    });
+
     it('should close persistent query', () => {
       service.setSessionId('test-session');
       service.closePersistentQuery('test reason');
