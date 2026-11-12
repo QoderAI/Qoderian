@@ -99,7 +99,6 @@ import {
   buildPromptWithHistoryContext,
   isSessionExpiredError,
 } from './session-context';
-import { createStopSubagentHook, type SubagentHookState } from './subagent-hooks';
 import {
   type ClosePersistentQueryOptions,
   type PersistentQueryConfig,
@@ -170,9 +169,6 @@ export class QoderChatRuntime implements ChatRuntime {
 
   // SDK command cache — populated on system/init, cleared on persistent query close
   private cachedSdkCommands: SlashCommand[] = [];
-
-  // Subagent hook state source (set from the feature layer).
-  private subagentStateSource: (() => SubagentHookState) | null = null;
 
   private readonly turnTracker = new QoderTurnTracker();
 
@@ -613,7 +609,6 @@ export class QoderChatRuntime implements ChatRuntime {
     externalContextPaths?: string[]
   ): Options {
     const baseContext = this.buildQueryOptionsContext(vaultPath, cliPath);
-    const hooks = this.buildHooks();
 
     const ctx: PersistentQueryContext = {
       ...baseContext,
@@ -622,7 +617,6 @@ export class QoderChatRuntime implements ChatRuntime {
         ? { sessionId: resumeSessionId, sessionAt: resumeAtMessageId, fork: this.pendingForkSession || undefined }
         : undefined,
       canUseTool: this.createApprovalCallback(),
-      hooks,
       externalContextPaths,
     };
 
@@ -631,22 +625,6 @@ export class QoderChatRuntime implements ChatRuntime {
       options.mcpServers = this.currentMcpServers;
     }
     return options;
-  }
-
-  /**
-   * Builds the hooks for SDK options.
-   * Hooks need access to `this` for dynamic settings, so they're built here.
-   */
-  private buildHooks() {
-    const hooks: Options['hooks'] = {};
-
-    // Resolve feature state at hook execution time so a long-lived Query sees
-    // the latest subagent status.
-    hooks.Stop = [createStopSubagentHook(
-      () => this.subagentStateSource?.() ?? { hasRunning: false }
-    )];
-
-    return hooks;
   }
 
   /**
@@ -1100,7 +1078,6 @@ export class QoderChatRuntime implements ChatRuntime {
     const queryPrompt = buildQoderPromptWithImages(prompt, images);
     const baseContext = this.buildQueryOptionsContext(cwd, cliPath);
     const externalContextPaths = queryOptions?.externalContextPaths || [];
-    const hooks = this.buildHooks();
     const hasEditorContext = prompt.includes('<editor_selection');
 
     let allowedTools: string[] | undefined;
@@ -1115,7 +1092,6 @@ export class QoderChatRuntime implements ChatRuntime {
       sessionId: this.sessionManager.getSessionId() ?? undefined,
       modelOverride: queryOptions?.model,
       canUseTool: this.createApprovalCallback(),
-      hooks,
       mcpMentions: queryOptions?.mcpMentions,
       enabledMcpServers: queryOptions?.enabledMcpServers,
       allowedTools,
@@ -1386,10 +1362,6 @@ export class QoderChatRuntime implements ChatRuntime {
 
   setPermissionModeSyncCallback(callback: ((sdkMode: string) => void) | null): void {
     this.permissionModeSyncCallback = callback;
-  }
-
-  setSubagentStateSource(getState: () => SubagentHookState): void {
-    this.subagentStateSource = getState;
   }
 
   setAutoTurnCallback(callback: AutoTurnCallback | null): void {

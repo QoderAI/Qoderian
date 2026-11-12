@@ -14,6 +14,7 @@ function createRouterHarness(options: { pendingSteerAbort?: boolean } = {}) {
       getTransformOptions: () => ({}),
       fetchContextUsage,
       bufferUsage: (chunk: StreamChunk) => chunk,
+      consumeMetadata: jest.fn().mockReturnValue({}),
       updateContextWindow: () => null,
       record: jest.fn(),
     },
@@ -109,6 +110,47 @@ describe('QoderResponseRouter', () => {
       }));
 
       expect(events.onDone).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('auto-turn buffer', () => {
+    function createIdleRouterHarness() {
+      const harness = createRouterHarness();
+      harness.router.unregister(harness.handler.id);
+      const autoTurnCallback = jest.fn();
+      harness.router.setAutoTurnCallback(autoTurnCallback);
+      return { router: harness.router, autoTurnCallback };
+    }
+
+    const buildBetweenTurnAssistantMessage = () => buildSDKMessage({
+      type: 'assistant',
+      message: { content: [{ type: 'text', text: 'Before restart.' }] },
+    });
+
+    it('flushes chunks buffered between turns on the next turn-complete', async () => {
+      const { router, autoTurnCallback } = createIdleRouterHarness();
+
+      await router.route(buildBetweenTurnAssistantMessage());
+
+      expect(autoTurnCallback).not.toHaveBeenCalled();
+
+      await router.route(buildSDKMessage({ type: 'result' }));
+
+      expect(autoTurnCallback).toHaveBeenCalledWith(expect.objectContaining({
+        chunks: [expect.objectContaining({ type: 'text', content: 'Before restart.' })],
+      }));
+    });
+
+    // Known limitation, documented on QoderResponseRouter.reset: a
+    // persistent-query restart racing a background completion loses it.
+    it('drops buffered chunks across a reset', async () => {
+      const { router, autoTurnCallback } = createIdleRouterHarness();
+
+      await router.route(buildBetweenTurnAssistantMessage());
+      router.reset();
+      await router.route(buildSDKMessage({ type: 'result' }));
+
+      expect(autoTurnCallback).not.toHaveBeenCalled();
     });
   });
 });

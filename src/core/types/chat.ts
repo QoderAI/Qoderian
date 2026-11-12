@@ -158,7 +158,15 @@ export type StreamChunk =
   | { type: 'done' }
   | { type: 'usage'; usage: UsageInfo; sessionId?: string | null }
   | { type: 'context_compacted' }
-  | { type: 'async_subagent_result'; agentId: string; status: 'completed' | 'error'; result?: string }
+  | {
+      type: 'async_subagent_result';
+      /** CLI task registry id — a different id space from the agentId in the Agent tool result. */
+      taskId: string;
+      /** The launching Agent tool_use id; the only reliable correlation key, but optional in the protocol. */
+      toolUseId?: string;
+      status: 'completed' | 'error';
+      result?: string;
+    }
   | { type: 'subagent_tool_use'; subagentId: string; id: string; name: string; input: Record<string, unknown> }
   | { type: 'subagent_tool_result'; subagentId: string; id: string; content: string; isError?: boolean; toolUseResult?: ToolUseResult };
 

@@ -171,9 +171,10 @@ export class SubagentStreamCoordinator {
     chunk: Extract<StreamChunk, { type: 'async_subagent_result' }>,
   ): Promise<void> {
     const handled = this.deps.subagentManager.handleAsyncSubagentResult(
-      chunk.agentId,
+      chunk.taskId,
       chunk.status,
       chunk.result,
+      chunk.toolUseId,
     );
     await this.hydrateAsyncSubagentToolCalls(handled);
     if (handled) this.deps.showThinkingIndicator();

@@ -46,6 +46,13 @@ export class QoderResponseRouter {
     if (index >= 0) this.handlers.splice(index, 1);
   }
 
+  /**
+   * Known limitation: buffered auto-turn chunks are dropped here. A background
+   * completion that arrives between turns is now the main thing landing in that
+   * buffer, so a persistent-query restart racing it loses the result. Keeping
+   * the buffer across a restart needs replay idempotency first — crash recovery
+   * re-enqueues the interrupted message, which would render twice.
+   */
   reset(preserveHandlers = false): void {
     this.autoTurnBuffer = [];
     this.autoTurnSawStreamText = false;

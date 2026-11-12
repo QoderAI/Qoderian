@@ -437,22 +437,30 @@ export class SubagentManager {
   }
 
   public handleAsyncSubagentResult(
-    agentId: string,
+    taskId: string,
     status: 'completed' | 'error',
-    result?: string
+    result?: string,
+    toolUseId?: string
   ): SubagentInfo | undefined {
-    const subagent = this.activeAsyncSubagents.get(agentId);
-    if (!subagent || subagent.asyncStatus !== 'running') {
+    // The CLI's task_id comes from its own task registry and shares no id space
+    // with the agentId parsed out of the Agent tool result. The notification's
+    // tool_use_id is the launching Agent tool_use id, which is ours.
+    const subagent =
+      (toolUseId ? this.getByTaskId(toolUseId) : undefined) ??
+      this.activeAsyncSubagents.get(taskId);
+    if (!subagent || subagent.asyncStatus === 'completed' || subagent.asyncStatus === 'error') {
       return undefined;
     }
 
-    subagent.agentId = subagent.agentId || agentId;
+    const agentId = subagent.agentId;
     subagent.asyncStatus = status;
     subagent.status = status;
     subagent.result = result?.trim() || (status === 'error' ? 'Background task failed.' : 'Background task completed.');
     subagent.completedAt = Date.now();
 
-    this.activeAsyncSubagents.delete(agentId);
+    if (agentId) this.activeAsyncSubagents.delete(agentId);
+    this.pendingAsyncSubagents.delete(subagent.id);
+    this.taskIdToAgentId.delete(subagent.id);
     for (const [toolId, mappedAgentId] of this.outputToolIdToAgentId.entries()) {
       if (mappedAgentId === agentId) {
         this.outputToolIdToAgentId.delete(toolId);
@@ -491,15 +499,6 @@ export class SubagentManager {
   public refreshAsyncSubagent(subagent: SubagentInfo): void {
     this.updateAsyncDomState(subagent);
     this.onStateChange(subagent);
-  }
-
-  // ============================================
-  // Hook State
-  // ============================================
-
-  public hasRunningSubagents(): boolean {
-    // pendingAsyncSubagents: awaiting agent_id; activeAsyncSubagents: only holds running entries
-    return this.pendingAsyncSubagents.size > 0 || this.activeAsyncSubagents.size > 0;
   }
 
   // ============================================

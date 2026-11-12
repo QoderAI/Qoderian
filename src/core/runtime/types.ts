@@ -95,10 +95,6 @@ export interface ChatRewindResult {
 
 export type ChatRewindMode = 'conversation' | 'code-and-conversation';
 
-export interface SubagentRuntimeState {
-  hasRunning: boolean;
-}
-
 export interface ChatTurnMetadata {
   userMessageId?: string;
   assistantMessageId?: string;
