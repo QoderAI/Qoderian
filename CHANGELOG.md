@@ -11,8 +11,16 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.19] - 2026-11-12
+
 ### Fixed
 
+- A turn that launched background subagents could refuse to finish: it was
+  repeatedly told to wait on a tool it had never been given, so the reply
+  looped until interrupted. Background results now reach the model on their
+  own and the turn ends normally.
+- A finished background subagent no longer stays stuck on "Running", and is
+  no longer reported as abandoned when switching conversations.
 - The new-tab, new-conversation, and chat-history buttons above the input are
   no longer nearly invisible in dark mode. Their icons now use the same muted
   color as the other composer controls instead of the faintest text tone, so
@@ -55,16 +63,6 @@ version with its date and start a fresh empty `[Unreleased]` above it.
   image previews.
 - The current-note chip above the composer is gone. Use the "Excluded tags"
   setting to keep a note out of context.
-
-### Fixed
-
-- A turn that launched background subagents could refuse to finish: it was
-  repeatedly told to wait on a tool it had never been given, so the reply
-  looped until interrupted. Background results now reach the model on their
-  own and the turn ends normally.
-
-- A finished background subagent no longer stays stuck on "Running", and is
-  no longer reported as abandoned when switching conversations.
 
 ## [1.0.16] - 2026-09-29
 
