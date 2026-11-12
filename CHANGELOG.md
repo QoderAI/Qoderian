@@ -11,6 +11,13 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Fixed
+
+- The new-tab, new-conversation, and chat-history buttons above the input are
+  no longer nearly invisible in dark mode. Their icons now use the same muted
+  color as the other composer controls instead of the faintest text tone, so
+  they stay readable without hovering.
+
 ## [1.0.18] - 2026-10-30
 
 ### Fixed
