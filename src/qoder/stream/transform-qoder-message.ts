@@ -69,9 +69,11 @@ function transformTaskNotification(message: SDKMessage): StreamChunk | null {
   }
 
   const status = normalizeTaskNotificationStatus(record.status);
+  const toolUseId = record.tool_use_id;
   return {
     type: 'async_subagent_result',
-    agentId: taskId,
+    taskId,
+    ...(typeof toolUseId === 'string' && toolUseId.length > 0 ? { toolUseId } : {}),
     status,
     result: normalizeTaskNotificationResult(status, record.summary),
   };

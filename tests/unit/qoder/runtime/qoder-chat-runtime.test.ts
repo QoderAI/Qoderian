@@ -1281,9 +1281,10 @@ describe('QoderChatRuntime', () => {
       await (service as any).responseRouter.route({
         type: 'system',
         subtype: 'task_notification',
-        task_id: 'agent-123',
+        task_id: 'a2f86bbc1bc40d8c5',
+        tool_use_id: 'toolu_agent_1',
         status: 'completed',
-        output_file: '/tmp/agent-123.output',
+        output_file: '/tmp/a2f86bbc1bc40d8c5.output',
         summary: 'Agent completed successfully.',
         uuid: 'notification-1',
         session_id: 'session-1',
@@ -1291,7 +1292,8 @@ describe('QoderChatRuntime', () => {
 
       expect(onChunk).toHaveBeenCalledWith({
         type: 'async_subagent_result',
-        agentId: 'agent-123',
+        taskId: 'a2f86bbc1bc40d8c5',
+        toolUseId: 'toolu_agent_1',
         status: 'completed',
         result: 'Agent completed successfully.',
       });
@@ -1317,7 +1319,7 @@ describe('QoderChatRuntime', () => {
         chunks: [
           {
             type: 'async_subagent_result',
-            agentId: 'agent-456',
+            taskId: 'agent-456',
             status: 'completed',
             result: 'Background agent finished.',
           },

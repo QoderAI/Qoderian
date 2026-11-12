@@ -105,10 +105,37 @@ describe('transformSDKMessage', () => {
 
       const results = [...transformSDKMessage(message)];
 
-      expect(results).toEqual([
+      // toStrictEqual: toolUseId is conditionally spread, so an explicit
+      // `toolUseId: undefined` key must not appear when the CLI omits it.
+      expect(results).toStrictEqual([
         {
           type: 'async_subagent_result',
-          agentId: 'agent-123',
+          taskId: 'agent-123',
+          status: 'completed',
+          result: 'Agent completed successfully.',
+        },
+      ]);
+      expect('toolUseId' in results[0]).toBe(false);
+    });
+
+    it('carries tool_use_id so the notification can be matched to its Agent call', () => {
+      const message = msg({
+        type: 'system',
+        subtype: 'task_notification',
+        task_id: 'a2f86bbc1bc40d8c5',
+        tool_use_id: 'toolu_agent_1',
+        status: 'completed',
+        output_file: '/tmp/a2f86bbc1bc40d8c5.output',
+        summary: 'Agent completed successfully.',
+      } as any);
+
+      const results = [...transformSDKMessage(message)];
+
+      expect(results).toStrictEqual([
+        {
+          type: 'async_subagent_result',
+          taskId: 'a2f86bbc1bc40d8c5',
+          toolUseId: 'toolu_agent_1',
           status: 'completed',
           result: 'Agent completed successfully.',
         },
@@ -127,10 +154,10 @@ describe('transformSDKMessage', () => {
 
       const results = [...transformSDKMessage(message)];
 
-      expect(results).toEqual([
+      expect(results).toStrictEqual([
         {
           type: 'async_subagent_result',
-          agentId: 'agent-failed',
+          taskId: 'agent-failed',
           status: 'error',
           result: 'Agent failed.',
         },

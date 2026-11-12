@@ -39,9 +39,6 @@ export function setupServiceCallbacks(tab: TabData, plugin: QoderianPlugin): voi
     }
     return decision;
   });
-  tab.service.setSubagentStateSource(() => ({
-    hasRunning: tab.services.subagentManager.hasRunningSubagents(),
-  }));
   tab.service.setAutoTurnCallback((result: AutoTurnResult) => renderAutoTriggeredTurn(tab, result));
   tab.service.setPermissionModeSyncCallback((sdkMode) => {
     const mode = sdkMode === 'bypassPermissions' || sdkMode === 'yolo'

@@ -46,7 +46,6 @@ export interface PersistentQueryContext extends QueryOptionsContext {
     fork?: boolean;
   };
   canUseTool?: CanUseTool;
-  hooks: Options['hooks'];
   externalContextPaths?: string[];
 }
 
@@ -55,7 +54,6 @@ export interface ColdStartQueryContext extends QueryOptionsContext {
   sessionId?: string;
   modelOverride?: string;
   canUseTool?: CanUseTool;
-  hooks: Options['hooks'];
   mcpMentions?: Set<string>;
   enabledMcpServers?: Set<string>;
   allowedTools?: string[];
@@ -151,7 +149,6 @@ export class QueryOptionsBuilder {
       ctx.canUseTool,
     );
     QueryOptionsBuilder.applyThinking(options, ctx.settings, runtimeModel);
-    options.hooks = ctx.hooks;
 
     // Pull mode: the provider re-reads live settings so model/override
     // changes apply on the next LLM call without restarting the query.
@@ -205,7 +202,6 @@ export class QueryOptionsBuilder {
       ctx.settings.permissionMode,
       ctx.canUseTool,
     );
-    options.hooks = ctx.hooks;
     QueryOptionsBuilder.applyThinking(options, ctx.settings, selectedModel);
     options.resolveModel = createQoderModelPolicyProvider(
       () => selectedModel,

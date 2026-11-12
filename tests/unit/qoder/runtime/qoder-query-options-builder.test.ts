@@ -37,7 +37,6 @@ function createContext(
     pluginManager: {
       getPluginsKey: jest.fn().mockReturnValue(''),
     } as unknown as AppPluginManager,
-    hooks: {},
   };
 }
 

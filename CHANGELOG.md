@@ -49,6 +49,16 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 - The current-note chip above the composer is gone. Use the "Excluded tags"
   setting to keep a note out of context.
 
+### Fixed
+
+- A turn that launched background subagents could refuse to finish: it was
+  repeatedly told to wait on a tool it had never been given, so the reply
+  looped until interrupted. Background results now reach the model on their
+  own and the turn ends normally.
+
+- A finished background subagent no longer stays stuck on "Running", and is
+  no longer reported as abandoned when switching conversations.
+
 ## [1.0.16] - 2026-09-29
 
 ### Changed
