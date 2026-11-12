@@ -182,7 +182,7 @@ body.qoderian-composer-resizing * {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--text-faint);
+  color: var(--text-muted);
   transition: color 0.15s ease;
 }
 
