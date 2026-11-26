@@ -329,6 +329,45 @@ describe('ModelSelector', () => {
       expect(parentEl.querySelectorAll('.qoderian-model-edit')).toHaveLength(0);
     });
 
+    it('stacks meta and the edit affordance in one trailing slot', () => {
+      const parentEl = createMockEl();
+      new ModelSelector(parentEl, {
+        onModelChange: jest.fn().mockResolvedValue(undefined),
+        onPermissionModeChange: jest.fn().mockResolvedValue(undefined),
+        onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
+        getSettings: jest.fn().mockReturnValue({ model: 'qmodel', permissionMode: 'auto' }),
+        getModelConfig: jest.fn().mockReturnValue({
+          getModelOptions: jest.fn().mockReturnValue([{
+            value: 'qmodel',
+            label: 'Qwen 3.8 Max',
+            group: 'Qoder',
+            priceLabel: '0.5x',
+            contextTiers: [{ label: '200K', tokenCount: 200000, isDefault: true }],
+          }]),
+        }),
+      });
+
+      const trailing = parentEl.querySelector('.qoderian-model-trailing');
+      expect(trailing?.querySelector('.qoderian-model-meta')).toBeTruthy();
+      expect(trailing?.querySelector('.qoderian-model-edit')).toBeTruthy();
+    });
+
+    it('caps the list by the anchor width and ignores zero-width anchors', () => {
+      const parentEl = createMockEl();
+      new ModelSelector(parentEl, buildCallbacks({
+        onModelOverrideChange: jest.fn().mockResolvedValue(undefined),
+      }));
+      const dropdown = parentEl.querySelector('.qoderian-model-dropdown');
+      expect(dropdown?.style['--qoderian-model-list-max-width']).toBeUndefined();
+
+      parentEl.querySelector('.qoderian-model-selector')!.getBoundingClientRect = () => ({
+        top: 0, left: 0, width: 300, height: 600, right: 300, bottom: 600, x: 0, y: 0, toJSON() {},
+      });
+      parentEl.querySelector('.qoderian-model-btn')?.click();
+
+      expect(dropdown?.style['--qoderian-model-list-max-width']).toBe('300px');
+    });
+
     it('opens the editor view with tiers, default tag, and thinking toggle', () => {
       const parentEl = createMockEl();
       new ModelSelector(parentEl, buildCallbacks({

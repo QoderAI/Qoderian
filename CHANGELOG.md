@@ -11,6 +11,18 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Fixed
+
+- The per-model editor (context window tiers and thinking effort) disappeared
+  from the model selector after the CLI daemon upgrade: the catalog now
+  arrives in a flat field shape the plugin did not read, so the edit entry
+  hid itself. Both shapes are mapped again.
+- The editor's "disable thinking" switch had no effect against the daemon
+  catalog: the per-request model policy only recognized the legacy
+  thinking_config block. Flat catalog flags are honored again.
+- The model dropdown no longer jumps wider when hovering a row, and no longer
+  overflows and clips inside narrow sidebars.
+
 ## [1.0.19] - 2026-11-12
 
 ### Fixed

@@ -95,8 +95,10 @@ function mapSdkModels(models: ModelInfo[]): QoderDiscoveredModel[] {
     if (!value || model.isEnabled === false) return [];
     const group = resolveSdkModelGroup(model);
     const promotion = mapSdkPromotion(model);
-    const contextTiers = mapContextTiers(model.context_config);
-    const thinkingEfforts = mapThinkingEfforts(model.thinking_config);
+    const contextTiers = mapContextTiers(model.context_config)
+      ?? mapFlatContextWindows(model.availableContextWindows, model.defaultContextWindow);
+    const thinkingEfforts = mapThinkingEfforts(model.thinking_config)
+      ?? mapFlatEfforts(model.efforts, model.defaultEffort);
     return [{
       value,
       displayName: model.displayName?.trim() || value,
@@ -108,10 +110,54 @@ function mapSdkModels(models: ModelInfo[]): QoderDiscoveredModel[] {
         : {}),
       ...(promotion ? { promotion } : {}),
       ...(contextTiers ? { contextTiers } : {}),
-      ...(model.thinking_config?.disabled !== undefined ? { thinkingDisableable: true } : {}),
+      ...(model.thinking_config?.disabled !== undefined || model.supportsDisabled === true
+        ? { thinkingDisableable: true }
+        : {}),
       ...(thinkingEfforts ? { thinkingEfforts } : {}),
     }];
   });
+}
+
+/** Daemon catalog `availableContextWindows` into editor tiers. */
+function mapFlatContextWindows(
+  windows: number[] | undefined,
+  defaultWindow: number | undefined,
+): QoderDiscoveredModel['contextTiers'] {
+  if (!windows) return undefined;
+  const tiers = windows.flatMap((tokenCount) => {
+    if (typeof tokenCount !== 'number' || !isFinite(tokenCount) || tokenCount <= 0) return [];
+    return [{
+      label: formatTokenCountLabel(tokenCount),
+      tokenCount,
+      isDefault: tokenCount === defaultWindow,
+    }];
+  });
+  tiers.sort((a, b) => a.tokenCount - b.tokenCount);
+  return tiers.length > 0 ? tiers : undefined;
+}
+
+function formatTokenCountLabel(tokenCount: number): string {
+  if (tokenCount >= 1_000_000 && tokenCount % 1_000_000 === 0) {
+    return `${tokenCount / 1_000_000}M`;
+  }
+  if (tokenCount >= 1_000 && tokenCount % 1_000 === 0) {
+    return `${tokenCount / 1_000}K`;
+  }
+  return String(tokenCount);
+}
+
+/** Daemon catalog `efforts` into editor intensity choices. */
+function mapFlatEfforts(
+  efforts: string[] | undefined,
+  defaultEffort: string | undefined,
+): QoderDiscoveredModel['thinkingEfforts'] {
+  if (!efforts) return undefined;
+  const mapped = efforts.flatMap((value) => {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+    return [{ value: trimmed, isDefault: trimmed === defaultEffort }];
+  });
+  return mapped.length > 0 ? sortThinkingEfforts(mapped) : undefined;
 }
 
 /** Server `thinking_config.enabled.efforts` into editor intensity choices. */

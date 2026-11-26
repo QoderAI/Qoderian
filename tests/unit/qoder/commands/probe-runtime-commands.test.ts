@@ -312,6 +312,54 @@ describe('probeRuntimeCatalog', () => {
     ]);
   });
 
+  it('maps flat daemon catalog fields for the per-model editor', async () => {
+    setInitMessage();
+    sdkMock.setMockAvailableModels([
+      {
+        value: 'qmodel_38max',
+        displayName: 'Qwen 3.8 Max',
+        description: '',
+        availableContextWindows: [400000, 200000, 1000000, -1],
+        defaultContextWindow: 200000,
+        efforts: ['xhigh', 'low', 'medium'],
+        defaultEffort: 'medium',
+        supportsDisabled: true,
+      },
+      {
+        value: 'flat-minimal',
+        displayName: 'Flat minimal',
+        description: '',
+        efforts: ['high'],
+      },
+    ]);
+
+    const result = await probeRuntimeCatalog(createMockPlugin());
+    expectSuccessfulProbe(result);
+
+    expect(result.models[0]).toEqual({
+      value: 'qmodel_38max',
+      displayName: 'Qwen 3.8 Max',
+      description: '',
+      group: 'Qoder',
+      contextTiers: [
+        { label: '200K', tokenCount: 200000, isDefault: true },
+        { label: '400K', tokenCount: 400000, isDefault: false },
+        { label: '1M', tokenCount: 1000000, isDefault: false },
+      ],
+      thinkingDisableable: true,
+      thinkingEfforts: [
+        { value: 'low', isDefault: false },
+        { value: 'medium', isDefault: true },
+        { value: 'xhigh', isDefault: false },
+      ],
+    });
+    expect(result.models[1]).not.toHaveProperty('thinkingDisableable');
+    expect(result.models[1]).not.toHaveProperty('contextTiers');
+    expect(result.models[1]).toHaveProperty('thinkingEfforts', [
+      { value: 'high', isDefault: false },
+    ]);
+  });
+
   it('uses initialization pricing when a live catalog refresh returns empty', async () => {
     setInitMessage();
     sdkMock.setMockAvailableModels([]);

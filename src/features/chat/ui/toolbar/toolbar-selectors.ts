@@ -257,42 +257,47 @@ export class ModelSelector {
         width: 12,
       }));
       option.createSpan({ cls: 'qoderian-model-option-label', text: model.label });
-      if (model.promotionLabel || model.priceLabel) {
-        const meta = option.createSpan({ cls: 'qoderian-model-meta' });
-        if (model.promotionLabel) {
-          meta.createSpan({ cls: 'qoderian-model-promo', text: model.promotionLabel });
-        }
-        if (model.priceLabel) {
-          meta.createSpan({ cls: 'qoderian-model-price', text: model.priceLabel });
-        }
-      }
       const editable = ((model.contextTiers?.length ?? 0) > 0
         || (model.thinkingEfforts?.length ?? 0) > 0
         || model.thinkingDisableable === true)
         && this.callbacks.onModelOverrideChange !== undefined;
-      if (editable) {
-        const editEl = option.createDiv({ cls: 'qoderian-model-edit' });
-        editEl.setAttribute('role', 'button');
-        editEl.setAttribute('tabindex', '0');
-        editEl.setAttribute('aria-label', `${t('model.edit')} ${model.label}`);
-        editEl.appendChild(createIconSvg(PENCIL_ICON, {
-          className: 'qoderian-model-edit-icon',
-          height: 11,
-          ownerDocument: option.ownerDocument,
-          width: 11,
-        }));
-        editEl.createSpan({ cls: 'qoderian-model-edit-label', text: t('model.edit') });
-        const enterEditing = (event: Event) => {
-          event.stopPropagation();
-          this.editingModel = model.value;
-          this.renderOptions();
-        };
-        editEl.addEventListener('click', enterEditing);
-        editEl.addEventListener('keydown', (event) => {
-          if (event.key !== 'Enter' && event.key !== ' ') return;
-          event.preventDefault();
-          enterEditing(event);
-        });
+      // Meta and the edit affordance share one trailing slot so swapping them
+      // on hover never changes the row's width.
+      if (model.promotionLabel || model.priceLabel || editable) {
+        const trailing = option.createDiv({ cls: 'qoderian-model-trailing' });
+        if (model.promotionLabel || model.priceLabel) {
+          const meta = trailing.createSpan({ cls: 'qoderian-model-meta' });
+          if (model.promotionLabel) {
+            meta.createSpan({ cls: 'qoderian-model-promo', text: model.promotionLabel });
+          }
+          if (model.priceLabel) {
+            meta.createSpan({ cls: 'qoderian-model-price', text: model.priceLabel });
+          }
+        }
+        if (editable) {
+          const editEl = trailing.createDiv({ cls: 'qoderian-model-edit' });
+          editEl.setAttribute('role', 'button');
+          editEl.setAttribute('tabindex', '0');
+          editEl.setAttribute('aria-label', `${t('model.edit')} ${model.label}`);
+          editEl.appendChild(createIconSvg(PENCIL_ICON, {
+            className: 'qoderian-model-edit-icon',
+            height: 11,
+            ownerDocument: option.ownerDocument,
+            width: 11,
+          }));
+          editEl.createSpan({ cls: 'qoderian-model-edit-label', text: t('model.edit') });
+          const enterEditing = (event: Event) => {
+            event.stopPropagation();
+            this.editingModel = model.value;
+            this.renderOptions();
+          };
+          editEl.addEventListener('click', enterEditing);
+          editEl.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            enterEditing(event);
+          });
+        }
       }
       if (model.description) option.setAttribute('title', model.description);
 
@@ -419,13 +424,19 @@ export class ModelSelector {
     const view = this.container.ownerDocument.defaultView;
     if (!view) return;
     const anchor = (dropdownEl.offsetParent ?? this.container).getBoundingClientRect();
+    const listMaxWidth = Math.floor(anchor.width);
+    dropdownEl.setCssProps({
+      '--qoderian-model-dropdown-max-height': `${modelDropdownMaxHeight(anchor.top)}px`,
+      // Keep the list inside the surrounding pane (e.g. a narrow sidebar);
+      // viewport-based caps alone let it overflow and clip at the leaf edge.
+      // A zero-width anchor (hidden or unlayouted view) must not collapse it.
+      ...(listMaxWidth > 0 ? { '--qoderian-model-list-max-width': `${listMaxWidth}px` } : {}),
+    });
+    // Measure after the cap applies so the flip decision sees the real width.
     dropdownEl.toggleClass(
       'qoderian-model-dropdown--flip',
       shouldFlipModelDropdown(anchor, dropdownEl.offsetWidth, view.innerWidth),
     );
-    dropdownEl.setCssProps({
-      '--qoderian-model-dropdown-max-height': `${modelDropdownMaxHeight(anchor.top)}px`,
-    });
     // Anchor the compact editor card to its edited row, IDE flyout style.
     if (this.editingModel !== null && this.listPaneEl && this.editorPaneEl) {
       const rowEl = this.listPaneEl.querySelector('.qoderian-model-option.editing');
