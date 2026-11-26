@@ -94,7 +94,6 @@
       "chooseTarget": "分叉对话",
       "targetNewTab": "新标签页",
       "targetCurrentTab": "当前标签页",
-      "maxTabsReached": "无法分叉：已达到最大 {count} 个标签页",
       "notice": "已分叉到新标签页",
       "noticeCurrentTab": "已在当前标签页分叉",
       "failed": "分叉失败：{error}",
@@ -106,9 +105,6 @@
       "errorNoActiveTab": "没有活动标签页",
       "commandNoMessages": "无法分叉：对话中没有消息",
       "commandNoAssistantUuid": "无法分叉：没有带标识符的助手回复"
-    },
-    "tabs": {
-      "maxTabsReached": "已达会话上限（{count}），可在设置中调整上限。"
     },
     "bangBash": {
       "placeholder": "> 运行命令...",
@@ -351,11 +347,6 @@
       "validation": {
         "noNode": "未在 PATH 中找到 Node.js。请安装 Node.js 或检查 PATH 配置。"
       }
-    },
-    "maxTabs": {
-      "name": "最大聊天标签数",
-      "desc": "同时开启的最大聊天标签数（3-10）。每个标签使用独立的 Qoder 会话。",
-      "warning": "超过 5 个标签可能会影响性能和内存使用。"
     },
     "enableAutoScroll": {
       "name": "流式传输时自动滚动",

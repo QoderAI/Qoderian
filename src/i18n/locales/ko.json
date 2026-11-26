@@ -94,7 +94,6 @@
       "chooseTarget": "대화 분기",
       "targetNewTab": "새 탭",
       "targetCurrentTab": "현재 탭",
-      "maxTabsReached": "분기 불가: 최대 {count}개 탭에 도달했습니다",
       "notice": "새 탭으로 분기됨",
       "noticeCurrentTab": "현재 탭에서 분기됨",
       "failed": "분기 실패: {error}",
@@ -106,9 +105,6 @@
       "errorNoActiveTab": "활성 탭이 없습니다",
       "commandNoMessages": "포크할 수 없습니다: 대화에 메시지가 없습니다",
       "commandNoAssistantUuid": "포크할 수 없습니다: 식별자가 있는 어시스턴트 응답이 없습니다"
-    },
-    "tabs": {
-      "maxTabsReached": "세션 한도({count})에 도달했습니다. 설정에서 한도를 변경할 수 있습니다."
     },
     "bangBash": {
       "placeholder": "> bash 명령 실행...",
@@ -351,11 +347,6 @@
       "validation": {
         "noNode": "PATH에서 Node.js를 찾을 수 없습니다. Node.js를 설치하거나 PATH 설정을 확인하세요."
       }
-    },
-    "maxTabs": {
-      "name": "최대 채팅 탭 수",
-      "desc": "동시에 열 수 있는 최대 채팅 탭 수(3-10). 각 탭은 별도의 Qoder 세션을 사용합니다.",
-      "warning": "5개 탭을 초과하면 성능 및 메모리 사용량에 영향을 줄 수 있습니다."
     },
     "enableAutoScroll": {
       "name": "스트리밍 중 자동 스크롤",

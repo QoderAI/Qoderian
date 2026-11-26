@@ -2,14 +2,13 @@ import { createMockEl } from '@test/helpers/mock-element';
 import { Notice, Platform, Scope } from 'obsidian';
 
 import { QoderianView } from '@/features/chat/chat-view';
-import { setLocale, t } from '@/i18n/i18n';
+import { setLocale } from '@/i18n/i18n';
 
 const MockScope = Scope as typeof Scope & { instances: Scope[] };
 const MockNotice = Notice as unknown as jest.Mock;
 
 function createViewHarness(options: {
   createdTab?: unknown;
-  maxTabs?: number;
 }): {
   createTab: jest.Mock;
   view: any;
@@ -18,7 +17,7 @@ function createViewHarness(options: {
   const view = Object.create(QoderianView.prototype) as any;
 
   view.plugin = {
-    settings: { maxTabs: options.maxTabs ?? 4 },
+    settings: {},
   };
   view.tabManager = { createTab };
 
@@ -31,17 +30,6 @@ describe('QoderianView tab controls', () => {
     setLocale('en');
   });
 
-  it('notices the limit and points to settings when no tab can be created', async () => {
-    const { view } = createViewHarness({ createdTab: null, maxTabs: 4 });
-
-    await view.createNewTab();
-
-    expect(MockNotice).toHaveBeenCalledTimes(1);
-    expect(MockNotice.mock.calls[0][0]).toBe(
-      t('chat.tabs.maxTabsReached', { count: '4' }),
-    );
-  });
-
   it('stays quiet when a new tab is created', async () => {
     const { createTab, view } = createViewHarness({ createdTab: { id: 'tab-2' } });
 
@@ -51,42 +39,32 @@ describe('QoderianView tab controls', () => {
     expect(MockNotice).not.toHaveBeenCalled();
   });
 
-  it('hides the strip and the new-session button at the limit while the redesign is off', () => {
+  it('hides the strip for a single tab while the redesign is off', () => {
     const tabBarContainerEl = createMockEl();
-    const newTabButtonEl = createMockEl();
     const view = Object.create(QoderianView.prototype) as any;
     view.plugin = { settings: {} };
     view.tabManager = {
       getTabCount: jest.fn().mockReturnValue(1),
-      canCreateTab: jest.fn().mockReturnValue(false),
     };
     view.tabBarContainerEl = tabBarContainerEl;
-    view.newTabButtonEl = newTabButtonEl;
 
-    view.refreshTabControls();
+    view.updateTabBarVisibility();
 
     expect(tabBarContainerEl.hasClass('qoderian-hidden')).toBe(true);
-    expect(newTabButtonEl.hasClass('qoderian-hidden')).toBe(true);
-    expect(newTabButtonEl.getAttribute('aria-hidden')).toBe('true');
   });
 
-  it('keeps a single session visible and the new-session button enabled while the redesign is on', () => {
+  it('keeps a single session visible while the redesign is on', () => {
     const tabBarContainerEl = createMockEl();
-    const newTabButtonEl = createMockEl();
     const view = Object.create(QoderianView.prototype) as any;
     view.plugin = { settings: { enableSessionTabsRedesign: true } };
     view.tabManager = {
       getTabCount: jest.fn().mockReturnValue(1),
-      canCreateTab: jest.fn().mockReturnValue(false),
     };
     view.tabBarContainerEl = tabBarContainerEl;
-    view.newTabButtonEl = newTabButtonEl;
 
-    view.refreshTabControls();
+    view.updateTabBarVisibility();
 
     expect(tabBarContainerEl.hasClass('qoderian-hidden')).toBe(false);
-    expect(newTabButtonEl.hasClass('qoderian-hidden')).toBe(false);
-    expect(newTabButtonEl.getAttribute('aria-disabled')).toBeNull();
   });
 
   it('opens a history conversation in a new tab when the redesign is on', async () => {
@@ -115,23 +93,6 @@ describe('QoderianView tab controls', () => {
 
     expect(openConversation).toHaveBeenCalledWith('conv-9', { preferNewTab: false });
     expect(MockNotice).not.toHaveBeenCalled();
-    expect(view.historyDropdown.hasClass('visible')).toBe(false);
-  });
-
-  it('notices the limit when a history conversation cannot open a new tab', async () => {
-    const openConversation = jest.fn().mockResolvedValue(false);
-    const view = Object.create(QoderianView.prototype) as any;
-    view.plugin = { settings: { maxTabs: 3, enableSessionTabsRedesign: true } };
-    view.tabManager = { openConversation };
-    view.historyDropdown = createMockEl();
-    view.historyDropdown.addClass('visible');
-
-    await view.openHistoryConversation('conv-9');
-
-    expect(MockNotice).toHaveBeenCalledTimes(1);
-    expect(MockNotice.mock.calls[0][0]).toBe(
-      t('chat.tabs.maxTabsReached', { count: '3' }),
-    );
     expect(view.historyDropdown.hasClass('visible')).toBe(false);
   });
 

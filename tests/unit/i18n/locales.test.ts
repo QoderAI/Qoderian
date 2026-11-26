@@ -117,7 +117,6 @@ const localizedKeys = [
   'feedback.noticeFailed',
   'nav.newSession',
   'nav.closeSession',
-  'chat.tabs.maxTabsReached',
   'settings.enableSessionTabsRedesign.name',
   'settings.enableSessionTabsRedesign.desc',
 ] as const;

@@ -188,7 +188,6 @@ export interface QoderianSettings {
   qoder: QoderSettings;
 
   // UI preferences
-  maxTabs: number;
   enableAutoScroll: boolean;
   deferMathRenderingDuringStreaming: boolean;
   expandFileEditsByDefault: boolean;

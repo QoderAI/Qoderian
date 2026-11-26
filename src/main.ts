@@ -134,13 +134,8 @@ export default class QoderianPlugin extends Plugin {
     this.addCommand({
       id: 'new-tab',
       name: t('commands.newTab'),
-      checkCallback: (checking: boolean) => {
-        if (!this.canCreateNewTab()) return false;
-
-        if (!checking) {
-          void this.openNewTab();
-        }
-        return true;
+      callback: () => {
+        void this.openNewTab();
       },
     });
 
@@ -362,22 +357,6 @@ export default class QoderianPlugin extends Plugin {
       active: true,
     });
     return leaf;
-  }
-
-  private canCreateNewTab(): boolean {
-    const hasQoderianLeaf = this.app.workspace.getLeavesOfType(VIEW_TYPE_QODERIAN).length > 0;
-    const view = this.getView();
-    const tabManager = view?.getTabManager();
-
-    if (tabManager) {
-      return tabManager.canCreateTab();
-    }
-
-    if (hasQoderianLeaf) {
-      return false;
-    }
-
-    return this.getLastKnownOpenTabCount() < this.getMaxTabsLimit();
   }
 
   private async ensureViewOpen(): Promise<QoderianView | null> {
@@ -802,11 +781,6 @@ export default class QoderianPlugin extends Plugin {
 
   private getLastKnownOpenTabCount(): number {
     return this.lastKnownTabManagerState?.openTabs.length ?? 0;
-  }
-
-  private getMaxTabsLimit(): number {
-    const maxTabs = this.settings.maxTabs ?? 3;
-    return Math.max(3, Math.min(10, maxTabs));
   }
 
 }

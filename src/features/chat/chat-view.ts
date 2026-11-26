@@ -22,7 +22,7 @@ import {
 } from './tabs/tab';
 import { TabBar } from './tabs/tab-bar';
 import { TabManager } from './tabs/tab-manager';
-import { DEFAULT_MAX_TABS, type TabData, type TabId } from './tabs/types';
+import { type TabData, type TabId } from './tabs/types';
 import { CreditsUsageButton } from './ui/credits-usage-button';
 
 type LoadableView = {
@@ -411,11 +411,6 @@ export class QoderianView extends ItemView {
     return this.sessionTabsRedesignEnabled() ? t('nav.newSession') : t('commands.newTab');
   }
 
-  /** Refreshes tab controls after settings that affect tab availability change. */
-  refreshTabControls(): void {
-    this.updateTabBarVisibility();
-  }
-
   /** Re-renders tab chrome after the experimental session-tab mode changes. */
   refreshSessionTabsMode(): void {
     this.newConversationButtonEl?.toggleClass(
@@ -470,12 +465,7 @@ export class QoderianView extends ItemView {
   }
 
   async createNewTab(): Promise<void> {
-    const tab = await this.tabManager?.createTab();
-    if (!tab) {
-      this.noticeSessionLimit();
-      this.updateTabBarVisibility();
-      return;
-    }
+    await this.tabManager?.createTab();
     this.updateTabBarVisibility();
   }
 
@@ -506,24 +496,6 @@ export class QoderianView extends ItemView {
     const showTabBar = tabCount >= 2;
 
     this.tabBarContainerEl.toggleClass('qoderian-hidden', !showTabBar);
-
-    this.updateNewTabButtonVisibility();
-  }
-
-  private updateNewTabButtonVisibility(): void {
-    if (!this.newTabButtonEl || !this.tabManager) return;
-    if (this.sessionTabsRedesignEnabled()) return;
-
-    const canCreateTab = this.tabManager.canCreateTab();
-    this.newTabButtonEl.toggleClass('qoderian-hidden', !canCreateTab);
-    if (canCreateTab) {
-      this.newTabButtonEl.removeAttribute('aria-disabled');
-      this.newTabButtonEl.removeAttribute('aria-hidden');
-      return;
-    }
-
-    this.newTabButtonEl.setAttribute('aria-disabled', 'true');
-    this.newTabButtonEl.setAttribute('aria-hidden', 'true');
   }
 
   /** Ensures the fixed Qoder logo is mounted in the header. */
@@ -576,12 +548,9 @@ export class QoderianView extends ItemView {
   private async openHistoryConversation(conversationId: string): Promise<void> {
     // With the redesigned tabs, resuming a conversation must not replace the
     // session in the active tab; legacy keeps opening it in the current tab.
-    const opened = await this.tabManager?.openConversation(conversationId, {
+    await this.tabManager?.openConversation(conversationId, {
       preferNewTab: this.sessionTabsRedesignEnabled(),
     });
-    if (opened === false) {
-      this.noticeSessionLimit();
-    }
     this.historyDropdown?.removeClass('visible');
   }
 
@@ -589,19 +558,11 @@ export class QoderianView extends ItemView {
     conversationId: string,
     activate = true,
   ): Promise<void> {
-    const opened = await this.tabManager?.openConversation(conversationId, {
+    await this.tabManager?.openConversation(conversationId, {
       preferNewTab: true,
       activate,
     });
-    if (opened === false) {
-      this.noticeSessionLimit();
-    }
     this.historyDropdown?.removeClass('visible');
-  }
-
-  private noticeSessionLimit(): void {
-    const maxTabs = this.plugin.settings.maxTabs ?? DEFAULT_MAX_TABS;
-    new Notice(t('chat.tabs.maxTabsReached', { count: String(maxTabs) }));
   }
 
   private getHistoryConversationStatus(conversationId: string): HistoryConversationStatus {
