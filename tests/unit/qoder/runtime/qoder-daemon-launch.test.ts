@@ -33,4 +33,21 @@ describe('buildDaemonLaunchOptions', () => {
     expect(options.env.CUSTOM_FLAG).toBe('1');
     expect(options.env.PATH).toBe('/opt/bin');
   });
+
+  it('ignores process.env keys added after the first build', () => {
+    // Other plugins share the renderer's process.env (e.g. Copilot sets
+    // CLAUDE_AGENT_SDK_VERSION), and the SDK rejects a Query whose daemon env
+    // gained a key since the daemon started.
+    const first = buildDaemonLaunchOptions('/opt/qodercli', '/opt/bin');
+    process.env.QODERIAN_TEST_LATE_ENV = '0.3.306';
+    try {
+      const second = buildDaemonLaunchOptions('/opt/qodercli', '/opt/bin');
+
+      // Compare keys only so a failure never prints the host's env values.
+      expect(Object.keys(second.env).sort()).toEqual(Object.keys(first.env).sort());
+      expect(second.env.QODERIAN_TEST_LATE_ENV).toBeUndefined();
+    } finally {
+      delete process.env.QODERIAN_TEST_LATE_ENV;
+    }
+  });
 });

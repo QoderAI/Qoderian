@@ -17,6 +17,19 @@ export const INTEGRATION_CLI_ENV = {
   QODER_INTEGRATION_ID: '70457212-a449-4ae3-af1e-5fb9e00fafcf',
 } as const;
 
+let baseEnvSnapshot: Record<string, string | undefined> | undefined;
+
+/**
+ * Returns the host environment as first seen by this module. Other plugins
+ * share the renderer's `process.env` and may add keys at any time (e.g. a
+ * bundled Claude Agent SDK sets `CLAUDE_AGENT_SDK_VERSION`); reading it live
+ * would make later Queries conflict with the already-running daemon.
+ */
+function getBaseEnv(): Record<string, string | undefined> {
+  baseEnvSnapshot ??= { ...process.env };
+  return baseEnvSnapshot;
+}
+
 export interface DaemonLaunchOptions {
   pathToQoderCLIExecutable: string;
   transport: Options['transport'];
@@ -30,7 +43,8 @@ export interface DaemonLaunchOptions {
  * launches that process, so launch-critical settings (the CLI entry and its
  * environment) must live in these options instead. The daemon is process-wide
  * and rejects a Query whose launch options differ, so every query site must
- * build them through this helper.
+ * build them through this helper, and the inherited environment comes from a
+ * one-time snapshot rather than the live `process.env`.
  */
 export function buildDaemonLaunchOptions(
   cliPath: string,
@@ -41,7 +55,7 @@ export function buildDaemonLaunchOptions(
     pathToQoderCLIExecutable: cliPath,
     transport: ProcessTransport.default,
     env: {
-      ...process.env,
+      ...getBaseEnv(),
       ...extraEnv,
       ...CUSTOM_PROVIDER_CLI_ENV,
       ...INTEGRATION_CLI_ENV,
