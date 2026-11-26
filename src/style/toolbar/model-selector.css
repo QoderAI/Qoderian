@@ -66,7 +66,7 @@
   overflow-y: auto;
   /* Hug the content, capped by the surrounding pane (set from the anchor
      width) so narrow sidebars ellipsize instead of overflowing. */
-  max-width: min(var(--qoderian-model-list-max-width, 340px), calc(100vw - 24px));
+  max-width: min(340px, var(--qoderian-model-list-max-width, 340px), calc(100vw - 24px));
   /* Measured by updateDropdownPlacement(); fallback matches the repo-wide
      popover height convention. */
   max-height: var(--qoderian-model-dropdown-max-height, 420px);

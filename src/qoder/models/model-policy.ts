@@ -33,9 +33,14 @@ export function createQoderModelPolicyProvider(
 
       const parameters: Record<string, unknown> = {};
       if (override.contextWindow !== undefined) {
-        const knownWindows = live?.context_config
-          ? Object.values(live.context_config).map(entry => entry.token_count)
-          : live?.availableContextWindows ?? discovered?.contextTiers?.map(tier => tier.tokenCount);
+        // Empty rich blocks count as absent, mirroring the probe's mapping.
+        const liveConfig = live?.context_config;
+        const liveWindows = liveConfig && Object.keys(liveConfig).length > 0
+          ? Object.values(liveConfig).map(entry => entry.token_count)
+          : undefined;
+        const knownWindows = liveWindows
+          ?? live?.availableContextWindows
+          ?? discovered?.contextTiers?.map(tier => tier.tokenCount);
         if (!knownWindows || knownWindows.includes(override.contextWindow)) {
           parameters.contextWindow = override.contextWindow;
         }
@@ -46,9 +51,13 @@ export function createQoderModelPolicyProvider(
       if (override.thinkingEnabled === false && canDisableThinking) {
         parameters.reasoningEffort = 'none';
       } else if (override.thinkingEffort !== undefined) {
-        const knownEfforts = live?.thinking_config?.enabled?.efforts
-          ? Object.keys(live.thinking_config.enabled.efforts)
-          : live?.efforts ?? discovered?.thinkingEfforts?.map(effort => effort.value);
+        const liveEffortMap = live?.thinking_config?.enabled?.efforts;
+        const liveEfforts = liveEffortMap && Object.keys(liveEffortMap).length > 0
+          ? Object.keys(liveEffortMap)
+          : undefined;
+        const knownEfforts = liveEfforts
+          ?? live?.efforts
+          ?? discovered?.thinkingEfforts?.map(effort => effort.value);
         if (!knownEfforts || knownEfforts.includes(override.thinkingEffort)) {
           parameters.reasoningEffort = override.thinkingEffort;
         }

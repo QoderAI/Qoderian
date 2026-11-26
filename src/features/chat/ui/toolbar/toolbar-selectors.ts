@@ -424,16 +424,19 @@ export class ModelSelector {
     const view = this.container.ownerDocument.defaultView;
     if (!view) return;
     const anchor = (dropdownEl.offsetParent ?? this.container).getBoundingClientRect();
-    dropdownEl.toggleClass(
-      'qoderian-model-dropdown--flip',
-      shouldFlipModelDropdown(anchor, dropdownEl.offsetWidth, view.innerWidth),
-    );
+    const listMaxWidth = Math.floor(anchor.width);
     dropdownEl.setCssProps({
       '--qoderian-model-dropdown-max-height': `${modelDropdownMaxHeight(anchor.top)}px`,
       // Keep the list inside the surrounding pane (e.g. a narrow sidebar);
       // viewport-based caps alone let it overflow and clip at the leaf edge.
-      '--qoderian-model-list-max-width': `${Math.max(0, Math.floor(anchor.width))}px`,
+      // A zero-width anchor (hidden or unlayouted view) must not collapse it.
+      ...(listMaxWidth > 0 ? { '--qoderian-model-list-max-width': `${listMaxWidth}px` } : {}),
     });
+    // Measure after the cap applies so the flip decision sees the real width.
+    dropdownEl.toggleClass(
+      'qoderian-model-dropdown--flip',
+      shouldFlipModelDropdown(anchor, dropdownEl.offsetWidth, view.innerWidth),
+    );
     // Anchor the compact editor card to its edited row, IDE flyout style.
     if (this.editingModel !== null && this.listPaneEl && this.editorPaneEl) {
       const rowEl = this.listPaneEl.querySelector('.qoderian-model-option.editing');

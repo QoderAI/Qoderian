@@ -138,6 +138,33 @@ describe('createQoderModelPolicyProvider', () => {
         parameters: { contextWindow: 400000 },
       });
     });
+
+    it('treats an empty live context_config as absent', () => {
+      const settings = settingsWith(
+        { qmodel_38max: { contextWindow: 400000 } },
+        [{
+          value: 'qmodel_38max',
+          displayName: 'Qwen 3.8 Max',
+          description: '',
+          contextTiers: [{ label: '200K', tokenCount: 200000, isDefault: true }],
+        }],
+      );
+      const provider = createQoderModelPolicyProvider(() => 'qmodel_38max', settings);
+      const live = createContext({
+        availableModels: [{
+          value: 'qmodel_38max',
+          displayName: 'Qwen 3.8 Max',
+          description: '',
+          context_config: {},
+          availableContextWindows: [200000, 400000],
+        }] as ModelPolicyContext['availableModels'],
+      });
+
+      expect(provider(live)).toEqual({
+        model: 'qmodel_38max',
+        parameters: { contextWindow: 400000 },
+      });
+    });
   });
 
   describe('thinking override', () => {
@@ -317,6 +344,33 @@ describe('createQoderModelPolicyProvider', () => {
           value: 'qmodel_38max',
           displayName: 'Qwen 3.8 Max',
           description: '',
+          efforts: ['low', 'xhigh'],
+        }] as ModelPolicyContext['availableModels'],
+      });
+
+      expect(provider(live)).toEqual({
+        model: 'qmodel_38max',
+        parameters: { reasoningEffort: 'xhigh' },
+      });
+    });
+
+    it('treats an empty live efforts map as absent', () => {
+      const settings = settingsWith(
+        { qmodel_38max: { thinkingEffort: 'xhigh' } },
+        [{
+          value: 'qmodel_38max',
+          displayName: 'Qwen 3.8 Max',
+          description: '',
+          thinkingEfforts: [{ value: 'low', isDefault: true }],
+        }],
+      );
+      const provider = createQoderModelPolicyProvider(() => 'qmodel_38max', settings);
+      const live = createContext({
+        availableModels: [{
+          value: 'qmodel_38max',
+          displayName: 'Qwen 3.8 Max',
+          description: '',
+          thinking_config: { enabled: { efforts: {} } },
           efforts: ['low', 'xhigh'],
         }] as ModelPolicyContext['availableModels'],
       });
