@@ -11,6 +11,8 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+## [1.0.20] - 2026-11-26
+
 ### Fixed
 
 - The per-model editor (context window tiers and thinking effort) disappeared
