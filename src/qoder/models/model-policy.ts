@@ -35,20 +35,20 @@ export function createQoderModelPolicyProvider(
       if (override.contextWindow !== undefined) {
         const knownWindows = live?.context_config
           ? Object.values(live.context_config).map(entry => entry.token_count)
-          : discovered?.contextTiers?.map(tier => tier.tokenCount);
+          : live?.availableContextWindows ?? discovered?.contextTiers?.map(tier => tier.tokenCount);
         if (!knownWindows || knownWindows.includes(override.contextWindow)) {
           parameters.contextWindow = override.contextWindow;
         }
       }
       const canDisableThinking = live
-        ? live.thinking_config?.disabled !== undefined
+        ? live.thinking_config?.disabled !== undefined || live.supportsDisabled === true
         : discovered?.thinkingDisableable === true;
       if (override.thinkingEnabled === false && canDisableThinking) {
         parameters.reasoningEffort = 'none';
       } else if (override.thinkingEffort !== undefined) {
         const knownEfforts = live?.thinking_config?.enabled?.efforts
           ? Object.keys(live.thinking_config.enabled.efforts)
-          : discovered?.thinkingEfforts?.map(effort => effort.value);
+          : live?.efforts ?? discovered?.thinkingEfforts?.map(effort => effort.value);
         if (!knownEfforts || knownEfforts.includes(override.thinkingEffort)) {
           parameters.reasoningEffort = override.thinkingEffort;
         }

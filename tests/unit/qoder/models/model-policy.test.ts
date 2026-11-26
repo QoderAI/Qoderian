@@ -112,6 +112,32 @@ describe('createQoderModelPolicyProvider', () => {
       // The live catalog no longer offers 400K, so the override is withheld.
       expect(provider(liveOnly200K)).toEqual({ model: 'qmodel_38max' });
     });
+
+    it('validates contextWindow against flat live context windows', () => {
+      const settings = settingsWith(
+        { qmodel_38max: { contextWindow: 400000 } },
+        [{
+          value: 'qmodel_38max',
+          displayName: 'Qwen 3.8 Max',
+          description: '',
+          contextTiers: [{ label: '200K', tokenCount: 200000, isDefault: true }],
+        }],
+      );
+      const provider = createQoderModelPolicyProvider(() => 'qmodel_38max', settings);
+      const live = createContext({
+        availableModels: [{
+          value: 'qmodel_38max',
+          displayName: 'Qwen 3.8 Max',
+          description: '',
+          availableContextWindows: [200000, 400000],
+        }] as ModelPolicyContext['availableModels'],
+      });
+
+      expect(provider(live)).toEqual({
+        model: 'qmodel_38max',
+        parameters: { contextWindow: 400000 },
+      });
+    });
   });
 
   describe('thinking override', () => {
@@ -165,6 +191,32 @@ describe('createQoderModelPolicyProvider', () => {
 
       // Live catalog has no thinking_config.disabled → refusing is the safe path.
       expect(provider(live)).toEqual({ model: 'qmodel_38max' });
+    });
+
+    it('honors the flat supportsDisabled flag when thinking_config is absent', () => {
+      const settings = settingsWith(
+        { qmodel_38max: { thinkingEnabled: false } },
+        [{
+          value: 'qmodel_38max',
+          displayName: 'Qwen 3.8 Max',
+          description: '',
+          thinkingDisableable: true,
+        }],
+      );
+      const provider = createQoderModelPolicyProvider(() => 'qmodel_38max', settings);
+      const live = createContext({
+        availableModels: [{
+          value: 'qmodel_38max',
+          displayName: 'Qwen 3.8 Max',
+          description: '',
+          supportsDisabled: true,
+        }] as ModelPolicyContext['availableModels'],
+      });
+
+      expect(provider(live)).toEqual({
+        model: 'qmodel_38max',
+        parameters: { reasoningEffort: 'none' },
+      });
     });
 
     it('does not emit reasoningEffort when thinking stays enabled', () => {
@@ -247,6 +299,32 @@ describe('createQoderModelPolicyProvider', () => {
 
       // The live catalog no longer offers xhigh, so the override is withheld.
       expect(provider(live)).toEqual({ model: 'qmodel_38max' });
+    });
+
+    it('validates thinkingEffort against flat live efforts', () => {
+      const settings = settingsWith(
+        { qmodel_38max: { thinkingEffort: 'xhigh' } },
+        [{
+          value: 'qmodel_38max',
+          displayName: 'Qwen 3.8 Max',
+          description: '',
+          thinkingEfforts: [{ value: 'low', isDefault: true }],
+        }],
+      );
+      const provider = createQoderModelPolicyProvider(() => 'qmodel_38max', settings);
+      const live = createContext({
+        availableModels: [{
+          value: 'qmodel_38max',
+          displayName: 'Qwen 3.8 Max',
+          description: '',
+          efforts: ['low', 'xhigh'],
+        }] as ModelPolicyContext['availableModels'],
+      });
+
+      expect(provider(live)).toEqual({
+        model: 'qmodel_38max',
+        parameters: { reasoningEffort: 'xhigh' },
+      });
     });
 
     it('prefers disabling thinking over a stored effort', () => {
