@@ -64,7 +64,9 @@
   min-height: 0;
   flex: 0 1 auto;
   overflow-y: auto;
-  max-width: min(340px, calc(100vw - 24px));
+  /* Hug the content, capped by the surrounding pane (set from the anchor
+     width) so narrow sidebars ellipsize instead of overflowing. */
+  max-width: min(var(--qoderian-model-list-max-width, 340px), calc(100vw - 24px));
   /* Measured by updateDropdownPlacement(); fallback matches the repo-wide
      popover height convention. */
   max-height: var(--qoderian-model-dropdown-max-height, 420px);
@@ -251,13 +253,26 @@
   font-weight: 500;
 }
 
-/* Credit multiplier and promotion badge trail the row like the Qoder IDE. */
+/* Credit multiplier and promotion badge trail the row like the Qoder IDE.
+   Meta and the edit affordance stack in one grid cell: the slot sizes to the
+   wider of the two, so hovering swaps them without resizing the row. */
+.qoderian-model-trailing {
+  display: grid;
+  align-items: center;
+  justify-items: end;
+  margin-left: auto;
+  padding-left: 12px;
+  flex-shrink: 0;
+}
+
+.qoderian-model-trailing > * {
+  grid-area: 1 / 1;
+}
+
 .qoderian-model-meta {
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-left: auto;
-  padding-left: 12px;
   flex-shrink: 0;
 }
 
@@ -274,18 +289,14 @@
   font-size: 10px;
 }
 
-/* Per-model edit affordance: collapsed and invisible until the row is hovered
-   (or the affordance is focused via keyboard / the row is being edited); the
-   label expands on hover/edit like the IDE. */
+/* Per-model edit affordance: invisible until the row is hovered (or the
+   affordance is focused via keyboard / the row is being edited). It keeps its
+   layout space while hidden so the dropdown width never jumps on hover. */
 .qoderian-model-edit {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-inline-start: 0;
-  padding-left: 0;
   flex-shrink: 0;
-  width: 0;
-  overflow: hidden;
   color: var(--text-muted);
   border-radius: 3px;
   opacity: 0;
@@ -296,8 +307,6 @@
 .qoderian-model-option:hover .qoderian-model-edit,
 .qoderian-model-option.editing .qoderian-model-edit,
 .qoderian-model-edit:focus-visible {
-  width: auto;
-  overflow: visible;
   opacity: 1;
   pointer-events: auto;
 }
@@ -309,27 +318,12 @@
 }
 
 .qoderian-model-edit-label {
-  display: none;
   font-size: 11px;
-}
-
-/* When the meta slot is hidden the edit affordance takes the trailing slot. */
-.qoderian-model-option:hover .qoderian-model-edit,
-.qoderian-model-option.editing .qoderian-model-edit,
-.qoderian-model-edit:focus-visible {
-  margin-inline-start: auto;
-  padding-left: 12px;
-}
-
-.qoderian-model-option:hover .qoderian-model-edit-label,
-.qoderian-model-option.editing .qoderian-model-edit-label,
-.qoderian-model-edit:focus-visible .qoderian-model-edit-label {
-  display: inline;
 }
 
 .qoderian-model-option:hover .qoderian-model-meta,
 .qoderian-model-option.editing .qoderian-model-meta {
-  display: none;
+  visibility: hidden;
 }
 
 /* Per-model editor view (context window tiers + thinking toggle). */
