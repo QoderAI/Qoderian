@@ -94,7 +94,6 @@
       "chooseTarget": "Bifurquer la conversation",
       "targetNewTab": "Nouvel onglet",
       "targetCurrentTab": "Onglet actuel",
-      "maxTabsReached": "Impossible de bifurquer : maximum de {count} onglets atteint",
       "notice": "Bifurqué dans un nouvel onglet",
       "noticeCurrentTab": "Bifurqué dans l'onglet actuel",
       "failed": "Échec de la bifurcation : {error}",
@@ -106,9 +105,6 @@
       "errorNoActiveTab": "Aucun onglet actif",
       "commandNoMessages": "Impossible de bifurquer : aucun message dans la conversation",
       "commandNoAssistantUuid": "Impossible de bifurquer : aucune réponse de l’assistant avec des identifiants"
-    },
-    "tabs": {
-      "maxTabsReached": "Limite de sessions atteinte ({count}). Vous pouvez modifier la limite dans les paramètres."
     },
     "bangBash": {
       "placeholder": "> Exécuter une commande bash...",
@@ -351,11 +347,6 @@
       "validation": {
         "noNode": "Node.js introuvable dans PATH. Installez Node.js ou vérifiez votre configuration PATH."
       }
-    },
-    "maxTabs": {
-      "name": "Maximum d'onglets de chat",
-      "desc": "Nombre maximum d'onglets de chat simultanés (3-10). Chaque onglet utilise une session Qoder séparée.",
-      "warning": "Plus de 5 onglets peut affecter les performances et l'utilisation de la mémoire."
     },
     "enableAutoScroll": {
       "name": "Défilement automatique pendant le streaming",

@@ -141,7 +141,7 @@ Open **Settings → Qoderian**:
 | Group | Contents |
 |-------|----------|
 | **Setup** | Qoder CLI edition and path to the `qodercli` executable (auto-detected by default) |
-| **Display** | Chat view placement, maximum tabs, auto-scroll, deferred math rendering during streaming, and default expansion of file edits (the language selector sits above this group) |
+| **Display** | Chat view placement, auto-scroll, deferred math rendering during streaming, and default expansion of file edits (the language selector sits above this group) |
 | **Conversations** | Auto-generated titles and the model that writes them |
 | **Content** | User name, custom system prompt, excluded tags, media folder |
 | **Input** | Send-key behavior and vim-style navigation mappings |

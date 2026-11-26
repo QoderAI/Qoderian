@@ -94,7 +94,6 @@
       "chooseTarget": "分叉對話",
       "targetNewTab": "新分頁",
       "targetCurrentTab": "目前分頁",
-      "maxTabsReached": "無法分叉：已達到最大 {count} 個分頁",
       "notice": "已分叉到新分頁",
       "noticeCurrentTab": "已在目前分頁分叉",
       "failed": "分叉失敗：{error}",
@@ -106,9 +105,6 @@
       "errorNoActiveTab": "沒有使用中的分頁",
       "commandNoMessages": "無法分叉：對話中沒有訊息",
       "commandNoAssistantUuid": "無法分叉：沒有帶識別碼的助手回覆"
-    },
-    "tabs": {
-      "maxTabsReached": "已達對話上限（{count}），可在設定中調整上限。"
     },
     "bangBash": {
       "placeholder": "> 執行 bash 指令...",
@@ -351,11 +347,6 @@
       "validation": {
         "noNode": "在 PATH 中找不到 Node.js。請安裝 Node.js 或檢查 PATH 設定。"
       }
-    },
-    "maxTabs": {
-      "name": "最大聊天分頁數",
-      "desc": "同時開啟的最大聊天分頁數（3-10）。每個分頁使用獨立的 Qoder 對話。",
-      "warning": "超過 5 個分頁可能會影響效能和記憶體使用。"
     },
     "enableAutoScroll": {
       "name": "串流傳輸時自動捲動",

@@ -18,7 +18,7 @@ describe('TabManager restore diagnostics', () => {
 
   function makeManager(): TabManager {
     const plugin = {
-      settings: { maxTabs: 5 },
+      settings: {},
       getConversationById: jest.fn(async () => undefined),
     } as any;
     const containerEl = createMockEl() as unknown as HTMLElement;

@@ -59,8 +59,8 @@ describe('QoderianSettingsStorage', () => {
     const settings = await storage.load();
 
     expect(settings.model).toBe('performance');
-    expect(settings.maxTabs).toBe(2);
     expect(settings.permissionMode).toBe('auto');
+    expect(settings).not.toHaveProperty('maxTabs');
     expect(settings).not.toHaveProperty('customContextLimits');
     expect(settings).not.toHaveProperty('sharedEnvironmentVariables');
     expect(settings).not.toHaveProperty('envSnippets');

@@ -42,7 +42,6 @@ export const DEFAULT_QODERIAN_SETTINGS: QoderianSettings = {
 
   qoder: { ...DEFAULT_QODER_SETTINGS },
 
-  maxTabs: 3,
   enableAutoScroll: true,
   deferMathRenderingDuringStreaming: true,
   expandFileEditsByDefault: false,
@@ -155,6 +154,7 @@ export class QoderianSettingsStorage {
       envSnippets: _removedEnvironmentSnippets,
       customModelAliases: _removedModelAliases,
       hiddenCommands: _removedHiddenCommands,
+      maxTabs: _removedMaxTabs,
       ...storedWithoutRemovedSettings
     } = stored;
     const merged = {

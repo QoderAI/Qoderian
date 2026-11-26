@@ -94,7 +94,6 @@
       "chooseTarget": "Fork conversation",
       "targetNewTab": "New tab",
       "targetCurrentTab": "Current tab",
-      "maxTabsReached": "Cannot fork: maximum {count} tabs reached",
       "notice": "Forked to new tab",
       "noticeCurrentTab": "Forked in current tab",
       "failed": "Fork failed: {error}",
@@ -106,9 +105,6 @@
       "errorNoActiveTab": "No active tab",
       "commandNoMessages": "Cannot fork: no messages in conversation",
       "commandNoAssistantUuid": "Cannot fork: no assistant response with identifiers"
-    },
-    "tabs": {
-      "maxTabsReached": "Session limit reached ({count}). You can change the limit in Settings."
     },
     "bangBash": {
       "placeholder": "> Run a bash command...",
@@ -351,11 +347,6 @@
       "validation": {
         "noNode": "Node.js not found on PATH. Install Node.js or check your PATH configuration."
       }
-    },
-    "maxTabs": {
-      "name": "Maximum chat tabs",
-      "desc": "Maximum number of concurrent chat tabs (3-10). Each tab uses a separate Qoder session.",
-      "warning": "More than 5 tabs may impact performance and memory usage."
     },
     "enableAutoScroll": {
       "name": "Auto-scroll during streaming",

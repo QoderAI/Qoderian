@@ -18,9 +18,6 @@ import {
   wireTabInputEvents,
 } from './tab';
 import {
-  DEFAULT_MAX_TABS,
-  MAX_TABS,
-  MIN_TABS,
   type PersistedTabManagerState,
   type PersistedTabState,
   type TabBarItem,
@@ -57,15 +54,6 @@ export class TabManager implements TabManagerInterface {
   /** Guard to prevent concurrent tab switches. */
   private isSwitchingTab = false;
 
-  /**
-   * Gets the current max tabs limit from settings.
-   * Clamps to MIN_TABS and MAX_TABS bounds.
-   */
-  private getMaxTabs(): number {
-    const settingsValue = this.plugin.settings.maxTabs ?? DEFAULT_MAX_TABS;
-    return Math.max(MIN_TABS, Math.min(MAX_TABS, settingsValue));
-  }
-
   /** Whether the experimental session-tab interaction (own tab per session) is on. */
   private sessionTabsRedesignEnabled(): boolean {
     return this.plugin.settings.enableSessionTabsRedesign === true;
@@ -92,13 +80,12 @@ export class TabManager implements TabManagerInterface {
    * @param conversationId Optional conversation to load into the tab.
    * @param tabId Optional tab ID (for restoration).
    * @param options Controls whether the new tab becomes active immediately.
-   * @returns The created tab, or null if max tabs reached.
    */
   async createTab(
     conversationId?: string | null,
     tabId?: TabId,
     options: CreateTabOptions = {},
-  ): Promise<TabData | null> {
+  ): Promise<TabData> {
     return this.createTabInner(conversationId, tabId, options);
   }
 
@@ -106,12 +93,7 @@ export class TabManager implements TabManagerInterface {
     conversationId?: string | null,
     tabId?: TabId,
     options: CreateTabOptions = {},
-  ): Promise<TabData | null> {
-    const maxTabs = this.getMaxTabs();
-    if (this.tabs.size >= maxTabs) {
-      return null;
-    }
-
+  ): Promise<TabData> {
     const { activate = true, draftModel } = options;
 
     const conversation = conversationId
@@ -150,7 +132,7 @@ export class TabManager implements TabManagerInterface {
       this.plugin,
       this.view,
       (forkContext) => this.handleForkRequest(forkContext),
-      (conversationId) => this.openConversation(conversationId).then(() => undefined),
+      (conversationId) => this.openConversation(conversationId),
       () => this.getQoderCatalogConfig(tab),
     );
 
@@ -320,11 +302,6 @@ export class TabManager implements TabManagerInterface {
     return this.tabs.size;
   }
 
-  /** Checks if more tabs can be created. */
-  canCreateTab(): boolean {
-    return this.tabs.size < this.getMaxTabs();
-  }
-
   // ============================================
   // Tab Bar Data
   // ============================================
@@ -361,12 +338,11 @@ export class TabManager implements TabManagerInterface {
    * Opens a conversation in a new tab or existing tab.
    * @param conversationId The conversation to open.
    * @param options Controls tab creation behavior (backward-compatible with boolean).
-   * @returns False when a new tab was requested but the tab limit is reached.
    */
   async openConversation(
     conversationId: string,
     options: boolean | OpenConversationOptions = false,
-  ): Promise<boolean> {
+  ): Promise<void> {
     const preferNewTab = typeof options === 'boolean'
       ? options
       : options.preferNewTab ?? false;
@@ -378,7 +354,7 @@ export class TabManager implements TabManagerInterface {
     for (const tab of this.tabs.values()) {
       if (tab.conversationId === conversationId) {
         await this.switchToTab(tab.id);
-        return true;
+        return;
       }
     }
 
@@ -390,19 +366,12 @@ export class TabManager implements TabManagerInterface {
       // Focus the other view and switch to its tab instead of opening duplicate
       await revealWorkspaceLeaf(this.plugin.app.workspace, crossViewResult.view.leaf);
       await crossViewResult.view.getTabManager()?.switchToTab(crossViewResult.tabId);
-      return true;
+      return;
     }
 
-    // Open in a new tab when requested. The redesigned tabs never replace the
-    // active tab silently; the legacy behavior keeps the old fallback.
     if (preferNewTab) {
-      if (this.canCreateTab()) {
-        await this.createTab(conversationId, undefined, { activate });
-        return true;
-      }
-      if (this.sessionTabsRedesignEnabled()) {
-        return false;
-      }
+      await this.createTab(conversationId, undefined, { activate });
+      return;
     }
 
     // Open in current tab
@@ -413,7 +382,6 @@ export class TabManager implements TabManagerInterface {
     if (activeTab) {
       await activeTab.controllers.conversationController?.switchTo(conversationId);
     }
-    return true;
   }
 
   /**
@@ -444,12 +412,7 @@ export class TabManager implements TabManagerInterface {
     if (!target) return;
 
     if (target === 'new-tab') {
-      const tab = await this.forkToNewTab(context);
-      if (!tab) {
-        const maxTabs = this.getMaxTabs();
-        new Notice(t('chat.fork.maxTabsReached', { count: String(maxTabs) }));
-        return;
-      }
+      await this.forkToNewTab(context);
       new Notice(t('chat.fork.notice'));
     } else {
       const success = await this.forkInCurrentTab(context);
@@ -461,12 +424,7 @@ export class TabManager implements TabManagerInterface {
     }
   }
 
-  async forkToNewTab(context: ForkContext): Promise<TabData | null> {
-    const maxTabs = this.getMaxTabs();
-    if (this.tabs.size >= maxTabs) {
-      return null;
-    }
-
+  async forkToNewTab(context: ForkContext): Promise<TabData> {
     const conversationId = await this.createForkConversation(context);
     try {
       return await this.createTab(conversationId);

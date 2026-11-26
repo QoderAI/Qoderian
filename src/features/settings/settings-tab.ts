@@ -109,17 +109,6 @@ export class QoderianSettingTab extends PluginSettingTab {
         heading: t('settings.display'),
         items: [
           {
-            name: t('settings.maxTabs.name'),
-            desc: t('settings.maxTabs.desc'),
-            render: (setting, group) => {
-              let injected: HTMLElement | null = null;
-              this.deferIntoList(group, (host) => {
-                injected = this.renderMaxTabsControl(setting, host);
-              });
-              return () => { injected?.remove(); };
-            },
-          },
-          {
             name: t('settings.chatViewPlacement.name'),
             desc: t('settings.chatViewPlacement.desc'),
             render: (setting) => this.renderChatViewPlacementControl(setting),
@@ -473,10 +462,6 @@ export class QoderianSettingTab extends PluginSettingTab {
         this.update();
         this.refreshLocalizedLanguageRow(previousName, previousDesc);
         this.refreshViewChrome();
-      } else if (key === 'maxTabs') {
-        for (const view of this.plugin.getAllViews()) {
-          view.refreshTabControls();
-        }
       } else if (key === 'enableSessionTabsRedesign') {
         for (const view of this.plugin.getAllViews()) {
           view.refreshSessionTabsMode();
@@ -615,11 +600,6 @@ export class QoderianSettingTab extends PluginSettingTab {
     // --- Display ---
 
     new Setting(container).setName(t('settings.display')).setHeading();
-
-    const maxTabsSetting = new Setting(container)
-      .setName(t('settings.maxTabs.name'))
-      .setDesc(t('settings.maxTabs.desc'));
-    this.renderMaxTabsControl(maxTabsSetting, container);
 
     const placementSetting = new Setting(container)
       .setName(t('settings.chatViewPlacement.name'))
@@ -775,35 +755,6 @@ export class QoderianSettingTab extends PluginSettingTab {
       .setName(t('settings.navMappings.name'))
       .setDesc(t('settings.navMappings.desc'));
     this.renderNavMappingsControl(navMappingsSetting);
-  }
-
-  /** Builds the max tabs slider with its over-limit warning. */
-  private renderMaxTabsControl(setting: Setting, warningHost: HTMLElement): HTMLElement {
-    const maxTabsWarningEl = warningHost.createDiv({
-      cls: 'qoderian-max-tabs-warning qoderian-setting-validation qoderian-setting-validation-warning qoderian-hidden',
-    });
-    maxTabsWarningEl.setText(t('settings.maxTabs.warning'));
-
-    const updateMaxTabsWarning = (value: number): void => {
-      maxTabsWarningEl.toggleClass('qoderian-hidden', value <= 5);
-    };
-
-    setting.addSlider((slider) => {
-      slider
-        .setLimits(3, 10, 1)
-        .setValue(this.plugin.settings.maxTabs ?? 3)
-        .onChange(async (value) => {
-          this.plugin.settings.maxTabs = value;
-          await this.plugin.saveSettings();
-          updateMaxTabsWarning(value);
-          for (const view of this.plugin.getAllViews()) {
-            view.refreshTabControls();
-          }
-        });
-      updateMaxTabsWarning(this.plugin.settings.maxTabs ?? 3);
-    });
-
-    return maxTabsWarningEl;
   }
 
   /** Builds the chat view placement dropdown with error rollback. */

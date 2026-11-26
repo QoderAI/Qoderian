@@ -525,8 +525,7 @@ describe('QoderianPlugin', () => {
 
       const command = getRegisteredCommand('new-tab');
 
-      expect(command.checkCallback(true)).toBe(true);
-      expect(command.checkCallback(false)).toBe(true);
+      command.callback();
 
       await new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -561,8 +560,7 @@ describe('QoderianPlugin', () => {
 
       const command = getRegisteredCommand('new-tab');
 
-      expect(command.checkCallback(true)).toBe(true);
-      expect(command.checkCallback(false)).toBe(true);
+      command.callback();
 
       await new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -570,53 +568,14 @@ describe('QoderianPlugin', () => {
       expect(createNewTab).toHaveBeenCalledTimes(1);
     });
 
-    it('stays unavailable when the open view is already at the tab limit', async () => {
-      await plugin.onload();
-
-      const mockView = {
-        getTabManager: jest.fn().mockReturnValue({
-          canCreateTab: jest.fn().mockReturnValue(false),
-        }),
-      };
-
-      jest.spyOn(plugin, 'getView').mockReturnValue(mockView as any);
-
-      const command = getRegisteredCommand('new-tab');
-
-      expect(command.checkCallback(true)).toBe(false);
-    });
-
-    it('keeps tab commands unavailable while a Qoderian leaf view is not initialized', async () => {
+    it('keeps the close-tab command unavailable while a Qoderian leaf view is not initialized', async () => {
       await plugin.onload();
 
       mockApp.workspace.getLeavesOfType.mockReturnValue([{ view: {} }]);
 
-      for (const commandId of ['new-tab', 'close-current-tab']) {
-        const command = getRegisteredCommand(commandId);
+      const command = getRegisteredCommand('close-current-tab');
 
-        expect(() => command.checkCallback(true)).not.toThrow();
-        expect(command.checkCallback(true)).toBe(false);
-      }
-    });
-
-    it('stays unavailable when reopening the persisted layout would already hit the tab limit', async () => {
-      (plugin.loadData as jest.Mock).mockResolvedValue({
-        tabManagerState: {
-          openTabs: [
-            { tabId: 'tab-1', conversationId: null },
-            { tabId: 'tab-2', conversationId: null },
-            { tabId: 'tab-3', conversationId: null },
-          ],
-          activeTabId: 'tab-3',
-        },
-      });
-
-      await plugin.onload();
-
-      jest.spyOn(plugin, 'getView').mockReturnValue(null);
-
-      const command = getRegisteredCommand('new-tab');
-
+      expect(() => command.checkCallback(true)).not.toThrow();
       expect(command.checkCallback(true)).toBe(false);
     });
   });

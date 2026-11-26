@@ -149,7 +149,6 @@ export type TranslationKey =
   | 'chat.fork.chooseTarget'
   | 'chat.fork.targetNewTab'
   | 'chat.fork.targetCurrentTab'
-  | 'chat.fork.maxTabsReached'
   | 'chat.fork.notice'
   | 'chat.fork.noticeCurrentTab'
   | 'chat.fork.failed'
@@ -161,7 +160,6 @@ export type TranslationKey =
   | 'chat.fork.errorNoActiveTab'
   | 'chat.fork.commandNoMessages'
   | 'chat.fork.commandNoAssistantUuid'
-  | 'chat.tabs.maxTabsReached'
 
   // Send queue (multi-message queue above the composer)
   | 'chat.queue.title'
@@ -327,9 +325,6 @@ export type TranslationKey =
   | 'settings.enableBangBash.name'
   | 'settings.enableBangBash.desc'
   | 'settings.enableBangBash.validation.noNode'
-  | 'settings.maxTabs.name'
-  | 'settings.maxTabs.desc'
-  | 'settings.maxTabs.warning'
   | 'settings.enableAutoScroll.name'
   | 'settings.enableAutoScroll.desc'
   | 'settings.deferMathRenderingDuringStreaming.name'
