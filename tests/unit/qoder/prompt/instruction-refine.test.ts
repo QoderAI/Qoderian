@@ -1,6 +1,18 @@
+import { getLocale, setLocale } from '@/i18n/i18n';
 import { buildRefineSystemPrompt } from '@/qoder/prompt/instruction-refine';
 
 describe('buildRefineSystemPrompt', () => {
+  let previousLocale: ReturnType<typeof getLocale>;
+
+  beforeEach(() => {
+    previousLocale = getLocale();
+    setLocale('en');
+  });
+
+  afterEach(() => {
+    setLocale(previousLocale);
+  });
+
   describe('without existing instructions', () => {
     it('should return base prompt when existing instructions is empty', () => {
       const result = buildRefineSystemPrompt('');
@@ -10,7 +22,6 @@ describe('buildRefineSystemPrompt', () => {
       expect(result).toContain('**Process**');
       expect(result).toContain('**Guidelines**');
       expect(result).toContain('**Output Format**');
-      expect(result).toContain('**Examples**');
     });
 
     it('should not include existing instructions section when empty', () => {
@@ -93,29 +104,22 @@ describe('buildRefineSystemPrompt', () => {
       expect(result).toContain('**Ambiguity**');
     });
 
-    it('should include examples', () => {
+    it('should use the shared language rule while preserving formatting examples', () => {
       const result = buildRefineSystemPrompt('');
 
+      expect(result).toContain("same language as the user's request");
+      expect(result).toContain('UI locale (`en`)');
+      expect(result).toContain('proper nouns, product names, file names, paths, code identifiers, and code snippets unchanged');
+      expect(result).toContain('The examples below illustrate formatting only');
       expect(result).toContain('Input: "typescript for code"');
-      expect(result).toContain('Input: "be concise"');
-      expect(result).toContain('Input: "organize coding style rules"');
-      expect(result).toContain('Input: "use that thing from before"');
+      expect(result).not.toContain('"Do X" instead of "Don\'t do Y"');
+      expect(result.indexOf('**Language**')).toBeLessThan(result.indexOf('**Examples**'));
     });
 
-    it('should show example outputs with proper tag wrapping', () => {
-      const result = buildRefineSystemPrompt('');
+    it('should fall back to the current UI locale', () => {
+      setLocale('zh-CN');
 
-      expect(result).toContain('Output: <instruction>');
-      expect(result).toContain('**Code Language**');
-      expect(result).toContain('**Conciseness**');
-      expect(result).toContain('## Coding Standards');
-    });
-
-    it('should include ambiguity handling example', () => {
-      const result = buildRefineSystemPrompt('');
-
-      expect(result).toContain('I\'m not sure what you\'re referring to');
-      expect(result).toContain('Could you please clarify');
+      expect(buildRefineSystemPrompt('')).toContain('UI locale (`zh-CN`)');
     });
   });
 

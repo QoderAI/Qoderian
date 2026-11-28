@@ -12,6 +12,7 @@ jest.mock('fs');
 
 // Now import after all mocks are set up
 import { buildCursorContext } from '@/core/editor/editor-context';
+import { getLocale, setLocale } from '@/i18n/i18n';
 import { buildInlineEditPrompt, parseInlineEditResponse } from '@/qoder/prompt/inline-edit';
 import type { InlineEditRequest } from '@/qoder/services/qoder-inline-edit-service';
 import {
@@ -46,12 +47,19 @@ const callHook = async (hook: any, input: any, ...rest: any[]): Promise<any> =>
 describe('QoderInlineEditService', () => {
   let service: QoderInlineEditService;
   let mockPlugin: any;
+  let previousLocale: ReturnType<typeof getLocale>;
 
   beforeEach(() => {
+    previousLocale = getLocale();
+    setLocale('en');
     jest.clearAllMocks();
     resetMockMessages();
     mockPlugin = createMockPlugin();
     service = new QoderInlineEditService(mockPlugin);
+  });
+
+  afterEach(() => {
+    setLocale(previousLocale);
   });
 
 
@@ -255,6 +263,33 @@ describe('QoderInlineEditService', () => {
   describe('editText', () => {
     beforeEach(() => {
       (fs.existsSync as jest.Mock).mockReturnValue(true);
+    });
+
+    it.each([
+      ['Chinese request under English UI', 'en', '请修正这段说明', 'useReducer 更新状态', '<replacement>useReducer 更新状态（已修正）</replacement>', 'useReducer 更新状态（已修正）'],
+      ['English request under Chinese UI', 'zh-CN', 'Fix this description', 'useReducer updates state', '<replacement>useReducer updates state correctly</replacement>', 'useReducer updates state correctly'],
+      ['mixed code identifiers', 'en', '保留 Qoderian、notes/demo.md 和 useReducer', 'Qoderian notes/demo.md useReducer', '<replacement>Qoderian：notes/demo.md 中的 useReducer 保持不变</replacement>', 'Qoderian：notes/demo.md 中的 useReducer 保持不变'],
+    ] as const)('edits text for %s in the request language', async (_name, locale, instruction, selectedText, response, expected) => {
+      setLocale(locale);
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: { content: [{ type: 'text', text: response }] },
+        },
+        { type: 'result' },
+      ]);
+
+      const result = await service.editText({
+        mode: 'selection',
+        selectedText,
+        instruction,
+        notePath: 'notes/demo.md',
+      });
+
+      expect(result).toEqual({ success: true, editedText: expected });
+      expect(getLastOptions()?.systemPrompt).toContain("same language as the user's request");
+      expect(getLastOptions()?.systemPrompt).toContain(`UI locale (\`${locale}\`)`);
     });
 
     it('should return error when vault path cannot be determined', async () => {

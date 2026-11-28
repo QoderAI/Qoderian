@@ -1,3 +1,5 @@
+import { buildGeneratedTextLanguageRule } from './generated-text-language';
+
 export function buildRefineSystemPrompt(existingInstructions: string): string {
   const existingSection = existingInstructions.trim()
     ? `\n\nEXISTING INSTRUCTIONS (already in the user's system prompt):
@@ -21,7 +23,7 @@ When refining the new instruction:
 2.  **Check Context**: Does this conflict with existing instructions?
     - *No Conflict*: Add as new.
     - *Conflict*: Propose a **merged instruction** that resolves the contradiction (or ask if unsure).
-3.  **Refine**: Draft a clear, positive instruction (e.g., "Do X" instead of "Don't do Y").
+3.  **Refine**: Draft a clear, positive instruction.
 4.  **Format**: Return *only* the Markdown snippet wrapped in \`<instruction>\` tags.
 
 **Guidelines**:
@@ -31,11 +33,15 @@ When refining the new instruction:
 - **No Header**: Do NOT include a top-level header like \`# Custom Instructions\`.
 - **Conflict Handling**: If the new rule directly contradicts an existing one, rewrite the *new* one to override specific cases or ask for clarification.
 
+${buildGeneratedTextLanguageRule()}
+
 **Output Format**:
 - **Success**: \`<instruction>...markdown content...</instruction>\`
 - **Ambiguity**: Plain text question.
 
 ${existingSection}
+
+The examples below illustrate formatting only. Always follow the language rule above for the generated text.
 
 **Examples**:
 

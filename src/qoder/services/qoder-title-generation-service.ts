@@ -4,7 +4,11 @@ import type {
 } from '../../core/types/services';
 import { toQoderRuntimeModelId } from '../models/model-selection';
 import { qoderModelConfig } from '../models/qoder-model-config';
-import { TITLE_GENERATION_SYSTEM_PROMPT } from '../prompt/title-generation';
+import {
+  buildTitleGenerationPrompt,
+  getTitleGenerationSystemPrompt,
+  parseTitleGenerationResponse,
+} from '../prompt/title-generation';
 import type { QoderHostContext } from '../qoder-host-context';
 import { runColdStartQuery } from '../runtime/qoder-cold-start-query';
 
@@ -32,13 +36,12 @@ export class QoderTitleGenerationService {
     const abortController = new AbortController();
     this.activeGenerations.set(conversationId, abortController);
 
-    const truncatedUser = this.truncateText(userMessage, 500);
-    const prompt = `User's request:\n"""\n${truncatedUser}\n"""\n\nGenerate a title for this conversation:`;
+    const prompt = buildTitleGenerationPrompt(userMessage);
 
     try {
       const result = await runColdStartQuery({
         plugin: this.plugin,
-        systemPrompt: TITLE_GENERATION_SYSTEM_PROMPT,
+        systemPrompt: getTitleGenerationSystemPrompt(),
         tools: [],
         model: this.resolveTitleModel(),
         thinking: { disabled: true },
@@ -46,7 +49,7 @@ export class QoderTitleGenerationService {
         abortController,
       }, prompt);
 
-      const title = this.parseTitle(result.text);
+      const title = parseTitleGenerationResponse(result.text);
       if (title) {
         await this.safeCallback(callback, conversationId, { success: true, title });
       } else {
@@ -80,32 +83,6 @@ export class QoderTitleGenerationService {
     }
 
     return 'auto';
-  }
-
-  private truncateText(text: string, maxLength: number): string {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  }
-
-  private parseTitle(responseText: string): string | null {
-    const trimmed = responseText.trim();
-    if (!trimmed) return null;
-
-    let title = trimmed;
-    if (
-      (title.startsWith('"') && title.endsWith('"')) ||
-      (title.startsWith("'") && title.endsWith("'"))
-    ) {
-      title = title.slice(1, -1);
-    }
-
-    title = title.replace(/[.!?:;,]+$/, '');
-
-    if (title.length > 50) {
-      title = title.substring(0, 47) + '...';
-    }
-
-    return title || null;
   }
 
   private async safeCallback(
