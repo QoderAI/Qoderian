@@ -6,6 +6,7 @@ import {
   setMockMessages,
 } from '@test/__mocks__/qoder-agent-sdk';
 
+import { getLocale, setLocale } from '@/i18n/i18n';
 import { QoderTitleGenerationService,type TitleGenerationResult } from '@/qoder/services/qoder-title-generation-service';
 function createMockPlugin(settings = {}) {
   return {
@@ -28,15 +29,45 @@ function createMockPlugin(settings = {}) {
 describe('QoderTitleGenerationService', () => {
   let service: QoderTitleGenerationService;
   let mockPlugin: any;
+  let previousLocale: ReturnType<typeof getLocale>;
 
   beforeEach(() => {
+    previousLocale = getLocale();
+    setLocale('en');
     jest.clearAllMocks();
     resetMockMessages();
     mockPlugin = createMockPlugin();
     service = new QoderTitleGenerationService(mockPlugin);
   });
 
+  afterEach(() => {
+    setLocale(previousLocale);
+  });
+
   describe('generateTitle', () => {
+    it.each([
+      ['Chinese request under English UI', 'en', '请修复 useReducer 的状态更新', '修复 useReducer 状态更新'],
+      ['English request under Chinese UI', 'zh-CN', 'Fix useReducer state updates', 'Fix useReducer state updates'],
+      ['mixed code identifiers', 'en', '请修复 Qoderian 中 notes/demo.md 的 useReducer', '修复 Qoderian 的 useReducer'],
+    ] as const)('generates a title for %s in the request language', async (_name, locale, request, title) => {
+      setLocale(locale);
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: { content: [{ type: 'text', text: title }] },
+        },
+        { type: 'result' },
+      ]);
+
+      const callback = jest.fn();
+      await service.generateTitle('conv-123', request, callback);
+
+      expect(callback).toHaveBeenCalledWith('conv-123', { success: true, title });
+      expect(getLastOptions()?.systemPrompt).toContain("same language as the user's request");
+      expect(getLastOptions()?.systemPrompt).toContain(`UI locale (\`${locale}\`)`);
+    });
+
     it('should generate a title from user message', async () => {
       setMockMessages([
         { type: 'system', subtype: 'init', session_id: 'test-session' },

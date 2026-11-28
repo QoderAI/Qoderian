@@ -1,17 +1,23 @@
+import { buildGeneratedTextLanguageRule } from './generated-text-language';
+
 const MAX_TITLE_INPUT_LENGTH = 500;
 const MAX_TITLE_LENGTH = 50;
 
-export const TITLE_GENERATION_SYSTEM_PROMPT = `You are a specialist in summarizing user intent.
+export function getTitleGenerationSystemPrompt(): string {
+  return `You are a specialist in summarizing user intent.
 
 **Task**: Generate a **concise, descriptive title** (max 50 chars) summarizing the user's task/request.
 
 **Rules**:
 1.  **Format**: Sentence case. No periods/quotes.
-2.  **Structure**: Start with a **strong verb** (e.g., Create, Fix, Debug, Explain, Analyze).
+2.  **Structure**: Start with a **strong verb** appropriate to the output language.
 3.  **Forbidden**: "Conversation with...", "Help me...", "Question about...", "I need...".
-4.  **Tech Context**: Detect and include the primary language/framework if code is present (e.g., "Debug Python script", "Refactor React hook").
+4.  **Tech Context**: When code is present, include the primary language or framework, preserving product names and code identifiers exactly.
+
+${buildGeneratedTextLanguageRule()}
 
 **Output**: Return ONLY the raw title text.`;
+}
 
 export function buildTitleGenerationPrompt(userMessage: string): string {
   const truncated = userMessage.length > MAX_TITLE_INPUT_LENGTH

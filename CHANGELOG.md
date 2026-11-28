@@ -11,6 +11,13 @@ version with its date and start a fresh empty `[Unreleased]` above it.
 
 ## [Unreleased]
 
+### Fixed
+
+- Auto-generated conversation titles, inline edits, and refined instructions
+  now follow the language of the user's request, falling back to the UI locale
+  when the language is unclear. Proper nouns, product names, file names, and
+  code identifiers are preserved.
+
 ## [1.0.20] - 2026-11-26
 
 ### Fixed

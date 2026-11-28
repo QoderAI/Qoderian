@@ -7,6 +7,7 @@ import {
 } from '@test/__mocks__/qoder-agent-sdk';
 
 // Import after mocks are set up
+import { getLocale, setLocale } from '@/i18n/i18n';
 import { QoderInstructionRefineService } from '@/qoder/services/qoder-instruction-refine-service';
 
 function createMockPlugin(settings = {}) {
@@ -30,15 +31,44 @@ function createMockPlugin(settings = {}) {
 describe('QoderInstructionRefineService', () => {
   let service: QoderInstructionRefineService;
   let mockPlugin: any;
+  let previousLocale: ReturnType<typeof getLocale>;
 
   beforeEach(() => {
+    previousLocale = getLocale();
+    setLocale('en');
     jest.clearAllMocks();
     resetMockMessages();
     mockPlugin = createMockPlugin();
     service = new QoderInstructionRefineService(mockPlugin);
   });
 
+  afterEach(() => {
+    setLocale(previousLocale);
+  });
+
   describe('refineInstruction', () => {
+    it.each([
+      ['Chinese request under English UI', 'en', '请让回答更简洁', '<instruction>- **简洁性**：回答简短直接。</instruction>', '- **简洁性**：回答简短直接。'],
+      ['English request under Chinese UI', 'zh-CN', 'Keep answers concise', '<instruction>- **Conciseness**: Keep answers brief and direct.</instruction>', '- **Conciseness**: Keep answers brief and direct.'],
+      ['mixed code identifiers', 'en', '保留 Qoderian、notes/demo.md 和 useReducer', '<instruction>- **命名**：保留 Qoderian、notes/demo.md 和 useReducer。</instruction>', '- **命名**：保留 Qoderian、notes/demo.md 和 useReducer。'],
+    ] as const)('refines an instruction for %s in the request language', async (_name, locale, rawInstruction, response, expected) => {
+      setLocale(locale);
+      setMockMessages([
+        { type: 'system', subtype: 'init', session_id: 'test-session' },
+        {
+          type: 'assistant',
+          message: { content: [{ type: 'text', text: response }] },
+        },
+        { type: 'result' },
+      ]);
+
+      const result = await service.refineInstruction(rawInstruction, '');
+
+      expect(result).toEqual({ success: true, refinedInstruction: expected });
+      expect(getLastOptions()?.systemPrompt).toContain("same language as the user's request");
+      expect(getLastOptions()?.systemPrompt).toContain(`UI locale (\`${locale}\`)`);
+    });
+
     it('should use no tools (text-only refinement)', async () => {
       setMockMessages([
         { type: 'system', subtype: 'init', session_id: 'test-session' },
